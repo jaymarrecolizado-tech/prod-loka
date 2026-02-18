@@ -168,6 +168,26 @@ define('MAIL_TEMPLATES', [
     'system_notification' => [
         'subject' => 'System Notification',
         'template' => 'You have a new system notification.'
+    ],
+    
+    // Override notifications
+    'vehicle_driver_override' => [
+        'subject' => 'Vehicle/Driver Assignment Changed',
+        'template' => 'The vehicle or driver assignment for a trip has been changed.'
+    ],
+    'driver_unassigned' => [
+        'subject' => 'Driver Assignment Removed',
+        'template' => 'You have been removed from a trip assignment.'
+    ],
+    'trip_vehicle_changed' => [
+        'subject' => 'Trip Vehicle/Driver Changed',
+        'template' => 'The vehicle or driver for your trip has been changed.'
+    ],
+    
+    // Default fallback template
+    'default' => [
+        'subject' => 'LOKA Notification',
+        'template' => 'You have a new notification from LOKA Fleet Management.'
     ]
 ]);
 
