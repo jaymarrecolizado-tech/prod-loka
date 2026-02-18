@@ -3,6 +3,7 @@
  * LOKA - Override Vehicle/Driver for Approved Request
  * 
  * Allows Motorpool Head to reassign vehicle/driver even after approval
+ * Records all changes to assignment_history for audit trail
  */
 
 requireRole(ROLE_MOTORPOOL);
@@ -24,7 +25,6 @@ if (empty($overrideReason)) {
 try {
     db()->beginTransaction();
     
-    // Get current request with row lock
     $request = db()->fetch(
         "SELECT r.*, u.name as requester_name, u.email as requester_email
          FROM requests r
@@ -38,15 +38,13 @@ try {
         throw new Exception('Request not found.');
     }
     
-    if ($request->status !== STATUS_APPROVED) {
+    if ($request->status !== STATUS_APPROVED && $request->status !== STATUS_MODIFIED) {
         throw new Exception('Can only override approved requests.');
     }
     
-    // Store old assignments
     $oldVehicleId = $request->vehicle_id;
     $oldDriverId = $request->driver_id;
     
-    // Get new vehicle and driver info
     $newVehicle = db()->fetch(
         "SELECT v.*, vt.name as type_name FROM vehicles v JOIN vehicle_types vt ON v.vehicle_type_id = vt.id WHERE v.id = ?",
         [$vehicleId]
@@ -60,31 +58,46 @@ try {
         throw new Exception('Invalid vehicle or driver selected.');
     }
     
-    // Release old vehicle and driver (if different)
-    if ($oldVehicleId && $oldVehicleId != $vehicleId) {
+    $vehicleChanged = ($oldVehicleId != $vehicleId);
+    $driverChanged = ($oldDriverId != $driverId);
+    
+    if (!$vehicleChanged && !$driverChanged) {
+        throw new Exception('No changes detected. Same vehicle and driver already assigned.');
+    }
+    
+    if ($oldVehicleId && $vehicleChanged) {
         db()->update('vehicles', ['status' => VEHICLE_AVAILABLE, 'updated_at' => date(DATETIME_FORMAT)], 'id = ?', [$oldVehicleId]);
     }
-    if ($oldDriverId && $oldDriverId != $driverId) {
+    if ($oldDriverId && $driverChanged) {
         db()->update('drivers', ['status' => DRIVER_AVAILABLE, 'updated_at' => date(DATETIME_FORMAT)], 'id = ?', [$oldDriverId]);
     }
     
-    // Set new vehicle and driver to in_use/on_trip
-    if ($oldVehicleId != $vehicleId) {
+    if ($vehicleChanged) {
         db()->update('vehicles', ['status' => VEHICLE_IN_USE, 'updated_at' => date(DATETIME_FORMAT)], 'id = ?', [$vehicleId]);
     }
-    if ($oldDriverId != $driverId) {
+    if ($driverChanged) {
         db()->update('drivers', ['status' => DRIVER_ON_TRIP, 'updated_at' => date(DATETIME_FORMAT)], 'id = ?', [$driverId]);
     }
     
-    // Update request
     db()->update('requests', [
         'vehicle_id' => $vehicleId,
         'driver_id' => $driverId,
-        'status' => STATUS_MODIFIED,
+        'status' => STATUS_APPROVED,
         'updated_at' => date(DATETIME_FORMAT)
     ], 'id = ?', [$requestId]);
     
-    // Create approval record for override
+    db()->insert('assignment_history', [
+        'request_id' => $requestId,
+        'vehicle_id' => $vehicleId,
+        'driver_id' => $driverId,
+        'assigned_by' => userId(),
+        'action' => 'overridden',
+        'previous_vehicle_id' => $oldVehicleId,
+        'previous_driver_id' => $oldDriverId,
+        'reason' => $overrideReason,
+        'created_at' => date(DATETIME_FORMAT)
+    ]);
+    
     db()->insert('approvals', [
         'request_id' => $requestId,
         'approver_id' => userId(),
@@ -94,7 +107,6 @@ try {
         'created_at' => date(DATETIME_FORMAT)
     ]);
     
-    // Audit log
     auditLog('vehicle_driver_override', 'request', $requestId, [
         'old_vehicle_id' => $oldVehicleId,
         'old_driver_id' => $oldDriverId,
@@ -110,11 +122,9 @@ try {
     
     db()->commit();
     
-    // Send notifications
     $vehicleInfo = "{$newVehicle->plate_number} - {$newVehicle->make} {$newVehicle->model}";
     $driverInfo = $newDriver->driver_name;
     
-    // Notify requester
     notify(
         $request->user_id,
         'vehicle_driver_override',
@@ -123,7 +133,6 @@ try {
         '/?page=requests&action=view&id=' . $requestId
     );
     
-    // Notify new driver
     notify(
         $newDriver->user_id,
         'driver_assigned',
@@ -132,8 +141,7 @@ try {
         '/?page=requests&action=view&id=' . $requestId
     );
     
-    // Notify old driver if changed
-    if ($oldDriverId && $oldDriverId != $driverId) {
+    if ($oldDriverId && $driverChanged) {
         $oldDriver = db()->fetch("SELECT user_id FROM drivers WHERE id = ?", [$oldDriverId]);
         if ($oldDriver) {
             notify(
@@ -146,7 +154,54 @@ try {
         }
     }
     
-    // Notify passengers
+    $deptApproval = db()->fetch(
+        "SELECT a.approver_id FROM approvals a WHERE a.request_id = ? AND a.approval_type = 'department' AND a.status = 'approved' ORDER BY a.created_at DESC LIMIT 1",
+        [$requestId]
+    );
+    
+    if ($deptApproval) {
+        $oldVehicleInfo = '';
+        $oldDriverInfo = '';
+        
+        if ($oldVehicleId) {
+            $oldVehicle = db()->fetch(
+                "SELECT v.plate_number, v.make, v.model FROM vehicles v WHERE v.id = ?",
+                [$oldVehicleId]
+            );
+            if ($oldVehicle) {
+                $oldVehicleInfo = "{$oldVehicle->plate_number} - {$oldVehicle->make} {$oldVehicle->model}";
+            }
+        }
+        
+        if ($oldDriverId) {
+            $oldDriverRec = db()->fetch(
+                "SELECT u.name FROM drivers d JOIN users u ON d.user_id = u.id WHERE d.id = ?",
+                [$oldDriverId]
+            );
+            if ($oldDriverRec) {
+                $oldDriverInfo = $oldDriverRec->name;
+            }
+        }
+        
+        $changesMsg = '';
+        if ($vehicleChanged) {
+            $changesMsg .= "\nOld Vehicle: {$oldVehicleInfo}";
+            $changesMsg .= "\nNew Vehicle: {$vehicleInfo}";
+        }
+        if ($driverChanged) {
+            $changesMsg .= "\nOld Driver: {$oldDriverInfo}";
+            $changesMsg .= "\nNew Driver: {$driverInfo}";
+        }
+        
+        notify(
+            $deptApproval->approver_id,
+            'vehicle_driver_override',
+            'Vehicle/Driver Override Notification',
+            "A request you approved for {$request->requester_name}'s trip to {$request->destination} has had its vehicle/driver assignment overridden by Motorpool.\n{$changesMsg}\n\nReason: {$overrideReason}",
+            '/?page=requests&action=view&id=' . $requestId
+        );
+    }
+    
     $passengers = db()->fetchAll(
         "SELECT user_id FROM request_passengers WHERE request_id = ? AND user_id IS NOT NULL",
         [$requestId]

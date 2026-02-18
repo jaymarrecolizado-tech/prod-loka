@@ -74,6 +74,33 @@ if ($request->dispatch_guard_id) {
 if ($request->arrival_guard_id) {
     $arrivalGuard = db()->fetch("SELECT name FROM users WHERE id = ?", [$request->arrival_guard_id]);
 }
+
+// Get assignment history
+$assignmentHistory = db()->fetchAll(
+    "SELECT ah.*, 
+            u.name as assigned_by_name,
+            v.plate_number, v.make, v.model as vehicle_model,
+            pv.plate_number as prev_plate_number, pv.make as prev_make, pv.model as prev_vehicle_model,
+            d_user.name as driver_name,
+            pd_user.name as prev_driver_name
+     FROM assignment_history ah
+     JOIN users u ON ah.assigned_by = u.id
+     LEFT JOIN vehicles v ON ah.vehicle_id = v.id
+     LEFT JOIN vehicles pv ON ah.previous_vehicle_id = pv.id
+     LEFT JOIN drivers d ON ah.driver_id = d.id
+     LEFT JOIN users d_user ON d.user_id = d_user.id
+     LEFT JOIN drivers pd ON ah.previous_driver_id = pd.id
+     LEFT JOIN users pd_user ON pd.user_id = pd_user.id
+     WHERE ah.request_id = ?
+     ORDER BY ah.created_at ASC",
+    [$requestId]
+);
+
+// Get original assignment (first record)
+$originalAssignment = null;
+if (!empty($assignmentHistory)) {
+    $originalAssignment = $assignmentHistory[0];
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -496,6 +523,44 @@ if ($request->arrival_guard_id) {
                     </div>
                 </div>
             </div>
+            
+            <?php if (!empty($assignmentHistory) && count($assignmentHistory) > 1): ?>
+            <div class="section">
+                <div class="section-title" style="background: #fff3cd;">III-A. ASSIGNMENT CHANGE HISTORY</div>
+                <div class="section-content">
+                    <?php foreach ($assignmentHistory as $i => $ah): ?>
+                        <?php if ($i === 0): ?>
+                            <div style="margin-bottom: 6px; padding-bottom: 4px; border-bottom: 1px dotted #ccc;">
+                                <strong style="font-size: 9pt;">Original Assignment (<?= formatDateTime($ah->created_at) ?>)</strong><br>
+                                <span style="font-size: 9pt;">
+                                    Vehicle: <?= e($ah->plate_number) ?> - <?= e($ah->make . ' ' . $ah->vehicle_model) ?><br>
+                                    Driver: <?= e($ah->driver_name) ?>
+                                </span>
+                            </div>
+                        <?php elseif ($ah->action === 'overridden'): ?>
+                            <div style="margin-bottom: 6px; padding-bottom: 4px; <?= $i < count($assignmentHistory) - 1 ? 'border-bottom: 1px dotted #ccc;' : '' ?>">
+                                <strong style="font-size: 9pt; color: #856404;">
+                                    Override #<?= $i ?> - <?= formatDateTime($ah->created_at) ?> by <?= e($ah->assigned_by_name) ?>
+                                </strong><br>
+                                <span style="font-size: 9pt;">
+                                    <?php if ($ah->prev_plate_number): ?>
+                                        Vehicle: <span style="text-decoration: line-through; color: #999;"><?= e($ah->prev_plate_number) ?></span>
+                                        → <strong><?= e($ah->plate_number) ?></strong><br>
+                                    <?php endif; ?>
+                                    <?php if ($ah->prev_driver_name): ?>
+                                        Driver: <span style="text-decoration: line-through; color: #999;"><?= e($ah->prev_driver_name) ?></span>
+                                        → <strong><?= e($ah->driver_name) ?></strong><br>
+                                    <?php endif; ?>
+                                    <?php if ($ah->reason): ?>
+                                        <em style="color: #666;">Reason: <?= e($ah->reason) ?></em>
+                                    <?php endif; ?>
+                                </span>
+                            </div>
+                        <?php endif; ?>
+                    <?php endforeach; ?>
+                </div>
+            </div>
+            <?php endif; ?>
         <?php endif; ?>
 
         <!-- Approval Section -->

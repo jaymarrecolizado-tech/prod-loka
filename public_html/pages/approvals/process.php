@@ -448,6 +448,19 @@ try {
             db()->update('vehicles', ['status' => 'in_use'], 'id = ?', [$vehicleId]);
             db()->update('drivers', ['status' => 'on_trip'], 'id = ?', [$driverId]);
             
+            // Record initial assignment in history
+            db()->insert('assignment_history', [
+                'request_id' => $requestId,
+                'vehicle_id' => $vehicleId,
+                'driver_id' => $driverId,
+                'assigned_by' => userId(),
+                'action' => 'assigned',
+                'previous_vehicle_id' => null,
+                'previous_driver_id' => null,
+                'reason' => null,
+                'created_at' => $now
+            ]);
+            
             $notificationsToSend[] = [
                 'user_id' => $request->user_id,
                 'type' => 'request_fully_approved',

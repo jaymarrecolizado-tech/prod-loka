@@ -30,7 +30,8 @@ class Database
         'audit_logs',
         'schema_migrations',
         'password_reset_tokens',
-        'maintenance_requests'
+        'maintenance_requests',
+        'assignment_history'
     ];
 
     private function __construct()
