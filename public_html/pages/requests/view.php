@@ -78,6 +78,27 @@ $passengers = db()->fetchAll(
     [$requestId]
 );
 
+// Get assignment history
+$assignmentHistory = db()->fetchAll(
+    "SELECT ah.*, 
+            u.name as assigned_by_name,
+            v.plate_number, v.make, v.model as vehicle_model,
+            pv.plate_number as prev_plate_number, pv.make as prev_make, pv.model as prev_vehicle_model,
+            d_user.name as driver_name,
+            pd_user.name as prev_driver_name
+     FROM assignment_history ah
+     JOIN users u ON ah.assigned_by = u.id
+     LEFT JOIN vehicles v ON ah.vehicle_id = v.id
+     LEFT JOIN vehicles pv ON ah.previous_vehicle_id = pv.id
+     LEFT JOIN drivers d ON ah.driver_id = d.id
+     LEFT JOIN users d_user ON d.user_id = d_user.id
+     LEFT JOIN drivers pd ON ah.previous_driver_id = pd.id
+     LEFT JOIN users pd_user ON pd.user_id = pd_user.id
+     WHERE ah.request_id = ?
+     ORDER BY ah.created_at ASC",
+    [$requestId]
+);
+
 $pageTitle = 'Request #' . $requestId;
 
 require_once INCLUDES_PATH . '/header.php';
@@ -236,6 +257,92 @@ require_once INCLUDES_PATH . '/header.php';
                                     </div>
                                 </div>
                             <?php endif; ?>
+                        </div>
+                    </div>
+                </div>
+            <?php endif; ?>
+
+            <!-- Assignment History -->
+            <?php if (!empty($assignmentHistory)): ?>
+                <div class="card mb-4 border-warning">
+                    <div class="card-header bg-warning bg-opacity-25">
+                        <h5 class="mb-0"><i class="bi bi-clock-history me-2"></i>Assignment History</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-sm table-hover mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>Date/Time</th>
+                                        <th>Action</th>
+                                        <th>Vehicle</th>
+                                        <th>Driver</th>
+                                        <th>By</th>
+                                        <th>Reason</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <?php foreach ($assignmentHistory as $i => $ah): ?>
+                                        <tr>
+                                            <td>
+                                                <small><?= formatDateTime($ah->created_at) ?></small>
+                                            </td>
+                                            <td>
+                                                <?php if ($ah->action === 'assigned'): ?>
+                                                    <span class="badge bg-success">Assigned</span>
+                                                <?php elseif ($ah->action === 'overridden'): ?>
+                                                    <span class="badge bg-warning text-dark">Overridden</span>
+                                                <?php elseif ($ah->action === 'released'): ?>
+                                                    <span class="badge bg-secondary">Released</span>
+                                                <?php elseif ($ah->action === 'completed'): ?>
+                                                    <span class="badge bg-primary">Completed</span>
+                                                <?php endif; ?>
+                                            </td>
+                                            <td>
+                                                <?php if ($ah->vehicle_id): ?>
+                                                    <div>
+                                                        <strong><?= e($ah->plate_number) ?></strong>
+                                                        <br><small class="text-muted"><?= e($ah->make . ' ' . $ah->vehicle_model) ?></small>
+                                                    </div>
+                                                <?php else: ?>
+                                                    <span class="text-muted">-</span>
+                                                <?php endif; ?>
+                                                <?php if ($ah->previous_vehicle_id && $ah->action === 'overridden'): ?>
+                                                    <div class="mt-1">
+                                                        <small class="text-danger">
+                                                            <i class="bi bi-arrow-up"></i> Was: <?= e($ah->prev_plate_number) ?> <?= e($ah->prev_make ?? '') ?>
+                                                        </small>
+                                                    </div>
+                                                <?php endif; ?>
+                                            </td>
+                                            <td>
+                                                <?php if ($ah->driver_id): ?>
+                                                    <strong><?= e($ah->driver_name) ?></strong>
+                                                <?php else: ?>
+                                                    <span class="text-muted">-</span>
+                                                <?php endif; ?>
+                                                <?php if ($ah->previous_driver_id && $ah->action === 'overridden'): ?>
+                                                    <div class="mt-1">
+                                                        <small class="text-danger">
+                                                            <i class="bi bi-arrow-up"></i> Was: <?= e($ah->prev_driver_name) ?>
+                                                        </small>
+                                                    </div>
+                                                <?php endif; ?>
+                                            </td>
+                                            <td>
+                                                <small><?= e($ah->assigned_by_name) ?></small>
+                                            </td>
+                                            <td>
+                                                <?php if ($ah->reason): ?>
+                                                    <small class="text-muted fst-italic"><?= e($ah->reason) ?></small>
+                                                <?php else: ?>
+                                                    <span class="text-muted">-</span>
+                                                <?php endif; ?>
+                                            </td>
+                                        </tr>
+                                    <?php endforeach; ?>
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                 </div>
