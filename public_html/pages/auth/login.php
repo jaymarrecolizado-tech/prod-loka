@@ -567,18 +567,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     <div class="stats-row">
       <div class="stat-item">
-        <span class="stat-value" id="vcount">—</span>
-        <span class="stat-label">Vehicles</span>
+        <span class="stat-value">24/7</span>
+        <span class="stat-label">Support</span>
       </div>
       <div class="stat-divider"></div>
       <div class="stat-item">
-        <span class="stat-value" id="rcount">—</span>
-        <span class="stat-label">Active Routes</span>
+        <span class="stat-value">256-bit</span>
+        <span class="stat-label">Encryption</span>
       </div>
       <div class="stat-divider"></div>
       <div class="stat-item">
-        <span class="stat-value" id="ucount">—</span>
-        <span class="stat-label">Users</span>
+        <span class="stat-value">99.9%</span>
+        <span class="stat-label">Uptime</span>
       </div>
     </div>
   </div>
@@ -684,23 +684,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       '  ' + now.toLocaleTimeString('en-PH');
   }
   updateClock(); setInterval(updateClock, 1000);
-
-  // Animated counters
-  function animateCount(id, target, suffix='') {
-    const el = document.getElementById(id);
-    let cur = 0;
-    const step = Math.ceil(target / 40);
-    const timer = setInterval(() => {
-      cur = Math.min(cur + step, target);
-      el.textContent = cur + suffix;
-      if (cur >= target) clearInterval(timer);
-    }, 40);
-  }
-  setTimeout(() => {
-    animateCount('vcount', 24);
-    animateCount('rcount', 7);
-    animateCount('ucount', 58);
-  }, 1200);
 
   // Password toggle
   function togglePwd() {
