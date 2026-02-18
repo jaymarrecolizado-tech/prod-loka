@@ -65,6 +65,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $updateData['actual_cost'] = $actualCost;
                 }
                 
+                if ($newStatus === MAINTENANCE_STATUS_IN_PROGRESS) {
+                    db()->update('vehicles', [
+                        'status' => VEHICLE_MAINTENANCE,
+                        'updated_at' => date(DATETIME_FORMAT)
+                    ], 'id = ?', [$maintenance->vehicle_id]);
+                }
+                
                 if ($newStatus === MAINTENANCE_STATUS_COMPLETED) {
                     $updateData['completed_date'] = $completedDate ?: date('Y-m-d');
                     
