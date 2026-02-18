@@ -43,6 +43,15 @@ if ($request->status === STATUS_PENDING_MOTORPOOL) {
         $canApprove = true;
         $approvalType = 'department';
     }
+} elseif ($request->status === STATUS_REVISION) {
+    // Both approver and motorpool can process revision requests
+    if ($request->approver_id == userId() || isAdmin()) {
+        $canApprove = true;
+        $approvalType = 'department';
+    } elseif ($request->motorpool_head_id == userId()) {
+        $canApprove = true;
+        $approvalType = 'motorpool';
+    }
 }
 
 // Get approval workflow status for each stage

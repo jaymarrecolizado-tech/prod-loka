@@ -101,9 +101,39 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             ];
             
             if ($wasRevision) {
-                $updateData['status'] = STATUS_PENDING;
-                // Clear viewed_at so approvers see it as new
+                // Check who sent it for revision to route appropriately
+                $revisionApproval = db()->fetch(
+                    "SELECT approval_type FROM approvals WHERE request_id = ? AND status = 'revision' ORDER BY created_at DESC LIMIT 1",
+                    [$requestId]
+                );
+                
+                // If motorpool sent for revision, route back to motorpool; otherwise department
+                if ($revisionApproval && $revisionApproval->approval_type === 'motorpool') {
+                    $updateData['status'] = STATUS_PENDING_MOTORPOOL;
+                } else {
+                    $updateData['status'] = STATUS_PENDING;
+                }
                 $updateData['viewed_at'] = null;
+                
+                // Notify the appropriate approver
+                $approverId = ($revisionApproval && $revisionApproval->approval_type === 'motorpool') 
+                    ? $request->motorpool_head_id 
+                    : $request->approver_id;
+                    
+                $approver = db()->fetch(
+                    "SELECT id, name, email FROM users WHERE id = ?",
+                    [$approverId]
+                );
+                
+                if ($approver) {
+                    $deferredNotifications[] = [
+                        'user_id' => $approver->id,
+                        'type' => 'request_submitted',
+                        'title' => 'Request Resubmitted for Approval',
+                        'message' => currentUser()->name . " has resubmitted a vehicle request for {$destination} on " . date('M j, Y', strtotime($startDatetime)) . " after revision. Please review the updated request.",
+                        'link' => '/?page=approvals&action=view&id=' . $requestId
+                    ];
+                }
             }
 
             db()->update('requests', $updateData, 'id = ?', [$requestId]);
