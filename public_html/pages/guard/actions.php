@@ -1,0 +1,190 @@
+<?php
+/**
+ * LOKA - Guard Actions Handler
+ * 
+ * Handles recording of dispatch and arrival times
+ */
+
+requireRole(ROLE_GUARD);
+requireCsrf();
+
+$action = get('action');
+$requestId = postInt('request_id');
+
+if (!$requestId) {
+    redirectWith('/?page=guard', 'danger', 'Invalid request.');
+}
+
+// Verify the request exists and is approved
+$request = db()->fetch(
+    "SELECT r.*, u.name as requester_name, u.email as requester_email
+     FROM requests r
+     JOIN users u ON r.user_id = u.id
+     WHERE r.id = ? AND r.status = 'approved' AND r.deleted_at IS NULL",
+    [$requestId]
+);
+
+if (!$request) {
+    redirectWith('/?page=guard', 'danger', 'Request not found or not approved.');
+}
+
+$now = date(DATETIME_FORMAT);
+
+switch ($action) {
+    case 'record_dispatch':
+        // Check if already dispatched
+        if ($request->actual_dispatch_datetime) {
+            redirectWith('/?page=guard', 'warning', 'This vehicle has already been dispatched.');
+        }
+        
+        $dispatchTime = post('dispatch_time');
+        $guardNotes = postSafe('guard_notes', '', 500);
+        
+        if (!$dispatchTime) {
+            redirectWith('/?page=guard', 'danger', 'Dispatch time is required.');
+        }
+        
+        // Format the datetime
+        $formattedDispatchTime = date('Y-m-d H:i:s', strtotime($dispatchTime));
+        
+        // Update request
+        db()->update('requests', [
+            'actual_dispatch_datetime' => $formattedDispatchTime,
+            'dispatch_guard_id' => userId(),
+            'guard_notes' => $guardNotes ?: null,
+            'updated_at' => $now
+        ], 'id = ?', [$requestId]);
+        
+        // Audit log
+        auditLog(
+            'vehicle_dispatched',
+            'request',
+            $requestId,
+            null,
+            [
+                'dispatch_time' => $formattedDispatchTime,
+                'guard_id' => userId(),
+                'guard_notes' => $guardNotes
+            ]
+        );
+        
+        // Notify requester
+        notify(
+            $request->user_id,
+            'vehicle_dispatched',
+            'Vehicle Dispatched',
+            "Your vehicle for request #{$requestId} to {$request->destination} has departed at " . formatDateTime($formattedDispatchTime) . ".",
+            '/?page=requests&action=view&id=' . $requestId,
+            $requestId
+        );
+        
+        // Notify driver if assigned
+        if ($request->driver_id) {
+            notifyDriver(
+                $request->driver_id,
+                'trip_started',
+                'Trip Started',
+                "Trip for request #{$requestId} to {$request->destination} has officially started. Dispatch time: " . formatDateTime($formattedDispatchTime),
+                '/?page=requests&action=view&id=' . $requestId
+            );
+        }
+        
+        redirectWith('/?page=guard', 'success', "Dispatch recorded for request #{$requestId}.");
+        break;
+        
+    case 'record_arrival':
+        // Check if dispatched first
+        if (!$request->actual_dispatch_datetime) {
+            redirectWith('/?page=guard', 'danger', 'Vehicle must be dispatched before recording arrival.');
+        }
+        
+        // Check if already arrived
+        if ($request->actual_arrival_datetime) {
+            redirectWith('/?page=guard', 'warning', 'This vehicle has already returned.');
+        }
+        
+        $arrivalTime = post('arrival_time');
+        $guardNotes = postSafe('guard_notes', '', 500);
+        
+        if (!$arrivalTime) {
+            redirectWith('/?page=guard', 'danger', 'Arrival time is required.');
+        }
+        
+        // Format the datetime
+        $formattedArrivalTime = date('Y-m-d H:i:s', strtotime($arrivalTime));
+        
+        // Validate arrival is after dispatch
+        if (strtotime($formattedArrivalTime) <= strtotime($request->actual_dispatch_datetime)) {
+            redirectWith('/?page=guard', 'danger', 'Arrival time must be after dispatch time.');
+        }
+        
+        // Update request - mark as completed
+        db()->update('requests', [
+            'actual_arrival_datetime' => $formattedArrivalTime,
+            'arrival_guard_id' => userId(),
+            'status' => STATUS_COMPLETED,
+            'guard_notes' => $guardNotes ? ($request->guard_notes . "\n\n[Arrival] " . $guardNotes) : $request->guard_notes,
+            'updated_at' => $now
+        ], 'id = ?', [$requestId]);
+        
+        // Update vehicle and driver status back to available
+        if ($request->vehicle_id) {
+            db()->update('vehicles', ['status' => 'available', 'updated_at' => $now], 'id = ?', [$request->vehicle_id]);
+        }
+        if ($request->driver_id) {
+            db()->update('drivers', ['status' => 'available', 'updated_at' => $now], 'id = ?', [$request->driver_id]);
+        }
+        
+        // Audit log
+        auditLog(
+            'vehicle_arrived',
+            'request',
+            $requestId,
+            [
+                'dispatch_time' => $request->actual_dispatch_datetime,
+                'old_status' => $request->status
+            ],
+            [
+                'arrival_time' => $formattedArrivalTime,
+                'guard_id' => userId(),
+                'guard_notes' => $guardNotes,
+                'new_status' => STATUS_COMPLETED
+            ]
+        );
+        
+        // Notify requester
+        notify(
+            $request->user_id,
+            'vehicle_arrived',
+            'Vehicle Returned - Trip Completed',
+            "Your vehicle for request #{$requestId} to {$request->destination} has returned at " . formatDateTime($formattedArrivalTime) . ". Trip completed!",
+            '/?page=requests&action=view&id=' . $requestId,
+            $requestId
+        );
+        
+        // Notify passengers
+        notifyPassengersBatch(
+            $requestId,
+            'trip_completed',
+            'Trip Completed',
+            "The trip to {$request->destination} has been completed. Vehicle returned at " . formatDateTime($formattedArrivalTime) . ".",
+            '/?page=requests&action=view&id=' . $requestId
+        );
+        
+        // Notify driver
+        if ($request->driver_id) {
+            notifyDriver(
+                $request->driver_id,
+                'trip_completed',
+                'Trip Completed',
+                "Trip for request #{$requestId} to {$request->destination} has been completed. Arrival time: " . formatDateTime($formattedArrivalTime),
+                '/?page=requests&action=view&id=' . $requestId
+            );
+        }
+        
+        redirectWith('/?page=guard', 'success', "Arrival recorded for request #{$requestId}. Trip marked as completed. Vehicle and driver are now available.");
+        break;
+        
+    default:
+        redirectWith('/?page=guard', 'danger', 'Invalid action.');
+}
