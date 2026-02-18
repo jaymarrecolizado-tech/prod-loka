@@ -565,7 +565,17 @@ if (!empty($assignmentHistory)) {
 
         <!-- Approval Section -->
         <div class="section">
-            <div class="section-title"><?= $request->vehicle_id ? 'IV' : 'III' ?>. APPROVAL</div>
+            <?php 
+            $approvalSectionNum = 'III';
+            if ($request->vehicle_id) {
+                if (!empty($assignmentHistory) && count($assignmentHistory) > 1) {
+                    $approvalSectionNum = 'V';
+                } else {
+                    $approvalSectionNum = 'IV';
+                }
+            }
+            ?>
+            <div class="section-title"><?= $approvalSectionNum ?>. APPROVAL</div>
             <div class="section-content">
                 <div class="col-2">
                     <!-- Department Approver -->

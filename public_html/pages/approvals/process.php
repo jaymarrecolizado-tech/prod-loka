@@ -254,8 +254,6 @@ try {
         }
     }
     
-    error_log("DEBUG APPROVAL: Determined newStatus=$newStatus");
-    
     // Validate state transition
     $validTransitionsForCurrent = $validTransitions[$oldStatus] ?? [];
     if (!in_array($newStatus, $validTransitionsForCurrent)) {
