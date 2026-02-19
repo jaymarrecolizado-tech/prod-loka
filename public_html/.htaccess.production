@@ -1,5 +1,40 @@
 # LOKA Fleet Management - Production .htaccess for Hostinger
 
+# =============================================================================
+# DDoS & Attack Protection Settings
+# =============================================================================
+
+# Limit request size (prevents large payload attacks)
+# 1MB max request body - sufficient for normal forms
+<IfModule mod_core.c>
+    LimitRequestBody 1048576
+</IfModule>
+
+# Limit request fields (prevents header flood attacks)
+LimitRequestFields 50
+LimitRequestFieldSize 8190
+LimitRequestLine 8190
+
+# Request timeouts (prevents Slowloris attacks)
+# These settings may not work on all hosts - silently ignored if unsupported
+<IfModule mod_reqtimeout.c>
+    # Header timeout: 20-40 seconds to receive headers
+    # Body timeout: 20 seconds to receive body data
+    # MinRate: Minimum speed at which client must send data
+    RequestReadTimeout header=20-40,MinRate=500 body=20,MinRate=500
+</IfModule>
+
+# =============================================================================
+# Directory & File Security
+# =============================================================================
+
+# Prevent directory browsing
+Options -Indexes
+
+# =============================================================================
+# URL Routing
+# =============================================================================
+
 # Enable Rewrite Engine
 <IfModule mod_rewrite.c>
     RewriteEngine On
@@ -32,9 +67,6 @@
     Header set Referrer-Policy "strict-origin-when-cross-origin"
 </IfModule>
 
-# Prevent directory browsing
-Options -Indexes
-
 # Protect sensitive files
 <FilesMatch "\.(php|sql|log|md|example)$">
     <IfModule mod_authz_core.c>
@@ -59,10 +91,21 @@ Options -Indexes
 
 # PHP Settings (if allowed by Hostinger)
 <IfModule mod_php8.c>
-    php_value upload_max_filesize 10M
-    php_value post_max_size 10M
-    php_value max_execution_time 300
-    php_value memory_limit 256M
+    # Reduce execution time to prevent hanging connections
+    php_value max_execution_time 30
+    php_value max_input_time 30
+
+    # Memory limit - keep reasonable
+    php_value memory_limit 128M
+
+    # File upload limits - reduced for security
+    # LOKA doesn't require large file uploads
+    php_value upload_max_filesize 2M
+    php_value post_max_size 2M
+    php_value max_file_uploads 5
+
+    # Limit max input variables (prevents hash collision attacks)
+    php_value max_input_vars 1000
 </IfModule>
 
 # Enable Gzip Compression

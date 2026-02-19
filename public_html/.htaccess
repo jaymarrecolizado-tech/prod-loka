@@ -1,5 +1,33 @@
 # LOKA Fleet Management - Security Configuration
 
+# =============================================================================
+# DDoS & Attack Protection Settings
+# =============================================================================
+
+# Limit request size (prevents large payload attacks)
+# 1MB max request body - sufficient for normal forms
+<IfModule mod_core.c>
+    LimitRequestBody 1048576
+</IfModule>
+
+# Limit request fields (prevents header flood attacks)
+LimitRequestFields 50
+LimitRequestFieldSize 8190
+LimitRequestLine 8190
+
+# Request timeouts (prevents Slowloris attacks)
+# These settings may not work on all hosts - silently ignored if unsupported
+<IfModule mod_reqtimeout.c>
+    # Header timeout: 20-40 seconds to receive headers
+    # Body timeout: 20 seconds to receive body data
+    # MinRate: Minimum speed at which client must send data
+    RequestReadTimeout header=20-40,MinRate=500 body=20,MinRate=500
+</IfModule>
+
+# =============================================================================
+# Directory & File Security
+# =============================================================================
+
 # Prevent directory listing
 Options -Indexes
 
@@ -54,4 +82,99 @@ ServerSignature Off
 <IfModule mod_php.c>
     php_flag display_errors off
     php_flag expose_php off
+</IfModule>
+
+# =============================================================================
+# PHP Resource Limits (Prevent Resource Exhaustion)
+# =============================================================================
+
+<IfModule mod_php8.c>
+    # Reduce execution time to prevent hanging connections
+    php_value max_execution_time 30
+    php_value max_input_time 30
+
+    # Memory limit - keep reasonable
+    php_value memory_limit 128M
+
+    # File upload limits - reduced from 10MB for security
+    # LOKA doesn't require large file uploads
+    php_value upload_max_filesize 2M
+    php_value post_max_size 2M
+    php_value max_file_uploads 5
+
+    # Limit max input variables (prevents hash collision attacks)
+    php_value max_input_vars 1000
+
+    # Disable dangerous functions (if allowed by host)
+    # php_value disable_functions "exec,passthru,shell_exec,system,proc_open,popen,curl_exec,curl_multi_exec,parse_ini_file,show_source"
+</IfModule>
+
+# =============================================================================
+# Additional Protections
+# =============================================================================
+
+# Block access based on User-Agent (common bot/tools)
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # Block suspicious user agents
+    RewriteCond %{HTTP_USER_AGENT} ^[Ww]get [OR]
+    RewriteCond %{HTTP_USER_AGENT} ^[Ww]eb[Bb]andit [OR]
+    RewriteCond %{HTTP_USER_AGENT} ^[Bb]lack[Ww]idow [OR]
+    RewriteCond %{HTTP_USER_AGENT} ^[Bb]lack[Ww]orm [OR]
+    RewriteCond %{HTTP_USER_AGENT} ^[Bb]ot.[Mm]ail [OR]
+    RewriteCond %{HTTP_USER_AGENT} ^[Cc]haron [OR]
+    RewriteCond %{HTTP_USER_AGENT} ^[Cc]opier [OR]
+    RewriteCond %{HTTP_USER_AGENT} ^[Cc]raagle [OR]
+    RewriteCond %{HTTP_USER_AGENT} ^[Dd]ownload [Dd]emon [OR]
+    RewriteCond %{HTTP_USER_AGENT} ^[Ee]du[Cc]ommere [OR]
+    RewriteCond %{HTTP_USER_AGENT} ^[Aa]t[Tt]ack[Bb]ot [OR]
+    RewriteCond %{HTTP_USER_AGENT} ^[Bb]ad[Bb]ot [OR]
+    RewriteCond %{HTTP_USER_AGENT} ^[Ss]crape [OR]
+    RewriteCond %{HTTP_USER_AGENT} ^[Ss]crapy [OR]
+    RewriteCond %{HTTP_USER_AGENT} ^[Ss]creaming[Ff]rog [OR]
+    RewriteCond %{HTTP_USER_AGENT} ^[Ss]nake [OR]
+    RewriteCond %{HTTP_USER_AGENT} ^[Ss]ql[Ww]orm [OR]
+    RewriteCond %{HTTP_USER_AGENT} ^[Ss]ux0r [OR]
+    RewriteCond %{HTTP_USER_AGENT} ^[Tt]urnitin[Bb]ot [OR]
+    RewriteCond %{HTTP_USER_AGENT} ^[Mm]ajor[Mm]ojo [OR]
+    RewriteCond %{HTTP_USER_AGENT} ^[Mm]echanical [OR]
+    RewriteCond %{HTTP_USER_AGENT} ^[Mm]ister [Pp]i[Xx] [OR]
+    RewriteCond %{HTTP_USER_AGENT} ^[Nn]ew[Tt] [OR]
+    RewriteCond %{HTTP_USER_AGENT} ^[Nn]ikto [OR]
+    RewriteCond %{HTTP_USER_AGENT} ^[Nn]utch [OR]
+    RewriteCond %{HTTP_USER_AGENT} ^[Pp]hoto [Dd]eck [OR]
+    RewriteCond %{HTTP_USER_AGENT} ^[Pp]ro[Ww]eb[Ww]alker [OR]
+    RewriteCond %{HTTP_USER_AGENT} ^[Pp]sych [OR]
+    RewriteCond %{HTTP_USER_AGENT} ^[Pp]y[Cc]URL [OR]
+    RewriteCond %{HTTP_USER_AGENT} ^[Rr]ambler [OR]
+    RewriteCond %{HTTP_USER_AGENT} ^[Ss]earch[Ee]ngine [OR]
+    RewriteCond %{HTTP_USER_AGENT} ^[Ss]eek [OR]
+    RewriteCond %{HTTP_USER_AGENT} ^[Ss]ite[Ee]xplorer [OR]
+    RewriteCond %{HTTP_USER_AGENT} ^[Ss]ite[Ss]napper [OR]
+    RewriteCond %{HTTP_USER_AGENT} ^[Ss]mart[Ww]isdom [OR]
+    RewriteCond %{HTTP_USER_AGENT} ^[Ss]noopy [OR]
+    RewriteCond %{HTTP_USER_AGENT} ^[Ss]teeler [OR]
+    RewriteCond %{HTTP_USER_AGENT} ^[Ss]urvey[Bb]ot [OR]
+    RewriteCond %{HTTP_USER_AGENT} ^[Ss]ysgain [OR]
+    RewriteCond %{HTTP_USER_AGENT} ^[Tt]eleport [OR]
+    RewriteCond %{HTTP_USER_AGENT} ^[Tt]he[Nn]aughty [OR]
+    RewriteCond %{HTTP_USER_AGENT} ^[Tt]he[Rr]aven [OR]
+    RewriteCond %{HTTP_USER_AGENT} ^[Tt]itan [OR]
+    RewriteCond %{HTTP_USER_AGENT} ^[Tt]uring[Mm]achine [OR]
+    RewriteCond %{HTTP_USER_AGENT} ^[Uu]rl[Ss]pider [OR]
+    RewriteCond %{HTTP_USER_AGENT} ^[Vv]acuum [OR]
+    RewriteCond %{HTTP_USER_AGENT} ^[Vv]ampire [OR]
+    RewriteCond %{HTTP_USER_AGENT} ^[Ww]eb[Aa]uto [OR]
+    RewriteCond %{HTTP_USER_AGENT} ^[Ww]eb[Ee]nhancer [OR]
+    RewriteCond %{HTTP_USER_AGENT} ^[Ww]eb[Ff]etch [OR]
+    RewriteCond %{HTTP_USER_AGENT} ^[Ww]eb[Ss]ucker [OR]
+    RewriteCond %{HTTP_USER_AGENT} ^[Ww]eb[Ww]hip [OR]
+    RewriteCond %{HTTP_USER_AGENT} ^[Ww]get [OR]
+    RewriteCond %{HTTP_USER_AGENT} ^[Ww]idow [OR]
+    RewriteCond %{HTTP_USER_AGENT} ^[Ww]eb[Ww]hop [OR]
+    RewriteCond %{HTTP_USER_AGENT} ^[Ww]eb[Zz]ip [OR]
+    RewriteCond %{HTTP_USER_AGENT} ^[Xx]xx [OR]
+    RewriteCond %{HTTP_USER_AGENT} ^[Zz]mud [NC]
+    RewriteRule ^.* - [F,L]
 </IfModule>

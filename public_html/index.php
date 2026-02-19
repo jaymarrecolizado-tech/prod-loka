@@ -77,6 +77,40 @@ if (!$security->checkIpAccess()) {
     die('Access denied.');
 }
 
+// =============================================================================
+// DDOS PROTECTION CHECKS
+// =============================================================================
+
+// Check if IP is currently banned (must be before expensive operations)
+if ($security->isIpBanned()) {
+    http_response_code(429);
+    $remaining = $security->getBanRemainingTime();
+    $minutes = ceil($remaining / 60);
+    die("Too many requests. Please try again in {$minutes} minute" . ($minutes > 1 ? 's' : '') . ".");
+}
+
+// Apply global rate limiting (per IP, all requests)
+// Skip in local development to avoid blocking legitimate testing
+if ($isProduction) {
+    $rateLimited = $security->checkGlobalRateLimit(
+        60,  // max 60 requests
+        60   // per 60 seconds
+    );
+
+    if ($rateLimited) {
+        http_response_code(429);
+        die("Rate limit exceeded. Please slow down.");
+    }
+}
+
+// Detect suspicious activity (optional - just logs, doesn't block)
+// This helps identify potential attacks without blocking legitimate users
+$security->detectSuspiciousActivity();
+
+// =============================================================================
+// END DDOS PROTECTION
+// =============================================================================
+
 // Initialize Auth
 $auth = new Auth();
 
