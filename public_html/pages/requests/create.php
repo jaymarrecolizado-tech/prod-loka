@@ -97,223 +97,38 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && post('action') === 'delete_workflow
     redirectWith('/?page=requests&action=create', 'success', 'Workflow deleted.');
 }
 
-// Handle form submission
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && post('action') !== 'save_workflow' && post('action') !== 'delete_workflow') {
-    requireCsrf();
-    
-    // Get form data
-    $startDatetime = postSafe('start_datetime', '', 20);
-    $endDatetime = postSafe('end_datetime', '', 20);
-    $purpose = postSafe('purpose', '', 500);
-    $destination = postSafe('destination', '', 255);
-    $passengerIds = $_POST['passengers'] ?? [];
-    
-    // Count passengers properly - filter out empty values
-    $passengerIds = array_filter($passengerIds, function($p) {
-        return !empty(trim($p));
-    });
-    
-    // Passenger count = selected passengers + requester (1)
-    $passengerCount = count($passengerIds) + 1;
-    
-    $vehicleId = postInt('vehicle_id') ?: null;
-    $notes = postSafe('notes', '', 1000);
-    $approverId = postInt('approver_id');
-    $motorpoolHeadId = postInt('motorpool_head_id');
-    $requestedDriverId = postInt('requested_driver_id') ?: null;
-    
-    // Validation
-    $manilaTz = new DateTimeZone('Asia/Manila');
-    $now = new DateTime('now', $manilaTz);
-    
-    if (empty($startDatetime)) {
-        $errors[] = 'Start date/time is required';
-    }
-    if (empty($endDatetime)) {
-        $errors[] = 'End date/time is required';
-    }
-    if ($startDatetime && $endDatetime) {
-        $startDt = new DateTime($startDatetime, $manilaTz);
-        $endDt = new DateTime($endDatetime, $manilaTz);
-        if ($endDt <= $startDt) {
-            $errors[] = 'End date/time must be after start date/time';
-        }
-    }
-    if (empty($purpose)) {
-        $errors[] = 'Purpose is required';
-    }
-    if (empty($destination)) {
-        $errors[] = 'Destination is required';
-    }
-    if (!$approverId) {
-        $errors[] = 'Please select a department approver';
-    }
-    if (!$motorpoolHeadId) {
-        $errors[] = 'Please select a motorpool head';
-    }
-    
-    // Validate passenger capacity against vehicle (if vehicle selected)
-    if ($vehicleId) {
-        $vehicle = db()->fetch(
-            "SELECT v.*, vt.passenger_capacity 
-             FROM vehicles v 
-             JOIN vehicle_types vt ON v.vehicle_type_id = vt.id 
-             WHERE v.id = ? AND v.deleted_at IS NULL",
-            [$vehicleId]
-        );
-        
-        if ($vehicle && $vehicle->passenger_capacity > 0 && $passengerCount > $vehicle->passenger_capacity) {
-            $errors[] = "This vehicle can only accommodate {$vehicle->passenger_capacity} passengers, but you have {$passengerCount} passengers (including yourself). Please select a larger vehicle or reduce passengers.";
-        }
-    }
-    
-    // Create request if no errors
+// Handle main form submission (not workflow actions)
+if (beginFormProcessing() && post('action') !== 'save_workflow' && post('action') !== 'delete_workflow') {
+    // Collect form data
+    $passengerIds = getRequestPassengerIds();
+    $passengerCount = calculatePassengerCount($passengerIds);
+
+    $data = [
+        'start_datetime' => postString('start_datetime', '', 20),
+        'end_datetime' => postString('end_datetime', '', 20),
+        'purpose' => postString('purpose', '', 500),
+        'destination' => postString('destination', '', 255),
+        'vehicle_id' => postInt('vehicle_id') ?: null,
+        'notes' => postString('notes', '', 1000),
+        'approver_id' => postInt('approver_id'),
+        'motorpool_head_id' => postInt('motorpool_head_id'),
+        'requested_driver_id' => postInt('requested_driver_id') ?: null,
+        'passenger_count' => $passengerCount,
+        'passengers_ids' => $passengerIds
+    ];
+
+    // Validate using shared function
+    $errors = validateRequestForm($data);
+
+    // Process if no errors
     if (empty($errors)) {
-        try {
-            db()->beginTransaction();
-            
-            // Insert request with selected approvers
-            $requestId = db()->insert('requests', [
-                'user_id' => userId(),
-                'department_id' => currentUser()->department_id,
-                'approver_id' => $approverId,
-                'motorpool_head_id' => $motorpoolHeadId,
-                'requested_driver_id' => $requestedDriverId,
-                'vehicle_id' => $vehicleId,
-                'start_datetime' => $startDatetime,
-                'end_datetime' => $endDatetime,
-                'purpose' => $purpose,
-                'destination' => $destination,
-                'passenger_count' => $passengerCount,
-                'notes' => $notes,
-                'status' => STATUS_PENDING,
-                'created_at' => date(DATETIME_FORMAT),
-                'updated_at' => date(DATETIME_FORMAT)
-            ]);
-            
-            // Insert passengers
-            foreach ($passengerIds as $p) {
-                if (is_numeric($p)) {
-                    // System user
-                    db()->insert('request_passengers', [
-                        'request_id' => $requestId,
-                        'user_id' => (int)$p,
-                        'created_at' => date(DATETIME_FORMAT)
-                    ]);
-                } else {
-                    // Guest name
-                    db()->insert('request_passengers', [
-                        'request_id' => $requestId,
-                        'guest_name' => trim($p),
-                        'created_at' => date(DATETIME_FORMAT)
-                    ]);
-                }
-            }
-            
-            // Recalculate actual passenger count from database (requester + passengers)
-            $actualPassengerCount = db()->fetch(
-                "SELECT COUNT(*) + 1 as count FROM request_passengers WHERE request_id = ?",
-                [$requestId]
-            )->count;
-            
-            // Update passenger_count with actual count
-            db()->update('requests', [
-                'passenger_count' => $actualPassengerCount
-            ], 'id = ?', [$requestId]);
-            
-            // Create approval workflow record
-            db()->insert('approval_workflow', [
-                'request_id' => $requestId,
-                'department_id' => currentUser()->department_id,
-                'step' => 'department',
-                'status' => 'pending',
-                'created_at' => date(DATETIME_FORMAT),
-                'updated_at' => date(DATETIME_FORMAT)
-            ]);
-            
-            // =====================================================
-            // DEFER NOTIFICATIONS UNTIL AFTER COMMIT
-            // This prevents orphaned emails if transaction fails
-            // =====================================================
-            
-            $deferredNotifications = [];
-            
-            // Queue requester confirmation
-            $deferredNotifications[] = [
-                'user_id' => userId(),
-                'type' => 'request_confirmation',
-                'title' => 'Request Submitted Successfully',
-                'message' => 'Your vehicle request to ' . $destination . ' on ' . date('M j, Y g:i A', strtotime($startDatetime)) . ' has been submitted and is awaiting approval.',
-                'link' => '/?page=requests&action=view&id=' . $requestId
-            ];
-            
-            // Queue approver notification
-            $deferredNotifications[] = [
-                'user_id' => $approverId,
-                'type' => 'request_submitted',
-                'title' => 'New Request Awaiting Your Approval',
-                'message' => currentUser()->name . ' submitted a vehicle request for ' . $destination . ' on ' . date('M j, Y', strtotime($startDatetime)) . '. You have been selected as the approver.',
-                'link' => '/?page=approvals&action=view&id=' . $requestId
-            ];
-
-            // Queue motorpool head notification (informational only - no approval needed yet)
-            $deferredNotifications[] = [
-                'user_id' => $motorpoolHeadId,
-                'type' => 'request_submitted_motorpool',
-                'title' => 'New Vehicle Request Submitted',
-                'message' => currentUser()->name . ' submitted a vehicle request for ' . $destination . ' on ' . date('M j, Y', strtotime($startDatetime)) . '. This request is now pending department approval.',
-                'link' => '/?page=approvals&action=view&id=' . $requestId
-            ];
-
-            // Audit log
-            auditLog('request_created', 'request', $requestId, null, [
-                'purpose' => $purpose,
-                'destination' => $destination,
-                'start_datetime' => $startDatetime,
-                'end_datetime' => $endDatetime,
-                'passenger_count' => $passengerCount,
-                'approver_id' => $approverId,
-                'motorpool_head_id' => $motorpoolHeadId,
-                'requested_driver_id' => $requestedDriverId
-            ]);
-            
-            db()->commit();
-            
-            // =====================================================
-            // SEND NOTIFICATIONS AFTER SUCCESSFUL COMMIT
-            // =====================================================
-            
-            // Send deferred notifications
-            foreach ($deferredNotifications as $notif) {
-                notify($notif['user_id'], $notif['type'], $notif['title'], $notif['message'], $notif['link']);
-            }
-            
-            // Notify passengers using batch function
-            notifyPassengersBatch(
-                $requestId,
-                'added_to_request',
-                'Added to Vehicle Request',
-                currentUser()->name . ' has added you as a passenger for a trip to ' . $destination . ' on ' . date('M j, Y', strtotime($startDatetime)) . '. The request is now awaiting approval.',
-                '/?page=requests&action=view&id=' . $requestId
-            );
-            
-            // Notify requested driver (if specified)
-            if ($requestedDriverId) {
-                notifyDriver(
-                    $requestedDriverId,
-                    'driver_requested',
-                    'You Have Been Requested as Driver',
-                    currentUser()->name . ' has requested you as the driver for a trip to ' . $destination . ' on ' . date('M j, Y g:i A', strtotime($startDatetime)) . '. The request is pending approval and you will be notified once approved.',
-                    '/?page=requests&action=view&id=' . $requestId
-                );
-            }
-            
-            redirectWith('/?page=requests', 'success', 'Request submitted successfully! Awaiting approval.');
-            
-        } catch (Exception $e) {
-            db()->rollback();
-            $errors[] = 'Failed to submit request. Please try again.';
-            error_log("Request creation error: " . $e->getMessage() . "\nTrace: " . $e->getTraceAsString());
+        $result = processRequestCreate($data);
+        if ($result->isSuccess()) {
+            // Send notifications after successful commit
+            sendRequestCreationNotifications($result);
+            $result->redirect();
+        } else {
+            $errors = $result->getErrors();
         }
     }
 }

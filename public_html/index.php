@@ -67,6 +67,7 @@ require_once __DIR__ . '/config/session.php';
 
 // Load helpers
 require_once __DIR__ . '/includes/functions.php';
+require_once __DIR__ . '/includes/form_helpers.php';
 
 // Initialize Security and send headers
 $security = Security::getInstance();

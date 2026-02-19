@@ -6,77 +6,39 @@
 requireRole(ROLE_ADMIN);
 
 $userId = (int) get('id');
-$user = db()->fetch("SELECT * FROM users WHERE id = ? AND deleted_at IS NULL FOR UPDATE", [$userId]);
-if (!$user)
-    redirectWith('/?page=users', 'danger', 'User not found.');
+$user = db()->fetch("SELECT * FROM users WHERE id = ? AND deleted_at IS NULL", [$userId]);
+if (!$user) redirectWith('/?page=users', 'danger', 'User not found.');
 
+$result = null;
 $errors = [];
-$departments = getDepartments(); // Use cached departments
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    requireCsrf();
+// Get cached departments
+$departments = getDepartments();
 
-    $name = postSafe('name', '', 100);
-    $email = post('email');
-    $password = post('password');
-    $phone = postSafe('phone', '', 20);
-    $role = postSafe('role', '', 20);
-    $departmentId = postInt('department_id') ?: null;
+if (beginFormProcessing()) {
+    // Collect form data
+    $data = [
+        'name' => postString('name'),
+        'email' => postString('email'),
+        'password' => post('password'), // Optional for edits
+        'phone' => postString('phone'),
+        'role' => postString('role'),
+        'department_id' => postInt('department_id') ?: null
+    ];
 
-    if (empty($name))
-        $errors[] = 'Name is required';
-    if (empty($email))
-        $errors[] = 'Email is required';
-    elseif (!filter_var($email, FILTER_VALIDATE_EMAIL))
-        $errors[] = 'Invalid email format';
-    if ($password && strlen($password) < 8)
-        $errors[] = 'Password must be at least 8 characters';
+    // Validate using shared function (password optional for edits)
+    $errors = validateUserForm($data, $userId, !empty($data['password']));
 
+    // Process if no errors
     if (empty($errors)) {
-        db()->beginTransaction();
-
-        try {
-            // Re-fetch with lock to ensure atomicity
-            $user = db()->fetch("SELECT * FROM users WHERE id = ? AND deleted_at IS NULL FOR UPDATE", [$userId]);
-
-            // Check unique email (exclude current)
-            if ($email && $email !== $user->email) {
-                $existing = db()->fetch("SELECT id FROM users WHERE email = ? AND id != ? AND deleted_at IS NULL", [$email, $userId]);
-                if ($existing) {
-                    db()->rollback();
-                    $errors[] = 'Email already exists';
-                }
-            }
-
-            if (empty($errors)) {
-                $updateData = [
-                    'name' => $name,
-                    'email' => $email,
-                    'phone' => $phone,
-                    'role' => $role,
-                    'department_id' => $departmentId,
-                    'updated_at' => date(DATETIME_FORMAT)
-                ];
-
-                if ($password) {
-                    $auth = new Auth();
-                    $updateData['password'] = $auth->hashPassword($password);
-                }
-
-                db()->update('users', $updateData, 'id = ?', [$userId]);
-                auditLog('user_updated', 'user', $userId);
-                db()->commit();
-                clearUserCache(); // Clear user cache after updating user
-                redirectWith('/?page=users', 'success', 'User updated successfully.');
-            }
-        } catch (Exception $e) {
-            db()->rollback();
-            $errors[] = 'Failed to update user';
+        $result = processUserForm($data, $userId);
+        if ($result->isSuccess()) {
+            $result->redirect();
         }
     }
 }
 
-$pageTitle = 'Edit User';
+$pageTitle = 'Edit User: ' . e($user->name);
 require_once INCLUDES_PATH . '/header.php';
 ?>
 
@@ -99,15 +61,11 @@ require_once INCLUDES_PATH . '/header.php';
                     <h5 class="mb-0"><i class="bi bi-pencil me-2"></i>Edit User</h5>
                 </div>
                 <div class="card-body">
-                    <?php if (!empty($errors)): ?>
-                        <div class="alert alert-danger">
-                            <ul class="mb-0"><?php foreach ($errors as $e): ?>
-                                    <li><?= e($e) ?></li><?php endforeach; ?>
-                            </ul>
-                        </div><?php endif; ?>
+                    <?= showErrors($errors) ?>
 
                     <form method="POST">
                         <?= csrfField() ?>
+
                         <div class="row g-3">
                             <div class="col-md-6">
                                 <label class="form-label">Full Name <span class="text-danger">*</span></label>
@@ -121,19 +79,23 @@ require_once INCLUDES_PATH . '/header.php';
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">New Password</label>
-                                <input type="password" class="form-control" name="password" minlength="8">
+                                <input type="password" class="form-control" name="password"
+                                    minlength="8" placeholder="Leave blank to keep current password">
                                 <small class="text-muted">Leave blank to keep current password</small>
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">Phone</label>
-                                <input type="text" class="form-control" name="phone"
+                                <input type="tel" class="form-control" name="phone"
                                     value="<?= e(post('phone', $user->phone)) ?>">
                             </div>
                             <div class="col-md-6">
-                                <label class="form-label">Role</label>
-                                <select class="form-select" name="role">
+                                <label class="form-label">Role <span class="text-danger">*</span></label>
+                                <select class="form-select" name="role" required>
                                     <?php foreach (ROLE_LABELS as $key => $info): ?>
-                                        <option value="<?= $key ?>" <?= post('role', $user->role) === $key ? 'selected' : '' ?>><?= e($info['label']) ?></option>
+                                        <option value="<?= $key ?>"
+                                            <?= post('role', $user->role) === $key ? 'selected' : '' ?>>
+                                            <?= e($info['label']) ?>
+                                        </option>
                                     <?php endforeach; ?>
                                 </select>
                             </div>
@@ -142,15 +104,18 @@ require_once INCLUDES_PATH . '/header.php';
                                 <select class="form-select" name="department_id">
                                     <option value="">No department</option>
                                     <?php foreach ($departments as $dept): ?>
-                                        <option value="<?= $dept->id ?>" <?= post('department_id', $user->department_id) == $dept->id ? 'selected' : '' ?>><?= e($dept->name) ?>
+                                        <option value="<?= $dept->id ?>"
+                                            <?= post('department_id', $user->department_id) == $dept->id ? 'selected' : '' ?>>
+                                            <?= e($dept->name) ?>
                                         </option>
                                     <?php endforeach; ?>
                                 </select>
                             </div>
                         </div>
                         <hr class="my-4">
-                        <button type="submit" class="btn btn-primary"><i class="bi bi-check-lg me-1"></i>Save
-                            Changes</button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-check-lg me-1"></i>Save Changes
+                        </button>
                         <a href="<?= APP_URL ?>/?page=users" class="btn btn-outline-secondary">Cancel</a>
                     </form>
                 </div>
