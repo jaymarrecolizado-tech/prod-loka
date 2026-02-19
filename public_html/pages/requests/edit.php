@@ -90,276 +90,37 @@ $currentPassengerIdentifiers = array_column($currentPassengers, 'identifier');
 $currentPassengerIds = array_filter(array_column($currentPassengers, 'user_id'));
 
 // Handle form submission
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    requireCsrf();
+if (beginFormProcessing()) {
+    // Collect form data
+    $passengerIds = getRequestPassengerIds();
+    $passengerCount = calculatePassengerCount($passengerIds);
 
-    $startDatetime = postSafe('start_datetime', '', 20);
-    $endDatetime = postSafe('end_datetime', '', 20);
-    $purpose = postSafe('purpose', '', 500);
-    $destination = postSafe('destination', '', 255);
-    $passengerIds = $_POST['passengers'] ?? [];
-    
-    // Count passengers properly - filter out empty values
-    $passengerIds = array_filter($passengerIds, function($p) {
-        return !empty(trim($p));
-    });
-    
-    // Passenger count = selected passengers + requester (1)
-    $passengerCount = count($passengerIds) + 1;
-    
-    $vehicleId = postInt('vehicle_id') ?: null;
-    $notes = postSafe('notes', '', 1000);
-    $approverId = postInt('approver_id');
-    $motorpoolHeadId = postInt('motorpool_head_id');
-    $requestedDriverId = postInt('requested_driver_id') ?: null;
+    $data = [
+        'start_datetime' => postString('start_datetime', '', 20),
+        'end_datetime' => postString('end_datetime', '', 20),
+        'purpose' => postString('purpose', '', 500),
+        'destination' => postString('destination', '', 255),
+        'vehicle_id' => postInt('vehicle_id') ?: null,
+        'notes' => postString('notes', '', 1000),
+        'approver_id' => postInt('approver_id'),
+        'motorpool_head_id' => postInt('motorpool_head_id'),
+        'requested_driver_id' => postInt('requested_driver_id') ?: null,
+        'passenger_count' => $passengerCount,
+        'passengers_ids' => $passengerIds
+    ];
 
-    // Validation
-    $manilaTz = new DateTimeZone('Asia/Manila');
-    $now = new DateTime('now', $manilaTz);
-    
-    if (empty($startDatetime))
-        $errors[] = 'Start date/time is required';
-    if (empty($endDatetime))
-        $errors[] = 'End date/time is required';
-    if ($startDatetime && $endDatetime) {
-        $startDt = new DateTime($startDatetime, $manilaTz);
-        $endDt = new DateTime($endDatetime, $manilaTz);
-        if ($endDt <= $startDt) {
-            $errors[] = 'End date/time must be after start date/time';
-        }
-    }
-    if (empty($purpose))
-        $errors[] = 'Purpose is required';
-    if (empty($destination))
-        $errors[] = 'Destination is required';
-    if (!$approverId)
-        $errors[] = 'Please select a department approver';
-    if (!$motorpoolHeadId)
-        $errors[] = 'Please select a motorpool head';
-    
-    // Validate passenger capacity against vehicle (if vehicle selected)
-    if ($vehicleId) {
-        $vehicle = db()->fetch(
-            "SELECT v.*, vt.passenger_capacity 
-             FROM vehicles v 
-             JOIN vehicle_types vt ON v.vehicle_type_id = vt.id 
-             WHERE v.id = ? AND v.deleted_at IS NULL",
-            [$vehicleId]
-        );
-        
-        if ($vehicle && $vehicle->passenger_capacity > 0 && $passengerCount > $vehicle->passenger_capacity) {
-            $errors[] = "This vehicle can only accommodate {$vehicle->passenger_capacity} passengers, but you have {$passengerCount} passengers (including yourself). Please select a larger vehicle or reduce passengers.";
-        }
-    }
+    // Validate using shared function
+    $errors = validateRequestForm($data, $requestId);
 
+    // Process if no errors
     if (empty($errors)) {
-        try {
-            db()->beginTransaction();
-
-            $oldData = (array) $request;
-            
-            // Initialize notification queue
-            $deferredNotifications = [];
-
-            // If request was in revision status, reset to pending for resubmission
-            $wasRevision = ($request->status === STATUS_REVISION);
-            $updateData = [
-                'start_datetime' => $startDatetime,
-                'end_datetime' => $endDatetime,
-                'purpose' => $purpose,
-                'destination' => $destination,
-                'notes' => $notes,
-                'vehicle_id' => $vehicleId,
-                'approver_id' => $approverId,
-                'motorpool_head_id' => $motorpoolHeadId,
-                'requested_driver_id' => $requestedDriverId,
-                'updated_at' => date(DATETIME_FORMAT)
-            ];
-            
-            if ($wasRevision) {
-                // Check who sent it for revision to route appropriately
-                $revisionApproval = db()->fetch(
-                    "SELECT approval_type FROM approvals WHERE request_id = ? AND status = 'revision' ORDER BY created_at DESC LIMIT 1",
-                    [$requestId]
-                );
-                
-                // If motorpool sent for revision, route back to motorpool; otherwise department
-                if ($revisionApproval && $revisionApproval->approval_type === 'motorpool') {
-                    $updateData['status'] = STATUS_PENDING_MOTORPOOL;
-                } else {
-                    $updateData['status'] = STATUS_PENDING;
-                }
-                $updateData['viewed_at'] = null;
-                
-                // Notify the appropriate approver
-                $approverId = ($revisionApproval && $revisionApproval->approval_type === 'motorpool') 
-                    ? $request->motorpool_head_id 
-                    : $request->approver_id;
-                    
-                $approver = db()->fetch(
-                    "SELECT id, name, email FROM users WHERE id = ?",
-                    [$approverId]
-                );
-                
-                if ($approver) {
-                    $deferredNotifications[] = [
-                        'user_id' => $approver->id,
-                        'type' => 'request_submitted',
-                        'title' => 'Request Resubmitted for Approval',
-                        'message' => currentUser()->name . " has resubmitted a vehicle request for {$destination} on " . date('M j, Y', strtotime($startDatetime)) . " after revision. Please review the updated request.",
-                        'link' => '/?page=approvals&action=view&id=' . $requestId
-                    ];
-                }
-            }
-
-            db()->update('requests', $updateData, 'id = ?', [$requestId]);
-            
-            // Handle passenger changes (Syncing users and guests)
-            $newPassengerValues = array_map('trim', $passengerIds);
-            $added = array_diff($newPassengerValues, $currentPassengerIdentifiers);
-            $removed = array_diff($currentPassengerIdentifiers, $newPassengerValues);
-
-            // Remove old passengers
-            foreach ($removed as $identifier) {
-                if (is_numeric($identifier)) {
-                    db()->delete('request_passengers', 'request_id = ? AND user_id = ?', [$requestId, (int) $identifier]);
-                    $deferredNotifications[] = [
-                        'user_id' => (int) $identifier,
-                        'type' => 'removed_from_request',
-                        'title' => 'Removed from Trip',
-                        'message' => 'You have been removed from a vehicle request by ' . currentUser()->name . '.',
-                        'link' => '/?page=requests&action=view&id=' . $requestId
-                    ];
-                } else {
-                    db()->delete('request_passengers', 'request_id = ? AND guest_name = ?', [$requestId, $identifier]);
-                }
-            }
-
-            // Add new passengers
-            foreach ($added as $val) {
-                if (is_numeric($val)) {
-                    db()->insert('request_passengers', [
-                        'request_id' => $requestId,
-                        'user_id' => (int) $val,
-                        'created_at' => date(DATETIME_FORMAT)
-                    ]);
-                    $deferredNotifications[] = [
-                        'user_id' => (int) $val,
-                        'type' => 'added_to_request',
-                        'title' => 'Added to Vehicle Request',
-                        'message' => currentUser()->name . ' has added you as a passenger for a trip to ' . $destination . ' on ' . date('M j, Y', strtotime($startDatetime)) . '.',
-                        'link' => '/?page=requests&action=view&id=' . $requestId
-                    ];
-                } else {
-                    db()->insert('request_passengers', [
-                        'request_id' => $requestId,
-                        'guest_name' => $val,
-                        'created_at' => date(DATETIME_FORMAT)
-                    ]);
-                }
-            }
-            
-            // Recalculate actual passenger count from database (requester + passengers)
-            $actualPassengerCount = db()->fetch(
-                "SELECT COUNT(*) + 1 as count FROM request_passengers WHERE request_id = ?",
-                [$requestId]
-            )->count;
-            
-            // Update passenger_count with actual count
-            db()->update('requests', [
-                'passenger_count' => $actualPassengerCount
-            ], 'id = ?', [$requestId]);
-
-            // Check if details changed - notify existing passengers
-            $detailsChanged = (
-                $oldData['destination'] !== $destination ||
-                $oldData['start_datetime'] !== $startDatetime ||
-                $oldData['end_datetime'] !== $endDatetime
-            );
-            
-            // Notify existing (unchanged) system users if details changed
-            $unchanged = array_intersect($currentPassengerIdentifiers, $newPassengerValues);
-            if ($detailsChanged && !empty($unchanged)) {
-                foreach ($unchanged as $id) {
-                    if (is_numeric($id)) {
-                        $deferredNotifications[] = [
-                            'user_id' => (int) $id,
-                            'type' => 'request_modified',
-                            'title' => 'Trip Details Updated',
-                            'message' => 'A trip you are part of has been modified by ' . currentUser()->name . '.',
-                            'link' => '/?page=requests&action=view&id=' . $requestId
-                        ];
-                    }
-                }
-            }
-            
-            // Notify requester if request was modified
-            if (
-                $oldData['destination'] !== $destination ||
-                $oldData['start_datetime'] !== $startDatetime ||
-                $oldData['end_datetime'] !== $endDatetime ||
-                $oldData['purpose'] !== $purpose
-            ) {
-                $deferredNotifications[] = [
-                    'user_id' => $request->user_id,
-                    'type' => 'request_modified',
-                    'title' => 'Trip Details Updated',
-                    'message' => 'Your vehicle request has been modified. Please review the updated details.',
-                    'link' => '/?page=requests&action=view&id=' . $requestId
-                ];
-            }
-            
-            // Prepare driver notification (deferred)
-            $deferredDriverNotification = null;
-            $requestedDriverId = $request->requested_driver_id ?? null;
-            
-            if ($requestedDriverId && $detailsChanged) {
-                $deferredDriverNotification = [
-                    'driver_id' => $requestedDriverId,
-                    'type' => 'driver_status_update',
-                    'title' => 'Trip Details Updated',
-                    'message' => 'A trip you were requested to drive has been modified. Please review the updated details.',
-                    'link' => '/?page=requests&action=view&id=' . $requestId
-                ];
-            }
-
-            auditLog('request_updated', 'request', $requestId, $oldData, [
-                'purpose' => $purpose,
-                'destination' => $destination,
-                'passenger_count' => $passengerCount
-            ]);
-
-            db()->commit();
-            
-            // =====================================================
-            // SEND NOTIFICATIONS AFTER SUCCESSFUL COMMIT
-            // =====================================================
-            
-            // Send deferred notifications
-            foreach ($deferredNotifications as $notif) {
-                notify($notif['user_id'], $notif['type'], $notif['title'], $notif['message'], $notif['link']);
-            }
-            
-            // Send driver notification if needed
-            if ($deferredDriverNotification) {
-                notifyDriver(
-                    $deferredDriverNotification['driver_id'],
-                    $deferredDriverNotification['type'],
-                    $deferredDriverNotification['title'],
-                    $deferredDriverNotification['message'],
-                    $deferredDriverNotification['link']
-                );
-            }
-
-            $message = $wasRevision 
-                ? 'Request resubmitted successfully. It will be reviewed again by the approver.'
-                : 'Request updated successfully.';
-            redirectWith('/?page=requests&action=view&id=' . $requestId, 'success', $message);
-
-        } catch (Exception $e) {
-            db()->rollback();
-            $errors[] = 'Failed to update request. Please try again.';
-            error_log("Request update error: " . $e->getMessage());
+        $result = processRequestUpdate($requestId, $data, $request, $currentPassengerIdentifiers);
+        if ($result->isSuccess()) {
+            // Send notifications after successful commit
+            sendRequestUpdateNotifications($result);
+            $result->redirect();
+        } else {
+            $errors = $result->getErrors();
         }
     }
 }
