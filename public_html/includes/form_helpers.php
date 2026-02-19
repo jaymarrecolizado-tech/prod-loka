@@ -63,13 +63,7 @@ class FormResult
 // CSRF HANDLING
 // =============================================================================
 
-/**
- * Render CSRF token field for forms
- */
-function csrfField(): string
-{
-    return '<input type="hidden" name="csrf_token" value="' . e(getCsrfToken()) . '">';
-}
+// Note: csrfField() is defined in functions.php
 
 /**
  * Validate CSRF token from POST data
@@ -296,19 +290,10 @@ function validateUnique(string $table, string $column, $value, ?int $excludeId, 
 // POST DATA HELPERS
 // =============================================================================
 
-/**
- * Get post data with default
- * @param string $key POST key
- * @param mixed $default Default value
- * @return mixed POST value or default
- */
-function postValue(string $key, $default = null)
-{
-    return $_POST[$key] ?? $default;
-}
+// Note: post(), postSafe(), and postInt() are defined in functions.php
 
 /**
- * Get sanitized string from POST
+ * Get sanitized string from POST (wrapper for consistency)
  * @param string $key POST key
  * @param string $default Default value
  * @param int $maxLength Maximum length
@@ -316,21 +301,7 @@ function postValue(string $key, $default = null)
  */
 function postString(string $key, string $default = '', int $maxLength = 0): string
 {
-    $value = $_POST[$key] ?? $default;
-    $security = Security::getInstance();
-    $value = $security->sanitizeString($value, $maxLength);
-    return $value;
-}
-
-/**
- * Get integer from POST
- * @param string $key POST key
- * @param int $default Default value
- * @return int Integer value
- */
-function postInt(string $key, int $default = 0): int
-{
-    return (int) ($_POST[$key] ?? $default);
+    return postSafe($key, $default, $maxLength);
 }
 
 /**
