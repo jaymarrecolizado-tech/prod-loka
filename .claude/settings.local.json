@@ -1,0 +1,23 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(php -l \"C:\\\\wamp64\\\\www\\\\Projects\\\\loka2\\\\public_html\\\\index.php\")",
+      "Bash(php -l \"C:\\\\wamp64\\\\www\\\\Projects\\\\loka2\\\\public_html\\\\classes\\\\Security.php\")",
+      "Bash(if [ ! -d \"C:\\\\wamp64\\\\www\\\\Projects\\\\loka2\\\\public_html\\\\logs\" ])",
+      "Bash(then mkdir -p \"C:\\\\wamp64\\\\www\\\\Projects\\\\loka2\\\\public_html\\\\logs\")",
+      "Bash(fi)",
+      "Bash(php -l \"C:\\\\wamp64\\\\www\\\\Projects\\\\loka2\\\\public_html\\\\classes\\\\Cache.php\")",
+      "Bash(php -l \"C:\\\\wamp64\\\\www\\\\Projects\\\\loka2\\\\public_html\\\\includes\\\\functions.php\")",
+      "Bash(php -l \"C:\\\\wamp64\\\\www\\\\Projects\\\\loka2\\\\public_html\\\\pages\\\\requests\\\\create.php\")",
+      "Bash(php -l \"C:\\\\wamp64\\\\www\\\\Projects\\\\loka2\\\\public_html\\\\pages\\\\users\\\\create.php\")",
+      "Bash(php -l \"C:\\\\wamp64\\\\www\\\\Projects\\\\loka2\\\\public_html\\\\pages\\\\vehicles\\\\create.php\")",
+      "Bash(php -l \"C:\\\\wamp64\\\\www\\\\Projects\\\\loka2\\\\public_html\\\\pages\\\\departments\\\\create.php\")",
+      "Bash(if [ ! -d \"C:\\\\wamp64\\\\www\\\\Projects\\\\loka2\\\\public_html\\\\cache\" ])",
+      "Bash(then mkdir -p \"C:\\\\wamp64\\\\www\\\\Projects\\\\loka2\\\\public_html\\\\cache/data\")",
+      "Bash(php -l run_014_indexes.php)",
+      "Bash(php run_migration_014.php)",
+      "Bash(php run_014_simple.php)",
+      "Bash(git add -A)"
+    ]
+  }
+}

@@ -11,7 +11,7 @@ $errors = [];
 $vehicle = db()->fetch("SELECT * FROM vehicles WHERE id = ? AND deleted_at IS NULL FOR UPDATE", [$vehicleId]);
 if (!$vehicle) redirectWith('/?page=vehicles', 'danger', 'Vehicle not found.');
 
-$vehicleTypes = db()->fetchAll("SELECT * FROM vehicle_types WHERE deleted_at IS NULL ORDER BY name");
+$vehicleTypes = getVehicleTypes(); // Use cached vehicle types
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     requireCsrf();
@@ -80,6 +80,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 
                 auditLog('vehicle_updated', 'vehicle', $vehicleId, $oldData);
                 db()->commit();
+                clearVehicleCache(); // Clear vehicle cache after updating vehicle
                 redirectWith('/?page=vehicles', 'success', 'Vehicle updated successfully.');
             }
         } catch (Exception $e) {

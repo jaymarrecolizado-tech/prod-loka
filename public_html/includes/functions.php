@@ -900,3 +900,233 @@ function activeMenu(string $page): string
 {
     return (get('page', 'dashboard') === $page) ? 'active' : '';
 }
+
+// =============================================================================
+// CACHE HELPER FUNCTIONS
+// =============================================================================
+
+/**
+ * Get cache instance
+ */
+function cache(): Cache
+{
+    return Cache::getInstance();
+}
+
+/**
+ * Get all active departments (cached)
+ *
+ * @param bool $refresh Force refresh from database
+ * @return array Array of department objects
+ */
+function getDepartments(bool $refresh = false): array
+{
+    $cache = cache();
+    $key = Cache::KEY_DEPARTMENTS . 'all';
+
+    if ($refresh) {
+        $cache->delete($key);
+    }
+
+    return $cache->remember($key, function() {
+        return db()->fetchAll(
+            "SELECT * FROM departments WHERE deleted_at IS NULL ORDER BY name"
+        );
+    }, 3600); // Cache for 1 hour
+}
+
+/**
+ * Get all available vehicles with types (cached)
+ *
+ * @param bool $refresh Force refresh from database
+ * @return array Array of vehicle objects with type_name
+ */
+function getAvailableVehicles(bool $refresh = false): array
+{
+    $cache = cache();
+    $key = Cache::KEY_VEHICLES . 'available';
+
+    if ($refresh) {
+        $cache->delete($key);
+    }
+
+    return $cache->remember($key, function() {
+        return db()->fetchAll(
+            "SELECT v.*, vt.name as type_name, vt.passenger_capacity
+             FROM vehicles v
+             JOIN vehicle_types vt ON v.vehicle_type_id = vt.id
+             WHERE v.deleted_at IS NULL
+             AND v.status IN ('available', 'in_use')
+             ORDER BY vt.name, v.plate_number"
+        );
+    }, 300); // Cache for 5 minutes (vehicles change more often)
+}
+
+/**
+ * Get all active drivers (cached)
+ *
+ * @param bool $refresh Force refresh from database
+ * @return array Array of driver objects with user info
+ */
+function getActiveDrivers(bool $refresh = false): array
+{
+    $cache = cache();
+    $key = Cache::KEY_DRIVERS . 'active';
+
+    if ($refresh) {
+        $cache->delete($key);
+    }
+
+    return $cache->remember($key, function() {
+        return db()->fetchAll(
+            "SELECT d.*, u.name as driver_name, u.phone as driver_phone, u.email as driver_email
+             FROM drivers d
+             JOIN users u ON d.user_id = u.id
+             WHERE d.deleted_at IS NULL AND u.status = 'active' AND u.deleted_at IS NULL
+             ORDER BY u.name"
+        );
+    }, 600); // Cache for 10 minutes
+}
+
+/**
+ * Get employees (active users, excluding current) (cached)
+ *
+ * @param int|null $excludeUserId User ID to exclude (default: current user)
+ * @param bool $refresh Force refresh from database
+ * @return array Array of user objects with department
+ */
+function getEmployees(?int $excludeUserId = null, bool $refresh = false): array
+{
+    $excludeUserId = $excludeUserId ?? userId();
+    $cache = cache();
+    $key = Cache::KEY_USERS . "employees:{$excludeUserId}";
+
+    if ($refresh) {
+        $cache->delete($key);
+    }
+
+    return $cache->remember($key, function() use ($excludeUserId) {
+        return db()->fetchAll(
+            "SELECT u.id, u.name, u.email, d.name as department_name
+             FROM users u
+             LEFT JOIN departments d ON u.department_id = d.id
+             WHERE u.status = 'active' AND u.deleted_at IS NULL AND u.id != ?
+             ORDER BY u.name",
+            [$excludeUserId]
+        );
+    }, 600); // Cache for 10 minutes
+}
+
+/**
+ * Get approvers (users with approver/admin role) (cached)
+ *
+ * @param bool $refresh Force refresh from database
+ * @return array Array of user objects with department
+ */
+function getApprovers(bool $refresh = false): array
+{
+    $cache = cache();
+    $key = Cache::KEY_USERS . 'approvers';
+
+    if ($refresh) {
+        $cache->delete($key);
+    }
+
+    return $cache->remember($key, function() {
+        return db()->fetchAll(
+            "SELECT u.id, u.name, u.email, d.name as department_name
+             FROM users u
+             LEFT JOIN departments d ON u.department_id = d.id
+             WHERE u.role IN ('approver', 'admin') AND u.status = 'active' AND u.deleted_at IS NULL
+             ORDER BY u.name"
+        );
+    }, 600); // Cache for 10 minutes
+}
+
+/**
+ * Get motorpool heads (cached)
+ *
+ * @param bool $refresh Force refresh from database
+ * @return array Array of user objects
+ */
+function getMotorpoolHeads(bool $refresh = false): array
+{
+    $cache = cache();
+    $key = Cache::KEY_USERS . 'motorpool_heads';
+
+    if ($refresh) {
+        $cache->delete($key);
+    }
+
+    return $cache->remember($key, function() {
+        return db()->fetchAll(
+            "SELECT u.id, u.name, u.email
+             FROM users u
+             WHERE u.role IN (?, ?) AND u.status = 'active' AND u.deleted_at IS NULL
+             ORDER BY u.name",
+            [ROLE_MOTORPOOL, ROLE_ADMIN]
+        );
+    }, 600); // Cache for 10 minutes
+}
+
+/**
+ * Get vehicle types (cached)
+ *
+ * @param bool $refresh Force refresh from database
+ * @return array Array of vehicle type objects
+ */
+function getVehicleTypes(bool $refresh = false): array
+{
+    $cache = cache();
+    $key = Cache::KEY_VEHICLE_TYPES . 'all';
+
+    if ($refresh) {
+        $cache->delete($key);
+    }
+
+    return $cache->remember($key, function() {
+        return db()->fetchAll(
+            "SELECT * FROM vehicle_types WHERE deleted_at IS NULL ORDER BY name"
+        );
+    }, 3600); // Cache for 1 hour
+}
+
+/**
+ * Clear user-related cache
+ * Call this when user data changes
+ */
+function clearUserCache(): void
+{
+    $cache = cache();
+    $cache->deletePattern(Cache::KEY_USERS);
+    $cache->deletePattern(Cache::KEY_DRIVERS);
+}
+
+/**
+ * Clear vehicle-related cache
+ * Call this when vehicle data changes
+ */
+function clearVehicleCache(): void
+{
+    $cache = cache();
+    $cache->deletePattern(Cache::KEY_VEHICLES);
+}
+
+/**
+ * Clear department cache
+ * Call this when department data changes
+ */
+function clearDepartmentCache(): void
+{
+    $cache = cache();
+    $cache->deletePattern(Cache::KEY_DEPARTMENTS);
+}
+
+/**
+ * Clear all application cache
+ * Use this for major changes
+ */
+function clearAppCache(): void
+{
+    cache()->clear();
+}

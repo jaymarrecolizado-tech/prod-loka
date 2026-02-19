@@ -57,6 +57,7 @@ if ($isProduction) {
 // Load classes (must be before session.php which uses Security class)
 require_once __DIR__ . '/classes/Database.php';
 require_once __DIR__ . '/classes/Security.php';
+require_once __DIR__ . '/classes/Cache.php';
 require_once __DIR__ . '/classes/Auth.php';
 require_once __DIR__ . '/classes/Mailer.php';
 require_once __DIR__ . '/classes/EmailQueue.php';

@@ -74,6 +74,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $security->logSecurityEvent('user_created', "New user: $email ($role)", userId());
 
             db()->commit();
+            clearUserCache(); // Clear user cache after creating user
             redirectWith('/?page=users', 'success', 'User created successfully.');
         } catch (Exception $e) {
             db()->rollback();

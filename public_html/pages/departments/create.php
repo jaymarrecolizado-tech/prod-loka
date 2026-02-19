@@ -8,7 +8,7 @@ requireRole(ROLE_ADMIN);
 $pageTitle = 'Add Department';
 $errors = [];
 
-$users = db()->fetchAll("SELECT id, name, email FROM users WHERE deleted_at IS NULL AND status = 'active' ORDER BY name");
+$users = getEmployees(userId() ?: 0); // Use cached employees, exclude current user (but none for this page)
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     requireCsrf();
@@ -33,8 +33,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'created_at' => date(DATETIME_FORMAT),
             'updated_at' => date(DATETIME_FORMAT)
         ]);
-        
+
         auditLog('department_created', 'department', $deptId);
+        clearDepartmentCache(); // Clear department cache after creating department
         redirectWith('/?page=departments', 'success', 'Department created successfully.');
     }
 }

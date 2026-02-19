@@ -65,6 +65,7 @@ Options -Indexes
     RewriteRule ^migrations/ - [F,L]
     RewriteRule ^logs/ - [F,L]
     RewriteRule ^includes/ - [F,L]
+    RewriteRule ^cache/ - [F,L]
 </IfModule>
 
 # Security Headers (fallback if PHP headers fail)

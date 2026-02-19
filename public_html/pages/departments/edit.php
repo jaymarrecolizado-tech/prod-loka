@@ -10,7 +10,7 @@ $dept = db()->fetch("SELECT * FROM departments WHERE id = ? AND deleted_at IS NU
 if (!$dept) redirectWith('/?page=departments', 'danger', 'Department not found.');
 
 $errors = [];
-$users = db()->fetchAll("SELECT id, name, email FROM users WHERE deleted_at IS NULL AND status = 'active' ORDER BY name");
+$users = getEmployees(userId() ?: 0); // Use cached employees
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     requireCsrf();
@@ -35,8 +35,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'status' => $status,
             'updated_at' => date(DATETIME_FORMAT)
         ], 'id = ?', [$deptId]);
-        
+
         auditLog('department_updated', 'department', $deptId);
+        clearDepartmentCache(); // Clear department cache after updating department
         redirectWith('/?page=departments', 'success', 'Department updated successfully.');
     }
 }

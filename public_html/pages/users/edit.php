@@ -11,7 +11,7 @@ if (!$user)
     redirectWith('/?page=users', 'danger', 'User not found.');
 
 $errors = [];
-$departments = db()->fetchAll("SELECT * FROM departments WHERE deleted_at IS NULL AND status = 'active' ORDER BY name");
+$departments = getDepartments(); // Use cached departments
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     requireCsrf();
@@ -66,6 +66,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 db()->update('users', $updateData, 'id = ?', [$userId]);
                 auditLog('user_updated', 'user', $userId);
                 db()->commit();
+                clearUserCache(); // Clear user cache after updating user
                 redirectWith('/?page=users', 'success', 'User updated successfully.');
             }
         } catch (Exception $e) {
