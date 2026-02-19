@@ -345,7 +345,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && post('action') !== 'save_workflow' 
         } catch (Exception $e) {
             db()->rollback();
             $errors[] = 'Failed to submit request. Please try again.';
-            error_log("Request creation error: " . $e->getMessage());
+            error_log("Request creation error: " . $e->getMessage() . "\nTrace: " . $e->getTraceAsString());
         }
     }
 }

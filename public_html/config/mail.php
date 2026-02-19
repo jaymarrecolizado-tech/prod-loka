@@ -184,6 +184,60 @@ define('MAIL_TEMPLATES', [
         'template' => 'The vehicle or driver for your trip has been changed.'
     ],
     
+    // Revision notifications
+    'request_revision' => [
+        'subject' => 'Request Sent Back for Revision',
+        'template' => 'Your vehicle request has been sent back for revision. Please review the comments and update your request.'
+    ],
+    'trip_revision' => [
+        'subject' => 'Trip Sent Back for Revision',
+        'template' => 'A trip you are part of has been sent back for revision.'
+    ],
+    
+    // Department approval stage
+    'department_approved' => [
+        'subject' => 'Request Approved by Department',
+        'template' => 'Your vehicle request has been approved by the department approver and is now awaiting motorpool assignment.'
+    ],
+    'pending_motorpool_approval' => [
+        'subject' => 'Request Awaiting Your Approval',
+        'template' => 'A vehicle request has been approved by the department and requires your motorpool approval.'
+    ],
+    
+    // Final approval
+    'request_fully_approved' => [
+        'subject' => 'Request Fully Approved!',
+        'template' => 'Great news! Your vehicle request has been fully approved.'
+    ],
+    'trip_fully_approved' => [
+        'subject' => 'Trip Fully Approved',
+        'template' => 'The trip you are part of has been fully approved!'
+    ],
+    'trip_rejected' => [
+        'subject' => 'Trip Rejected',
+        'template' => 'A trip you were part of has been rejected.'
+    ],
+    
+    // Driver notifications
+    'driver_not_selected' => [
+        'subject' => 'Driver Assignment Update',
+        'template' => 'A trip you were requested to drive has been assigned to another driver.'
+    ],
+    'driver_requested' => [
+        'subject' => 'You Have Been Requested as Driver',
+        'template' => 'You have been requested as the driver for a vehicle request. The request is pending approval.'
+    ],
+    
+    // Override/conflict notifications
+    'request_override_notice' => [
+        'subject' => 'Your Trip May Be Affected by Override',
+        'template' => 'Your trip may be affected by a vehicle/driver override. Please review your trip details.'
+    ],
+    'passenger_override_notice' => [
+        'subject' => 'Trip May Be Affected by Override',
+        'template' => 'A trip you are part of may be affected by a vehicle/driver override.'
+    ],
+    
     // Default fallback template
     'default' => [
         'subject' => 'LOKA Notification',

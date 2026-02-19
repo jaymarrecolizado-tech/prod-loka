@@ -1,6 +1,13 @@
 <?php
 /**
  * LOKA - Edit Request Page (Hardened Version)
+ * 
+ * Allows editing all relevant fields including:
+ * - Date/time, purpose, destination, notes
+ * - Passengers
+ * - Vehicle selection
+ * - Requested driver
+ * - Approval workflow (approver and motorpool head)
  */
 
 $requestId = (int) get('id');
@@ -27,8 +34,15 @@ if (!in_array($request->status, $editableStatuses)) {
     redirectWith('/?page=requests', 'danger', 'This request cannot be edited in its current state.');
 }
 
-// Get vehicle types
-$vehicleTypes = db()->fetchAll("SELECT * FROM vehicle_types WHERE deleted_at IS NULL ORDER BY name");
+// Get available vehicles for selection
+$availableVehicles = db()->fetchAll(
+    "SELECT v.*, vt.name as type_name, vt.passenger_capacity
+     FROM vehicles v
+     JOIN vehicle_types vt ON v.vehicle_type_id = vt.id
+     WHERE v.deleted_at IS NULL 
+     AND v.status IN ('available', 'in_use')
+     ORDER BY vt.name, v.plate_number"
+);
 
 // Get all active employees for passenger selection (exclude current user)
 $employees = db()->fetchAll(
@@ -38,6 +52,33 @@ $employees = db()->fetchAll(
      WHERE u.status = 'active' AND u.deleted_at IS NULL AND u.id != ?
      ORDER BY u.name",
     [userId()]
+);
+
+// Get department approvers (approver or admin role in any department)
+$approvers = db()->fetchAll(
+    "SELECT u.id, u.name, d.name as department_name 
+     FROM users u 
+     LEFT JOIN departments d ON u.department_id = d.id
+     WHERE u.role IN ('approver', 'admin') AND u.status = 'active' AND u.deleted_at IS NULL
+     ORDER BY u.name"
+);
+
+// Get all active drivers
+$allDrivers = db()->fetchAll(
+    "SELECT d.*, u.name as driver_name, u.phone as driver_phone
+     FROM drivers d
+     JOIN users u ON d.user_id = u.id
+     WHERE d.deleted_at IS NULL AND u.status = 'active' AND u.deleted_at IS NULL
+     ORDER BY u.name"
+);
+
+// Get motorpool heads
+$motorpoolHeads = db()->fetchAll(
+    "SELECT u.id, u.name 
+     FROM users u 
+     WHERE u.role IN (?, ?) AND u.status = 'active' AND u.deleted_at IS NULL
+     ORDER BY u.name",
+    [ROLE_MOTORPOOL, ROLE_ADMIN]
 );
 
 // Get current passengers (both users and guests)
@@ -57,8 +98,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $purpose = postSafe('purpose', '', 500);
     $destination = postSafe('destination', '', 255);
     $passengerIds = $_POST['passengers'] ?? [];
-    $passengerCount = count($passengerIds) + 1; // +1 for requester
+    
+    // Count passengers properly - filter out empty values
+    $passengerIds = array_filter($passengerIds, function($p) {
+        return !empty(trim($p));
+    });
+    
+    // Passenger count = selected passengers + requester (1)
+    $passengerCount = count($passengerIds) + 1;
+    
+    $vehicleId = postInt('vehicle_id') ?: null;
     $notes = postSafe('notes', '', 1000);
+    $approverId = postInt('approver_id');
+    $motorpoolHeadId = postInt('motorpool_head_id');
+    $requestedDriverId = postInt('requested_driver_id') ?: null;
 
     // Validation
     $manilaTz = new DateTimeZone('Asia/Manila');
@@ -79,6 +132,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $errors[] = 'Purpose is required';
     if (empty($destination))
         $errors[] = 'Destination is required';
+    if (!$approverId)
+        $errors[] = 'Please select a department approver';
+    if (!$motorpoolHeadId)
+        $errors[] = 'Please select a motorpool head';
+    
+    // Validate passenger capacity against vehicle (if vehicle selected)
+    if ($vehicleId) {
+        $vehicle = db()->fetch(
+            "SELECT v.*, vt.passenger_capacity 
+             FROM vehicles v 
+             JOIN vehicle_types vt ON v.vehicle_type_id = vt.id 
+             WHERE v.id = ? AND v.deleted_at IS NULL",
+            [$vehicleId]
+        );
+        
+        if ($vehicle && $vehicle->passenger_capacity > 0 && $passengerCount > $vehicle->passenger_capacity) {
+            $errors[] = "This vehicle can only accommodate {$vehicle->passenger_capacity} passengers, but you have {$passengerCount} passengers (including yourself). Please select a larger vehicle or reduce passengers.";
+        }
+    }
 
     if (empty($errors)) {
         try {
@@ -97,6 +169,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 'purpose' => $purpose,
                 'destination' => $destination,
                 'notes' => $notes,
+                'vehicle_id' => $vehicleId,
+                'approver_id' => $approverId,
+                'motorpool_head_id' => $motorpoolHeadId,
+                'requested_driver_id' => $requestedDriverId,
                 'updated_at' => date(DATETIME_FORMAT)
             ];
             
@@ -290,12 +366,34 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 $pageTitle = 'Edit Request #' . $requestId;
 
+// If request is in revision status, get the revision comments
+$revisionComments = null;
+$revisionBy = null;
+if ($request->status === STATUS_REVISION) {
+    $revisionApproval = db()->fetch(
+        "SELECT a.*, u.name as approver_name 
+         FROM approvals a 
+         JOIN users u ON a.approver_id = u.id 
+         WHERE a.request_id = ? AND a.status = 'revision' 
+         ORDER BY a.created_at DESC LIMIT 1",
+        [$requestId]
+    );
+    if ($revisionApproval) {
+        $revisionComments = $revisionApproval->comments;
+        $revisionBy = $revisionApproval->approver_name;
+    }
+}
+
 require_once INCLUDES_PATH . '/header.php';
 ?>
 
 <div class="container-fluid py-4">
     <div class="mb-4">
-        <h4 class="mb-1">Edit Request #<?= $requestId ?></h4>
+        <h4 class="mb-1">Edit Request #<?= $requestId ?>
+            <?php if ($request->status === STATUS_REVISION): ?>
+                <span class="badge bg-warning text-dark ms-2"><i class="bi bi-arrow-repeat me-1"></i>Revision Requested</span>
+            <?php endif; ?>
+        </h4>
         <nav aria-label="breadcrumb">
             <ol class="breadcrumb mb-0">
                 <li class="breadcrumb-item"><a href="<?= APP_URL ?>">Dashboard</a></li>
@@ -304,6 +402,15 @@ require_once INCLUDES_PATH . '/header.php';
             </ol>
         </nav>
     </div>
+
+    <?php if ($request->status === STATUS_REVISION && $revisionComments): ?>
+    <div class="alert alert-warning border-start border-warning border-4 mb-4">
+        <h6 class="alert-heading mb-2"><i class="bi bi-exclamation-triangle me-2"></i>Revision Requested by <?= e($revisionBy) ?></h6>
+        <p class="mb-0"><strong>Reason:</strong> <?= nl2br(e($revisionComments)) ?></p>
+        <hr class="my-2">
+        <small class="text-muted">Please address the feedback above and resubmit your request for approval.</small>
+    </div>
+    <?php endif; ?>
 
     <div class="row">
         <div class="col-lg-8">
@@ -374,11 +481,93 @@ require_once INCLUDES_PATH . '/header.php';
                                 </div>
                             </div>
 
-                            <div class="col-12">
-                                <label for="notes" class="form-label">Additional Notes</label>
-                                <textarea class="form-control" id="notes" name="notes"
-                                    rows="2"><?= e(post('notes', $request->notes)) ?></textarea>
+                            <!-- Vehicle Selection -->
+                            <div class="col-md-6 mt-3">
+                                <label for="vehicle_id" class="form-label">Select Vehicle</label>
+                                <select class="form-select" id="vehicle_id" name="vehicle_id">
+                                    <option value="">Choose a vehicle...</option>
+                                    <?php foreach ($availableVehicles as $vehicle): ?>
+                                    <option value="<?= $vehicle->id ?>" 
+                                            data-capacity="<?= $vehicle->passenger_capacity ?>"
+                                            data-type="<?= e($vehicle->type_name) ?>"
+                                            <?= (post('vehicle_id') == $vehicle->id || $request->vehicle_id == $vehicle->id) ? 'selected' : '' ?>>
+                                        <?= e($vehicle->plate_number) ?> - <?= e($vehicle->make . ' ' . $vehicle->model) ?>
+                                        (<?= e($vehicle->type_name) ?>, <?= $vehicle->passenger_capacity ?> seats)
+                                        <?= $vehicle->status === 'in_use' ? ' [Currently in use]' : '' ?>
+                                    </option>
+                                    <?php endforeach; ?>
+                                </select>
+                                <small class="text-muted">Select the vehicle you need for this trip</small>
+                                <div id="vehicleCapacityAlert" class="alert alert-warning mt-2 small py-2 d-none">
+                                    <i class="bi bi-exclamation-triangle me-1"></i>
+                                    <span class="message"></span>
+                                </div>
                             </div>
+
+                            <!-- Requested Driver -->
+                            <div class="col-md-6 mt-3">
+                                <label for="requested_driver_id" class="form-label">Requested Driver (Optional)</label>
+                                <select class="form-select" id="requested_driver_id" name="requested_driver_id">
+                                    <option value="">No preference</option>
+                                    <?php foreach ($allDrivers as $driver): ?>
+                                    <option value="<?= $driver->id ?>" <?= (post('requested_driver_id') == $driver->id || $request->requested_driver_id == $driver->id) ? 'selected' : '' ?>>
+                                        <?= e($driver->driver_name) ?>
+                                    </option>
+                                    <?php endforeach; ?>
+                                </select>
+                                <small class="text-muted">You can request a specific driver. Motorpool will confirm availability.</small>
+                            </div>
+                        </div>
+
+                        <!-- Approval Workflow Section -->
+                        <div class="card bg-light mt-4">
+                            <div class="card-header bg-primary bg-opacity-10">
+                                <h6 class="mb-0"><i class="bi bi-diagram-3 me-2"></i>Approval Workflow</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="row g-3">
+                                    <!-- Department Approver -->
+                                    <div class="col-md-6">
+                                        <label for="approver_id" class="form-label">
+                                            Department Approver <span class="text-danger">*</span>
+                                        </label>
+                                        <select class="form-select" id="approver_id" name="approver_id" required>
+                                            <option value="">Select approver...</option>
+                                            <?php foreach ($approvers as $app): ?>
+                                            <option value="<?= $app->id ?>" 
+                                                    <?= (post('approver_id') == $app->id || $request->approver_id == $app->id) ? 'selected' : '' ?>>
+                                                <?= e($app->name) ?> (<?= e($app->department_name ?: 'Admin') ?>)
+                                            </option>
+                                            <?php endforeach; ?>
+                                        </select>
+                                        <small class="text-muted">First level approval</small>
+                                    </div>
+                                    
+                                    <!-- Motorpool Head -->
+                                    <div class="col-md-6">
+                                        <label for="motorpool_head_id" class="form-label">
+                                            Motorpool Head <span class="text-danger">*</span>
+                                        </label>
+                                        <select class="form-select" id="motorpool_head_id" name="motorpool_head_id" required>
+                                            <option value="">Select motorpool head...</option>
+                                            <?php foreach ($motorpoolHeads as $mp): ?>
+                                            <option value="<?= $mp->id ?>" 
+                                                    <?= (post('motorpool_head_id') == $mp->id || $request->motorpool_head_id == $mp->id) ? 'selected' : '' ?>>
+                                                <?= e($mp->name) ?>
+                                            </option>
+                                            <?php endforeach; ?>
+                                        </select>
+                                        <small class="text-muted">Final approval & vehicle assignment</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Notes -->
+                        <div class="mt-3">
+                            <label for="notes" class="form-label">Additional Notes</label>
+                            <textarea class="form-control" id="notes" name="notes"
+                                rows="2" placeholder="Any special requirements or notes..."><?= e(post('notes', $request->notes)) ?></textarea>
                         </div>
 
                         <hr class="my-4">
@@ -458,18 +647,20 @@ require_once INCLUDES_PATH . '/header.php';
                 </div>
             </div>
         </div>
+    </div>
+    </div>
 
-        <!-- Sidebar Info -->
-        <div class="col-lg-4">
-            <div class="card bg-light border-0">
-                <div class="card-body">
-                    <h6><i class="bi bi-info-circle me-2"></i>Edit Request</h6>
-                    <p class="small text-muted mb-0">
-                        You are modifying an existing vehicle request. Ensure all details are correct before saving. 
-                        Passengers will be notified of any significant changes.
-                    </p>
-                </div>
+    <!-- Sidebar -->
+    <div class="col-lg-4">
+        <div class="card bg-light border-0">
+            <div class="card-body">
+                <h6><i class="bi bi-info-circle me-2"></i>Edit Request</h6>
+                <p class="small text-muted mb-0">
+                    You are modifying an existing vehicle request. Ensure all details are correct before saving. 
+                    Passengers will be notified of any significant changes.
+                </p>
             </div>
+        </div>
 
             <!-- Selected Passengers Preview -->
             <div class="card mt-3" id="passengerPreview">

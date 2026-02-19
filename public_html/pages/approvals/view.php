@@ -756,7 +756,8 @@ require_once INCLUDES_PATH . '/header.php';
 
                     <!-- Action Buttons -->
                     <div class="d-flex gap-2 flex-wrap">
-                            <button type="submit" name="approval_action" value="approve" id="approveBtn" class="btn btn-success">
+                            <input type="hidden" name="approval_action" id="approvalActionInput" value="">
+                            <button type="button" id="approveBtn" class="btn btn-success" data-action="approve">
                             <span class="btn-text">
                                 <i class="bi bi-check-lg me-1"></i>Approve
                             </span>
@@ -765,7 +766,7 @@ require_once INCLUDES_PATH . '/header.php';
                                 Processing...
                             </span>
                         </button>
-                            <button type="submit" name="approval_action" value="revision" id="revisionBtn" class="btn btn-warning">
+                            <button type="button" id="revisionBtn" class="btn btn-warning" data-action="revision">
                             <span class="btn-text">
                                 <i class="bi bi-arrow-repeat me-1"></i>Request Revision
                             </span>
@@ -774,7 +775,7 @@ require_once INCLUDES_PATH . '/header.php';
                                 Processing...
                             </span>
                         </button>
-                            <button type="submit" name="approval_action" value="reject" id="rejectBtn" class="btn btn-danger">
+                            <button type="button" id="rejectBtn" class="btn btn-danger" data-action="reject">
                             <span class="btn-text">
                                 <i class="bi bi-x-lg me-1"></i>Reject
                             </span>
@@ -1082,153 +1083,129 @@ require_once INCLUDES_PATH . '/header.php';
         // Track which button was clicked
         let clickedAction = null;
         
-        // Handle button clicks to toggle fields and track action
+        // Function to validate and submit form
+        function validateAndSubmit(action) {
+            const actionInput = document.getElementById('approvalActionInput');
+            if (actionInput) {
+                actionInput.value = action;
+            }
+            
+            const formActionUrl = approvalForm.action;
+            const formData = new FormData(approvalForm);
+            formData.set('approval_action', action);
+            
+            const submitBtn = action === 'approve' ? approveBtn : (action === 'revision' ? revisionBtn : rejectBtn);
+            const btnText = submitBtn.querySelector('.btn-text');
+            const btnLoading = submitBtn.querySelector('.btn-loading');
+            const comments = formData.get('comments')?.trim() || '';
+            
+            // Validate comments for rejection or revision
+            if ((action === 'reject' || action === 'revision') && !comments) {
+                const msg = action === 'revision' 
+                    ? 'Please explain what needs to be revised.' 
+                    : 'Please provide a reason for rejection.';
+                showToast(msg, 'warning');
+                document.getElementById('comments').classList.add('is-invalid');
+                document.getElementById('comments').focus();
+                return;
+            }
+            
+            // Validate vehicle/driver for motorpool approval
+            const approvalType = '<?= $approvalType ?>';
+            if (action === 'approve' && approvalType === 'motorpool') {
+                const vehicleId = formData.get('vehicle_id');
+                const driverId = formData.get('driver_id');
+                const vehicleSelect = document.getElementById('vehicle_id');
+                const driverSelect = document.getElementById('driver_id');
+                
+                if (!vehicleId || !driverId) {
+                    showToast('Please select both a vehicle and driver for approval.', 'warning');
+                    if (!vehicleId && vehicleSelect) vehicleSelect.classList.add('is-invalid');
+                    if (!driverId && driverSelect) driverSelect.classList.add('is-invalid');
+                    return;
+                }
+            }
+            
+            // Clear validation classes
+            document.querySelectorAll('.is-invalid').forEach(el => el.classList.remove('is-invalid'));
+            
+            // Disable buttons and show loading
+            approveBtn.disabled = true;
+            rejectBtn.disabled = true;
+            if (revisionBtn) revisionBtn.disabled = true;
+            btnText.classList.add('d-none');
+            btnLoading.classList.remove('d-none');
+            
+            // Add AJAX header
+            formData.append('ajax', '1');
+            
+            fetch(formActionUrl, {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => {
+                const contentType = response.headers.get('content-type') || '';
+                if (contentType.includes('application/json')) {
+                    return response.json();
+                }
+                return response.text().then(() => null);
+            })
+            .then(data => {
+                clickedAction = null;
+                
+                const success = data && typeof data === 'object' ? !!data.success : true;
+                const message = data && typeof data === 'object' && data.message
+                    ? data.message
+                    : (action === 'approve' ? 'Request approved successfully!' : (action === 'revision' ? 'Request sent for revision.' : 'Request rejected.'));
+                
+                if (success) {
+                    showToast(message, 'success');
+                    setTimeout(() => {
+                        window.location.href = '<?= APP_URL ?>/?page=approvals&tab=processed&p_processed=1';
+                    }, 1500);
+                } else {
+                    showToast(data.message || 'An error occurred. Please try again.', 'danger');
+                    if (approveBtn) approveBtn.disabled = false;
+                    if (rejectBtn) rejectBtn.disabled = false;
+                    if (revisionBtn) revisionBtn.disabled = false;
+                    if (btnText) btnText.classList.remove('d-none');
+                    if (btnLoading) btnLoading.classList.add('d-none');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                clickedAction = null;
+                showToast('An error occurred. Please try again.', 'danger');
+                if (approveBtn) approveBtn.disabled = false;
+                if (rejectBtn) rejectBtn.disabled = false;
+                if (revisionBtn) revisionBtn.disabled = false;
+                if (btnText) btnText.classList.remove('d-none');
+                if (btnLoading) btnLoading.classList.add('d-none');
+            });
+        }
+        
+        // Handle button clicks
         if (approveBtn) {
             approveBtn.addEventListener('click', function(e) {
-                clickedAction = 'approve';
+                e.preventDefault();
                 toggleAssignmentFields('approve');
+                validateAndSubmit('approve');
             });
         }
         
         if (revisionBtn) {
             revisionBtn.addEventListener('click', function(e) {
-                clickedAction = 'revision';
+                e.preventDefault();
                 toggleAssignmentFields('revision');
+                validateAndSubmit('revision');
             });
         }
         
         if (rejectBtn) {
             rejectBtn.addEventListener('click', function(e) {
-                clickedAction = 'reject';
-                toggleAssignmentFields('reject');
-            });
-        }
-        
-        // AJAX form submission
-        if (approvalForm) {
-            approvalForm.addEventListener('submit', function(e) {
                 e.preventDefault();
-                
-                const formActionUrl = this.action;
-                const formData = new FormData(this);
-                
-                // Determine which action was triggered
-                let action = clickedAction;
-                
-                // If no button was explicitly clicked (e.g., Enter key), check the submitter
-                if (!action && e.submitter) {
-                    action = e.submitter.value || 'approve';
-                }
-                
-                // If still no action, try to get from form data
-                if (!action) {
-                    const actionValue = formData.get('approval_action');
-                    if (actionValue && typeof actionValue === 'object') {
-                        if (actionValue.length !== undefined) {
-                            action = actionValue[0]?.value || 'approve';
-                        } else if (actionValue.value !== undefined) {
-                            action = String(actionValue.value || 'approve');
-                        } else {
-                            action = 'approve';
-                        }
-                    } else {
-                        action = String(actionValue || 'approve');
-                    }
-                }
-                
-                action = String(action);
-                formData.set('approval_action', action);
-                
-                const submitBtn = action === 'approve' ? approveBtn : (action === 'revision' ? revisionBtn : rejectBtn);
-                const btnText = submitBtn.querySelector('.btn-text');
-                const btnLoading = submitBtn.querySelector('.btn-loading');
-                const comments = formData.get('comments')?.trim() || '';
-                
-                // Validate comments for rejection or revision
-                if ((action === 'reject' || action === 'revision') && !comments) {
-                    const msg = action === 'revision' 
-                        ? 'Please explain what needs to be revised.' 
-                        : 'Please provide a reason for rejection.';
-                    showToast(msg, 'warning');
-                    document.getElementById('comments').classList.add('is-invalid');
-                    document.getElementById('comments').focus();
-                    return;
-                }
-                
-                // Validate vehicle/driver for motorpool approval
-                const approvalType = '<?= $approvalType ?>';
-                if (action === 'approve' && approvalType === 'motorpool') {
-                    const vehicleId = formData.get('vehicle_id');
-                    const driverId = formData.get('driver_id');
-                    const vehicleSelect = document.getElementById('vehicle_id');
-                    const driverSelect = document.getElementById('driver_id');
-                    
-                    if (!vehicleId || !driverId) {
-                        showToast('Please select both a vehicle and driver for approval.', 'warning');
-                        if (!vehicleId && vehicleSelect) vehicleSelect.classList.add('is-invalid');
-                        if (!driverId && driverSelect) driverSelect.classList.add('is-invalid');
-                        return;
-                    }
-                }
-                
-                // Clear validation classes
-                document.querySelectorAll('.is-invalid').forEach(el => el.classList.remove('is-invalid'));
-                
-                // Disable buttons and show loading
-                approveBtn.disabled = true;
-                rejectBtn.disabled = true;
-                if (revisionBtn) revisionBtn.disabled = true;
-                btnText.classList.add('d-none');
-                btnLoading.classList.remove('d-none');
-                
-                // Add AJAX header
-                formData.append('ajax', '1');
-                
-                fetch(formActionUrl, {
-                    method: 'POST',
-                    body: formData
-                })
-                .then(response => {
-                    const contentType = response.headers.get('content-type') || '';
-                    if (contentType.includes('application/json')) {
-                        return response.json();
-                    }
-                    return response.text().then(() => null);
-                })
-                .then(data => {
-                    clickedAction = null;
-                    
-                    const success = data && typeof data === 'object' ? !!data.success : true;
-                    const message = data && typeof data === 'object' && data.message
-                        ? data.message
-                        : (action === 'approve' ? 'Request approved successfully!' : 'Request rejected.');
-                    
-                    if (success) {
-                        showToast(message, 'success');
-                        setTimeout(() => {
-                            window.location.href = '<?= APP_URL ?>/?page=approvals&tab=processed&p_processed=1';
-                        }, 1500);
-                    } else {
-                        showToast(data.message || 'An error occurred. Please try again.', 'danger');
-                        if (approveBtn) approveBtn.disabled = false;
-                        if (rejectBtn) rejectBtn.disabled = false;
-                        if (revisionBtn) revisionBtn.disabled = false;
-                        if (btnText) btnText.classList.remove('d-none');
-                        if (btnLoading) btnLoading.classList.add('d-none');
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    clickedAction = null;
-                    showToast('An error occurred. Please try again.', 'danger');
-                    if (approveBtn) approveBtn.disabled = false;
-                    if (rejectBtn) rejectBtn.disabled = false;
-                    if (revisionBtn) revisionBtn.disabled = false;
-                    const btnText = submitBtn ? submitBtn.querySelector('.btn-text') : null;
-                    const btnLoading = submitBtn ? submitBtn.querySelector('.btn-loading') : null;
-                    if (btnText) btnText.classList.remove('d-none');
-                    if (btnLoading) btnLoading.classList.add('d-none');
-                });
+                toggleAssignmentFields('reject');
+                validateAndSubmit('reject');
             });
         }
     });
