@@ -6,52 +6,20 @@
 $pageTitle = 'New Request';
 $errors = [];
 
-// Get available vehicles for selection
-$availableVehicles = db()->fetchAll(
-    "SELECT v.*, vt.name as type_name, vt.passenger_capacity
-     FROM vehicles v
-     JOIN vehicle_types vt ON v.vehicle_type_id = vt.id
-     WHERE v.deleted_at IS NULL 
-     AND v.status IN ('available', 'in_use')
-     ORDER BY vt.name, v.plate_number"
-);
+// Get available vehicles for selection (cached)
+$availableVehicles = getAvailableVehicles();
 
-// Get all active employees for passenger selection (exclude current user)
-$employees = db()->fetchAll(
-    "SELECT u.id, u.name, u.email, d.name as department_name 
-     FROM users u 
-     LEFT JOIN departments d ON u.department_id = d.id
-     WHERE u.status = 'active' AND u.deleted_at IS NULL AND u.id != ?
-     ORDER BY u.name",
-    [userId()]
-);
+// Get all active employees for passenger selection (cached)
+$employees = getEmployees();
 
-// Get department approvers (approver or admin role in any department)
-$approvers = db()->fetchAll(
-    "SELECT u.id, u.name, d.name as department_name 
-     FROM users u 
-     LEFT JOIN departments d ON u.department_id = d.id
-     WHERE u.role IN ('approver', 'admin') AND u.status = 'active' AND u.deleted_at IS NULL
-     ORDER BY u.name"
-);
+// Get department approvers (cached)
+$approvers = getApprovers();
 
-// Get all active drivers
-$allDrivers = db()->fetchAll(
-    "SELECT d.*, u.name as driver_name, u.phone as driver_phone
-     FROM drivers d
-     JOIN users u ON d.user_id = u.id
-     WHERE d.deleted_at IS NULL AND u.status = 'active' AND u.deleted_at IS NULL
-     ORDER BY u.name"
-);
+// Get all active drivers (cached)
+$allDrivers = getActiveDrivers();
 
-// Get motorpool heads
-$motorpoolHeads = db()->fetchAll(
-    "SELECT u.id, u.name 
-     FROM users u 
-     WHERE u.role IN (?, ?) AND u.status = 'active' AND u.deleted_at IS NULL
-     ORDER BY u.name",
-    [ROLE_MOTORPOOL, ROLE_ADMIN]
-);
+// Get motorpool heads (cached)
+$motorpoolHeads = getMotorpoolHeads();
 
 // Get user's saved workflows
 $savedWorkflows = db()->fetchAll(

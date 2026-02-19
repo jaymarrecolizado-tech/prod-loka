@@ -8,7 +8,7 @@ requireRole(ROLE_APPROVER);
 $pageTitle = 'Add Vehicle';
 $errors = [];
 
-$vehicleTypes = db()->fetchAll("SELECT * FROM vehicle_types WHERE deleted_at IS NULL ORDER BY name");
+$vehicleTypes = getVehicleTypes(); // Use cached vehicle types
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     requireCsrf();
@@ -58,8 +58,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             ]);
             
             auditLog('vehicle_created', 'vehicle', $vehicleId);
-            
+
             db()->commit();
+            clearVehicleCache(); // Clear vehicle cache after adding vehicle
             redirectWith('/?page=vehicles', 'success', 'Vehicle added successfully.');
         } catch (Exception $e) {
             db()->rollback();
