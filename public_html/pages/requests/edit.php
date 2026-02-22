@@ -82,7 +82,7 @@ $motorpoolHeads = db()->fetchAll(
 );
 
 // Get current passengers (both users and guests)
-$currentPassengers = db()->fetchAll(
+$currentPassengers = db()->fetchAllArray(
     "SELECT COALESCE(user_id, guest_name) as identifier, user_id, guest_name FROM request_passengers WHERE request_id = ?",
     [$requestId]
 );
