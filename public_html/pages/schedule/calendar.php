@@ -291,7 +291,7 @@ require_once INCLUDES_PATH . '/header.php';
             $currentDate = sprintf('%04d-%02d-%02d', $year, $month, $day);
             $isToday = $currentDate === $today;
             $dayEvents = $busyDays[$day] ?? [];
-            $bookedCount = count(array_unique(array_column($dayEvents, 'vehicle_id')));
+            $bookedCount = count(array_unique(array_map(fn($e) => $e->vehicle_id, $dayEvents)));
             
             $dayClass = 'calendar-day';
             if ($isToday) $dayClass .= ' today';

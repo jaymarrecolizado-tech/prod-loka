@@ -11,9 +11,11 @@
 </IfModule>
 
 # Limit request fields (prevents header flood attacks)
-LimitRequestFields 50
-LimitRequestFieldSize 8190
-LimitRequestLine 8190
+# NOTE: These directives are not allowed in .htaccess context on Apache
+# They must be set in httpd.conf or virtual host config
+# LimitRequestFields 50
+# LimitRequestFieldSize 8190
+# LimitRequestLine 8190
 
 # Request timeouts (prevents Slowloris attacks)
 # These settings may not work on all hosts - silently ignored if unsupported
@@ -127,7 +129,7 @@ ServerSignature Off
     RewriteCond %{HTTP_USER_AGENT} ^[Cc]haron [OR]
     RewriteCond %{HTTP_USER_AGENT} ^[Cc]opier [OR]
     RewriteCond %{HTTP_USER_AGENT} ^[Cc]raagle [OR]
-    RewriteCond %{HTTP_USER_AGENT} ^[Dd]ownload [Dd]emon [OR]
+    RewriteCond %{HTTP_USER_AGENT} ^[Dd]ownload\ [Dd]emon [OR]
     RewriteCond %{HTTP_USER_AGENT} ^[Ee]du[Cc]ommere [OR]
     RewriteCond %{HTTP_USER_AGENT} ^[Aa]t[Tt]ack[Bb]ot [OR]
     RewriteCond %{HTTP_USER_AGENT} ^[Bb]ad[Bb]ot [OR]
@@ -140,11 +142,11 @@ ServerSignature Off
     RewriteCond %{HTTP_USER_AGENT} ^[Tt]urnitin[Bb]ot [OR]
     RewriteCond %{HTTP_USER_AGENT} ^[Mm]ajor[Mm]ojo [OR]
     RewriteCond %{HTTP_USER_AGENT} ^[Mm]echanical [OR]
-    RewriteCond %{HTTP_USER_AGENT} ^[Mm]ister [Pp]i[Xx] [OR]
+    RewriteCond %{HTTP_USER_AGENT} ^[Mm]ister\ [Pp]i[Xx] [OR]
     RewriteCond %{HTTP_USER_AGENT} ^[Nn]ew[Tt] [OR]
     RewriteCond %{HTTP_USER_AGENT} ^[Nn]ikto [OR]
     RewriteCond %{HTTP_USER_AGENT} ^[Nn]utch [OR]
-    RewriteCond %{HTTP_USER_AGENT} ^[Pp]hoto [Dd]eck [OR]
+    RewriteCond %{HTTP_USER_AGENT} ^[Pp]hoto\ [Dd]eck [OR]
     RewriteCond %{HTTP_USER_AGENT} ^[Pp]ro[Ww]eb[Ww]alker [OR]
     RewriteCond %{HTTP_USER_AGENT} ^[Pp]sych [OR]
     RewriteCond %{HTTP_USER_AGENT} ^[Pp]y[Cc]URL [OR]
@@ -171,7 +173,6 @@ ServerSignature Off
     RewriteCond %{HTTP_USER_AGENT} ^[Ww]eb[Ff]etch [OR]
     RewriteCond %{HTTP_USER_AGENT} ^[Ww]eb[Ss]ucker [OR]
     RewriteCond %{HTTP_USER_AGENT} ^[Ww]eb[Ww]hip [OR]
-    RewriteCond %{HTTP_USER_AGENT} ^[Ww]get [OR]
     RewriteCond %{HTTP_USER_AGENT} ^[Ww]idow [OR]
     RewriteCond %{HTTP_USER_AGENT} ^[Ww]eb[Ww]hop [OR]
     RewriteCond %{HTTP_USER_AGENT} ^[Ww]eb[Zz]ip [OR]

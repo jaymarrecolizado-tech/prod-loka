@@ -85,12 +85,21 @@ class Database
     }
 
     /**
-     * Fetch all rows
+     * Fetch all rows as objects
      */
     public function fetchAll(string $sql, array $params = []): array
     {
         $stmt = $this->query($sql, $params);
-        return $stmt->fetchAll();
+        return $stmt->fetchAll(PDO::FETCH_OBJ);
+    }
+
+    /**
+     * Fetch all rows as arrays
+     */
+    public function fetchAllArray(string $sql, array $params = []): array
+    {
+        $stmt = $this->query($sql, $params);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
     /**

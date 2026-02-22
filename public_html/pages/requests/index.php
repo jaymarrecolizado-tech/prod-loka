@@ -52,7 +52,7 @@ $requests = db()->fetchAll(
 // Fetch notification counts separately (eliminates N+1 query)
 $notificationCounts = [];
 if (!empty($requests) && !isAdmin()) {
-    $requestIds = array_column($requests, 'id');
+    $requestIds = array_map(fn($r) => $r->id, $requests);
     if (!empty($requestIds)) {
         $placeholders = implode(',', array_fill(0, count($requestIds), '?'));
         $linkConditions = array_map(fn($id) => "n.link LIKE ?", $requestIds);
