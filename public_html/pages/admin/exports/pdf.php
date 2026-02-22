@@ -98,10 +98,10 @@ switch ($type) {
         $filename = 'maintenance_' . $startDate . '_to_' . $endDate;
         $title = 'Maintenance Records';
         $orientation = 'L';
-        $columns = ['ID', 'Vehicle', 'Type', 'Priority', 'Status', 'Scheduled', 'Cost', 'Created'];
-        $colWidths = [12, 25, 25, 22, 25, 28, 20, 28];
+        $columns = ['ID', 'Vehicle', 'Type', 'Status', 'Scheduled', 'Cost', 'Created'];
+        $colWidths = [12, 25, 30, 25, 30, 20, 30];
         $data = db()->fetchAll(
-            "SELECT mr.id, v.plate_number as vehicle, mr.type, mr.priority, mr.status, 
+            "SELECT mr.id, v.plate_number as vehicle, mr.maintenance_type as type, mr.status,
                     mr.scheduled_date, mr.cost, mr.created_at
              FROM maintenance_requests mr
              JOIN vehicles v ON mr.vehicle_id = v.id
@@ -119,9 +119,9 @@ switch ($type) {
         $columns = ['ID', 'Timestamp', 'User', 'Action', 'Entity', 'IP Address'];
         $colWidths = [12, 35, 35, 35, 50, 35];
         $data = db()->fetchAll(
-            "SELECT al.id, al.created_at as timestamp, u.name as user, al.action, 
+            "SELECT al.id, al.created_at as timestamp, u.name as user, al.action,
                     CONCAT(al.entity_type, ' #', al.entity_id) as entity, al.ip_address
-             FROM audit_logs al
+             FROM audit_log al
              LEFT JOIN users u ON al.user_id = u.id
              WHERE DATE(al.created_at) BETWEEN ? AND ?
              ORDER BY al.created_at DESC

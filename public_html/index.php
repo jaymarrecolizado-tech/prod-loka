@@ -310,6 +310,11 @@ switch ($page) {
         require_once PAGES_PATH . '/audit/index.php';
         break;
 
+    case 'admin-reports':
+        requireRole(ROLE_ADMIN);
+        require_once PAGES_PATH . '/admin/reports.php';
+        break;
+
     case 'settings':
         requireRole(ROLE_ADMIN);
         if ($action === 'email-queue') {
@@ -342,6 +347,18 @@ switch ($page) {
             require_once PAGES_PATH . '/api/check_conflict.php';
         } else {
             jsonResponse(false, ['error' => 'Invalid action'], 'Invalid action', 404);
+        }
+        break;
+
+    case 'export':
+        requireRole(ROLE_ADMIN);
+        $format = get('format', 'csv');
+        if ($format === 'csv') {
+            require_once PAGES_PATH . '/admin/exports/csv.php';
+        } elseif ($format === 'pdf') {
+            require_once PAGES_PATH . '/admin/exports/pdf.php';
+        } else {
+            redirectWith('/?page=admin-reports', 'danger', 'Invalid export format.');
         }
         break;
 

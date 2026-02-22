@@ -28,6 +28,7 @@ logs/*.log
 *.tmp
 *.temp
 .cache/
+cache/
 
 # Build Output
 dist/
