@@ -22,7 +22,7 @@ $headers = [];
 switch ($type) {
     case 'requests':
         $filename = 'vehicle_requests_' . $startDate . '_to_' . $endDate;
-        $headers = ['ID', 'Created', 'Start', 'End', 'Purpose', 'Destination', 'Passengers', 'Status', 'Requester', 'Department', 'Vehicle', 'Driver'];
+        $headers = ['ID', 'Created', 'Start', 'End', 'Purpose', 'Destination', 'Passenger Count', 'Status', 'Requester', 'Department', 'Vehicle', 'Driver'];
         $data = db()->fetchAll(
             "SELECT r.id, r.created_at, r.start_datetime, r.end_datetime, r.purpose, r.destination,
                     r.passenger_count, r.status, u.name as requester, d.name as department,
@@ -82,9 +82,9 @@ switch ($type) {
 
     case 'maintenance':
         $filename = 'maintenance_' . $startDate . '_to_' . $endDate;
-        $headers = ['ID', 'Vehicle', 'Type', 'Priority', 'Status', 'Scheduled', 'Completed', 'Cost', 'Created'];
+        $headers = ['ID', 'Vehicle', 'Type', 'Status', 'Scheduled Date', 'Completed At', 'Cost', 'Created'];
         $data = db()->fetchAll(
-            "SELECT mr.id, v.plate_number as vehicle, mr.type, mr.priority, mr.status, 
+            "SELECT mr.id, v.plate_number as vehicle, mr.maintenance_type as type, mr.status,
                     mr.scheduled_date, mr.completed_at, mr.cost, mr.created_at
              FROM maintenance_requests mr
              JOIN vehicles v ON mr.vehicle_id = v.id
@@ -99,9 +99,9 @@ switch ($type) {
         $filename = 'audit_logs_' . $startDate . '_to_' . $endDate;
         $headers = ['ID', 'Timestamp', 'User', 'Action', 'Entity Type', 'Entity ID', 'IP Address'];
         $data = db()->fetchAll(
-            "SELECT al.id, al.created_at as timestamp, u.name as user, al.action, 
+            "SELECT al.id, al.created_at as timestamp, u.name as user, al.action,
                     al.entity_type, al.entity_id, al.ip_address
-             FROM audit_logs al
+             FROM audit_log al
              LEFT JOIN users u ON al.user_id = u.id
              WHERE DATE(al.created_at) BETWEEN ? AND ?
              ORDER BY al.created_at DESC
