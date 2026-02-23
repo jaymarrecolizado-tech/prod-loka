@@ -84,9 +84,14 @@ require_once INCLUDES_PATH . '/header.php';
             <h4 class="mb-1">Reports</h4>
             <nav aria-label="breadcrumb"><ol class="breadcrumb mb-0"><li class="breadcrumb-item"><a href="<?= APP_URL ?>">Dashboard</a></li><li class="breadcrumb-item active">Reports</li></ol></nav>
         </div>
-        <a href="<?= APP_URL ?>/?page=reports&action=export&start_date=<?= $startDate ?>&end_date=<?= $endDate ?>" class="btn btn-outline-primary">
-            <i class="bi bi-download me-1"></i>Export CSV
-        </a>
+        <div class="btn-group">
+            <a href="<?= APP_URL ?>/?page=reports&action=export&start_date=<?= $startDate ?>&end_date=<?= $endDate ?>" class="btn btn-outline-primary">
+                <i class="bi bi-file-earmark-csv me-1"></i>Export CSV
+            </a>
+            <a href="<?= APP_URL ?>/?page=reports&action=export-pdf&start_date=<?= $startDate ?>&end_date=<?= $endDate ?>" class="btn btn-outline-danger">
+                <i class="bi bi-file-earmark-pdf me-1"></i>Export PDF
+            </a>
+        </div>
     </div>
     
     <!-- Date Filter -->
