@@ -15,11 +15,17 @@ $user = db()->fetch(
     [userId()]
 );
 
+// Get all departments for dropdown
+$departments = db()->fetchAll(
+    "SELECT id, name FROM departments WHERE deleted_at IS NULL ORDER BY name"
+);
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     requireCsrf();
     
     $name = postSafe('name', '', 100);
     $phone = postSafe('phone', '', 20);
+    $departmentId = postInt('department_id') ?: null;
     $currentPassword = post('current_password');
     $newPassword = post('new_password');
     $confirmPassword = post('confirm_password');
@@ -59,6 +65,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $updateData = [
             'name' => $name,
             'phone' => $phone,
+            'department_id' => $departmentId,
             'updated_at' => date(DATETIME_FORMAT)
         ];
         
@@ -163,7 +170,18 @@ require_once INCLUDES_PATH . '/header.php';
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">Phone</label>
-                                <input type="text" class="form-control" name="phone" value="<?= e(post('phone', $user->phone)) ?>">
+                                <input type="tel" class="form-control" name="phone" value="<?= e(post('phone', $user->phone)) ?>" placeholder="e.g., 09171234567">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Department</label>
+                                <select class="form-select" name="department_id">
+                                    <option value="">Select department...</option>
+                                    <?php foreach ($departments as $dept): ?>
+                                    <option value="<?= $dept->id ?>" <?= (post('department_id', $user->department_id) == $dept->id) ? 'selected' : '' ?>>
+                                        <?= e($dept->name) ?>
+                                    </option>
+                                    <?php endforeach; ?>
+                                </select>
                             </div>
                         </div>
                         

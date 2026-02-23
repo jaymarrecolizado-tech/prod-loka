@@ -105,8 +105,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && post('action') !== 'save_workflow' 
     $startDatetime = postSafe('start_datetime', '', 20);
     $endDatetime = postSafe('end_datetime', '', 20);
     $purpose = postSafe('purpose', '', 500);
-    $destination = postSafe('destination', '', 255);
+    $destinationRaw = $_POST['destinations'] ?? [];
     $passengerIds = $_POST['passengers'] ?? [];
+    
+    // Process destinations - filter empty values and combine
+    $destinations = array_filter(array_map('trim', $destinationRaw), function($d) {
+        return !empty($d);
+    });
+    $destination = implode(' → ', $destinations);
     
     // Count passengers properly - filter out empty values
     $passengerIds = array_filter($passengerIds, function($p) {
@@ -142,8 +148,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && post('action') !== 'save_workflow' 
     if (empty($purpose)) {
         $errors[] = 'Purpose is required';
     }
-    if (empty($destination)) {
-        $errors[] = 'Destination is required';
+    if (empty($destinations)) {
+        $errors[] = 'At least one destination is required';
+    }
+    if (!$vehicleId) {
+        $errors[] = 'Please select a vehicle';
     }
     if (!$approverId) {
         $errors[] = 'Please select a department approver';
@@ -312,8 +321,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && post('action') !== 'save_workflow' 
             
         } catch (Exception $e) {
             db()->rollback();
-            $errors[] = 'Failed to submit request. Please try again.';
             error_log("Request creation error: " . $e->getMessage() . "\nTrace: " . $e->getTraceAsString());
+            
+            // Show detailed error in development
+            if (APP_ENV === 'development') {
+                $errors[] = 'Error: ' . $e->getMessage();
+            } else {
+                $errors[] = 'Failed to submit request. Please try again.';
+            }
         }
     }
 }
@@ -380,14 +395,46 @@ require_once INCLUDES_PATH . '/header.php';
                                 <div class="invalid-feedback">Please enter the purpose</div>
                             </div>
                             
-                            <!-- Destination -->
-                            <div class="col-12">
-                                <label for="destination" class="form-label">Destination <span class="text-danger">*</span></label>
-                                <input type="text" class="form-control" id="destination" name="destination" 
-                                       value="<?= e(post('destination', '')) ?>" 
-                                       placeholder="Enter destination address..." required>
-                                <div class="invalid-feedback">Please enter the destination</div>
-                            </div>
+                            <!-- Destinations (Multiple) -->
+                             <div class="col-12">
+                                 <label class="form-label">Destinations <span class="text-danger">*</span></label>
+                                 <div class="alert alert-info py-2 mb-2">
+                                     <i class="bi bi-info-circle me-1"></i>
+                                     <strong>Note:</strong> Add locations in sequential order (first stop to last stop).
+                                 </div>
+                                 <div id="destinationsContainer">
+                                     <?php 
+                                     $destinations = post('destinations', []);
+                                     if (empty($destinations)) {
+                                         $destinations = [''];
+                                     }
+                                     foreach ($destinations as $index => $dest): 
+                                     ?>
+                                     <div class="destination-row mb-2">
+                                         <div class="input-group">
+                                             <span class="input-group-text bg-primary text-white" style="min-width: 45px;">
+                                                 <i class="bi bi-geo-alt"></i> <?= $index + 1 ?>
+                                             </span>
+                                             <input type="text" class="form-control destination-input" 
+                                                    name="destinations[]" 
+                                                    value="<?= e($dest) ?>" 
+                                                    placeholder="Enter location address..."
+                                                    <?= $index === 0 ? 'required' : '' ?>>
+                                             <?php if ($index > 0): ?>
+                                             <button type="button" class="btn btn-outline-danger remove-destination" title="Remove location">
+                                                 <i class="bi bi-trash"></i>
+                                             </button>
+                                             <?php endif; ?>
+                                         </div>
+                                     </div>
+                                     <?php endforeach; ?>
+                                 </div>
+                                 <button type="button" class="btn btn-outline-primary btn-sm mt-1" id="addDestinationBtn">
+                                     <i class="bi bi-plus-circle me-1"></i>Add Another Location
+                                 </button>
+                                 <input type="hidden" name="destination" id="destinationCombined">
+                                 <div class="invalid-feedback" id="destinationError">Please enter at least one destination</div>
+                             </div>
                             
                             <!-- Passengers Summary & Modal Trigger -->
                             <div class="col-12 mt-4">
@@ -412,13 +459,15 @@ require_once INCLUDES_PATH . '/header.php';
                                 <label for="vehicle_id" class="form-label">Select Vehicle <span class="text-danger">*</span></label>
                                 <select class="form-select" id="vehicle_id" name="vehicle_id" required>
                                     <option value="">Choose a vehicle...</option>
-                                    <?php foreach ($availableVehicles as $vehicle): ?>
+                                    <?php foreach ($availableVehicles as $vehicle): 
+                                        $vehicle = (object) $vehicle;
+                                    ?>
                                     <option value="<?= $vehicle->id ?>" 
                                             data-capacity="<?= $vehicle->passenger_capacity ?>"
-                                            data-type="<?= e($vehicle->type_name) ?>"
+                                            data-type="<?= e($vehicle->type_name ?? '') ?>"
                                             <?= post('vehicle_id') == $vehicle->id ? 'selected' : '' ?>>
                                         <?= e($vehicle->plate_number) ?> - <?= e($vehicle->make . ' ' . $vehicle->model) ?>
-                                        (<?= e($vehicle->type_name) ?>, <?= $vehicle->passenger_capacity ?> seats)
+                                        (<?= e($vehicle->type_name ?? '') ?>, <?= $vehicle->passenger_capacity ?> seats)
                                         <?= $vehicle->status === 'in_use' ? ' [Currently in use]' : '' ?>
                                     </option>
                                     <?php endforeach; ?>
@@ -442,7 +491,9 @@ require_once INCLUDES_PATH . '/header.php';
                                 <label for="requested_driver_id" class="form-label">Requested Driver (Optional)</label>
                                 <select class="form-select" id="requested_driver_id" name="requested_driver_id">
                                     <option value="">No preference</option>
-                                    <?php foreach ($allDrivers as $driver): ?>
+                                    <?php foreach ($allDrivers as $driver): 
+                                        $driver = (object) $driver;
+                                    ?>
                                     <option value="<?= $driver->id ?>" <?= post('requested_driver_id') == $driver->id ? 'selected' : '' ?>>
                                         <?= e($driver->driver_name) ?>
                                     </option>
@@ -466,7 +517,9 @@ require_once INCLUDES_PATH . '/header.php';
                                         <i class="bi bi-bookmark me-1"></i>Load Saved
                                     </button>
                                     <ul class="dropdown-menu dropdown-menu-end">
-                                        <?php foreach ($savedWorkflows as $wf): ?>
+                                        <?php foreach ($savedWorkflows as $wf): 
+                                            $wf = (object) $wf;
+                                        ?>
                                         <li>
                                             <a class="dropdown-item d-flex justify-content-between align-items-center workflow-load" 
                                                href="#" 
@@ -494,10 +547,12 @@ require_once INCLUDES_PATH . '/header.php';
                                         </label>
                                         <select class="form-select" id="approver_id" name="approver_id" required>
                                             <option value="">Select approver...</option>
-                                            <?php foreach ($approvers as $app): ?>
+                                            <?php foreach ($approvers as $app): 
+                                                $app = (object) $app;
+                                            ?>
                                             <option value="<?= $app->id ?>" 
                                                     <?= (post('approver_id') == $app->id || ($defaultWorkflow && $defaultWorkflow->approver_id == $app->id && !post('approver_id'))) ? 'selected' : '' ?>>
-                                                <?= e($app->name) ?> (<?= e($app->department_name ?: 'Admin') ?>)
+                                                <?= e($app->name) ?> (<?= e($app->department_name ?? 'Admin') ?>)
                                             </option>
                                             <?php endforeach; ?>
                                         </select>
@@ -511,7 +566,9 @@ require_once INCLUDES_PATH . '/header.php';
                                         </label>
                                         <select class="form-select" id="motorpool_head_id" name="motorpool_head_id" required>
                                             <option value="">Select motorpool head...</option>
-                                            <?php foreach ($motorpoolHeads as $mp): ?>
+                                            <?php foreach ($motorpoolHeads as $mp): 
+                                                $mp = (object) $mp;
+                                            ?>
                                             <option value="<?= $mp->id ?>" 
                                                     <?= (post('motorpool_head_id') == $mp->id || ($defaultWorkflow && $defaultWorkflow->motorpool_head_id == $mp->id && !post('motorpool_head_id'))) ? 'selected' : '' ?>>
                                                 <?= e($mp->name) ?>
@@ -587,7 +644,9 @@ require_once INCLUDES_PATH . '/header.php';
                     <h6 class="mb-0"><i class="bi bi-bookmark me-2"></i>Saved Workflows</h6>
                 </div>
                 <div class="list-group list-group-flush">
-                    <?php foreach ($savedWorkflows as $wf): ?>
+                    <?php foreach ($savedWorkflows as $wf): 
+                        $wf = (object) $wf;
+                    ?>
                     <div class="list-group-item d-flex justify-content-between align-items-start">
                         <div class="flex-grow-1">
                             <div class="d-flex align-items-center">
@@ -678,25 +737,26 @@ require_once INCLUDES_PATH . '/header.php';
                                 <?php 
                                 $selectedPassengers = post('passengers', []);
                                 foreach ($employees as $emp): 
+                                    $emp = (object) $emp;
                                     $isSelected = in_array($emp->id, $selectedPassengers);
                                 ?>
                                 <div class="form-check py-2 border-bottom employee-item" 
                                      data-name="<?= strtolower(e($emp->name)) ?>"
-                                     data-department="<?= strtolower(e($emp->department_name ?: '')) ?>"
-                                     data-email="<?= strtolower(e($emp->email)) ?>"
-                                     data-search-text="<?= strtolower(e($emp->name . ' ' . ($emp->department_name ?: '') . ' ' . $emp->email)) ?>">
+                                     data-department="<?= strtolower(e($emp->department_name ?? '')) ?>"
+                                     data-email="<?= strtolower(e($emp->email ?? '')) ?>"
+                                     data-search-text="<?= strtolower(e($emp->name . ' ' . ($emp->department_name ?? '') . ' ' . ($emp->email ?? ''))) ?>">
                                     <input class="form-check-input passenger-checkbox" 
                                            type="checkbox" 
                                            value="<?= $emp->id ?>" 
                                            id="emp_<?= $emp->id ?>"
                                            data-type="employee"
-                                           data-department="<?= e($emp->department_name ?: 'No Dept') ?>"
+                                           data-department="<?= e($emp->department_name ?? 'No Dept') ?>"
                                            <?= $isSelected ? 'checked' : '' ?>>
                                     <label class="form-check-label w-100" for="emp_<?= $emp->id ?>">
                                         <div class="d-flex justify-content-between align-items-center">
                                             <div>
                                                 <div class="fw-medium"><?= e($emp->name) ?></div>
-                                                <small class="text-muted"><?= e($emp->department_name ?: 'No Department') ?></small>
+                                                <small class="text-muted"><?= e($emp->department_name ?? 'No Department') ?></small>
                                             </div>
                                             <i class="bi bi-person-fill text-secondary"></i>
                                         </div>
@@ -1204,6 +1264,109 @@ ob_start();
     // Make it globally accessible
     window.passengerManager = passengerManager;
     
+    // Destination Manager - Handle multiple sequential destinations
+    class DestinationManager {
+        constructor() {
+            this.container = document.getElementById('destinationsContainer');
+            this.addBtn = document.getElementById('addDestinationBtn');
+            this.maxDestinations = 10;
+            
+            this.init();
+        }
+        
+        init() {
+            if (this.addBtn) {
+                this.addBtn.addEventListener('click', () => this.addDestination());
+            }
+            
+            // Event delegation for remove buttons
+            document.addEventListener('click', (e) => {
+                if (e.target.classList.contains('remove-destination') || e.target.closest('.remove-destination')) {
+                    const row = e.target.closest('.destination-row');
+                    if (row) {
+                        this.removeDestination(row);
+                    }
+                }
+            });
+        }
+        
+        addDestination() {
+            const rows = this.container.querySelectorAll('.destination-row');
+            if (rows.length >= this.maxDestinations) {
+                alert('Maximum of ' + this.maxDestinations + ' destinations allowed');
+                return;
+            }
+            
+            const index = rows.length;
+            const row = document.createElement('div');
+            row.className = 'destination-row mb-2';
+            row.innerHTML = `
+                <div class="input-group">
+                    <span class="input-group-text bg-primary text-white" style="min-width: 45px;">
+                        <i class="bi bi-geo-alt"></i> ${index + 1}
+                    </span>
+                    <input type="text" class="form-control destination-input" 
+                           name="destinations[]" 
+                           placeholder="Enter location address...">
+                    <button type="button" class="btn btn-outline-danger remove-destination" title="Remove location">
+                        <i class="bi bi-trash"></i>
+                    </button>
+                </div>
+            `;
+            
+            this.container.appendChild(row);
+            row.querySelector('input').focus();
+            this.updateNumbers();
+        }
+        
+        removeDestination(row) {
+            const rows = this.container.querySelectorAll('.destination-row');
+            if (rows.length <= 1) {
+                alert('At least one destination is required');
+                return;
+            }
+            
+            row.remove();
+            this.updateNumbers();
+        }
+        
+        updateNumbers() {
+            const rows = this.container.querySelectorAll('.destination-row');
+            rows.forEach((row, index) => {
+                const badge = row.querySelector('.input-group-text');
+                if (badge) {
+                    badge.innerHTML = '<i class="bi bi-geo-alt"></i> ' + (index + 1);
+                }
+                
+                const input = row.querySelector('.destination-input');
+                if (input) {
+                    input.required = (index === 0);
+                }
+                
+                // Show/hide remove button based on index
+                const removeBtn = row.querySelector('.remove-destination');
+                if (removeBtn) {
+                    removeBtn.style.display = (index === 0 && rows.length === 1) ? 'none' : '';
+                }
+            });
+        }
+        
+        getCombinedDestination() {
+            const inputs = this.container.querySelectorAll('.destination-input');
+            const destinations = [];
+            inputs.forEach(input => {
+                const val = input.value.trim();
+                if (val) {
+                    destinations.push(val);
+                }
+            });
+            return destinations.join(' → ');
+        }
+    }
+    
+    const destinationManager = new DestinationManager();
+    window.destinationManager = destinationManager;
+    
     // Form submission handler - prepare passenger data
     const requestForm = document.getElementById('requestForm');
     if (requestForm) {
@@ -1240,6 +1403,15 @@ ob_start();
             const passengersJson = document.getElementById('passengers_json');
             if (passengersJson) {
                 passengersJson.value = JSON.stringify(passengersArray);
+            }
+            
+            // Combine destinations into hidden field
+            const destManager = window.destinationManager;
+            if (destManager) {
+                const combinedDest = document.getElementById('destinationCombined');
+                if (combinedDest) {
+                    combinedDest.value = destManager.getCombinedDestination();
+                }
             }
             
             // Debug: Log passenger count
@@ -1467,13 +1639,6 @@ ob_start();
                 });
             }
         }, 500);
-    }
-    
-    // Start initialization when DOM is ready
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', initPage);
-    } else {
-        initPage();
     }
 })();
 </script>

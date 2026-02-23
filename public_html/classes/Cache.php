@@ -169,8 +169,8 @@ class Cache
             return false;
         }
 
-        $data = json_decode(file_get_contents($file), true);
-        return $data['expires'] > time();
+        $data = json_decode(file_get_contents($file));
+        return $data->expires > time();
     }
 
     /**
@@ -227,15 +227,15 @@ class Cache
             return null;
         }
 
-        $data = json_decode(file_get_contents($file), true);
+        $data = json_decode(file_get_contents($file));
 
         // Check if expired
-        if ($data['expires'] < time()) {
+        if ($data->expires < time()) {
             @unlink($file);
             return null;
         }
 
-        return $data['value'];
+        return $data->value;
     }
 
     /**
@@ -271,8 +271,8 @@ class Cache
         $files = glob($this->fileCacheDir . '*.json');
 
         foreach ($files as $file) {
-            $data = json_decode(file_get_contents($file), true);
-            if ($data['expires'] < $now) {
+            $data = json_decode(file_get_contents($file));
+            if ($data->expires < $now) {
                 if (@unlink($file)) {
                     $count++;
                 }
@@ -305,8 +305,8 @@ class Cache
 
         foreach ($files as $file) {
             $totalSize += filesize($file);
-            $data = json_decode(file_get_contents($file), true);
-            if ($data['expires'] > time()) {
+            $data = json_decode(file_get_contents($file));
+            if ($data->expires > time()) {
                 $validCount++;
             }
         }
