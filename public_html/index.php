@@ -255,18 +255,20 @@ switch ($page) {
 
     case 'reports':
         requireRole(ROLE_APPROVER);
-        if ($action === 'utilization') {
-            require_once PAGES_PATH . '/reports/utilization.php';
-        } elseif ($action === 'department') {
-            require_once PAGES_PATH . '/reports/department.php';
-        } elseif ($action === 'vehicle-history') {
+        if ($action === 'vehicle-history') {
             require_once PAGES_PATH . '/reports/vehicle-history.php';
         } elseif ($action === 'driver') {
             require_once PAGES_PATH . '/reports/driver.php';
+        } elseif ($action === 'trips') {
+            require_once PAGES_PATH . '/reports/trips.php';
         } elseif ($action === 'export') {
             require_once PAGES_PATH . '/reports/export.php';
         } elseif ($action === 'export-pdf') {
             require_once PAGES_PATH . '/reports/export-pdf.php';
+        } elseif ($action === 'export-vehicle-history') {
+            require_once PAGES_PATH . '/reports/export-vehicle-history.php';
+        } elseif ($action === 'export-driver') {
+            require_once PAGES_PATH . '/reports/export-driver.php';
         } else {
             require_once PAGES_PATH . '/reports/index.php';
         }
