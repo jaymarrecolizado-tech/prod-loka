@@ -267,8 +267,12 @@ switch ($page) {
             require_once PAGES_PATH . '/reports/export-pdf.php';
         } elseif ($action === 'export-vehicle-history') {
             require_once PAGES_PATH . '/reports/export-vehicle-history.php';
+        } elseif ($action === 'export-vehicle-csv') {
+            require_once PAGES_PATH . '/reports/export-vehicle-csv.php';
         } elseif ($action === 'export-driver') {
             require_once PAGES_PATH . '/reports/export-driver.php';
+        } elseif ($action === 'export-driver-csv') {
+            require_once PAGES_PATH . '/reports/export-driver-csv.php';
         } else {
             require_once PAGES_PATH . '/reports/index.php';
         }
