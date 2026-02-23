@@ -259,6 +259,10 @@ switch ($page) {
             require_once PAGES_PATH . '/reports/utilization.php';
         } elseif ($action === 'department') {
             require_once PAGES_PATH . '/reports/department.php';
+        } elseif ($action === 'vehicle-history') {
+            require_once PAGES_PATH . '/reports/vehicle-history.php';
+        } elseif ($action === 'driver') {
+            require_once PAGES_PATH . '/reports/driver.php';
         } elseif ($action === 'export') {
             require_once PAGES_PATH . '/reports/export.php';
         } elseif ($action === 'export-pdf') {
