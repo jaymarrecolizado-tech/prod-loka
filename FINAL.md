@@ -1,5 +1,5 @@
 # LOKA Fleet Management System - Current Status
-**Last Updated:** February 22, 2026
+**Last Updated:** February 23, 2026
 
 ---
 
@@ -16,14 +16,16 @@
 - **Database Name:** `lokaloka2`
 - **Config File:** `public_html/.env`
 
-### Login Credentials
+### Login Credentials (All Users: password123)
 | Role | Email | Password |
 |------|-------|----------|
 | Admin | admin@fleet.local | password123 |
 | Motorpool Head | jay.galil619@gmail.com | password123 |
 | Guard | guard@fleet.local | password123 |
-| Approver | approver@fleet.local | password123 |
+| Approver | shawntibo94@gmail.com | password123 |
 | Requester | requester@fleet.local | password123 |
+
+**All 101 users** in the database have the default password: `password123`
 
 ---
 
@@ -40,22 +42,28 @@
 | Action | Description |
 |--------|-------------|
 | index | List all requests with filters |
-| create | New request form (no time restrictions) |
+| create | New request form with **multiple sequential destinations** |
 | edit | Edit pending/revision requests |
 | view | View request details |
 | cancel | Cancel a request |
-| print | Print request form with guard tracking |
+| print | Print request form with guard tracking and approval status |
 | override | Motorpool can reassign vehicle/driver on approved requests |
 | complete | Mark trip as completed |
 
 **Request Workflow:**
 ```
 pending → pending_motorpool → approved → completed
-                ↓                  ↓
-            rejected           cancelled
-                ↓
-            revision → (resubmit)
+                 ↓                  ↓
+             rejected           cancelled
+                 ↓
+             revision → (resubmit)
 ```
+
+**Multiple Destinations Feature:**
+- Users can add multiple locations in sequential order
+- Locations displayed with numbered badges (1, 2, 3...)
+- Stored as: `Location 1 → Location 2 → Location 3`
+- Arrow separator clearly shows trip route
 
 ### 2.3 Approvals Module (`/page=approvals`)
 - Department approvers see pending requests from their department
@@ -98,20 +106,47 @@ pending → pending_motorpool → approved → completed
 - Odometer reading updates
 
 ### 2.9 Reports Module (`/page=reports`)
-| Report | Description |
-|--------|-------------|
-| index | Dashboard with trip statistics |
-| utilization | Vehicle utilization report |
-| department | Department-wise usage report |
-| export | CSV export with guard tracking data |
 
-**Export Columns:**
-- Request details (ID, requester, purpose, destination)
-- Schedule (planned start/end)
-- Actual times (dispatch, arrival)
-- Duration comparison (planned vs actual)
-- Vehicle and driver info
-- Guard tracking (dispatched by, received by)
+#### Main Reports Page
+Card-based menu with 4 report types:
+- **Vehicle History** - Trip history per vehicle with PDF/CSV export
+- **Driver Report** - Trip history per driver with PDF/CSV export
+- **Trip Requests** - All requests with filters and PDF/CSV export
+- **Admin Reports** - Advanced data exports (admin only)
+
+#### Vehicle History Report (`/page=reports&action=vehicle-history`)
+- Select vehicle from dropdown
+- Date range filter
+- Vehicle information section (plate, make, model, year, type, color, mileage, fuel)
+- Trip statistics (total trips, completed, total hours)
+- Trip history table with all details
+- **Export:** CSV and PDF
+
+#### Driver Report (`/page=reports&action=driver`)
+- Select driver from dropdown
+- Date range filter
+- Driver information section (name, phone, license, expiry, department, status, emergency contact)
+- Trip statistics (total trips, completed, total hours, vehicles driven, passengers)
+- Trip history table with all details
+- **Export:** CSV and PDF
+
+#### Trip Requests Report (`/page=reports&action=trips`)
+- Date range filter
+- Status filter
+- Summary statistics cards
+- Full requests table
+- **Export:** CSV and PDF
+
+#### Export Field List (30 fields)
+| Category | Fields |
+|----------|--------|
+| Request | ID, Created, Scheduled Start/End, Purpose, Destination, Passengers, Status, Notes |
+| Requester | Name, Email, Phone, Department |
+| Vehicle | Plate, Make, Model, Year, Type, Color |
+| Driver | Name, License |
+| Approval | Approved By, Motorpool Head |
+| Tracking | Actual Dispatch, Actual Arrival, Planned Duration, Actual Duration |
+| Guard | Dispatched By, Received By, Guard Notes |
 
 ### 2.10 Guard Dashboard (`/page=guard`)
 - View scheduled dispatches for today
@@ -138,7 +173,9 @@ pending → pending_motorpool → approved → completed
 - AJAX refresh for header
 
 ### 2.14 Profile (`/page=profile`)
-- Edit name and phone
+- Edit name
+- Edit **phone number**
+- Edit **department**
 - Change password with validation
 - View account info
 
@@ -153,6 +190,11 @@ pending → pending_motorpool → approved → completed
 - Booking rules (max advance days, min notice)
 - Email queue management
 
+### 2.17 Admin Reports (`/page=admin-reports`)
+- Admin only
+- Export users, vehicles, departments, maintenance, audit logs
+- CSV and PDF export options
+
 ---
 
 ## 3. SECURITY FEATURES
@@ -164,10 +206,11 @@ pending → pending_motorpool → approved → completed
 - Ban duration tracking
 
 ### 3.2 Authentication & Authorization
-- Password hashing (bcrypt)
+- Password hashing (bcrypt, cost 12)
 - Password policy enforcement
-- Session management
+- Session management with fingerprint validation
 - Role-based access control (RBAC)
+- Remember me functionality
 
 ### 3.3 Input Validation
 - CSRF token protection
@@ -202,7 +245,8 @@ pending → pending_motorpool → approved → completed
 | drivers | Driver profiles |
 | requests | Trip requests |
 | request_passengers | Passenger list per request |
-| request_approvals | Approval workflow records |
+| approvals | Approval records (revision → approved tracking) |
+| approval_workflow | Workflow state tracking |
 | assignment_history | Vehicle/driver change history |
 
 ### Support Tables
@@ -213,8 +257,11 @@ pending → pending_motorpool → approved → completed
 | password_reset_tokens | Password reset tokens |
 | maintenance_requests | Maintenance records |
 | audit_log | System activity log |
+| security_log | Security events log |
+| rate_limits | Rate limiting tracking |
 | settings | System configuration |
 | migrations | Migration tracking |
+| saved_workflows | User's saved approval workflows |
 
 ---
 
@@ -293,7 +340,7 @@ php run-migrations.php
 - **Primary:** APCu (if available)
 - **Fallback:** File-based cache (`cache/data/`)
 
-### Cached Data
+### Cached Data (Returns Objects, Not Arrays)
 | Data | TTL | Key Prefix |
 |------|-----|------------|
 | Employees list | 10 min | `user:employees:` |
@@ -316,63 +363,93 @@ public_html/
 ├── index.php              # Main router
 ├── .env                   # Environment config
 ├── config/
+│   ├── bootstrap.php      # App bootstrap (classes before session)
 │   ├── constants.php      # System constants
 │   ├── database.php       # DB configuration
-│   ├── mail.php          # Email settings
-│   ├── security.php      # Security config
-│   └── session.php       # Session config
+│   ├── mail.php           # Email settings
+│   ├── security.php       # Security config
+│   └── session.php        # Session config
 ├── classes/
-│   ├── Auth.php          # Authentication
-│   ├── Cache.php         # Caching layer
-│   ├── Database.php      # DB wrapper (PDO)
-│   ├── EmailQueue.php    # Email queue
-│   ├── Mailer.php        # Email sending
-│   ├── Migration.php     # Migration runner
-│   └── Security.php      # Security utilities
+│   ├── Auth.php           # Authentication
+│   ├── Cache.php          # Caching layer (returns objects)
+│   ├── Database.php       # DB wrapper (PDO, FETCH_OBJ)
+│   ├── EmailQueue.php     # Email queue
+│   ├── Mailer.php         # Email sending
+│   ├── Migration.php      # Migration runner
+│   └── Security.php       # Security utilities
 ├── includes/
-│   ├── functions.php     # Helper functions
-│   ├── header.php        # Page header
-│   ├── footer.php        # Page footer
-│   └── sidebar.php       # Navigation
+│   ├── functions.php      # Helper functions
+│   ├── header.php         # Page header
+│   ├── footer.php         # Page footer
+│   └── sidebar.php        # Navigation
 ├── pages/
-│   ├── approvals/        # Approval workflow
-│   ├── auth/             # Login, password reset
-│   ├── dashboard/        # Main dashboard
-│   ├── departments/      # Department management
-│   ├── drivers/          # Driver management
-│   ├── guard/            # Guard dashboard
-│   ├── maintenance/      # Maintenance module
-│   ├── my-trips/         # Driver trips view
-│   ├── notifications/    # Notifications
-│   ├── profile/          # User profile
-│   ├── reports/          # Reports & exports
-│   ├── requests/         # Request management
-│   ├── schedule/         # Calendar view
-│   ├── settings/         # Admin settings
-│   ├── users/            # User management
-│   └── vehicles/         # Vehicle management
-├── migrations/           # Database migrations
-├── cron/                 # Scheduled jobs
-├── cache/                # Cache storage
-├── logs/                 # System logs
-└── vendor/               # Composer dependencies
+│   ├── admin/
+│   │   └── exports/       # PDF/CSV exports for admin
+│   ├── approvals/         # Approval workflow
+│   ├── auth/              # Login, password reset
+│   ├── dashboard/         # Main dashboard
+│   ├── departments/       # Department management
+│   ├── drivers/           # Driver management
+│   ├── guard/             # Guard dashboard
+│   ├── maintenance/       # Maintenance module
+│   ├── my-trips/          # Driver trips view
+│   ├── notifications/     # Notifications
+│   ├── profile/           # User profile (phone, dept editable)
+│   ├── reports/           # Reports & exports
+│   │   ├── index.php           # Main reports menu
+│   │   ├── vehicle-history.php # Vehicle trip history
+│   │   ├── driver.php          # Driver report
+│   │   ├── trips.php           # All trip requests
+│   │   ├── export.php          # CSV export (30 fields)
+│   │   ├── export-pdf.php      # PDF export
+│   │   ├── export-vehicle-history.php  # Vehicle PDF
+│   │   ├── export-vehicle-csv.php      # Vehicle CSV
+│   │   ├── export-driver.php    # Driver PDF
+│   │   └── export-driver-csv.php # Driver CSV
+│   ├── requests/          # Request management
+│   ├── schedule/          # Calendar view
+│   ├── settings/          # Admin settings
+│   ├── users/             # User management
+│   └── vehicles/          # Vehicle management
+├── migrations/            # Database migrations
+├── cron/                  # Scheduled jobs
+├── cache/                 # Cache storage
+├── logs/                  # System logs
+│   └── sessions/          # Session files
+└── vendor/                # Composer dependencies
 ```
 
 ---
 
-## 11. RECENT FIXES (Feb 22, 2026)
+## 11. RECENT FIXES (Feb 23, 2026)
 
-### Bug Fixes
-1. **Passenger Search Error** - Fixed `fetchAll()` returning arrays instead of objects
-2. **Profile Edit Error** - Same fix applied, all data now returns as objects
-3. **.htaccess 500 Error** - Escaped spaces in RewriteCond patterns for bot blocking
-4. **Cache Stale Data** - Cleared cache to ensure fresh object data
+### Authentication & Session Fixes
+1. **Session Not Persisting** - Added `session_write_close()` before redirect
+2. **Session Cookie Path** - Fixed cookie path configuration
+3. **Class Load Order** - Classes now load before session.php (Security class fix)
 
-### Technical Changes
-- `Database::fetchAll()` now returns `PDO::FETCH_OBJ` by default
-- Added `Database::fetchAllArray()` for cases requiring array output
-- Updated `pages/requests/edit.php` to use `fetchAllArray()` for `array_column()` calls
-- Updated `pages/requests/index.php` to use object property access
+### Cache Fixes
+1. **Cache Returning Arrays** - Fixed `json_decode()` to return objects instead of arrays
+2. **All cached data** now properly returns objects for consistent access
+
+### Reports Enhancements
+1. **Complete Field Exports** - CSV/PDF exports now include 30 fields
+2. **Vehicle History Report** - Full vehicle info, trip statistics, all trip details
+3. **Driver Report** - Complete driver info, trip statistics, all trip details
+4. **CSV Exports** - Added for vehicle history and driver reports
+5. **Removed Redundant Files** - Deleted placeholder utilization.php and department.php
+
+### Request Features
+1. **Multiple Destinations** - Users can add sequential locations with arrow separator
+2. **Vehicle Validation** - Added required validation for vehicle selection
+
+### Profile Enhancements
+1. **Phone Number Editing** - Users can now edit their phone number
+2. **Department Selection** - Users can change their department
+
+### Print Form Fixes
+1. **Approval Status Display** - Shows latest approval (revision → approved)
+2. **Correct Date Labels** - "Approved on", "Disapproved on", "Revision requested on"
 
 ---
 
@@ -403,18 +480,26 @@ public_html/
 ## 13. TESTING CHECKLIST
 
 ### Core Workflows
-- [ ] Create new request → Department approval → Motorpool approval → Complete
-- [ ] Request revision flow (requester updates → reapprove)
-- [ ] Motorpool override of vehicle/driver
-- [ ] Guard dispatch and arrival recording
+- [x] Create new request → Department approval → Motorpool approval → Complete
+- [x] Request revision flow (requester updates → reapprove)
+- [x] Motorpool override of vehicle/driver
+- [x] Guard dispatch and arrival recording
 - [ ] Maintenance request full cycle
 - [ ] Password reset via email
-- [ ] Profile update with password change
+- [x] Profile update with password change
+
+### Reports Testing
+- [x] Vehicle History PDF export
+- [x] Vehicle History CSV export
+- [x] Driver Report PDF export
+- [x] Driver Report CSV export
+- [x] Trip Requests PDF export
+- [x] Trip Requests CSV export
 
 ### Edge Cases
-- [ ] Cancel request at various stages
-- [ ] Edit request in revision status
-- [ ] Override with conflicting vehicle/driver
+- [x] Cancel request at various stages
+- [x] Edit request in revision status
+- [x] Override with conflicting vehicle/driver
 - [ ] Email queue failure handling
 - [ ] Rate limiting and IP banning
 
@@ -430,6 +515,10 @@ Requests:     /?page=requests
 Approvals:    /?page=approvals
 Guard:        /?page=guard
 Reports:      /?page=reports
+Vehicle History: /?page=reports&action=vehicle-history
+Driver Report:   /?page=reports&action=driver
+Trip Requests:   /?page=reports&action=trips
+Admin Reports:   /?page=admin-reports
 ```
 
 ### Status Constants
@@ -458,6 +547,27 @@ ROLE_ADMIN         = 'admin'
 cd public_html
 php db-test.php
 ```
+
+### Clear All Test Data
+```bash
+# Truncates requests, notifications, approvals, etc. (keeps users, vehicles, drivers)
+```
+
+---
+
+## 15. DEPLOYMENT NOTES
+
+### Production Environment
+1. Set `APP_ENV=production` in `.env`
+2. Set `IS_PRODUCTION=true` in `.env`
+3. Error reporting disabled automatically
+4. Security headers enforced
+
+### After Deployment
+1. Run migrations: `php run-migrations.php`
+2. Clear cache: `rm -rf cache/data/*.json`
+3. Test login with admin credentials
+4. Verify email queue processing
 
 ---
 
