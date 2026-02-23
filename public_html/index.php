@@ -261,6 +261,8 @@ switch ($page) {
             require_once PAGES_PATH . '/reports/department.php';
         } elseif ($action === 'export') {
             require_once PAGES_PATH . '/reports/export.php';
+        } elseif ($action === 'export-pdf') {
+            require_once PAGES_PATH . '/reports/export-pdf.php';
         } else {
             require_once PAGES_PATH . '/reports/index.php';
         }
