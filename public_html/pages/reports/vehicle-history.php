@@ -116,9 +116,14 @@ require_once INCLUDES_PATH . '/header.php';
                 </div>
                 <?php if ($vehicleId && !empty($trips)): ?>
                 <div class="col-md-3 text-end">
-                    <a href="<?= APP_URL ?>/?page=reports&action=export-vehicle-history&vehicle_id=<?= $vehicleId ?>&start_date=<?= $startDate ?>&end_date=<?= $endDate ?>" class="btn btn-outline-danger">
-                        <i class="bi bi-file-earmark-pdf me-1"></i>Export PDF
-                    </a>
+                    <div class="btn-group">
+                        <a href="<?= APP_URL ?>/?page=reports&action=export-vehicle-csv&vehicle_id=<?= $vehicleId ?>&start_date=<?= $startDate ?>&end_date=<?= $endDate ?>" class="btn btn-outline-primary">
+                            <i class="bi bi-file-earmark-csv me-1"></i>CSV
+                        </a>
+                        <a href="<?= APP_URL ?>/?page=reports&action=export-vehicle-history&vehicle_id=<?= $vehicleId ?>&start_date=<?= $startDate ?>&end_date=<?= $endDate ?>" class="btn btn-outline-danger">
+                            <i class="bi bi-file-earmark-pdf me-1"></i>PDF
+                        </a>
+                    </div>
                 </div>
                 <?php endif; ?>
             </form>
