@@ -36,7 +36,7 @@ if ($driverId) {
     );
     
     $trips = db()->fetchAll(
-        "SELECT r.id, r.control_number, r.start_datetime, r.end_datetime, r.purpose, r.destination,
+        "SELECT r.id, r.start_datetime, r.end_datetime, r.purpose, r.destination,
                 r.status, r.passenger_count, r.actual_dispatch_datetime, r.actual_arrival_datetime,
                 u.name as requester_name, d.name as department_name,
                 v.plate_number, v.make, v.model,
