@@ -32,6 +32,7 @@ function e(?string $string): string
  */
 function redirect(string $url): void
 {
+    session_write_close();
     header("Location: " . APP_URL . $url);
     exit;
 }

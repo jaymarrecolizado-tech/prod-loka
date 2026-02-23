@@ -168,7 +168,9 @@ class Auth
     public function login(object $user, bool $remember = false): void
     {
         // Regenerate session ID to prevent fixation
-        session_regenerate_id(true);
+        if (!session_regenerate_id(true)) {
+            error_log("Auth::login() - session_regenerate_id() failed");
+        }
 
         // Set session data
         $_SESSION['user_id'] = $user->id;
@@ -179,11 +181,13 @@ class Auth
         $_SESSION['user'] = $user;
         $_SESSION['logged_in_at'] = time();
         
-        // Store fingerprint immediately after login to prevent validation issues
-        $this->security->storeFingerprint();
+        // Reset session timers for fresh login
         $_SESSION['_created'] = time();
         $_SESSION['_absolute_start'] = time();
         $_SESSION['_last_activity'] = time();
+        
+        // Store fingerprint immediately after login to prevent validation issues
+        $this->security->storeFingerprint();
 
         // Update last login
         $this->db->update('users', ['last_login_at' => date(DATETIME_FORMAT)], 'id = ?', [$user->id]);

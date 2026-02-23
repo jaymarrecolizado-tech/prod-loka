@@ -96,8 +96,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $startDatetime = postSafe('start_datetime', '', 20);
     $endDatetime = postSafe('end_datetime', '', 20);
     $purpose = postSafe('purpose', '', 500);
-    $destination = postSafe('destination', '', 255);
+    $destinationRaw = $_POST['destinations'] ?? [];
     $passengerIds = $_POST['passengers'] ?? [];
+    
+    // Process destinations - filter empty values and combine
+    $destinations = array_filter(array_map('trim', $destinationRaw), function($d) {
+        return !empty($d);
+    });
+    $destination = implode(' → ', $destinations);
     
     // Count passengers properly - filter out empty values
     $passengerIds = array_filter($passengerIds, function($p) {
@@ -130,8 +136,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
     if (empty($purpose))
         $errors[] = 'Purpose is required';
-    if (empty($destination))
-        $errors[] = 'Destination is required';
+    if (empty($destinations))
+        $errors[] = 'At least one destination is required';
     if (!$approverId)
         $errors[] = 'Please select a department approver';
     if (!$motorpoolHeadId)
@@ -459,8 +465,45 @@ require_once INCLUDES_PATH . '/header.php';
                             <div class="col-12">
                                 <label for="destination" class="form-label">Destination <span
                                         class="text-danger">*</span></label>
-                                <input type="text" class="form-control" id="destination" name="destination"
-                                    value="<?= e(post('destination', $request->destination)) ?>" required>
+                                <div class="alert alert-info py-2 mb-2">
+                                    <i class="bi bi-info-circle me-1"></i>
+                                    <strong>Note:</strong> Add locations in sequential order (first stop to last stop).
+                                </div>
+                                <div id="destinationsContainer">
+                                    <?php 
+                                    $existingDest = post('destination', $request->destination);
+                                    $destinations = post('destinations', []);
+                                    if (empty($destinations) && $existingDest) {
+                                        $destinations = array_map('trim', explode('→', $existingDest));
+                                    }
+                                    if (empty($destinations)) {
+                                        $destinations = [''];
+                                    }
+                                    foreach ($destinations as $index => $dest): 
+                                    ?>
+                                    <div class="destination-row mb-2">
+                                        <div class="input-group">
+                                            <span class="input-group-text bg-primary text-white" style="min-width: 45px;">
+                                                <i class="bi bi-geo-alt"></i> <?= $index + 1 ?>
+                                            </span>
+                                            <input type="text" class="form-control destination-input" 
+                                                   name="destinations[]" 
+                                                   value="<?= e($dest) ?>" 
+                                                   placeholder="Enter location address..."
+                                                   <?= $index === 0 ? 'required' : '' ?>>
+                                            <?php if ($index > 0): ?>
+                                            <button type="button" class="btn btn-outline-danger remove-destination" title="Remove location">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                            <?php endif; ?>
+                                        </div>
+                                    </div>
+                                    <?php endforeach; ?>
+                                </div>
+                                <button type="button" class="btn btn-outline-primary btn-sm mt-1" id="addDestinationBtn">
+                                    <i class="bi bi-plus-circle me-1"></i>Add Another Location
+                                </button>
+                                <input type="hidden" name="destination" id="destinationCombined">
                             </div>
 
                             <!-- Passengers Summary & Modal Trigger -->
@@ -486,13 +529,15 @@ require_once INCLUDES_PATH . '/header.php';
                                 <label for="vehicle_id" class="form-label">Select Vehicle</label>
                                 <select class="form-select" id="vehicle_id" name="vehicle_id">
                                     <option value="">Choose a vehicle...</option>
-                                    <?php foreach ($availableVehicles as $vehicle): ?>
+                                    <?php foreach ($availableVehicles as $vehicle): 
+                                        $vehicle = (object) $vehicle;
+                                    ?>
                                     <option value="<?= $vehicle->id ?>" 
                                             data-capacity="<?= $vehicle->passenger_capacity ?>"
-                                            data-type="<?= e($vehicle->type_name) ?>"
+                                            data-type="<?= e($vehicle->type_name ?? '') ?>"
                                             <?= (post('vehicle_id') == $vehicle->id || $request->vehicle_id == $vehicle->id) ? 'selected' : '' ?>>
                                         <?= e($vehicle->plate_number) ?> - <?= e($vehicle->make . ' ' . $vehicle->model) ?>
-                                        (<?= e($vehicle->type_name) ?>, <?= $vehicle->passenger_capacity ?> seats)
+                                        (<?= e($vehicle->type_name ?? '') ?>, <?= $vehicle->passenger_capacity ?> seats)
                                         <?= $vehicle->status === 'in_use' ? ' [Currently in use]' : '' ?>
                                     </option>
                                     <?php endforeach; ?>
@@ -509,7 +554,9 @@ require_once INCLUDES_PATH . '/header.php';
                                 <label for="requested_driver_id" class="form-label">Requested Driver (Optional)</label>
                                 <select class="form-select" id="requested_driver_id" name="requested_driver_id">
                                     <option value="">No preference</option>
-                                    <?php foreach ($allDrivers as $driver): ?>
+                                    <?php foreach ($allDrivers as $driver): 
+                                        $driver = (object) $driver;
+                                    ?>
                                     <option value="<?= $driver->id ?>" <?= (post('requested_driver_id') == $driver->id || $request->requested_driver_id == $driver->id) ? 'selected' : '' ?>>
                                         <?= e($driver->driver_name) ?>
                                     </option>
@@ -533,10 +580,12 @@ require_once INCLUDES_PATH . '/header.php';
                                         </label>
                                         <select class="form-select" id="approver_id" name="approver_id" required>
                                             <option value="">Select approver...</option>
-                                            <?php foreach ($approvers as $app): ?>
+                                            <?php foreach ($approvers as $app): 
+                                                $app = (object) $app;
+                                            ?>
                                             <option value="<?= $app->id ?>" 
                                                     <?= (post('approver_id') == $app->id || $request->approver_id == $app->id) ? 'selected' : '' ?>>
-                                                <?= e($app->name) ?> (<?= e($app->department_name ?: 'Admin') ?>)
+                                                <?= e($app->name) ?> (<?= e($app->department_name ?? 'Admin') ?>)
                                             </option>
                                             <?php endforeach; ?>
                                         </select>
@@ -550,7 +599,9 @@ require_once INCLUDES_PATH . '/header.php';
                                         </label>
                                         <select class="form-select" id="motorpool_head_id" name="motorpool_head_id" required>
                                             <option value="">Select motorpool head...</option>
-                                            <?php foreach ($motorpoolHeads as $mp): ?>
+                                            <?php foreach ($motorpoolHeads as $mp): 
+                                                $mp = (object) $mp;
+                                            ?>
                                             <option value="<?= $mp->id ?>" 
                                                     <?= (post('motorpool_head_id') == $mp->id || $request->motorpool_head_id == $mp->id) ? 'selected' : '' ?>>
                                                 <?= e($mp->name) ?>
@@ -600,12 +651,14 @@ require_once INCLUDES_PATH . '/header.php';
                             <span class="x-small text-primary"><i class="bi bi-keyboard me-1"></i>Enter guest names</span>
                         </label>
                         <select class="form-select border-primary" id="passengers" name="passengers[]" multiple>
-                            <?php foreach ($employees as $emp): ?>
+                            <?php foreach ($employees as $emp): 
+                                $emp = (object) $emp;
+                            ?>
                             <option value="<?= $emp->id ?>" 
-                                    data-email="<?= e($emp->email) ?>"
-                                    data-department="<?= e($emp->department_name ?: 'No Dept') ?>"
+                                    data-email="<?= e($emp->email ?? '') ?>"
+                                    data-department="<?= e($emp->department_name ?? 'No Dept') ?>"
                                     <?= in_array($emp->id, post('passengers', $currentPassengerIds)) ? 'selected' : '' ?>>
-                                <?= e($emp->name) ?> <?= $emp->department_name ? '(' . e($emp->department_name) . ')' : '' ?>
+                                <?= e($emp->name) ?> <?= !empty($emp->department_name) ? '(' . e($emp->department_name) . ')' : '' ?>
                             </option>
                             <?php endforeach; ?>
 
@@ -869,6 +922,97 @@ require_once INCLUDES_PATH . '/header.php';
                 passengersSelect.style.minHeight = '100px';
             }
         }
+    });
+    
+    // Destination Manager - Handle multiple sequential destinations
+    document.addEventListener('DOMContentLoaded', function() {
+        const container = document.getElementById('destinationsContainer');
+        const addBtn = document.getElementById('addDestinationBtn');
+        const maxDestinations = 10;
+        
+        if (!container || !addBtn) return;
+        
+        addBtn.addEventListener('click', function() {
+            const rows = container.querySelectorAll('.destination-row');
+            if (rows.length >= maxDestinations) {
+                alert('Maximum of ' + maxDestinations + ' destinations allowed');
+                return;
+            }
+            
+            const index = rows.length;
+            const row = document.createElement('div');
+            row.className = 'destination-row mb-2';
+            row.innerHTML = `
+                <div class="input-group">
+                    <span class="input-group-text bg-primary text-white" style="min-width: 45px;">
+                        <i class="bi bi-geo-alt"></i> ${index + 1}
+                    </span>
+                    <input type="text" class="form-control destination-input" 
+                           name="destinations[]" 
+                           placeholder="Enter location address...">
+                    <button type="button" class="btn btn-outline-danger remove-destination" title="Remove location">
+                        <i class="bi bi-trash"></i>
+                    </button>
+                </div>
+            `;
+            
+            container.appendChild(row);
+            row.querySelector('input').focus();
+            updateNumbers();
+        });
+        
+        // Event delegation for remove buttons
+        container.addEventListener('click', function(e) {
+            if (e.target.classList.contains('remove-destination') || e.target.closest('.remove-destination')) {
+                const row = e.target.closest('.destination-row');
+                const rows = container.querySelectorAll('.destination-row');
+                if (rows.length <= 1) {
+                    alert('At least one destination is required');
+                    return;
+                }
+                row.remove();
+                updateNumbers();
+            }
+        });
+        
+        function updateNumbers() {
+            const rows = container.querySelectorAll('.destination-row');
+            rows.forEach((row, index) => {
+                const badge = row.querySelector('.input-group-text');
+                if (badge) {
+                    badge.innerHTML = '<i class="bi bi-geo-alt"></i> ' + (index + 1);
+                }
+                
+                const input = row.querySelector('.destination-input');
+                if (input) {
+                    input.required = (index === 0);
+                }
+                
+                // Show/hide remove button
+                const removeBtn = row.querySelector('.remove-destination');
+                if (removeBtn) {
+                    removeBtn.style.display = (index === 0 && rows.length === 1) ? 'none' : '';
+                }
+            });
+        }
+        
+        // Combine destinations before form submit
+        const form = document.getElementById('requestForm');
+        if (form) {
+            form.addEventListener('submit', function() {
+                const inputs = container.querySelectorAll('.destination-input');
+                const destinations = [];
+                inputs.forEach(input => {
+                    const val = input.value.trim();
+                    if (val) {
+                        destinations.push(val);
+                    }
+                });
+                document.getElementById('destinationCombined').value = destinations.join(' → ');
+            });
+        }
+        
+        updateNumbers();
     });
 </script>
 <?php

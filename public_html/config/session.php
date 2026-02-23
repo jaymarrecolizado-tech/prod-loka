@@ -5,12 +5,40 @@
  * Hardened session security settings
  */
 
+// Ensure session save path exists and is writable
+$sessionSavePath = ini_get('session.save_path') ?: sys_get_temp_dir();
+if (!is_dir($sessionSavePath) || !is_writable($sessionSavePath)) {
+    $sessionSavePath = dirname(__DIR__) . '/logs/sessions';
+    if (!is_dir($sessionSavePath)) {
+        @mkdir($sessionSavePath, 0755, true);
+    }
+    ini_set('session.save_path', $sessionSavePath);
+}
+
 // Session cookie settings
-ini_set('session.cookie_httponly', COOKIE_HTTPONLY ? 1 : 0);
+$cookieParams = [
+    'lifetime' => 0,
+    'path' => COOKIE_PATH,
+    'domain' => COOKIE_DOMAIN,
+    'secure' => COOKIE_SECURE,
+    'httponly' => COOKIE_HTTPONLY,
+    'samesite' => COOKIE_SAMESITE
+];
+
+if (PHP_VERSION_ID >= 70300) {
+    session_set_cookie_params($cookieParams);
+} else {
+    session_set_cookie_params(
+        $cookieParams['lifetime'],
+        $cookieParams['path'],
+        $cookieParams['domain'],
+        $cookieParams['secure'],
+        $cookieParams['httponly']
+    );
+}
+
 ini_set('session.use_only_cookies', 1);
 ini_set('session.use_strict_mode', 1);
-ini_set('session.cookie_secure', COOKIE_SECURE ? 1 : 0);
-ini_set('session.cookie_samesite', COOKIE_SAMESITE);
 ini_set('session.gc_maxlifetime', SESSION_TIMEOUT);
 ini_set('session.sid_length', 48);
 ini_set('session.sid_bits_per_character', 6);

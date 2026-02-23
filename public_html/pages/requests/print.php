@@ -34,12 +34,13 @@ if ($request->user_id !== userId() && !isApprover() && !isGuard() && !isMotorpoo
     redirectWith('/?page=requests', 'danger', 'You do not have permission to view this request.');
 }
 
-// Get approval records
+// Get approval records - fetch the LATEST one for each type (in case of revision -> approved)
 $deptApproval = db()->fetch(
     "SELECT a.*, u.name as approver_name 
      FROM approvals a 
      JOIN users u ON a.approver_id = u.id 
-     WHERE a.request_id = ? AND a.approval_type = 'department'",
+     WHERE a.request_id = ? AND a.approval_type = 'department'
+     ORDER BY a.id DESC LIMIT 1",
     [$requestId]
 );
 
@@ -47,7 +48,8 @@ $motorpoolApproval = db()->fetch(
     "SELECT a.*, u.name as approver_name 
      FROM approvals a 
      JOIN users u ON a.approver_id = u.id 
-     WHERE a.request_id = ? AND a.approval_type = 'motorpool'",
+     WHERE a.request_id = ? AND a.approval_type = 'motorpool'
+     ORDER BY a.id DESC LIMIT 1",
     [$requestId]
 );
 
@@ -583,8 +585,22 @@ if (!empty($assignmentHistory)) {
                         <h3>DEPARTMENT APPROVER</h3>
 
                         <?php if ($deptApproval): ?>
-                            <div class="approval-status status-<?= $deptApproval->status ?>">
-                                <?= strtoupper($deptApproval->status) ?>
+                            <?php 
+                            $statusClass = 'status-pending';
+                            $statusText = strtoupper($deptApproval->status);
+                            if ($deptApproval->status === 'approved') {
+                                $statusClass = 'status-approved';
+                                $statusText = 'APPROVED';
+                            } elseif ($deptApproval->status === 'rejected') {
+                                $statusClass = 'status-rejected';
+                                $statusText = 'DISAPPROVED';
+                            } elseif ($deptApproval->status === 'revision') {
+                                $statusClass = 'status-pending';
+                                $statusText = 'REVISION REQUESTED';
+                            }
+                            ?>
+                            <div class="approval-status <?= $statusClass ?>">
+                                <?= $statusText ?>
                             </div>
 
                             <div class="checkbox-row">
@@ -608,7 +624,15 @@ if (!empty($assignmentHistory)) {
 
                             <div style="text-align: center; margin-top: 8px; font-size: 9pt;">
                                 <strong><?= e($deptApproval->approver_name) ?></strong><br>
-                                <span style="color: #555;">Approved on <?= date('F j, Y', strtotime($deptApproval->created_at)) ?></span>
+                                <span style="color: #555;">
+                                    <?php if ($deptApproval->status === 'approved'): ?>
+                                        Approved on <?= date('F j, Y', strtotime($deptApproval->created_at)) ?>
+                                    <?php elseif ($deptApproval->status === 'rejected'): ?>
+                                        Disapproved on <?= date('F j, Y', strtotime($deptApproval->created_at)) ?>
+                                    <?php else: ?>
+                                        Revision requested on <?= date('F j, Y', strtotime($deptApproval->created_at)) ?>
+                                    <?php endif; ?>
+                                </span>
                             </div>
 
                         <?php else: ?>
@@ -636,8 +660,22 @@ if (!empty($assignmentHistory)) {
                         <h3>MOTORPOOL HEAD</h3>
 
                         <?php if ($motorpoolApproval): ?>
-                            <div class="approval-status status-<?= $motorpoolApproval->status ?>">
-                                <?= strtoupper($motorpoolApproval->status) ?>
+                            <?php 
+                            $mpStatusClass = 'status-pending';
+                            $mpStatusText = strtoupper($motorpoolApproval->status);
+                            if ($motorpoolApproval->status === 'approved') {
+                                $mpStatusClass = 'status-approved';
+                                $mpStatusText = 'APPROVED';
+                            } elseif ($motorpoolApproval->status === 'rejected') {
+                                $mpStatusClass = 'status-rejected';
+                                $mpStatusText = 'DISAPPROVED';
+                            } elseif ($motorpoolApproval->status === 'revision') {
+                                $mpStatusClass = 'status-pending';
+                                $mpStatusText = 'REVISION REQUESTED';
+                            }
+                            ?>
+                            <div class="approval-status <?= $mpStatusClass ?>">
+                                <?= $mpStatusText ?>
                             </div>
 
                             <div class="checkbox-row">
@@ -661,7 +699,15 @@ if (!empty($assignmentHistory)) {
 
                             <div style="text-align: center; margin-top: 8px; font-size: 9pt;">
                                 <strong><?= e($motorpoolApproval->approver_name) ?></strong><br>
-                                <span style="color: #555;">Approved on <?= date('F j, Y', strtotime($motorpoolApproval->created_at)) ?></span>
+                                <span style="color: #555;">
+                                    <?php if ($motorpoolApproval->status === 'approved'): ?>
+                                        Approved on <?= date('F j, Y', strtotime($motorpoolApproval->created_at)) ?>
+                                    <?php elseif ($motorpoolApproval->status === 'rejected'): ?>
+                                        Disapproved on <?= date('F j, Y', strtotime($motorpoolApproval->created_at)) ?>
+                                    <?php else: ?>
+                                        Revision requested on <?= date('F j, Y', strtotime($motorpoolApproval->created_at)) ?>
+                                    <?php endif; ?>
+                                </span>
                             </div>
 
                         <?php else: ?>
