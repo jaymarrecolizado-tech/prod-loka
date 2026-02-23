@@ -94,6 +94,51 @@ require_once INCLUDES_PATH . '/header.php';
         </div>
     </div>
     
+    <!-- Report Types -->
+    <div class="row g-4 mb-4">
+        <div class="col-md-4">
+            <a href="<?= APP_URL ?>/?page=reports&action=vehicle-history" class="text-decoration-none">
+                <div class="card h-100 report-card">
+                    <div class="card-body text-center py-4">
+                        <div class="mb-3">
+                            <i class="bi bi-car-front text-primary" style="font-size: 3rem;"></i>
+                        </div>
+                        <h5>Vehicle History</h5>
+                        <p class="text-muted mb-0">View trip history and utilization for each vehicle</p>
+                    </div>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-4">
+            <a href="<?= APP_URL ?>/?page=reports&action=driver" class="text-decoration-none">
+                <div class="card h-100 report-card">
+                    <div class="card-body text-center py-4">
+                        <div class="mb-3">
+                            <i class="bi bi-person-badge text-success" style="font-size: 3rem;"></i>
+                        </div>
+                        <h5>Driver Report</h5>
+                        <p class="text-muted mb-0">View trip history and statistics for each driver</p>
+                    </div>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-4">
+            <a href="<?= APP_URL ?>/?page=admin-reports" class="text-decoration-none">
+                <div class="card h-100 report-card">
+                    <div class="card-body text-center py-4">
+                        <div class="mb-3">
+                            <i class="bi bi-bar-chart text-info" style="font-size: 3rem;"></i>
+                        </div>
+                        <h5>Admin Reports</h5>
+                        <p class="text-muted mb-0">Advanced reports and data exports (Admin only)</p>
+                    </div>
+                </div>
+            </a>
+        </div>
+    </div>
+    
+    <hr class="my-4">
+    
     <!-- Date Filter -->
     <div class="card table-card mb-4">
         <div class="card-body">
@@ -303,5 +348,18 @@ require_once INCLUDES_PATH . '/header.php';
         </div>
     </div>
 </div>
+
+<style>
+.report-card {
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+.report-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+.report-card h5 {
+    color: #333;
+}
+</style>
 
 <?php require_once INCLUDES_PATH . '/footer.php'; ?>
