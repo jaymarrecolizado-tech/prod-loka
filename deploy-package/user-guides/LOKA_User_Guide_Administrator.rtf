@@ -1,0 +1,417 @@
+{\rtf1\ansi\ansicpg1252\deff0\nouicompat\deflang1033{\fonttbl{\f0\fnil\fcharset0 Arial;}{\f1\fnil\fcharset0 Arial Baltic;}}
+{\colortbl ;\red0\0\blue255;\red0\0\blue0;\red0\128\0;\red255\0\0;\red255\128\0;\red128\0\128;\red0\128\128;\red128\128\0;}
+\viewkind4\uc1\pard\b\f0\fs28 LOKA Fleet Management System\par
+\b0\fs24 User Guide for Administrator\par
+\par
+\b\fs20 Department of Information and Communications Technology (DICT)\par
+\b0\fs16\par
+\par
+\pard\qc\b\fs24 TABLE OF CONTENTS\par
+\pard\fs20\par
+1. Introduction\par
+2. Getting Started\par
+3. Dashboard Overview\par
+4. System Administration\par
+5. User Management\par
+6. Department Management\par
+7. Approval and Override Functions\par
+8. Audit Logs\par
+9. System Settings\par
+10. Security Best Practices\par
+11. Troubleshooting\par
+12. Frequently Asked Questions\par
+\par
+\b\fs24 1. INTRODUCTION\par
+\b0\fs20\par
+Welcome to LOKA Fleet Management System! As an Administrator, you have the highest level of access in the system. You are responsible for system configuration, user management, security oversight, and ensuring the overall integrity of the fleet management operations.\par
+\par
+\b Your Responsibilities:\par
+\b0\par
+\bullet\ Complete system administration\par
+\bullet\ User account management (create, edit, deactivate)\par
+\bullet\ Role and permission assignments\par
+\bullet\ Department management\par
+\bullet\ System configuration and settings\par
+\bullet\ Audit log review and compliance\par
+\bullet\ Override capabilities for all approvals\par
+\bullet\ Security monitoring and incident response\par
+\bullet\ Data integrity and backup coordination\par
+\bullet\ Technical troubleshooting\par
+\par
+\b Your Access Level:\par
+\b0\par
+As Administrator (Level 5 - Highest), you can:\par
+\bullet\ Access ALL system features\par
+\bullet\ View and process ALL requests (not just assigned)\par
+\bullet\ Manage ALL user accounts and roles\par
+\bullet\ Access Audit Logs\par
+\bullet\ Configure System Settings\par
+\bullet\ Override any approval decision\par
+\bullet\ View all reports and data\par
+\bullet\ Perform administrative actions\par
+\par
+\b\fs24 2. GETTING STARTED\par
+\b0\fs20\par
+\b Logging In:\par
+\b0\par
+1. Open your web browser and go to the LOKA Fleet Management URL\par
+2. Enter your administrator email address\par
+3. Enter your password\par
+4. Click "Login"\par
+\par
+\b Important Security Note:\par
+\b0\par
+Administrator accounts have elevated privileges. Always:\par
+\bullet\ Use a strong, unique password\par
+\bullet\ Log out when stepping away\par
+\bullet\ Never share your credentials\par
+\bullet\ Report any suspicious activity immediately\par
+\par
+\b Complete Navigation Menu:\par
+\b0\par
+\b Core Functions:\par
+\b0\bullet\ Dashboard - System-wide overview\par
+\bullet\ Requests - All requests in the system\par
+\bullet\ Availability - Vehicle schedule calendar\par
+\bullet\ Approvals - All approval queues\par
+\par
+\b Fleet Management:\par
+\b0\bullet\ Vehicles - Complete fleet inventory\par
+\bullet\ Drivers - All driver records\par
+\bullet\ Maintenance - Maintenance scheduling\par
+\par
+\b Reports:\par
+\b0\bullet\ Reports - All operational reports\par
+\par
+\b Administration:\par
+\b0\bullet\ Users - User account management\par
+\bullet\ Departments - Department management\par
+\bullet\ Audit Logs - Activity tracking\par
+\bullet\ Settings - System configuration\par
+\par
+\b\fs24 3. DASHBOARD OVERVIEW\par
+\b0\fs20\par
+As Administrator, your dashboard shows system-wide statistics:\par
+\par
+\b Statistics Cards:\par
+\b0\par
+\bullet\ \b My Requests\b0  - Your personal requests\par
+\bullet\ \b Pending Approvals\b0  - ALL pending requests (not just assigned to you)\par
+\bullet\ \b Available Vehicles\b0  - Current fleet availability\par
+\bullet\ \b Available Drivers\b0  - Driver availability\par
+\par
+\b Vehicle Status Overview:\par
+\b0\par
+Complete breakdown of fleet status distribution.\par
+\par
+\b Recent Activity:\par
+\b0\par
+Shows ALL recent requests in the system (not just yours), with:\par
+\bullet\ Requester name and department\par
+\bullet\ Current status\par
+\bullet\ Last update timestamp\par
+\par
+\b\fs24 4. SYSTEM ADMINISTRATION\par
+\b0\fs20\par
+\b Admin-Specific Features:\par
+\b0\par
+As Administrator, you have access to special features:\par
+\par
+\bullet\ \b View All Requests:\b0  Unlike other roles, you see ALL requests regardless of assignment\par
+\bullet\ \b Universal Approval Access:\b0  Can approve/reject ANY request\par
+\bullet\ \b Audit Trail:\b0  Full visibility of all system activities\par
+\bullet\ \b User Impersonation Prevention:\b0  System tracks your admin actions separately\par
+\par
+\b\fs24 5. USER MANAGEMENT\par
+\b0\fs20\par
+\b Accessing User Management:\par
+\b0\par
+Go to Users from the sidebar.\par
+\par
+\b Viewing All Users:\par
+\b0\par
+See all registered users with:\par
+\bullet\ Name and email address\par
+\bullet\ Department assignment\par
+\bullet\ Role (Requester, Approver, Motorpool, Guard, Admin)\par
+\bullet\ Account status (Active/Inactive/Suspended)\par
+\bullet\ Last login timestamp\par
+\par
+\b Filtering Users:\par
+\b0\par
+\bullet\ By Role - Filter specific user types\par
+\bullet\ By Status - Active, Inactive\par
+\bullet\ By Search - Name or email search\par
+\par
+\b Adding a New User:\par
+\b0\par
+1. Click "Add User"\par
+2. Fill in required fields:\par
+    - \b Full Name\b0  (required)\par
+    - \b Email Address\b0  (required, must be unique)\par
+    - \b Password\b0  (required, follow password policy)\par
+    - \b Department\b0  (select from dropdown)\par
+    - \b Role\b0  (select appropriate access level)\par
+3. Click "Create User"\par
+\par
+\b Role Descriptions:\par
+\b0\par
+\bullet\ \b Requester (Level 1):\b0  Can submit vehicle requests only\par
+\bullet\ \b Guard (Level 1):\b0  Can record dispatch/arrival times\par
+\bullet\ \b Approver (Level 3):\b0  Can approve requests, manage vehicles/drivers\par
+\bullet\ \b Motorpool Head (Level 4):\b0  Full fleet management, user management\par
+\bullet\ \b Administrator (Level 5):\b0  Complete system access\par
+\par
+\b Editing User Accounts:\par
+\b0\par
+1. Click the edit (pencil) icon\par
+2. Modify user details:\par
+    - Update name or email\par
+    - Change department assignment\par
+    - Change user role\par
+    - Reset password (enter new password)\par
+3. Save changes\par
+\par
+\b Deactivating Users:\par
+\b0\par
+\bullet\ Click the toggle icon to activate/deactivate\par
+\bullet\ Deactivated users cannot log in\par
+\bullet\ Their historical data remains intact\par
+\bullet\ Use for employees on extended leave or separated\par
+\par
+\b Important User Management Notes:\par
+\b0\par
+\bullet\ At least one Administrator must always exist\par
+\bullet\ Cannot deactivate your own account\par
+\bullet\ Password resets should be communicated securely\par
+\bullet\ Role changes are logged in audit trail\par
+\par
+\b\fs24 6. DEPARTMENT MANAGEMENT\par
+\b0\fs20\par
+\b Accessing Department Management:\par
+\b0\par
+Go to Departments from the sidebar.\par
+\par
+\b Viewing Departments:\par
+\b0\par
+See all departments with:\par
+\bullet\ Department name\par
+\bullet\ Description\par
+\bullet\ Member count\par
+\par
+\b Adding a Department:\par
+\b0\par
+1. Click "Add Department"\par
+2. Enter department name\par
+3. Add description (optional)\par
+4. Save\par
+\par
+\b Editing Departments:\par
+\b0\par
+1. Click the edit icon\par
+2. Update department information\par
+3. Save changes\par
+\par
+\b Deleting Departments:\par
+\b0\par
+\bullet\ Departments can only be deleted if no users are assigned\par
+\bullet\ Reassign users before deleting a department\par
+\bullet\ Deleted departments are soft-deleted (recoverable)\par
+\par
+\b\fs24 7. APPROVAL AND OVERRIDE FUNCTIONS\par
+\b0\fs20\par
+\b Admin Approval Privileges:\par
+\b0\par
+As Administrator, you can:\par
+\par
+\bullet\ View ALL requests in the approval queue (not just assigned)\par
+\bullet\ Approve or reject ANY request at ANY stage\par
+\bullet\ Override previous approval decisions\par
+\bullet\ Assign vehicles and drivers to any request\par
+\bullet\ Cancel approved requests if necessary\par
+\par
+\b When to Use Override:\par
+\b0\par
+\bullet\ Emergency situations requiring immediate action\par
+\bullet\ When designated approver is unavailable\par
+\bullet\ To correct errors in the approval process\par
+\bullet\ Policy violations requiring administrative intervention\par
+\par
+\b Override Process:\par
+\b0\par
+1. Navigate to the request\par
+2. Use standard approval buttons\par
+3. Your admin action is logged with your credentials\par
+4. Add detailed notes explaining the override\par
+\par
+\b\fs24 8. AUDIT LOGS\par
+\b0\fs20\par
+\b Accessing Audit Logs:\par
+\b0\par
+Go to Audit Logs from the sidebar.\par
+\par
+\b What Audit Logs Track:\par
+\b0\par
+\bullet\ User logins (successful and failed)\par
+\bullet\ Request creation, modifications, deletions\par
+\bullet\ Approval actions (approve, reject, revision)\par
+\bullet\ User account changes\par
+\bullet\ Vehicle and driver assignments\par
+\bullet\ System configuration changes\par
+\bullet\ Administrative actions\par
+\par
+\b Log Information:\par
+\b0\par
+Each entry includes:\par
+\bullet\ Timestamp\par
+\bullet\ User who performed the action\par
+\bullet\ Action type\par
+\bullet\ Entity affected (request, user, vehicle, etc.)\par
+\bullet\ Old and new values (for modifications)\par
+\bullet\ IP address\par
+\bullet\ User agent (browser/device)\par
+\par
+\b Filtering Logs:\par
+\b0\par
+\bullet\ By Date Range\par
+\bullet\ By User\par
+\bullet\ By Action Type\par
+\bullet\ By Entity Type\par
+\par
+\b Using Audit Logs:\par
+\b0\par
+\bullet\ Investigate security incidents\par
+\bullet\ Verify compliance with policies\par
+\bullet\ Track user activity patterns\par
+\bullet\ Recover lost information\par
+\bullet\ Generate compliance reports\par
+\par
+\b\fs24 9. SYSTEM SETTINGS\par
+\b0\fs20\par
+\b Accessing Settings:\par
+\b0\par
+Go to Settings from the sidebar.\par
+\par
+\b Configurable Settings:\par
+\b0\par
+\bullet\ \b Email Configuration:\b0\par
+    - SMTP server settings\par
+    - Sender email and name\par
+    - Email queue management\par
+\par
+\bullet\ \b Application Settings:\b0\par
+    - Application name and version\par
+    - Session timeout duration\par
+    - Pagination limits\par
+\par
+\bullet\ \b Security Settings:\b0\par
+    - Password requirements\par
+    - Login attempt limits\par
+    - Session security options\par
+\par
+\b Managing Email Queue:\par
+\b0\par
+1. Go to Settings > Email Queue\par
+2. View pending emails\par
+3. Check for failed deliveries\par
+4. Resend failed emails if needed\par
+\par
+\b\fs24 10. SECURITY BEST PRACTICES\par
+\b0\fs20\par
+\b Password Management:\par
+\b0\par
+\bullet\ Use strong, unique passwords (12+ characters)\par
+\bullet\ Change passwords regularly (every 90 days recommended)\par
+\bullet\ Never share administrator credentials\par
+\bullet\ Use a password manager\par
+\par
+\b Account Security:\par
+\b0\par
+\bullet\ Log out when not actively using the system\par
+\bullet\ Review audit logs regularly\par
+\bullet\ Deactivate accounts of separated employees promptly\par
+\bullet\ Monitor failed login attempts\par
+\par
+\b User Management Security:\par
+\b0\par
+\bullet\ Assign minimum necessary role level\par
+\bullet\ Regularly review user access levels\par
+\bullet\ Audit active user list monthly\par
+\bullet\ Remove inactive accounts\par
+\par
+\b Data Security:\par
+\b0\par
+\bullet\ Coordinate with IT for database backups\par
+\bullet\ Never delete data directly from the database\par
+\bullet\ Use system features for all deletions\par
+\bullet\ Maintain audit trail integrity\par
+\par
+\b\fs24 11. TROUBLESHOOTING\par
+\b0\fs20\par
+\b User Cannot Log In:\par
+\b0\par
+1. Check if account is active (Users page)\par
+2. Verify email address is correct\par
+3. Reset user's password\par
+4. Check for recent failed login attempts in audit log\par
+\par
+\b Request Stuck in Approval:\par
+\b0\par
+1. Check if approver is available\par
+2. As admin, process the request yourself\par
+3. Or reassign to a different approver\par
+\par
+\b Email Notifications Not Sending:\par
+\b0\par
+1. Check Settings > Email Queue for failed emails\par
+2. Verify SMTP settings are correct\par
+3. Check server error logs\par
+4. Contact IT for mail server issues\par
+\par
+\b System Performance Issues:\par
+\b0\par
+1. Clear browser cache\par
+2. Try a different browser\par
+3. Check internet connection\par
+4. Contact IT support for server-side issues\par
+\par
+\b Data Discrepancies:\par
+\b0\par
+1. Review audit logs for recent changes\par
+2. Identify who made the change\par
+3. Correct data if necessary\par
+4. Document the correction in audit trail\par
+\par
+\b\fs24 12. FREQUENTLY ASKED QUESTIONS\par
+\b0\fs20\par
+\b Q: Can I create another Administrator account?\par
+\b0 A: Yes, assign the "Admin" role when creating or editing a user. Multiple administrators are allowed.\par
+\par
+\b Q: How do I recover a deleted user/vehicle/request?\par
+\b0 A: The system uses soft-delete. Contact IT to restore from database. Records are not permanently deleted.\par
+\par
+\b Q: Can I see what a specific user has done in the system?\par
+\b0 A: Yes, use Audit Logs and filter by user. All their actions are recorded.\par
+\par
+\b Q: What if I accidentally approve the wrong request?\par
+\b0 A: You can reject it immediately or edit to change vehicle/driver. Add notes explaining the correction.\par
+\par
+\b Q: How do I generate a report of all system activities?\par
+\b0 A: Use the Audit Logs with appropriate date filters, then export.\par
+\par
+\b Q: Can I impersonate another user?\par
+\b0 A: No, the system does not allow user impersonation for security reasons. All actions are tied to your admin account.\par
+\par
+\b Q: How often should I review audit logs?\par
+\b0 A: Weekly review is recommended. Daily for high-security environments.\par
+\par
+\b Q: What happens if I'm the only Administrator and my account gets locked?\par
+\b0 A: Contact IT support immediately. They can reset your account directly in the database.\par
+\par
+\par
+\b\fs20 For Technical Support:\par
+\b0 Contact your IT Department\par
+\par
+\b\fs16 Document Version: 1.0\par
+\b0 Last Updated: February 2026\par
+}
