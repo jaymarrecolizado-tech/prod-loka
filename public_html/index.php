@@ -341,12 +341,18 @@ switch ($page) {
         break;
 
     case 'my-trips':
-        require_once PAGES_PATH . '/my-trips/index.php';
+        if ($action === 'export-pdf') {
+            require_once PAGES_PATH . '/my-trips/export-pdf.php';
+        } else {
+            require_once PAGES_PATH . '/my-trips/index.php';
+        }
         break;
 
     case 'guard':
         requireRole(ROLE_GUARD);
-        if ($action === 'record_dispatch' || $action === 'record_arrival') {
+        if ($action === 'completed') {
+            require_once PAGES_PATH . '/guard/completed.php';
+        } elseif ($action === 'record_dispatch' || $action === 'record_arrival') {
             require_once PAGES_PATH . '/guard/actions.php';
         } else {
             require_once PAGES_PATH . '/guard/index.php';
@@ -357,6 +363,18 @@ switch ($page) {
         $action = get('action');
         if ($action === 'check_conflict') {
             require_once PAGES_PATH . '/api/check_conflict.php';
+        } elseif ($action === 'list' || $action === 'get' || $action === 'create' || $action === 'update' || $action === 'delete') {
+            // Determine API type from query parameter or referer
+            $apiType = get('type');
+            if (!$apiType) {
+                $apiType = get('endpoint', 'requests');
+            }
+
+            if ($apiType === 'vehicle_types') {
+                require_once BASE_PATH . '/api/vehicle_types.php';
+            } else {
+                require_once BASE_PATH . '/api/requests.php';
+            }
         } else {
             jsonResponse(false, ['error' => 'Invalid action'], 'Invalid action', 404);
         }
