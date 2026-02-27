@@ -62,7 +62,7 @@ $pdf->SetHeaderData('', 0, 'DICT - Driver Report',
     $driverInfo->name . ' | Period: ' . $startDate . ' to ' . $endDate);
 $pdf->setHeaderFont([PDF_FONT_NAME_MAIN, '', 10]);
 $pdf->setFooterFont([PDF_FONT_NAME_DATA, '', 8]);
-$pdf->SetMargins(10, 15, 10);
+$pdf->SetMargins(15, 15, 15);
 $pdf->SetAutoPageBreak(TRUE, 15);
 $pdf->AddPage();
 
@@ -139,7 +139,8 @@ $pdf->SetFont('helvetica', 'B', 10);
 $pdf->Cell(0, 7, 'TRIP HISTORY', 0, 1);
 
 $columns = ['ID', 'Date/Time', 'Vehicle', 'Destination', 'Purpose', 'Requester', 'Pass', 'Status', 'Duration', 'Dispatch', 'Arrival'];
-$colWidths = [12, 32, 35, 48, 35, 30, 12, 20, 18, 25, 25];
+// Conservative column widths (total: 235mm) to fit within A4 landscape
+$colWidths = [10, 26, 30, 40, 28, 24, 9, 17, 15, 20, 20];
 
 $pdf->SetFont('helvetica', 'B', 7);
 $pdf->SetFillColor(13, 110, 253);

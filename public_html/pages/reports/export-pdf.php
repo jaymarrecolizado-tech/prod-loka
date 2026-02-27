@@ -59,7 +59,7 @@ $pdf->SetHeaderData('', 0, 'DICT - Fleet Management Report',
     'Period: ' . $startDate . ' to ' . $endDate . ' | Generated: ' . date('Y-m-d H:i:s'));
 $pdf->setHeaderFont([PDF_FONT_NAME_MAIN, '', 10]);
 $pdf->setFooterFont([PDF_FONT_NAME_DATA, '', 8]);
-$pdf->SetMargins(8, 15, 8);
+$pdf->SetMargins(15, 15, 15);
 $pdf->SetAutoPageBreak(TRUE, 15);
 $pdf->AddPage();
 
@@ -84,7 +84,8 @@ $pdf->Cell(35, 5, 'Pending: ' . $stats['pending'], 0, 1);
 $pdf->Ln(3);
 
 $columns = ['ID', 'Created', 'Scheduled', 'Requester', 'Dept', 'Destination', 'Vehicle', 'Driver', 'Status', 'Duration', 'Dispatch', 'Arrival'];
-$colWidths = [12, 22, 32, 28, 25, 45, 28, 25, 20, 18, 25, 25];
+// Conservative column widths (total: 240mm) to fit within A4 landscape (297mm - ~40mm margins)
+$colWidths = [10, 18, 26, 23, 20, 38, 23, 20, 16, 15, 20, 20];
 
 $pdf->SetFont('helvetica', 'B', 7);
 $pdf->SetFillColor(13, 110, 253);

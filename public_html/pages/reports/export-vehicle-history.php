@@ -62,7 +62,7 @@ $pdf->SetHeaderData('', 0, 'DICT - Vehicle History Report',
     ' | Period: ' . $startDate . ' to ' . $endDate);
 $pdf->setHeaderFont([PDF_FONT_NAME_MAIN, '', 10]);
 $pdf->setFooterFont([PDF_FONT_NAME_DATA, '', 8]);
-$pdf->SetMargins(10, 15, 10);
+$pdf->SetMargins(15, 15, 15);
 $pdf->SetAutoPageBreak(TRUE, 15);
 $pdf->AddPage();
 
@@ -127,7 +127,8 @@ $pdf->SetFont('helvetica', 'B', 10);
 $pdf->Cell(0, 7, 'TRIP HISTORY', 0, 1);
 
 $columns = ['ID', 'Date/Time', 'Destination', 'Purpose', 'Requester', 'Dept', 'Driver', 'Status', 'Duration', 'Dispatch', 'Arrival'];
-$colWidths = [12, 35, 50, 40, 30, 28, 28, 22, 20, 25, 25];
+// Conservative column widths (total: 235mm) to fit within A4 landscape
+$colWidths = [10, 28, 40, 32, 23, 21, 21, 17, 15, 20, 20];
 
 $pdf->SetFont('helvetica', 'B', 7);
 $pdf->SetFillColor(13, 110, 253);
