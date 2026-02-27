@@ -231,9 +231,9 @@ if ($showCharts) {
     </div>
     
     <!-- Statistics Cards -->
-    <div class="row g-4 mb-4">
+    <div class="row g-4 mb-4 stats-row">
         <!-- My Requests -->
-        <div class="col-xl-3 col-md-6">
+        <div class="col-12 col-md-6 col-xl-3">
             <div class="card stat-card h-100">
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-start">
@@ -251,7 +251,7 @@ if ($showCharts) {
         
         <?php if (isApprover()): ?>
         <!-- Pending Approvals -->
-        <div class="col-xl-3 col-md-6">
+        <div class="col-12 col-md-6 col-xl-3">
             <div class="card stat-card h-100">
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-start">
@@ -269,7 +269,7 @@ if ($showCharts) {
         <?php endif; ?>
         
         <!-- Available Vehicles -->
-        <div class="col-xl-3 col-md-6">
+        <div class="col-12 col-md-6 col-xl-3">
             <div class="card stat-card h-100">
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-start">
@@ -305,53 +305,61 @@ if ($showCharts) {
 
     <?php if ($showCharts && $analyticsData): ?>
     <!-- Analytics Charts -->
-    <div class="row g-4 mb-4">
+    <div class="row g-4 mb-4 charts-row">
         <!-- Daily Trips Chart -->
-        <div class="col-lg-8">
+        <div class="col-12 col-lg-8">
             <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h5 class="mb-0"><i class="bi bi-graph-up me-2"></i>Trips (Last 7 Days)</h5>
                 </div>
                 <div class="card-body">
-                    <canvas id="dailyTripsChart" height="120"></canvas>
+                    <div class="chart-container">
+                        <canvas id="dailyTripsChart"></canvas>
+                    </div>
                 </div>
             </div>
         </div>
 
         <!-- Status Distribution -->
-        <div class="col-lg-4">
+        <div class="col-12 col-lg-4">
             <div class="card">
                 <div class="card-header">
                     <h5 class="mb-0"><i class="bi bi-pie-chart me-2"></i>Status Distribution</h5>
                 </div>
                 <div class="card-body">
-                    <canvas id="statusChart" height="220"></canvas>
+                    <div class="chart-container-sm">
+                        <canvas id="statusChart"></canvas>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="row g-4 mb-4">
+    <div class="row g-4 mb-4 charts-row">
         <!-- Department Trips -->
-        <div class="col-lg-6">
+        <div class="col-12 col-lg-6">
             <div class="card">
                 <div class="card-header">
                     <h5 class="mb-0"><i class="bi bi-building me-2"></i>Trips by Department</h5>
                 </div>
                 <div class="card-body">
-                    <canvas id="departmentChart" height="200"></canvas>
+                    <div class="chart-container">
+                        <canvas id="departmentChart"></canvas>
+                    </div>
                 </div>
             </div>
         </div>
 
         <!-- Peak Hours -->
-        <div class="col-lg-6">
+        <div class="col-12 col-lg-6">
             <div class="card">
                 <div class="card-header">
                     <h5 class="mb-0"><i class="bi bi-clock me-2"></i>Peak Hours (Last 30 Days)</h5>
                 </div>
                 <div class="card-body">
-                    <canvas id="peakHoursChart" height="200"></canvas>
+                    <div class="chart-container">
+                        <canvas id="peakHoursChart"></canvas>
+                    </div>
                 </div>
             </div>
         </div>
@@ -361,13 +369,59 @@ if ($showCharts) {
         // Chart data from PHP
         const analyticsData = <?= json_encode($analyticsData) ?>;
 
-        // Common chart options
+        // Detect mobile for chart adjustments
+        const isMobile = window.innerWidth < 768;
+        const isSmallMobile = window.innerWidth < 576;
+
+        // Common chart options with mobile adjustments
         const commonOptions = {
             responsive: true,
             maintainAspectRatio: false,
             plugins: {
                 legend: {
-                    position: 'bottom'
+                    position: 'bottom',
+                    labels: {
+                        font: {
+                            size: isSmallMobile ? 10 : (isMobile ? 11 : 12),
+                            family: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
+                        },
+                        boxWidth: isSmallMobile ? 12 : (isMobile ? 14 : 16),
+                        padding: isSmallMobile ? 8 : 12
+                    }
+                },
+                tooltip: {
+                    titleFont: {
+                        size: isSmallMobile ? 11 : 12
+                    },
+                    bodyFont: {
+                        size: isSmallMobile ? 10 : 11
+                    },
+                    padding: isSmallMobile ? 6 : 8
+                }
+            },
+            scales: {
+                x: {
+                    ticks: {
+                        font: {
+                            size: isSmallMobile ? 9 : (isMobile ? 10 : 11)
+                        },
+                        maxRotation: isMobile ? 45 : 0,
+                        minRotation: isMobile ? 45 : 0
+                    },
+                    grid: {
+                        display: !isSmallMobile
+                    }
+                },
+                y: {
+                    ticks: {
+                        font: {
+                            size: isSmallMobile ? 9 : (isMobile ? 10 : 11)
+                        },
+                        stepSize: 1
+                    },
+                    grid: {
+                        display: !isSmallMobile
+                    }
                 }
             }
         };
@@ -499,7 +553,7 @@ if ($showCharts) {
 
     <div class="row g-4">
         <!-- Upcoming Trips -->
-        <div class="col-lg-6">
+        <div class="col-12 col-lg-6">
             <div class="card table-card h-100">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h5><i class="bi bi-calendar-event me-2"></i>Upcoming Trips</h5>
@@ -546,7 +600,7 @@ if ($showCharts) {
         </div>
         
         <!-- Recent Activity / My Requests -->
-        <div class="col-lg-6">
+        <div class="col-12 col-lg-6">
             <div class="card table-card h-100">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h5><i class="bi bi-clock-history me-2"></i><?= isAdmin() ? 'Recent Activity' : 'My Requests' ?></h5>
