@@ -25,6 +25,7 @@ if (isAdmin()) {
     $pendingRequests = db()->fetchAll(
         "SELECT r.*, u.name as requester_name, d.name as department_name,
                 appr.name as assigned_approver_name, mph.name as assigned_motorpool_name,
+                v.plate_number as vehicle_plate, v.make as vehicle_make, v.model as vehicle_model,
                 (SELECT status FROM approvals WHERE request_id = r.id AND approval_type = 'department' ORDER BY created_at DESC LIMIT 1) as dept_status,
                 (SELECT status FROM approvals WHERE request_id = r.id AND approval_type = 'motorpool' ORDER BY created_at DESC LIMIT 1) as motorpool_status
          FROM requests r
@@ -32,6 +33,7 @@ if (isAdmin()) {
          JOIN departments d ON r.department_id = d.id
          LEFT JOIN users appr ON r.approver_id = appr.id
          LEFT JOIN users mph ON r.motorpool_head_id = mph.id
+         LEFT JOIN vehicles v ON r.vehicle_id = v.id AND v.deleted_at IS NULL
          WHERE r.status IN ('pending', 'pending_motorpool', 'revision') AND r.deleted_at IS NULL
          ORDER BY r.viewed_at IS NULL DESC, r.created_at DESC
          LIMIT ? OFFSET ?",
@@ -52,11 +54,13 @@ if (isAdmin()) {
     $pendingRequests = db()->fetchAll(
         "SELECT r.*, u.name as requester_name, d.name as department_name,
                 appr.name as assigned_approver_name,
+                v.plate_number as vehicle_plate, v.make as vehicle_make, v.model as vehicle_model,
                 (SELECT status FROM approvals WHERE request_id = r.id AND approval_type = 'department' ORDER BY created_at DESC LIMIT 1) as dept_status
          FROM requests r
          JOIN users u ON r.user_id = u.id
          JOIN departments d ON r.department_id = d.id
          LEFT JOIN users appr ON r.approver_id = appr.id
+         LEFT JOIN vehicles v ON r.vehicle_id = v.id AND v.deleted_at IS NULL
          WHERE (r.status = 'pending_motorpool' OR r.status = 'revision')
          AND r.motorpool_head_id = ?
          AND r.deleted_at IS NULL
@@ -79,11 +83,13 @@ if (isAdmin()) {
     $pendingRequests = db()->fetchAll(
         "SELECT r.*, u.name as requester_name, d.name as department_name,
                 mph.name as assigned_motorpool_name,
+                v.plate_number as vehicle_plate, v.make as vehicle_make, v.model as vehicle_model,
                 (SELECT status FROM approvals WHERE request_id = r.id AND approval_type = 'motorpool' ORDER BY created_at DESC LIMIT 1) as motorpool_status
          FROM requests r
          JOIN users u ON r.user_id = u.id
          JOIN departments d ON r.department_id = d.id
          LEFT JOIN users mph ON r.motorpool_head_id = mph.id
+         LEFT JOIN vehicles v ON r.vehicle_id = v.id AND v.deleted_at IS NULL
          WHERE (r.status = 'pending' OR r.status = 'revision')
          AND r.approver_id = ?
          AND r.deleted_at IS NULL
@@ -192,6 +198,7 @@ require_once INCLUDES_PATH . '/header.php';
                             <th>Department</th>
                             <th>Purpose</th>
                             <th>Date/Time</th>
+                            <th>Vehicle</th>
                             <th>Stage Status</th>
                             <th>Submitted</th>
                             <th>Actions</th>
@@ -212,6 +219,14 @@ require_once INCLUDES_PATH . '/header.php';
                             <td>
                                 <div><?= formatDateTime($request->start_datetime) ?></div>
                                 <small class="text-muted">to <?= formatDateTime($request->end_datetime) ?></small>
+                            </td>
+                            <td>
+                                <?php if ($request->vehicle_plate): ?>
+                                    <div class="fw-medium"><?= e($request->vehicle_plate) ?></div>
+                                    <small class="text-muted"><?= e($request->vehicle_make . ' ' . $request->vehicle_model) ?></small>
+                                <?php else: ?>
+                                    <span class="text-muted">Not assigned</span>
+                                <?php endif; ?>
                             </td>
                             <td>
                                 <?php if ($request->status === 'revision'): ?>

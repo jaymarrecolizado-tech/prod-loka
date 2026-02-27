@@ -91,7 +91,17 @@
                     <span>Drivers</span>
                 </a>
             </li>
-            
+
+            <?php if (isAdmin()): ?>
+            <!-- Vehicle Types -->
+            <li class="nav-item">
+                <a class="nav-link <?= activeMenu('vehicle_types') ?>" href="<?= APP_URL ?>/?page=vehicle_types">
+                    <i class="bi bi-car-front"></i>
+                    <span>Vehicle Types</span>
+                </a>
+            </li>
+            <?php endif; ?>
+
             <!-- Maintenance -->
             <li class="nav-item">
                 <a class="nav-link <?= activeMenu('maintenance') ?>" href="<?= APP_URL ?>/?page=maintenance">

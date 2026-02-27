@@ -128,10 +128,12 @@ require_once INCLUDES_PATH . '/header.php';
                     class="btn btn-outline-primary me-2">
                     <i class="bi bi-pencil me-1"></i>Edit
                 </a>
-                <a href="<?= APP_URL ?>/?page=requests&action=cancel&id=<?= $requestId ?>" class="btn btn-outline-danger"
-                    data-confirm="Cancel this request?">
-                    <i class="bi bi-x-lg me-1"></i>Cancel
-                </a>
+            <?php endif; ?>
+
+            <?php if ($request->user_id === userId() && !in_array($request->status, [STATUS_COMPLETED, STATUS_CANCELLED, STATUS_REJECTED])): ?>
+                <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#cancelRequestModal">
+                    <i class="bi bi-x-circle me-1"></i>Cancel Request
+                </button>
             <?php endif; ?>
 
             <?php if (isMotorpool() && $request->status === STATUS_APPROVED): ?>
@@ -215,6 +217,75 @@ require_once INCLUDES_PATH . '/header.php';
                     </div>
                 </div>
             </div>
+
+            <!-- Mileage Information -->
+            <?php if ($request->mileage_start || $request->mileage_end || $request->mileage_actual): ?>
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="bi bi-speedometer2 me-2"></i>Mileage Information</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-4">
+                            <?php if ($request->mileage_start): ?>
+                                <div class="col-md-4">
+                                    <h6 class="text-muted mb-2">Starting Mileage</h6>
+                                    <div class="fs-4 fw-bold text-primary"><?= number_format($request->mileage_start) ?> km</div>
+                                    <small class="text-muted">Recorded at dispatch</small>
+                                </div>
+                            <?php endif; ?>
+                            <?php if ($request->mileage_end): ?>
+                                <div class="col-md-4">
+                                    <h6 class="text-muted mb-2">Ending Mileage</h6>
+                                    <div class="fs-4 fw-bold text-success"><?= number_format($request->mileage_end) ?> km</div>
+                                    <small class="text-muted">Recorded at arrival</small>
+                                </div>
+                            <?php endif; ?>
+                            <?php if ($request->mileage_actual): ?>
+                                <div class="col-md-4">
+                                    <h6 class="text-muted mb-2">Actual Distance</h6>
+                                    <div class="fs-4 fw-bold text-info"><?= number_format($request->mileage_actual) ?> km</div>
+                                    <small class="text-muted">Total trip distance</small>
+                                </div>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+                </div>
+            <?php endif; ?>
+
+            <!-- Travel Documents -->
+            <?php if ($request->has_travel_order || $request->has_official_business_slip): ?>
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="bi bi-file-earmark-text me-2"></i>Travel Documents</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <?php if ($request->has_travel_order): ?>
+                                <div class="col-md-6">
+                                    <div class="d-flex align-items-center p-3 bg-success bg-opacity-10 rounded">
+                                        <i class="bi bi-check-circle-fill text-success fs-4 me-3"></i>
+                                        <div>
+                                            <div class="fw-bold">Travel Order</div>
+                                            <div class="text-muted">Number: <strong><?= e($request->travel_order_number) ?></strong></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            <?php endif; ?>
+                            <?php if ($request->has_official_business_slip): ?>
+                                <div class="col-md-6">
+                                    <div class="d-flex align-items-center p-3 bg-primary bg-opacity-10 rounded">
+                                        <i class="bi bi-check-circle-fill text-primary fs-4 me-3"></i>
+                                        <div>
+                                            <div class="fw-bold">Official Business Slip</div>
+                                            <div class="text-muted">Number: <strong><?= e($request->ob_slip_number) ?></strong></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+                </div>
+            <?php endif; ?>
 
             <!-- Vehicle & Driver Assignment -->
             <?php if ($request->vehicle_id || $request->driver_id): ?>
@@ -683,6 +754,30 @@ require_once INCLUDES_PATH . '/header.php';
             </div>
         </div>
     </div>
+<?php endif; ?>
+
+<!-- Cancel Request Modal -->
+<?php if ($request->user_id === userId() && !in_array($request->status, [STATUS_COMPLETED, STATUS_CANCELLED, STATUS_REJECTED])): ?>
+<div class="modal fade" id="cancelRequestModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Cancel Request?</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to cancel this request?</p>
+                <div class="alert alert-warning">
+                    This action cannot be undone. The vehicle and driver will be freed for others to use.
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Keep Request</button>
+                <a href="<?= APP_URL ?>/?page=requests&action=cancel&id=<?= $requestId ?>" class="btn btn-danger">Yes, Cancel</a>
+            </div>
+        </div>
+    </div>
+</div>
 <?php endif; ?>
 
 <?php require_once INCLUDES_PATH . '/footer.php'; ?>

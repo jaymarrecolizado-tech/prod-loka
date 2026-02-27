@@ -28,6 +28,7 @@ $approvalType = postSafe('approval_type', '', 20); // 'department' or 'motorpool
 $comments = postSafe('comments', '', 1000);
 $vehicleId = postInt('vehicle_id') ?: null;
 $driverId = postInt('driver_id') ?: null;
+$mileageStart = postInt('mileage_start') ?: null; // Optional mileage start
 
 // Validate action
 if (!in_array($approvalAction, ['approve', 'reject', 'revision'])) {
@@ -136,11 +137,23 @@ if ($approvalType === 'motorpool' && $approvalAction === 'approve') {
     
     // Check vehicle exists (motorpool can override status)
     $vehicle = db()->fetch(
-        "SELECT status FROM vehicles WHERE id = ? AND deleted_at IS NULL",
+        "SELECT status, mileage FROM vehicles WHERE id = ? AND deleted_at IS NULL",
         [$vehicleId]
     );
     if (!$vehicle) {
         $errorMsg = 'Selected vehicle does not exist.';
+        if (isset($_POST['ajax']) && $_POST['ajax'] == '1') {
+            header('Content-Type: application/json');
+            http_response_code(400);
+            echo json_encode(['success' => false, 'message' => $errorMsg]);
+            exit;
+        }
+        redirectWith('/?page=approvals&action=view&id=' . $requestId, 'danger', $errorMsg);
+    }
+
+    // Validate mileage_start if provided (must be >= vehicle's current mileage)
+    if ($mileageStart !== null && $mileageStart < $vehicle->mileage) {
+        $errorMsg = "Starting mileage ({$mileageStart}) cannot be less than vehicle's current mileage ({$vehicle->mileage}).";
         if (isset($_POST['ajax']) && $_POST['ajax'] == '1') {
             header('Content-Type: application/json');
             http_response_code(400);
@@ -499,6 +512,9 @@ try {
     if ($approvalType === 'motorpool' && $approvalAction === 'approve') {
         $updateData['vehicle_id'] = $vehicleId;
         $updateData['driver_id'] = $driverId;
+        if ($mileageStart !== null) {
+            $updateData['mileage_start'] = $mileageStart;
+        }
     }
 
     $updatedRows = db()->update('requests', $updateData, 'id = ?', [$requestId]);

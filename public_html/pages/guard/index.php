@@ -13,7 +13,7 @@ $today = date('Y-m-d');
 $filter = get('filter', 'today'); // today, pending_dispatch, pending_arrival, completed
 
 // Build query based on filter
-$sql = "SELECT r.*, 
+$sql = "SELECT r.*,
             u.name as requester_name, u.phone as requester_phone,
             d.name as department_name,
             v.plate_number, v.make, v.model as vehicle_model,
@@ -31,7 +31,7 @@ $sql = "SELECT r.*,
      LEFT JOIN users mph ON r.motorpool_head_id = mph.id
      LEFT JOIN users dispatch_guard ON r.dispatch_guard_id = dispatch_guard.id
      LEFT JOIN users arrival_guard ON r.arrival_guard_id = arrival_guard.id
-     WHERE r.status = 'approved' 
+     WHERE r.status = 'approved'
      AND r.deleted_at IS NULL";
 
 $params = [];
@@ -175,11 +175,21 @@ require_once INCLUDES_PATH . '/header.php';
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link <?= $filter === 'completed' ? 'active' : '' ?>" 
+                    <a class="nav-link <?= $filter === 'completed' ? 'active' : '' ?>"
                        href="<?= APP_URL ?>/?page=guard&filter=completed">
                         <i class="bi bi-check-all me-1"></i>Completed
                     </a>
                 </li>
+            </ul>
+        </div>
+        <div class="card-body">
+            <?php if ($filter === 'completed' && !empty($trips)): ?>
+                <div class="d-flex justify-content-end mb-3">
+                    <button type="button" class="btn btn-success" onclick="exportCompletedTrips()">
+                        <i class="bi bi-file-earmark-excel me-1"></i>Export to CSV
+                    </button>
+                </div>
+            <?php endif; ?>
             </ul>
         </div>
         <div class="card-body">
@@ -353,20 +363,41 @@ require_once INCLUDES_PATH . '/header.php';
                             
                             <div class="mb-3">
                                 <label for="dispatch_time<?= $trip->id ?>" class="form-label">Dispatch Time <span class="text-danger">*</span></label>
-                                <input type="datetime-local" 
-                                       class="form-control" 
-                                       id="dispatch_time<?= $trip->id ?>" 
-                                       name="dispatch_time" 
+                                <input type="datetime-local"
+                                       class="form-control"
+                                       id="dispatch_time<?= $trip->id ?>"
+                                       name="dispatch_time"
                                        value="<?= date('Y-m-d\TH:i') ?>"
                                        required>
                                 <small class="text-muted">Current time is pre-filled. Adjust if needed.</small>
                             </div>
-                            
+
+                            <!-- Travel Documents -->
+                            <div class="mb-3">
+                                <label class="form-label">Travel Documents (Optional)</label>
+                                <div class="card card-body bg-light">
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input" type="checkbox" name="has_travel_order" id="has_travel_order<?= $trip->id ?>" value="1" onchange="toggleTravelOrderInput(<?= $trip->id ?>)">
+                                        <label class="form-check-label" for="has_travel_order<?= $trip->id ?>">
+                                            <i class="bi bi-file-earmark-text me-1"></i>Travel Order Present
+                                        </label>
+                                        <input type="text" name="travel_order_number" id="travel_order_number<?= $trip->id ?>" class="form-control form-control-sm mt-2" placeholder="Travel Order No. (Required if checked)" style="display:none;">
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="has_official_business_slip" id="has_ob_slip<?= $trip->id ?>" value="1" onchange="toggleObSlipInput(<?= $trip->id ?>)">
+                                        <label class="form-check-label" for="has_ob_slip<?= $trip->id ?>">
+                                            <i class="bi bi-file-earmark me-1"></i>Official Business Slip Present
+                                        </label>
+                                        <input type="text" name="ob_slip_number" id="ob_slip_number<?= $trip->id ?>" class="form-control form-control-sm mt-2" placeholder="OB Slip No. (Required if checked)" style="display:none;">
+                                    </div>
+                                </div>
+                            </div>
+
                             <div class="mb-3">
                                 <label for="guard_notes<?= $trip->id ?>" class="form-label">Notes (Optional)</label>
-                                <textarea class="form-control" 
-                                          id="guard_notes<?= $trip->id ?>" 
-                                          name="guard_notes" 
+                                <textarea class="form-control"
+                                          id="guard_notes<?= $trip->id ?>"
+                                          name="guard_notes"
                                           rows="2"
                                           placeholder="Any observations about the vehicle condition, passengers, etc."></textarea>
                             </div>
@@ -425,20 +456,34 @@ require_once INCLUDES_PATH . '/header.php';
                             
                             <div class="mb-3">
                                 <label for="arrival_time<?= $trip->id ?>" class="form-label">Arrival Time <span class="text-danger">*</span></label>
-                                <input type="datetime-local" 
-                                       class="form-control" 
-                                       id="arrival_time<?= $trip->id ?>" 
-                                       name="arrival_time" 
+                                <input type="datetime-local"
+                                       class="form-control"
+                                       id="arrival_time<?= $trip->id ?>"
+                                       name="arrival_time"
                                        value="<?= date('Y-m-d\TH:i') ?>"
                                        required>
                                 <small class="text-muted">Current time is pre-filled. Adjust if needed.</small>
                             </div>
-                            
+
+                            <!-- Ending Mileage (Optional) -->
+                            <?php if ($trip->mileage_start): ?>
+                            <div class="mb-3">
+                                <label for="mileage_end<?= $trip->id ?>" class="form-label">Ending Mileage (Optional)</label>
+                                <input type="number" class="form-control" id="mileage_end<?= $trip->id ?>" name="mileage_end"
+                                       min="<?= $trip->mileage_start ?>" placeholder="Current odometer reading">
+                                <small class="text-muted">
+                                    <i class="bi bi-info-circle me-1"></i>
+                                    Starting mileage was <strong><?= $trip->mileage_start ?> km</strong>.
+                                    If entered, system will calculate actual trip distance.
+                                </small>
+                            </div>
+                            <?php endif; ?>
+
                             <div class="mb-3">
                                 <label for="guard_notes<?= $trip->id ?>" class="form-label">Notes (Optional)</label>
-                                <textarea class="form-control" 
-                                          id="guard_notes<?= $trip->id ?>" 
-                                          name="guard_notes" 
+                                <textarea class="form-control"
+                                          id="guard_notes<?= $trip->id ?>"
+                                          name="guard_notes"
                                           rows="2"
                                           placeholder="Any observations about the vehicle condition upon return..."></textarea>
                             </div>
@@ -456,5 +501,77 @@ require_once INCLUDES_PATH . '/header.php';
         </div>
     <?php endif; ?>
 <?php endforeach; ?>
+
+<script>
+function toggleTravelOrderInput(id) {
+    const checkbox = document.getElementById('has_travel_order' + id);
+    const input = document.getElementById('travel_order_number' + id);
+    if (checkbox && input) {
+        input.style.display = checkbox.checked ? 'block' : 'none';
+        input.required = checkbox.checked;
+    }
+}
+
+function toggleObSlipInput(id) {
+    const checkbox = document.getElementById('has_ob_slip' + id);
+    const input = document.getElementById('ob_slip_number' + id);
+    if (checkbox && input) {
+        input.style.display = checkbox.checked ? 'block' : 'none';
+        input.required = checkbox.checked;
+    }
+}
+
+function exportCompletedTrips() {
+    // Collect data from visible table rows
+    const rows = document.querySelectorAll('tbody tr');
+    const data = [['ID', 'Requester', 'Department', 'Date', 'Time', 'Vehicle', 'Driver', 'Destination', 'Dispatch Time', 'Arrival Time', 'Mileage Start', 'Mileage End', 'Mileage Actual', 'Travel Order', 'OB Slip']];
+
+    rows.forEach(row => {
+        const cells = row.querySelectorAll('td');
+        if (cells.length > 0) {
+            const id = cells[0].textContent.trim().replace('#', '');
+            const requester = cells[1].textContent.trim();
+            const dateTime = cells[2].textContent.trim();
+            const vehicle = cells[3].textContent.trim();
+            const driver = cells[4].textContent.trim();
+            const destination = cells[5].textContent.trim();
+            const status = cells[6].textContent.trim();
+            const dispatchTime = cells[7].textContent.trim();
+            const arrivalTime = cells[8] ? cells[8].textContent.trim() : '';
+
+            // Parse date and time from the datetime cells
+            const dateParts = dateTime.match(/(\d{2}\/\d{2}\/\d{4})/g);
+            const tripDate = dateParts ? dateParts[0] : '';
+
+            const startTime = dateTime.includes('→') ? dateTime.split('→')[0].trim() : '';
+            const endTime = dateTime.includes('→') ? dateTime.split('→')[1].trim() : '';
+
+            data.push([
+                id,
+                requester,
+                '',
+                tripDate,
+                startTime + ' - ' + endTime,
+                vehicle,
+                driver,
+                destination,
+                dispatchTime,
+                arrivalTime,
+                '', '', '', '', ''
+            ]);
+        }
+    });
+
+    // Convert to CSV
+    let csv = data.map(row => row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(',')).join('\n');
+
+    // Create download link
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = 'completed_trips_' + new Date().toISOString().slice(0, 10) + '.csv';
+    link.click();
+}
+</script>
 
 <?php require_once INCLUDES_PATH . '/footer.php'; ?>

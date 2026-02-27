@@ -690,6 +690,7 @@ require_once INCLUDES_PATH . '/header.php';
                                             <option value="">Select a vehicle...</option>
                                             <?php foreach ($availableVehicles as $vehicle): ?>
                                                 <option value="<?= $vehicle->id ?>"
+                                                    data-mileage="<?= $vehicle->mileage ?>"
                                                     <?= $hasRequestedVehicle && $vehicle->id == $request->vehicle_id ? 'selected' : '' ?>>
                                                     <?= e($vehicle->plate_number) ?> - <?= e($vehicle->make . ' ' . $vehicle->model) ?>
                                                     (<?= e($vehicle->type_name) ?>, <?= $vehicle->passenger_capacity ?> seats)
@@ -705,6 +706,18 @@ require_once INCLUDES_PATH . '/header.php';
                                         <?php if (empty($availableVehicles)): ?>
                                             <small class="text-danger">No vehicles available</small>
                                         <?php endif; ?>
+                                    </div>
+
+                                    <!-- Mileage Start (Optional) -->
+                                    <div class="mb-3">
+                                        <label for="mileage_start" class="form-label">Starting Mileage (Optional)</label>
+                                        <input type="number" class="form-control" id="mileage_start" name="mileage_start"
+                                               min="0" placeholder="Current odometer reading (optional)">
+                                        <small class="text-muted">
+                                            <i class="bi bi-info-circle me-1"></i>
+                                            Leave blank to skip mileage tracking. If entered, must be >= vehicle's current mileage.
+                                            <span id="currentMileageDisplay"></span>
+                                        </small>
                                     </div>
 
                                     <!-- Driver Selection -->
@@ -1008,6 +1021,34 @@ require_once INCLUDES_PATH . '/header.php';
         if (vehicleSelect) vehicleSelect.addEventListener('change', () => check('vehicle', vehicleSelect.value, vAlert));
         if (driverSelect) driverSelect.addEventListener('change', () => check('driver', driverSelect.value, dAlert));
         if (overrideBox) document.getElementById('confirmOverride').addEventListener('change', updateUI);
+
+        // Handle vehicle mileage display
+        if (vehicleSelect) {
+            const updateMileageDisplay = () => {
+                const selectedOption = vehicleSelect.options[vehicleSelect.selectedIndex];
+                const mileageDisplay = document.getElementById('currentMileageDisplay');
+                const mileageInput = document.getElementById('mileage_start');
+                if (selectedOption && selectedOption.value) {
+                    const currentMileage = selectedOption.getAttribute('data-mileage');
+                    if (mileageDisplay && currentMileage) {
+                        mileageDisplay.innerHTML = `<br>Vehicle current mileage: <strong>${currentMileage} km</strong>`;
+                    }
+                    if (mileageInput && currentMileage) {
+                        mileageInput.min = currentMileage;
+                        mileageInput.placeholder = `Minimum: ${currentMileage} km`;
+                    }
+                } else {
+                    if (mileageDisplay) mileageDisplay.innerHTML = '';
+                    if (mileageInput) {
+                        mileageInput.min = 0;
+                        mileageInput.placeholder = 'Current odometer reading (optional)';
+                    }
+                }
+            };
+            vehicleSelect.addEventListener('change', updateMileageDisplay);
+            // Initial call for pre-selected vehicle
+            updateMileageDisplay();
+        }
 
         // Initial check for requested driver (Approver view info)
         <?php if ($request->requested_driver_id): ?>

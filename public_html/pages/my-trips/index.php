@@ -22,7 +22,7 @@ $pageTitle = 'My Trips';
 $filter = get('filter', 'upcoming');
 $today = date('Y-m-d');
 
-$sql = "SELECT r.*, 
+$sql = "SELECT r.*,
             u.name as requester_name, u.phone as requester_phone,
             d.name as department_name,
             v.plate_number, v.make, v.model as vehicle_model,
@@ -200,6 +200,7 @@ require_once INCLUDES_PATH . '/header.php';
                                 <th>Date & Time</th>
                                 <th>Destination</th>
                                 <th>Vehicle</th>
+                                <th>Mileage</th>
                                 <th>Requester</th>
                                 <th>Status</th>
                                 <th>Role</th>
@@ -236,6 +237,17 @@ require_once INCLUDES_PATH . '/header.php';
                                             <small class="text-muted"><?= e($trip->make . ' ' . $trip->vehicle_model) ?></small>
                                         <?php else: ?>
                                             <span class="text-muted">Not assigned</span>
+                                        <?php endif; ?>
+                                    </td>
+                                    <td>
+                                        <?php if ($trip->mileage_actual): ?>
+                                            <div class="fw-medium text-primary"><?= number_format($trip->mileage_actual) ?> km</div>
+                                            <small class="text-muted">Actual distance</small>
+                                        <?php elseif ($trip->mileage_start): ?>
+                                            <div class="fw-medium"><?= number_format($trip->mileage_start) ?> km</div>
+                                            <small class="text-muted">Start only</small>
+                                        <?php else: ?>
+                                            <span class="text-muted">-</span>
                                         <?php endif; ?>
                                     </td>
                                     <td>
