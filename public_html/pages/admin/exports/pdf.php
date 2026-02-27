@@ -30,7 +30,8 @@ switch ($type) {
         $title = 'Vehicle Requests Report';
         $orientation = 'L'; // Landscape for wide table
         $columns = ['ID', 'Created', 'Start', 'End', 'Purpose', 'Destination', 'Passengers', 'Status', 'Requester', 'Department'];
-        $colWidths = [12, 28, 28, 28, 45, 45, 18, 20, 30, 30];
+        // Conservative column widths (total: 235mm) to fit within A4 landscape
+        $colWidths = [10, 23, 23, 23, 36, 36, 14, 16, 24, 24];
         $data = db()->fetchAll(
             "SELECT r.id, r.created_at, r.start_datetime, r.end_datetime, r.purpose, r.destination,
                     r.passenger_count, r.status, u.name as requester, d.name as department
