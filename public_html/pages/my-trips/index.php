@@ -90,10 +90,13 @@ require_once INCLUDES_PATH . '/header.php';
             <h4 class="mb-1"><i class="bi bi-truck me-2"></i>My Trips</h4>
             <p class="text-muted mb-0">View your assigned and requested trips</p>
         </div>
-        <div>
+        <div class="d-flex gap-2">
             <span class="badge bg-light text-dark border fs-6">
                 <i class="bi bi-person-badge me-1"></i><?= e($driver->name) ?>
             </span>
+            <a href="?page=my-trips&action=export-pdf&filter=<?= $filter ?>" class="btn btn-success">
+                <i class="bi bi-file-earmark-pdf me-1"></i>Export PDF
+            </a>
         </div>
     </div>
 

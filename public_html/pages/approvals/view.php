@@ -9,12 +9,20 @@ $requestId = (int) get('id');
 
 // Get request with full details
 $request = db()->fetch(
-    "SELECT r.*, 
+    "SELECT r.*,
             u.name as requester_name, u.email as requester_email, u.phone as requester_phone,
-            d.name as department_name
+            d.name as department_name,
+            v.plate_number as vehicle_plate, v.make as vehicle_make, v.model as vehicle_model,
+            v.color as vehicle_color, v.year as vehicle_year, v.mileage as vehicle_mileage,
+            vt.name as vehicle_type, vt.passenger_capacity as vehicle_capacity,
+            drv.license_number as driver_license, drv_u.name as driver_name, drv_u.phone as driver_phone
      FROM requests r
      JOIN users u ON r.user_id = u.id
      JOIN departments d ON r.department_id = d.id
+     LEFT JOIN vehicles v ON r.vehicle_id = v.id AND v.deleted_at IS NULL
+     LEFT JOIN vehicle_types vt ON v.vehicle_type_id = vt.id
+     LEFT JOIN drivers drv ON r.driver_id = drv.id AND drv.deleted_at IS NULL
+     LEFT JOIN users drv_u ON drv.user_id = drv_u.id
      WHERE r.id = ? AND r.deleted_at IS NULL",
     [$requestId]
 );
@@ -426,6 +434,89 @@ require_once INCLUDES_PATH . '/header.php';
                     </div>
                 </div>
             </div>
+
+            <!-- Vehicle Information -->
+            <?php if ($request->vehicle_plate || $approvalType === 'motorpool'): ?>
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="bi bi-car-front me-2"></i>Vehicle Information</h5>
+                    </div>
+                    <div class="card-body">
+                        <?php if ($request->vehicle_plate): ?>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="text-muted small">Plate Number</label>
+                                    <div class="fw-bold fs-5"><?= e($request->vehicle_plate) ?></div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="text-muted small">Make & Model</label>
+                                    <div class="fw-bold">
+                                        <?= e($request->vehicle_make) ?> <?= e($request->vehicle_model) ?>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="text-muted small">Vehicle Type</label>
+                                    <div><?= e($request->vehicle_type ?: 'N/A') ?></div>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="text-muted small">Year</label>
+                                    <div><?= $request->vehicle_year ?: 'N/A' ?></div>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="text-muted small">Color</label>
+                                    <div><?= e($request->vehicle_color ?: 'N/A') ?></div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="text-muted small">Passenger Capacity</label>
+                                    <div>
+                                        <i class="bi bi-people me-1"></i>
+                                        <?= $request->vehicle_capacity ?: 'N/A' ?> seats
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="text-muted small">Current Mileage</label>
+                                    <div>
+                                        <i class="bi bi-speedometer2 me-1"></i>
+                                        <?= number_format($request->vehicle_mileage ?? 0) ?> km
+                                    </div>
+                                </div>
+                            </div>
+                        <?php else: ?>
+                            <div class="text-center py-3">
+                                <i class="bi bi-car-front text-muted fs-4"></i>
+                                <p class="text-muted mb-0 mt-2">
+                                    Vehicle will be assigned by Motorpool Head during approval.
+                                </p>
+                            </div>
+                        <?php endif; ?>
+                    </div>
+                </div>
+            <?php endif; ?>
+
+            <!-- Driver Information (if assigned) -->
+            <?php if ($request->driver_name): ?>
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="bi bi-person-badge me-2"></i>Driver Information</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="text-muted small">Driver Name</label>
+                                <div class="fw-bold"><?= e($request->driver_name) ?></div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="text-muted small">Phone</label>
+                                <div><?= e($request->driver_phone) ?></div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="text-muted small">License Number</label>
+                                <div><?= e($request->driver_license) ?></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            <?php endif; ?>
 
             <!-- Approval History -->
             <?php if (!empty($approvals)): ?>
