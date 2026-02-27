@@ -121,6 +121,13 @@
                     <?php endif; ?>
                 </a>
             </li>
+            <!-- Maintenance Schedule -->
+            <li class="nav-item">
+                <a class="nav-link <?= activeMenu('maintenance', 'schedule') ?>" href="<?= APP_URL ?>/?page=maintenance&action=schedule">
+                    <i class="bi bi-calendar-check"></i>
+                    <span>Schedule</span>
+                </a>
+            </li>
             <?php endif; ?>
             
             <?php if (isApprover()): ?>

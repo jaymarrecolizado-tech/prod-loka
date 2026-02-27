@@ -61,6 +61,10 @@ require_once __DIR__ . '/classes/Cache.php';
 require_once __DIR__ . '/classes/Auth.php';
 require_once __DIR__ . '/classes/Mailer.php';
 require_once __DIR__ . '/classes/EmailQueue.php';
+require_once __DIR__ . '/classes/NotificationService.php';
+
+// Load notification templates
+require_once __DIR__ . '/config/notifications.php';
 
 // Load session after classes (session.php uses Security class)
 require_once __DIR__ . '/config/session.php';
@@ -286,6 +290,8 @@ switch ($page) {
             require_once PAGES_PATH . '/maintenance/view.php';
         } elseif ($action === 'edit') {
             require_once PAGES_PATH . '/maintenance/edit.php';
+        } elseif ($action === 'schedule') {
+            require_once PAGES_PATH . '/maintenance/schedule.php';
         } else {
             require_once PAGES_PATH . '/maintenance/index.php';
         }

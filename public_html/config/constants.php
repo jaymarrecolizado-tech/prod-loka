@@ -136,6 +136,15 @@ define('MAINTENANCE_TYPE_PREVENTIVE', 'preventive');
 define('MAINTENANCE_TYPE_CORRECTIVE', 'corrective');
 define('MAINTENANCE_TYPE_EMERGENCY', 'emergency');
 
+// Recurring Maintenance Types
+define('RECURRING_TYPE_OIL_CHANGE', 'oil_change');
+define('RECURRING_TYPE_TIRE_ROTATION', 'tire_rotation');
+define('RECURRING_TYPE_BRAKE_INSPECTION', 'brake_inspection');
+define('RECURRING_TYPE_FILTER_CHANGE', 'filter_change');
+define('RECURRING_TYPE_FLUID_CHECK', 'fluid_check');
+define('RECURRING_TYPE_ALIGNMENT', 'alignment');
+define('RECURRING_TYPE_ANNUAL_INSPECTION', 'annual_inspection');
+
 // Maintenance Priorities
 define('MAINTENANCE_PRIORITY_LOW', 'low');
 define('MAINTENANCE_PRIORITY_MEDIUM', 'medium');
@@ -153,6 +162,59 @@ define('MAINTENANCE_TYPES', [
     MAINTENANCE_TYPE_PREVENTIVE => ['label' => 'Preventive', 'icon' => 'bi-calendar-check'],
     MAINTENANCE_TYPE_CORRECTIVE => ['label' => 'Corrective', 'icon' => 'bi-wrench'],
     MAINTENANCE_TYPE_EMERGENCY => ['label' => 'Emergency', 'icon' => 'bi-exclamation-triangle']
+]);
+
+// Recurring Maintenance Types with intervals (in km or days)
+define('RECURRING_MAINTENANCE_TYPES', [
+    RECURRING_TYPE_OIL_CHANGE => [
+        'label' => 'Oil Change',
+        'icon' => 'bi-droplet',
+        'interval_km' => 5000,
+        'interval_days' => 90,
+        'description' => 'Regular oil change and filter replacement'
+    ],
+    RECURRING_TYPE_TIRE_ROTATION => [
+        'label' => 'Tire Rotation',
+        'icon' => 'bi-arrow-repeat',
+        'interval_km' => 10000,
+        'interval_days' => 180,
+        'description' => 'Rotate tires for even wear'
+    ],
+    RECURRING_TYPE_BRAKE_INSPECTION => [
+        'label' => 'Brake Inspection',
+        'icon' => 'bi-shield-check',
+        'interval_km' => 15000,
+        'interval_days' => 180,
+        'description' => 'Inspect brake pads, rotors, and fluid'
+    ],
+    RECURRING_TYPE_FILTER_CHANGE => [
+        'label' => 'Air Filter Change',
+        'icon' => 'bi-fan',
+        'interval_km' => 15000,
+        'interval_days' => 365,
+        'description' => 'Replace air filter'
+    ],
+    RECURRING_TYPE_FLUID_CHECK => [
+        'label' => 'Fluid Check',
+        'icon' => 'bi-water',
+        'interval_km' => 20000,
+        'interval_days' => 180,
+        'description' => 'Check and top off all fluids'
+    ],
+    RECURRING_TYPE_ALIGNMENT => [
+        'label' => 'Wheel Alignment',
+        'icon' => 'bi-arrows-angle-expand',
+        'interval_km' => 20000,
+        'interval_days' => 365,
+        'description' => 'Check and adjust wheel alignment'
+    ],
+    RECURRING_TYPE_ANNUAL_INSPECTION => [
+        'label' => 'Annual Inspection',
+        'icon' => 'bi-clipboard-check',
+        'interval_km' => null,
+        'interval_days' => 365,
+        'description' => 'Comprehensive annual vehicle inspection'
+    ]
 ]);
 
 define('MAINTENANCE_PRIORITIES', [

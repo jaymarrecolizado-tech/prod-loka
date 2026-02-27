@@ -166,12 +166,15 @@ require_once INCLUDES_PATH . '/header.php';
                             );
                             
                             db()->commit();
-                            
+
+                            // Send email notification for cancellation
+                            NotificationService::requestCancelled($requestId, userId());
+
                             // Send notifications AFTER successful commit
-                            $cancelledBy = ($request->user_id == userId()) 
-                                ? 'You' 
+                            $cancelledBy = ($request->user_id == userId())
+                                ? 'You'
                                 : (currentUser()->name ?? 'An administrator');
-                            
+
                             // Notify requester
                             notify(
                                 $request->user_id,

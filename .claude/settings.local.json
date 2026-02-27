@@ -52,7 +52,9 @@
       "Bash(git add public_html/vendor/)",
       "Bash(git add public_html/.gitignore)",
       "Bash(git commit -m \"$\\(cat <<''EOF''\nfeat: Add admin export reports with CSV and PDF support\n\n- Add CSV and PDF export handlers for admin reports\n- Support exports: requests, users, vehicles, departments, maintenance, audit_logs\n- Add TCPDF library for PDF generation\n- Add routing for admin-reports page and export endpoints\n- Fix .htaccess - remove LimitRequestFields directives not allowed in directory context\n- Add cache/ directory to .gitignore\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n\\)\")",
-      "Bash(git push origin feature/admin-export-reports)"
+      "Bash(git push origin feature/admin-export-reports)",
+      "Bash(cd C:\\\\wamp64\\\\www\\\\Projects\\\\loka2:*)",
+      "Bash(cd:*)"
     ]
   }
 }
