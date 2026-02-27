@@ -110,6 +110,110 @@ if (isMotorpool()) {
 }
 
 require_once INCLUDES_PATH . '/header.php';
+
+// Analytics Data for Charts (only for admin/motorpool/approver)
+$analyticsData = null;
+$showCharts = isAdmin() || isMotorpool() || isApprover();
+
+if ($showCharts) {
+    // Get data for the last 30 days
+    $thirtyDaysAgo = date('Y-m-d', strtotime('-30 days'));
+    $sevenDaysAgo = date('Y-m-d', strtotime('-7 days'));
+    $today = date('Y-m-d');
+
+    // Daily trip counts (last 7 days)
+    $dailyTrips = db()->fetchAll(
+        "SELECT DATE(start_datetime) as trip_date, COUNT(*) as count
+         FROM requests
+         WHERE DATE(start_datetime) >= ?
+         AND deleted_at IS NULL
+         GROUP BY DATE(start_datetime)
+         ORDER BY trip_date ASC",
+        [$sevenDaysAgo]
+    );
+
+    // Fill missing dates with 0
+    $dailyTripData = [];
+    for ($i = 6; $i >= 0; $i--) {
+        $date = date('Y-m-d', strtotime("-$i days"));
+        $count = 0;
+        foreach ($dailyTrips as $dt) {
+            if ($dt->trip_date === $date) {
+                $count = $dt->count;
+                break;
+            }
+        }
+        $dailyTripData[] = [
+            'date' => date('M/d', strtotime($date)),
+            'count' => $count
+        ];
+    }
+
+    // Status distribution
+    $statusDistribution = db()->fetchAll(
+        "SELECT status, COUNT(*) as count
+         FROM requests
+         WHERE created_at >= ?
+         AND deleted_at IS NULL
+         GROUP BY status",
+        [$thirtyDaysAgo]
+    );
+
+    // Department trip counts (last 30 days)
+    $departmentStats = db()->fetchAll(
+        "SELECT d.name as department, COUNT(*) as count
+         FROM requests r
+         JOIN departments d ON r.department_id = d.id
+         WHERE r.created_at >= ?
+         AND r.deleted_at IS NULL
+         GROUP BY d.name
+         ORDER BY count DESC
+         LIMIT 8",
+        [$thirtyDaysAgo]
+    );
+
+    // Vehicle utilization (last 30 days)
+    $vehicleUtilization = db()->fetchAll(
+        "SELECT v.plate_number,
+                 COUNT(r.id) as trip_count,
+                 COALESCE(SUM(r.mileage_actual), 0) as total_mileage
+         FROM vehicles v
+         LEFT JOIN requests r ON r.vehicle_id = v.id
+             AND r.status = 'completed'
+             AND r.actual_arrival_datetime >= ?
+             AND r.deleted_at IS NULL
+         WHERE v.deleted_at IS NULL
+         GROUP BY v.id
+         ORDER BY trip_count DESC
+         LIMIT 10",
+        [$thirtyDaysAgo]
+    );
+
+    // Peak hours analysis
+    $peakHours = db()->fetchAll(
+        "SELECT HOUR(start_datetime) as hour, COUNT(*) as count
+         FROM requests
+         WHERE DATE(start_datetime) >= ?
+         AND deleted_at IS NULL
+         GROUP BY HOUR(start_datetime)
+         ORDER BY hour ASC",
+        [$thirtyDaysAgo]
+    );
+
+    // Fill all hours (0-23) with 0
+    $hourlyData = array_fill(0, 24, 0);
+    foreach ($peakHours as $ph) {
+        $hourlyData[$ph->hour] = $ph->count;
+    }
+
+    $analyticsData = [
+        'dailyTrips' => $dailyTripData,
+        'statusDistribution' => $statusDistribution,
+        'departmentStats' => $departmentStats,
+        'vehicleUtilization' => $vehicleUtilization,
+        'peakHours' => $hourlyData
+    ];
+}
 ?>
 
 <div class="container-fluid py-4">
@@ -198,7 +302,201 @@ require_once INCLUDES_PATH . '/header.php';
             </div>
         </div>
     </div>
-    
+
+    <?php if ($showCharts && $analyticsData): ?>
+    <!-- Analytics Charts -->
+    <div class="row g-4 mb-4">
+        <!-- Daily Trips Chart -->
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="bi bi-graph-up me-2"></i>Trips (Last 7 Days)</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="dailyTripsChart" height="120"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Status Distribution -->
+        <div class="col-lg-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bi bi-pie-chart me-2"></i>Status Distribution</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="statusChart" height="220"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4 mb-4">
+        <!-- Department Trips -->
+        <div class="col-lg-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bi bi-building me-2"></i>Trips by Department</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="departmentChart" height="200"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Peak Hours -->
+        <div class="col-lg-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bi bi-clock me-2"></i>Peak Hours (Last 30 Days)</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="peakHoursChart" height="200"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Chart data from PHP
+        const analyticsData = <?= json_encode($analyticsData) ?>;
+
+        // Common chart options
+        const commonOptions = {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom'
+                }
+            }
+        };
+
+        // Daily Trips Chart
+        const dailyTripsCtx = document.getElementById('dailyTripsChart');
+        if (dailyTripsCtx) {
+            new Chart(dailyTripsCtx, {
+                type: 'line',
+                data: {
+                    labels: analyticsData.dailyTrips.map(d => d.date),
+                    datasets: [{
+                        label: 'Number of Trips',
+                        data: analyticsData.dailyTrips.map(d => d.count),
+                        borderColor: '#0d6efd',
+                        backgroundColor: 'rgba(13, 110, 253, 0.1)',
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    ...commonOptions,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: { stepSize: 1 }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Status Distribution Chart
+        const statusCtx = document.getElementById('statusChart');
+        if (statusCtx) {
+            const statusLabels = {
+                'approved': 'Approved',
+                'pending': 'Pending',
+                'pending_motorpool': 'Motorpool',
+                'completed': 'Completed',
+                'cancelled': 'Cancelled',
+                'rejected': 'Rejected',
+                'revision': 'Revision'
+            };
+            const statusColors = {
+                'approved': '#198754',
+                'pending': '#ffc107',
+                'pending_motorpool': '#0dcaf0',
+                'completed': '#20c997',
+                'cancelled': '#6c757d',
+                'rejected': '#dc3545',
+                'revision': '#fd7e14'
+            };
+
+            new Chart(statusCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: analyticsData.statusDistribution.map(s => statusLabels[s->status] || s->status),
+                    datasets: [{
+                        data: analyticsData.statusDistribution.map(s => s->count),
+                        backgroundColor: analyticsData.statusDistribution.map(s => statusColors[s->status] || '#6c757d')
+                    }]
+                },
+                options: commonOptions
+            });
+        }
+
+        // Department Trips Chart
+        const deptCtx = document.getElementById('departmentChart');
+        if (deptCtx) {
+            new Chart(deptCtx, {
+                type: 'bar',
+                data: {
+                    labels: analyticsData.departmentStats.map(d => d->department),
+                    datasets: [{
+                        label: 'Trips',
+                        data: analyticsData.departmentStats.map(d => d->count),
+                        backgroundColor: [
+                            '#0d6efd', '#6610f2', '#d63384', '#dc3545',
+                            '#fd7e14', '#ffc107', '#198754', '#20c997'
+                        ]
+                    }]
+                },
+                options: {
+                    ...commonOptions,
+                    indexAxis: 'y',
+                    scales: {
+                        x: {
+                            beginAtZero: true,
+                            ticks: { stepSize: 1 }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Peak Hours Chart
+        const peakCtx = document.getElementById('peakHoursChart');
+        if (peakCtx) {
+            const hourLabels = Array.from({length: 24}, (_, i) => i + ':00');
+            new Chart(peakCtx, {
+                type: 'bar',
+                data: {
+                    labels: hourLabels,
+                    datasets: [{
+                        label: 'Trips',
+                        data: analyticsData.peakHours,
+                        backgroundColor: 'rgba(13, 110, 253, 0.7)',
+                        borderColor: '#0d6efd',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    ...commonOptions,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: { stepSize: 1 }
+                        }
+                    },
+                    plugins: {
+                        legend: { display: false }
+                    }
+                }
+            });
+        }
+    </script>
+    <?php endif; ?>
+
     <div class="row g-4">
         <!-- Upcoming Trips -->
         <div class="col-lg-6">

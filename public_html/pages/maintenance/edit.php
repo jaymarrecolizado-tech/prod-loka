@@ -39,9 +39,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $resolutionNotes = postSafe('resolution_notes', '', 2000);
         $actualCost = post('actual_cost') ? (float)post('actual_cost') : null;
         $completedDate = postSafe('completed_date', '', 20);
-        
+        $mileageAtCompletion = postInt('mileage_at_completion') ?: null;
+
         if (!in_array($newStatus, [MAINTENANCE_STATUS_PENDING, MAINTENANCE_STATUS_SCHEDULED, MAINTENANCE_STATUS_IN_PROGRESS, MAINTENANCE_STATUS_COMPLETED, MAINTENANCE_STATUS_CANCELLED])) {
             $errors[] = 'Invalid status';
+        }
+
+        // Validate mileage at completion when completing maintenance
+        if ($newStatus === MAINTENANCE_STATUS_COMPLETED && $mileageAtCompletion === null) {
+            $errors[] = 'Odometer reading at completion is required when marking as completed';
         }
         
         // Validate numeric fields
@@ -74,16 +80,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 
                 if ($newStatus === MAINTENANCE_STATUS_COMPLETED) {
                     $updateData['completed_date'] = $completedDate ?: date('Y-m-d');
-                    
+                    $updateData['mileage_at_completion'] = $mileageAtCompletion;
+                    $updateData['completed_at'] = date(DATETIME_FORMAT);
+                    $updateData['completed_by'] = userId();
+
                     $vehicle = db()->fetch(
                         "SELECT mileage FROM vehicles WHERE id = ?",
                         [$maintenance->vehicle_id]
                     );
-                    
+
+                    // Update vehicle mileage to the completed mileage if it's higher
+                    $newMileage = max($vehicle->mileage, $mileageAtCompletion);
                     db()->update('vehicles', [
                         'status' => VEHICLE_AVAILABLE,
+                        'mileage' => $newMileage,
                         'last_maintenance_date' => date('Y-m-d'),
-                        'last_maintenance_odometer' => $vehicle->mileage ?? $maintenance->odometer_reading,
+                        'last_maintenance_odometer' => $mileageAtCompletion,
                         'updated_at' => date(DATETIME_FORMAT)
                     ], 'id = ?', [$maintenance->vehicle_id]);
                 }
@@ -123,7 +135,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $odometer = postInt('odometer') ?: null;
         
         if (!$vehicleId) $errors[] = 'Please select a vehicle';
-        if (!in_array($type, [MAINTENANCE_TYPE_PREVENTIVE, MAINTENANCE_TYPE_CORRECTIVE, MAINTENANCE_TYPE_EMERGENCY])) $errors[] = 'Invalid maintenance type';
+
+        // Validate maintenance type (including recurring types)
+        $allTypes = array_merge(
+            [MAINTENANCE_TYPE_PREVENTIVE, MAINTENANCE_TYPE_CORRECTIVE, MAINTENANCE_TYPE_EMERGENCY],
+            array_keys(RECURRING_MAINTENANCE_TYPES)
+        );
+        if (!in_array($type, $allTypes)) $errors[] = 'Invalid maintenance type';
+
         if (!in_array($priority, [MAINTENANCE_PRIORITY_LOW, MAINTENANCE_PRIORITY_MEDIUM, MAINTENANCE_PRIORITY_HIGH, MAINTENANCE_PRIORITY_CRITICAL])) $errors[] = 'Invalid priority';
         if (empty($title)) $errors[] = 'Title is required';
         if (empty($description)) $errors[] = 'Description is required';
@@ -205,7 +224,7 @@ require_once INCLUDES_PATH . '/header.php';
                         <div class="row g-3">
                             <div class="col-md-4">
                                 <label class="form-label">Status</label>
-                                <select class="form-select" name="status">
+                                <select class="form-select" name="status" id="statusSelect">
                                     <option value="pending" <?= $maintenance->status === 'pending' ? 'selected' : '' ?>>Pending</option>
                                     <option value="scheduled" <?= $maintenance->status === 'scheduled' ? 'selected' : '' ?>>Scheduled</option>
                                     <option value="in_progress" <?= $maintenance->status === 'in_progress' ? 'selected' : '' ?>>In Progress</option>
@@ -213,22 +232,32 @@ require_once INCLUDES_PATH . '/header.php';
                                     <option value="cancelled" <?= $maintenance->status === 'cancelled' ? 'selected' : '' ?>>Cancelled</option>
                                 </select>
                             </div>
-                            
+
                             <div class="col-md-4">
                                 <label class="form-label">Actual Cost</label>
                                 <div class="input-group">
                                     <span class="input-group-text">₱</span>
-                                    <input type="number" class="form-control" name="actual_cost" 
+                                    <input type="number" class="form-control" name="actual_cost"
                                            value="<?= e($maintenance->actual_cost ?? '') ?>" step="0.01" min="0">
                                 </div>
                             </div>
-                            
+
                             <div class="col-md-4">
                                 <label class="form-label">Completed Date</label>
-                                <input type="text" class="form-control datepicker" name="completed_date" 
+                                <input type="text" class="form-control datepicker" name="completed_date"
                                        value="<?= e($maintenance->completed_date ?? '') ?>">
                             </div>
-                            
+
+                            <div class="col-md-6" id="mileageAtCompletionWrapper" style="display: <?= $maintenance->status === MAINTENANCE_STATUS_COMPLETED ? 'block' : 'none' ?>;">
+                                <label class="form-label">Odometer at Completion <span class="text-danger">*</span></label>
+                                <div class="input-group">
+                                    <input type="number" class="form-control" name="mileage_at_completion"
+                                           value="<?= e($maintenance->mileage_at_completion ?? '') ?>" min="0">
+                                    <span class="input-group-text">km</span>
+                                </div>
+                                <small class="text-muted">Vehicle's odometer reading when maintenance was completed</small>
+                            </div>
+
                             <div class="col-12">
                                 <label class="form-label">Resolution Notes</label>
                                 <textarea class="form-control" name="resolution_notes" rows="2"
@@ -267,9 +296,18 @@ require_once INCLUDES_PATH . '/header.php';
                             <div class="col-md-3">
                                 <label class="form-label">Type</label>
                                 <select class="form-select" name="type">
-                                    <option value="corrective" <?= $maintenance->type === 'corrective' ? 'selected' : '' ?>>Corrective</option>
-                                    <option value="preventive" <?= $maintenance->type === 'preventive' ? 'selected' : '' ?>>Preventive</option>
-                                    <option value="emergency" <?= $maintenance->type === 'emergency' ? 'selected' : '' ?>>Emergency</option>
+                                    <optgroup label="Maintenance Categories">
+                                        <option value="corrective" <?= $maintenance->type === 'corrective' ? 'selected' : '' ?>>Corrective</option>
+                                        <option value="preventive" <?= $maintenance->type === 'preventive' ? 'selected' : '' ?>>Preventive</option>
+                                        <option value="emergency" <?= $maintenance->type === 'emergency' ? 'selected' : '' ?>>Emergency</option>
+                                    </optgroup>
+                                    <optgroup label="Recurring Maintenance">
+                                        <?php foreach (RECURRING_MAINTENANCE_TYPES as $typeKey => $typeInfo): ?>
+                                        <option value="<?= $typeKey ?>" <?= $maintenance->type === $typeKey ? 'selected' : '' ?>>
+                                            <?= $typeInfo['label'] ?>
+                                        </option>
+                                        <?php endforeach; ?>
+                                    </optgroup>
                                 </select>
                             </div>
                             
@@ -343,5 +381,22 @@ require_once INCLUDES_PATH . '/header.php';
         </div>
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const statusSelect = document.getElementById('statusSelect');
+    const mileageWrapper = document.getElementById('mileageAtCompletionWrapper');
+
+    function toggleMileageField() {
+        if (statusSelect.value === 'completed') {
+            mileageWrapper.style.display = 'block';
+        } else {
+            mileageWrapper.style.display = 'none';
+        }
+    }
+
+    statusSelect.addEventListener('change', toggleMileageField);
+});
+</script>
 
 <?php require_once INCLUDES_PATH . '/footer.php'; ?>

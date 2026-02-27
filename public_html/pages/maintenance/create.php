@@ -29,7 +29,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $odometer = postInt('odometer') ?: null;
     
     if (!$vehicleId) $errors[] = 'Please select a vehicle';
-    if (!in_array($type, [MAINTENANCE_TYPE_PREVENTIVE, MAINTENANCE_TYPE_CORRECTIVE, MAINTENANCE_TYPE_EMERGENCY])) $errors[] = 'Invalid maintenance type';
+
+    // Validate maintenance type (including recurring types)
+    $allTypes = array_merge(
+        [MAINTENANCE_TYPE_PREVENTIVE, MAINTENANCE_TYPE_CORRECTIVE, MAINTENANCE_TYPE_EMERGENCY],
+        array_keys(RECURRING_MAINTENANCE_TYPES)
+    );
+    if (!in_array($type, $allTypes)) $errors[] = 'Invalid maintenance type';
+
     if (!in_array($priority, [MAINTENANCE_PRIORITY_LOW, MAINTENANCE_PRIORITY_MEDIUM, MAINTENANCE_PRIORITY_HIGH, MAINTENANCE_PRIORITY_CRITICAL])) $errors[] = 'Invalid priority';
     if (empty($title)) $errors[] = 'Title is required';
     if (empty($description)) $errors[] = 'Description is required';
@@ -129,9 +136,18 @@ require_once INCLUDES_PATH . '/header.php';
                             <div class="col-md-3">
                                 <label class="form-label">Type <span class="text-danger">*</span></label>
                                 <select class="form-select" name="type" required>
-                                    <option value="corrective" <?= post('type') === 'corrective' ? 'selected' : '' ?>>Corrective</option>
-                                    <option value="preventive" <?= post('type') === 'preventive' ? 'selected' : '' ?>>Preventive</option>
-                                    <option value="emergency" <?= post('type') === 'emergency' ? 'selected' : '' ?>>Emergency</option>
+                                    <optgroup label="Maintenance Categories">
+                                        <option value="corrective" <?= post('type') === 'corrective' ? 'selected' : '' ?>>Corrective</option>
+                                        <option value="preventive" <?= post('type') === 'preventive' ? 'selected' : '' ?>>Preventive</option>
+                                        <option value="emergency" <?= post('type') === 'emergency' ? 'selected' : '' ?>>Emergency</option>
+                                    </optgroup>
+                                    <optgroup label="Recurring Maintenance">
+                                        <?php foreach (RECURRING_MAINTENANCE_TYPES as $typeKey => $typeInfo): ?>
+                                        <option value="<?= $typeKey ?>" <?= post('type') === $typeKey ? 'selected' : '' ?>>
+                                            <?= $typeInfo['label'] ?>
+                                        </option>
+                                        <?php endforeach; ?>
+                                    </optgroup>
                                 </select>
                             </div>
                             

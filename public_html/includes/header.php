@@ -20,7 +20,10 @@
     
     <!-- Tom Select CSS -->
     <link href="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/css/tom-select.bootstrap5.min.css" rel="stylesheet">
-    
+
+    <!-- Chart.js for Analytics -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+
     <!-- Custom CSS -->
     <link href="<?= ASSETS_PATH ?>/css/style.css" rel="stylesheet">
 </head>
