@@ -130,7 +130,7 @@ require_once INCLUDES_PATH . '/header.php';
                 </a>
             <?php endif; ?>
 
-            <?php if ($request->user_id === userId() && !in_array($request->status, [STATUS_COMPLETED, STATUS_CANCELLED, STATUS_REJECTED])): ?>
+            <?php if ($request->user_id === userId() && !in_array($request->status, [STATUS_COMPLETED, STATUS_CANCELLED])): ?>
                 <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#cancelRequestModal">
                     <i class="bi bi-x-circle me-1"></i>Cancel Request
                 </button>
@@ -165,6 +165,68 @@ require_once INCLUDES_PATH . '/header.php';
                     </div>
                 </div>
             </div>
+
+            <!-- Cancellation Details (shown only for admins/approvers/motorpool when cancelled) -->
+            <?php if ($request->status === STATUS_CANCELLED && (isAdmin() || isApprover() || isMotorpool())): ?>
+                <?php
+                // Get cancellation details from audit log
+                $cancellationAudit = db()->fetch(
+                    "SELECT * FROM audit_logs
+                     WHERE entity_type = 'request' AND entity_id = ? AND action = 'request_cancelled'
+                     ORDER BY created_at DESC LIMIT 1",
+                    [$requestId]
+                );
+                ?>
+                <div class="card mb-4 border-danger">
+                    <div class="card-header bg-danger text-white">
+                        <h5 class="mb-0"><i class="bi bi-x-circle me-2"></i>Cancellation Details</h5>
+                    </div>
+                    <div class="card-body">
+                        <?php if ($cancellationAudit): ?>
+                            <?php
+                            $auditData = json_decode($cancellationAudit->new_values, true);
+                            $cancelledByUserId = $auditData['cancelled_by'] ?? null;
+                            $cancellationReason = $auditData['reason'] ?? 'No reason provided';
+                            $isAdminOverride = $auditData['is_admin_override'] ?? false;
+
+                            // Get canceller details
+                            $canceller = null;
+                            if ($cancelledByUserId) {
+                                $canceller = db()->fetch("SELECT name, email FROM users WHERE id = ?", [$cancelledByUserId]);
+                            }
+                            ?>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="text-muted small">Cancelled By</label>
+                                    <div class="fw-bold">
+                                        <?php if ($canceller): ?>
+                                            <?= e($canceller->name) ?>
+                                            <?php if ($isAdminOverride): ?>
+                                            <span class="badge bg-warning text-dark ms-2">Admin Override</span>
+                                            <?php endif; ?>
+                                        <?php else: ?>
+                                            System
+                                        <?php endif; ?>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="text-muted small">Cancelled On</label>
+                                    <div class="fw-bold"><?= formatDateTime($cancellationAudit->created_at) ?></div>
+                                </div>
+                                <div class="col-12">
+                                    <label class="text-muted small">Reason for Cancellation</label>
+                                    <div class="alert alert-warning mb-0">
+                                        <i class="bi bi-chat-left-quote me-2"></i>
+                                        <?= nl2br(e($cancellationReason)) ?>
+                                    </div>
+                                </div>
+                            </div>
+                        <?php else: ?>
+                            <p class="text-muted mb-0">Cancellation details not found in audit log.</p>
+                        <?php endif; ?>
+                    </div>
+                </div>
+            <?php endif; ?>
 
             <!-- Trip Details -->
             <div class="card mb-4">
@@ -757,24 +819,83 @@ require_once INCLUDES_PATH . '/header.php';
 <?php endif; ?>
 
 <!-- Cancel Request Modal -->
-<?php if ($request->user_id === userId() && !in_array($request->status, [STATUS_COMPLETED, STATUS_CANCELLED, STATUS_REJECTED])): ?>
-<div class="modal fade" id="cancelRequestModal" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Cancel Request?</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+<?php if ($request->user_id === userId() && !in_array($request->status, [STATUS_COMPLETED, STATUS_CANCELLED])): ?>
+<div class="modal fade" id="cancelRequestModal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-danger">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i>Cancel Request?
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
-            <div class="modal-body">
-                <p>Are you sure you want to cancel this request?</p>
-                <div class="alert alert-warning">
-                    This action cannot be undone. The vehicle and driver will be freed for others to use.
+            <form method="POST" action="<?= APP_URL ?>/?page=requests&action=cancel&id=<?= $requestId ?>">
+                <?= csrfField() ?>
+                <input type="hidden" name="confirm_cancel" value="1">
+                <div class="modal-body">
+                    <div class="text-center mb-4">
+                        <i class="bi bi-x-circle-fill text-danger" style="font-size: 4rem;"></i>
+                    </div>
+
+                    <h5 class="text-center mb-3">Are you sure you want to cancel this request?</h5>
+
+                    <div class="card bg-light mb-3">
+                        <div class="card-body">
+                            <div class="row g-2">
+                                <div class="col-sm-4"><strong class="text-muted">Request #:</strong></div>
+                                <div class="col-sm-8"><?= $requestId ?></div>
+                                <div class="col-sm-4"><strong class="text-muted">Destination:</strong></div>
+                                <div class="col-sm-8"><?= e($request->destination) ?></div>
+                                <div class="col-sm-4"><strong class="text-muted">Date/Time:</strong></div>
+                                <div class="col-sm-8"><?= formatDateTime($request->start_datetime) ?></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="alert alert-danger d-flex align-items-start mb-3" role="alert">
+                        <i class="bi bi-exclamation-triangle-fill flex-shrink-0 me-2 mt-1"></i>
+                        <div>
+                            <strong>This action cannot be undone!</strong>
+                            <ul class="mb-0 mt-2">
+                                <li>The request will be marked as cancelled</li>
+                                <li>Assigned vehicle and driver will be released</li>
+                                <li>All approvers and passengers will be notified</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <?php if ($request->status === STATUS_APPROVED): ?>
+                    <div class="alert alert-warning mb-3">
+                        <i class="bi bi-info-circle-fill me-2"></i>
+                        <strong>Attention:</strong> This request has already been approved.
+                        <?php if ($request->vehicle_plate): ?>
+                        <div class="mt-2"><strong>Vehicle:</strong> <?= e($request->vehicle_number) ?> - <?= e($request->vehicle_make) ?> <?= e($request->vehicle_model) ?></div>
+                        <?php endif; ?>
+                        <?php if ($request->driver_name): ?>
+                        <div><strong>Driver:</strong> <?= e($request->driver_name) ?></div>
+                        <?php endif; ?>
+                    </div>
+                    <?php endif; ?>
+
+                    <div class="mb-0">
+                        <label for="cancel_reason" class="form-label fw-bold">
+                            <i class="bi bi-chat-left-text me-1"></i>Reason for cancellation
+                            <span class="text-danger">*</span>
+                        </label>
+                        <textarea class="form-control" id="cancel_reason" name="reason" rows="2" required
+                            placeholder="Please provide a reason for cancelling this request..."></textarea>
+                        <small class="text-muted">This field is required</small>
+                    </div>
                 </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Keep Request</button>
-                <a href="<?= APP_URL ?>/?page=requests&action=cancel&id=<?= $requestId ?>" class="btn btn-danger">Yes, Cancel</a>
-            </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary btn-lg" data-bs-dismiss="modal">
+                        <i class="bi bi-x-lg me-1"></i>No, Keep Request
+                    </button>
+                    <button type="submit" class="btn btn-danger btn-lg">
+                        <i class="bi bi-check-lg me-1"></i>Yes, Cancel Request
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
 </div>

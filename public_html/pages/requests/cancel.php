@@ -1,10 +1,10 @@
 <?php
 /**
  * LOKA - Cancel Request Page (Hardened Version)
- * 
+ *
  * Allows requester to cancel their own request
  * Or admin/approver to cancel any request
- * 
+ *
  * Handles:
  * - Status transition to 'cancelled' with state machine validation
  * - Vehicle/driver release when applicable
@@ -22,7 +22,7 @@ if (!$requestId) {
 
 // Get request with full details - FOR UPDATE locking
 $request = db()->fetch(
-    "SELECT r.*, 
+    "SELECT r.*,
             u.name as requester_name, u.email as requester_email,
             v.plate_number as vehicle_plate, v.make as vehicle_make, v.model as vehicle_model,
             d.id as driver_db_id, du.name as driver_name
@@ -57,7 +57,7 @@ if (!$canCancel) {
 }
 
 // Check if request is in a cancellable state
-$cancellableStatuses = [STATUS_DRAFT, STATUS_PENDING, STATUS_PENDING_MOTORPOOL, STATUS_REVISION, STATUS_APPROVED];
+$cancellableStatuses = [STATUS_DRAFT, STATUS_PENDING, STATUS_PENDING_MOTORPOOL, STATUS_REVISION, STATUS_APPROVED, STATUS_REJECTED];
 if (!in_array($request->status, $cancellableStatuses)) {
     $statusLabels = [
         STATUS_DRAFT => 'Draft',
@@ -66,9 +66,208 @@ if (!in_array($request->status, $cancellableStatuses)) {
         STATUS_REVISION => 'Under Revision',
         STATUS_APPROVED => 'Approved',
         STATUS_REJECTED => 'Rejected',
-        STATUS_CANCELLED => 'Cancelled'
+        STATUS_CANCELLED => 'Cancelled',
+        STATUS_COMPLETED => 'Completed'
     ];
     redirectWith('/?page=requests&action=view&id=' . $requestId, 'danger', "Cannot cancel request in '{$statusLabels[$request->status]}' status.");
+}
+
+// Handle POST submission BEFORE any HTML output
+$redirectUrl = '';
+$flashMessage = '';
+$flashType = '';
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && post('confirm_cancel') === '1') {
+    // Validate reason is required
+    $reason = trim(post('reason') ?: '');
+    if (empty($reason)) {
+        $redirectUrl = '/?page=requests&action=view&id=' . $requestId;
+        $flashMessage = 'Please provide a reason for cancellation.';
+        $flashType = 'danger';
+        redirectWith($redirectUrl, $flashType, $flashMessage);
+        exit;
+    }
+
+    try {
+        db()->beginTransaction();
+
+        $oldStatus = $request->status;
+        $now = date(DATETIME_FORMAT);
+
+        // STATE MACHINE VALIDATION
+        $validTransitions = [
+            STATUS_DRAFT => [STATUS_CANCELLED],
+            STATUS_PENDING => [STATUS_CANCELLED],
+            STATUS_PENDING_MOTORPOOL => [STATUS_CANCELLED],
+            STATUS_REVISION => [STATUS_CANCELLED],
+            STATUS_APPROVED => [STATUS_CANCELLED],
+            STATUS_REJECTED => [STATUS_CANCELLED]
+        ];
+
+        if (!in_array(STATUS_CANCELLED, $validTransitions[$oldStatus] ?? [])) {
+            throw new Exception("Cannot cancel request in '{$oldStatus}' status.");
+        }
+
+        // Release vehicle if assigned
+        if ($request->vehicle_id) {
+            db()->update('vehicles', [
+                'status' => 'available',
+                'updated_at' => $now
+            ], 'id = ?', [$request->vehicle_id]);
+        }
+
+        // Release driver if assigned
+        if ($request->driver_id) {
+            db()->update('drivers', [
+                'status' => 'available',
+                'updated_at' => $now
+            ], 'id = ?', [$request->driver_id]);
+        }
+
+        // Update request status
+        db()->update('requests', [
+            'status' => STATUS_CANCELLED,
+            'updated_at' => $now
+        ], 'id = ?', [$requestId]);
+
+        // Try to update workflow (may not support 'cancelled' status in ENUM)
+        try {
+            $workflow = db()->fetch(
+                "SELECT * FROM approval_workflow WHERE request_id = ?",
+                [$requestId]
+            );
+
+            if ($workflow) {
+                db()->update('approval_workflow', [
+                    'status' => 'rejected', // Use 'rejected' as 'cancelled' is not in ENUM
+                    'action_at' => $now,
+                    'updated_at' => $now,
+                    'comments' => 'Request cancelled: ' . $reason
+                ], 'request_id = ?', [$requestId]);
+            }
+        } catch (Exception $e) {
+            // Workflow update failed, but cancellation continues
+            error_log("Workflow update failed (non-critical): " . $e->getMessage());
+        }
+
+        // Audit log with admin override tracking
+        $isAdminOverride = ($request->user_id != userId() && $isAdminOrApprover);
+        $auditData = [
+            'status' => STATUS_CANCELLED,
+            'cancelled_by' => userId(),
+            'is_admin_override' => $isAdminOverride,
+            'reason' => $reason
+        ];
+
+        if ($isAdminOverride) {
+            $auditData['original_requester_id'] = $request->user_id;
+        }
+
+        auditLog(
+            'request_cancelled',
+            'request',
+            $requestId,
+            ['status' => $oldStatus],
+            $auditData
+        );
+
+        db()->commit();
+
+        // Send notifications AFTER successful commit (non-blocking)
+        $cancelledBy = ($request->user_id == userId())
+            ? 'You'
+            : (currentUser()->name ?? 'An administrator');
+
+        // Try to send email notification (don't fail if it errors)
+        try {
+            @NotificationService::requestCancelled($requestId, userId());
+        } catch (Exception $e) {
+            error_log("Email notification failed: " . $e->getMessage());
+        }
+
+        // Try to send in-app notifications (don't fail if they error)
+        try {
+            // Notify requester
+            @notify(
+                $request->user_id,
+                'request_cancelled',
+                'Request Cancelled',
+                "Your request for {$request->destination} on " . formatDate($request->start_datetime) . " has been cancelled.\n\nCancelled by: {$cancelledBy}\nReason: " . $reason,
+                '/?page=requests&action=view&id=' . $requestId
+            );
+
+            // Notify passengers using batch function
+            @notifyPassengersBatch(
+                $requestId,
+                'request_cancelled',
+                'Trip Cancelled',
+                "The trip to {$request->destination} on " . formatDate($request->start_datetime) . " has been cancelled.\n\nCancelled by: {$cancelledBy}\nReason: " . $reason,
+                '/?page=requests&action=view&id=' . $requestId
+            );
+
+            // Notify assigned driver
+            if ($request->driver_id) {
+                @notifyDriver(
+                    $request->driver_id,
+                    'trip_cancelled_driver',
+                    'Trip Cancelled',
+                    "A trip you were assigned to drive to {$request->destination} on " . formatDate($request->start_datetime) . " has been cancelled.\n\nCancelled by: {$cancelledBy}\nReason: " . $reason,
+                    '/?page=requests&action=view&id=' . $requestId
+                );
+            }
+
+            // Notify requested driver (if different)
+            if ($request->requested_driver_id && $request->requested_driver_id != $request->driver_id) {
+                @notifyDriver(
+                    $request->requested_driver_id,
+                    'trip_cancelled_driver',
+                    'Trip Cancelled',
+                    "A trip you were requested to drive to {$request->destination} on " . formatDate($request->start_datetime) . " has been cancelled.\n\nCancelled by: {$cancelledBy}\nReason: " . $reason,
+                    '/?page=requests&action=view&id=' . $requestId
+                );
+            }
+
+            // Notify approver if request was pending
+            if (in_array($oldStatus, [STATUS_PENDING, STATUS_PENDING_MOTORPOOL])) {
+                if ($oldStatus === STATUS_PENDING && $request->approver_id) {
+                    @notify(
+                        $request->approver_id,
+                        'request_cancelled',
+                        'Request Cancelled',
+                        "Request #{$requestId} for {$request->destination} has been cancelled by the requester.",
+                        '/?page=approvals&action=view&id=' . $requestId
+                    );
+                }
+                if ($oldStatus === STATUS_PENDING_MOTORPOOL && $request->motorpool_head_id) {
+                    @notify(
+                        $request->motorpool_head_id,
+                        'request_cancelled',
+                        'Request Cancelled',
+                        "Request #{$requestId} for {$request->destination} has been cancelled.",
+                        '/?page=approvals&action=view&id=' . $requestId
+                    );
+                }
+            }
+        } catch (Exception $e) {
+            error_log("In-app notifications failed: " . $e->getMessage());
+        }
+
+        // Set redirect variables
+        $redirectUrl = '/?page=requests&action=view&id=' . $requestId;
+        $flashMessage = 'Request has been cancelled successfully.';
+        $flashType = 'success';
+
+    } catch (Exception $e) {
+        db()->rollback();
+        error_log("Request cancellation error: " . $e->getMessage());
+        $redirectUrl = '/?page=requests&action=view&id=' . $requestId;
+        $flashMessage = 'Failed to cancel request: ' . $e->getMessage();
+        $flashType = 'danger';
+    }
+
+    // Redirect after POST
+    redirectWith($redirectUrl, $flashType, $flashMessage);
+    exit;
 }
 
 $pageTitle = 'Cancel Request #' . $requestId;
@@ -83,216 +282,92 @@ require_once INCLUDES_PATH . '/header.php';
                     <h5 class="mb-0"><i class="bi bi-x-circle me-2"></i>Cancel Request #<?= $requestId ?></h5>
                 </div>
                 <div class="card-body">
-                    <?php if ($_SERVER['REQUEST_METHOD'] === 'POST' && post('confirm_cancel') === '1'): ?>
-                        <?php
-                        try {
-                            db()->beginTransaction();
-                            
-                            $oldStatus = $request->status;
-                            $now = date(DATETIME_FORMAT);
-                            
-                            // STATE MACHINE VALIDATION
-                            $validTransitions = [
-                                STATUS_DRAFT => [STATUS_CANCELLED],
-                                STATUS_PENDING => [STATUS_CANCELLED],
-                                STATUS_PENDING_MOTORPOOL => [STATUS_CANCELLED],
-                                STATUS_REVISION => [STATUS_CANCELLED],
-                                STATUS_APPROVED => [STATUS_CANCELLED]
-                            ];
-                            
-                            if (!in_array(STATUS_CANCELLED, $validTransitions[$oldStatus] ?? [])) {
-                                throw new Exception("Cannot cancel request in '{$oldStatus}' status.");
-                            }
-                            
-                            // Release vehicle if assigned
-                            if ($request->vehicle_id) {
-                                db()->update('vehicles', [
-                                    'status' => 'available',
-                                    'updated_at' => $now
-                                ], 'id = ?', [$request->vehicle_id]);
-                            }
-                            
-                            // Release driver if assigned
-                            if ($request->driver_id) {
-                                db()->update('drivers', [
-                                    'status' => 'available',
-                                    'updated_at' => $now
-                                ], 'id = ?', [$request->driver_id]);
-                            }
-                            
-                            // Update request status
-                            db()->update('requests', [
-                                'status' => STATUS_CANCELLED,
-                                'updated_at' => $now,
-                                'cancelled_at' => $now,
-                                'cancelled_by' => userId(),
-                                'cancellation_reason' => trim(post('reason') ?: 'Cancelled by user')
-                            ], 'id = ?', [$requestId]);
-                            
-                            // Update workflow
-                            $workflow = db()->fetch(
-                                "SELECT * FROM approval_workflow WHERE request_id = ?",
-                                [$requestId]
-                            );
-                            
-                            if ($workflow) {
-                                db()->update('approval_workflow', [
-                                    'status' => 'cancelled',
-                                    'action_at' => $now,
-                                    'updated_at' => $now,
-                                    'comments' => 'Request cancelled: ' . trim(post('reason') ?: 'No reason provided')
-                                ], 'request_id = ?', [$requestId]);
-                            }
-                            
-                            // Audit log with admin override tracking
-                            $isAdminOverride = ($request->user_id != userId() && $isAdminOrApprover);
-                            $auditData = [
-                                'status' => STATUS_CANCELLED,
-                                'cancelled_by' => userId(),
-                                'is_admin_override' => $isAdminOverride,
-                                'reason' => trim(post('reason') ?: 'No reason provided')
-                            ];
-                            
-                            if ($isAdminOverride) {
-                                $auditData['original_requester_id'] = $request->user_id;
-                            }
-                            
-                            auditLog(
-                                'request_cancelled',
-                                'request',
-                                $requestId,
-                                ['status' => $oldStatus],
-                                $auditData
-                            );
-                            
-                            db()->commit();
+                    <div class="text-center mb-4">
+                        <i class="bi bi-x-circle-fill text-danger" style="font-size: 5rem;"></i>
+                    </div>
 
-                            // Send email notification for cancellation
-                            NotificationService::requestCancelled($requestId, userId());
+                    <h4 class="text-center mb-4">Are you sure you want to cancel this request?</h4>
 
-                            // Send notifications AFTER successful commit
-                            $cancelledBy = ($request->user_id == userId())
-                                ? 'You'
-                                : (currentUser()->name ?? 'An administrator');
+                    <div class="card bg-light mb-4">
+                        <div class="card-body">
+                            <h6 class="text-muted mb-3">Request Details</h6>
+                            <div class="row g-3">
+                                <div class="col-sm-4">
+                                    <label class="small text-muted">Request #</label>
+                                    <div class="fw-bold"><?= $requestId ?></div>
+                                </div>
+                                <div class="col-sm-8">
+                                    <label class="small text-muted">Purpose</label>
+                                    <div class="fw-bold"><?= e($request->purpose) ?></div>
+                                </div>
+                                <div class="col-sm-4">
+                                    <label class="small text-muted">Destination</label>
+                                    <div><?= e($request->destination) ?></div>
+                                </div>
+                                <div class="col-sm-8">
+                                    <label class="small text-muted">Date & Time</label>
+                                    <div><?= formatDateTime($request->start_datetime) ?></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
 
-                            // Notify requester
-                            notify(
-                                $request->user_id,
-                                'request_cancelled',
-                                'Request Cancelled',
-                                "Your request for {$request->destination} on " . formatDate($request->start_datetime) . " has been cancelled.\n\nCancelled by: {$cancelledBy}\nReason: " . trim(post('reason') ?: 'No reason provided'),
-                                '/?page=requests&action=view&id=' . $requestId
-                            );
-                            
-                            // Notify passengers using batch function
-                            notifyPassengersBatch(
-                                $requestId,
-                                'request_cancelled',
-                                'Trip Cancelled',
-                                "The trip to {$request->destination} on " . formatDate($request->start_datetime) . " has been cancelled.\n\nCancelled by: {$cancelledBy}\nReason: " . trim(post('reason') ?: 'No reason provided'),
-                                '/?page=requests&action=view&id=' . $requestId
-                            );
-                            
-                            // Notify assigned driver
-                            if ($request->driver_id) {
-                                notifyDriver(
-                                    $request->driver_id,
-                                    'trip_cancelled_driver',
-                                    'Trip Cancelled',
-                                    "A trip you were assigned to drive to {$request->destination} on " . formatDate($request->start_datetime) . " has been cancelled.\n\nCancelled by: {$cancelledBy}\nReason: " . trim(post('reason') ?: 'No reason provided'),
-                                    '/?page=requests&action=view&id=' . $requestId
-                                );
-                            }
-                            
-                            // Notify requested driver (if different)
-                            if ($request->requested_driver_id && $request->requested_driver_id != $request->driver_id) {
-                                notifyDriver(
-                                    $request->requested_driver_id,
-                                    'trip_cancelled_driver',
-                                    'Trip Cancelled',
-                                    "A trip you were requested to drive to {$request->destination} on " . formatDate($request->start_datetime) . " has been cancelled.\n\nCancelled by: {$cancelledBy}\nReason: " . trim(post('reason') ?: 'No reason provided'),
-                                    '/?page=requests&action=view&id=' . $requestId
-                                );
-                            }
-                            
-                            // Notify approver if request was pending
-                            if (in_array($oldStatus, [STATUS_PENDING, STATUS_PENDING_MOTORPOOL])) {
-                                if ($oldStatus === STATUS_PENDING && $request->approver_id) {
-                                    notify(
-                                        $request->approver_id,
-                                        'request_cancelled',
-                                        'Request Cancelled',
-                                        "Request #{$requestId} for {$request->destination} has been cancelled by the requester.",
-                                        '/?page=approvals&action=view&id=' . $requestId
-                                    );
-                                }
-                                if ($oldStatus === STATUS_PENDING_MOTORPOOL && $request->motorpool_head_id) {
-                                    notify(
-                                        $request->motorpool_head_id,
-                                        'request_cancelled',
-                                        'Request Cancelled',
-                                        "Request #{$requestId} for {$request->destination} has been cancelled.",
-                                        '/?page=approvals&action=view&id=' . $requestId
-                                    );
-                                }
-                            }
-                            
-                            redirectWith('/?page=requests&action=view&id=' . $requestId, 'success', 'Request has been cancelled successfully.');
-                            
-                        } catch (Exception $e) {
-                            db()->rollback();
-                            error_log("Request cancellation error: " . $e->getMessage());
-                            redirectWith('/?page=requests&action=view&id=' . $requestId, 'danger', 'Failed to cancel request. Please try again.');
-                        }
-                        ?>
-                    <?php else: ?>
-                        <div class="alert alert-warning">
-                            <i class="bi bi-exclamation-triangle me-2"></i>
-                            Are you sure you want to cancel this request?
+                    <div class="alert alert-danger d-flex align-items-start mb-4" role="alert">
+                        <i class="bi bi-exclamation-triangle-fill flex-shrink-0 me-3 fs-4"></i>
+                        <div>
+                            <strong class="d-block mb-2">This action cannot be undone!</strong>
+                            <ul class="mb-0">
+                                <li>The request will be marked as cancelled</li>
+                                <li>Assigned vehicle and driver will be released</li>
+                                <li>All approvers and passengers will be notified</li>
+                            </ul>
                         </div>
-                        
-                        <div class="mb-3">
-                            <label class="text-muted small">Request</label>
-                            <div class="fw-bold">#<?= $requestId ?> - <?= e($request->purpose) ?></div>
-                            <small class="text-muted"><?= e($request->destination) ?> | <?= formatDateTime($request->start_datetime) ?></small>
-                        </div>
-                        
-                        <?php if ($request->status === STATUS_APPROVED): ?>
-                        <div class="alert alert-info">
-                            <i class="bi bi-info-circle me-2"></i>
-                            <strong>Note:</strong> This request has already been approved. 
-                            The assigned vehicle and driver will be released.
-                            <?php if ($request->vehicle_plate): ?>
-                            <br><br>
-                            <strong>Vehicle:</strong> <?= e($request->vehicle_plate) ?> - <?= e($request->vehicle_make) ?> <?= e($request->vehicle_model) ?>
-                            <?php endif; ?>
-                            <?php if ($request->driver_name): ?>
-                            <br><strong>Driver:</strong> <?= e($request->driver_name) ?>
-                            <?php endif; ?>
-                        </div>
+                    </div>
+
+                    <?php if ($request->status === STATUS_APPROVED): ?>
+                    <div class="alert alert-warning mb-4">
+                        <i class="bi bi-info-circle-fill me-2"></i>
+                        <strong>Attention:</strong> This request has already been approved.
+                        <?php if ($request->vehicle_plate): ?>
+                        <div class="mt-2"><strong>Vehicle:</strong> <?= e($request->vehicle_plate) ?> - <?= e($request->vehicle_make) ?> <?= e($request->vehicle_model) ?></div>
                         <?php endif; ?>
-                        
-                        <form method="POST">
-                            <?= csrfField() ?>
-                            <input type="hidden" name="confirm_cancel" value="1">
-                            
-                            <div class="mb-3">
-                                <label for="reason" class="form-label">Reason for cancellation</label>
-                                <textarea class="form-control" id="reason" name="reason" rows="3" 
-                                    placeholder="Please provide a reason for cancellation (optional)"></textarea>
-                            </div>
-                            
-                            <div class="d-flex gap-2">
-                                <button type="submit" class="btn btn-danger">
-                                    <i class="bi bi-x-circle me-1"></i>Yes, Cancel Request
-                                </button>
-                                <a href="<?= APP_URL ?>/?page=requests&action=view&id=<?= $requestId ?>" 
-                                   class="btn btn-outline-secondary">
-                                    No, Go Back
-                                </a>
-                            </div>
-                        </form>
+                        <?php if ($request->driver_name): ?>
+                        <div><strong>Driver:</strong> <?= e($request->driver_name) ?></div>
+                        <?php endif; ?>
+                    </div>
                     <?php endif; ?>
+
+                    <?php if ($request->status === STATUS_REJECTED): ?>
+                    <div class="alert alert-info mb-4">
+                        <i class="bi bi-info-circle-fill me-2"></i>
+                        <strong>Note:</strong> This request was rejected. Cancelling will permanently close this request.
+                    </div>
+                    <?php endif; ?>
+
+                    <form method="POST">
+                        <?= csrfField() ?>
+                        <input type="hidden" name="confirm_cancel" value="1">
+
+                        <div class="mb-4">
+                            <label for="reason" class="form-label fw-bold">
+                                <i class="bi bi-chat-left-text me-1"></i>Reason for cancellation
+                                <span class="text-danger">*</span>
+                            </label>
+                            <textarea class="form-control" id="reason" name="reason" rows="3" required
+                                placeholder="Please provide a reason for cancelling this request..."></textarea>
+                            <small class="text-muted">This field is required</small>
+                        </div>
+
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <a href="<?= APP_URL ?>/?page=requests&action=view&id=<?= $requestId ?>"
+                               class="btn btn-outline-secondary btn-lg">
+                                <i class="bi bi-x-lg me-1"></i>No, Go Back
+                            </a>
+                            <button type="submit" class="btn btn-danger btn-lg">
+                                <i class="bi bi-check-lg me-1"></i>Yes, Cancel Request
+                            </button>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>

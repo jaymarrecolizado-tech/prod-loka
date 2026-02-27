@@ -5,7 +5,7 @@
  * RESTful API endpoints for vehicle type CRUD operations
  */
 
-requireRole(ROLE_ADMIN);
+requireRole(ROLE_APPROVER);
 
 header('Content-Type: application/json');
 

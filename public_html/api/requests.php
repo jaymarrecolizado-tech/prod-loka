@@ -44,8 +44,8 @@ try {
                 exit;
             }
 
-            // Allow cancel at any stage except completed, cancelled, or rejected
-            if (in_array($request->status, [STATUS_COMPLETED, STATUS_CANCELLED, STATUS_REJECTED])) {
+            // Allow cancel at any stage except completed or already cancelled
+            if (in_array($request->status, [STATUS_COMPLETED, STATUS_CANCELLED])) {
                 echo json_encode([
                     'success' => false,
                     'message' => 'Cannot cancel ' . str_replace('_', ' ', $request->status) . ' requests'
