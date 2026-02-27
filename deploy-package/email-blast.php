@@ -37,7 +37,11 @@ $debugLog = '';
 // FUNCTION DEFINITIONS - Must be defined before POST handlers that use them
 // ========================================================================
 
-function buildEmailTemplate(string $userName, string $userEmail, string $defaultPassword, string $fromName, string $loginUrl): string
+$maintenanceStart = 'February 27, 2026 at 9:00 AM';
+$maintenanceEnd = 'March 1, 2026 at 11:59 PM';
+$additionalMessage = 'We apologize for any inconvenience this may cause. Thank you for your understanding and patience.';
+
+function buildEmailTemplate(string $userName, string $userEmail, string $fromName, string $loginUrl, string $maintenanceStart, string $maintenanceEnd, string $additionalMessage): string
 {
     return '<!DOCTYPE html>
 <html>
@@ -51,45 +55,50 @@ function buildEmailTemplate(string $userName, string $userEmail, string $default
             <td align="center">
                 <table width="650" cellpadding="0" cellspacing="0" style="background-color:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 4px 15px rgba(0,0,0,0.1);">
                     <tr>
-                        <td style="background:linear-gradient(135deg, #0d6efd 0%, #0a58ca 100%);padding:40px 30px;text-align:center;">
-                            <h1 style="color:#ffffff;margin:0;font-size:28px;font-weight:bold;">LOKA Fleet Management</h1>
-                            <p style="color:#ffffff;margin:10px 0 0 0;font-size:14px;opacity:0.9;">Department of Information and Communications Technology</p>
+                        <td style="background:linear-gradient(135deg, #dc3545 0%, #bb2d3b 100%);padding:40px 30px;text-align:center;">
+                            <div style="margin-bottom:10px;">
+                                <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="12" cy="12" r="10"></circle>
+                                    <line x1="4.93" y1="4.93" x2="19.07" y2="19.07"></line>
+                                </svg>
+                            </div>
+                            <h1 style="color:#ffffff;margin:0;font-size:28px;font-weight:bold;">System Maintenance Notice</h1>
+                            <p style="color:#ffffff;margin:10px 0 0 0;font-size:14px;opacity:0.9;">LOKA Fleet Management</p>
                         </td>
                     </tr>
                     <tr>
                         <td style="padding:40px 40px 20px 40px;">
-                            <h2 style="color:#1a1a1a;margin:0 0 15px 0;font-size:22px;font-weight:600;">Welcome to LOKA Fleet Management System!</h2>
+                            <h2 style="color:#1a1a1a;margin:0 0 15px 0;font-size:22px;font-weight:600;">Scheduled System Maintenance</h2>
                             <p style="color:#555555;font-size:15px;line-height:1.7;margin:0;">
-                                Dear <strong style="color:#0d6efd;">' . htmlspecialchars($userName) . '</strong>,
+                                Dear <strong style="color:#dc3545;">' . htmlspecialchars($userName) . '</strong>,
                             </p>
                             <p style="color:#555555;font-size:15px;line-height:1.7;margin:15px 0;">
-                                Your account has been successfully created in the <strong>LOKA Fleet Management System</strong> - the official vehicle reservation and management platform for the Department of Information and Communications Technology (DICT).
+                                We would like to inform you that the <strong>LOKA Fleet Management System</strong> will undergo scheduled maintenance to improve system performance and reliability.
                             </p>
                         </td>
                     </tr>
                     <tr>
                         <td style="padding:0 40px 20px 40px;">
-                            <table width="100%" cellpadding="0" cellspacing="0" style="background:linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);border-radius:10px;border:1px solid #dee2e6;">
+                            <table width="100%" cellpadding="0" cellspacing="0" style="background:linear-gradient(135deg, #fff3cd 0%, #ffc107 100%);border-radius:10px;border:1px solid #ffc107;">
                                 <tr>
-                                    <td style="padding:25px;">
-                                        <h3 style="color:#1a1a1a;margin:0 0 20px 0;font-size:16px;font-weight:600;text-transform:uppercase;letter-spacing:1px;">Your Login Credentials</h3>
+                                    <td style="padding:25px;text-align:center;">
+                                        <h3 style="color:#856404;margin:0 0 15px 0;font-size:18px;font-weight:600;">Maintenance Schedule</h3>
                                         <table width="100%" cellpadding="0" cellspacing="0">
                                             <tr>
-                                                <td style="padding:8px 0;border-bottom:1px solid #dee2e6;">
-                                                    <span style="color:#6c757d;font-size:13px;">Email Address:</span><br>
-                                                    <strong style="color:#1a1a1a;font-size:15px;">' . htmlspecialchars($userEmail) . '</strong>
+                                                <td style="padding:10px 0;border-bottom:1px solid rgba(133, 100, 4, 0.3);text-align:center;">
+                                                    <span style="color:#856404;font-size:13px;">START</span><br>
+                                                    <strong style="color:#1a1a1a;font-size:18px;">' . htmlspecialchars($maintenanceStart) . '</strong>
                                                 </td>
                                             </tr>
                                             <tr>
-                                                <td style="padding:8px 0;border-bottom:1px solid #dee2e6;">
-                                                    <span style="color:#6c757d;font-size:13px;">Default Password:</span><br>
-                                                    <span style="color:#0d6efd;font-size:24px;font-weight:bold;letter-spacing:2px;">' . htmlspecialchars($defaultPassword) . '</span>
+                                                <td style="padding:10px 0;border-bottom:1px solid rgba(133, 100, 4, 0.3);text-align:center;">
+                                                    <span style="color:#856404;font-size:13px;">END</span><br>
+                                                    <strong style="color:#1a1a1a;font-size:18px;">' . htmlspecialchars($maintenanceEnd) . '</strong>
                                                 </td>
                                             </tr>
                                         </table>
-                                        <div style="background:#fff3cd;border:1px solid #ffc107;border-radius:8px;padding:15px;margin-top:20px;">
-                                            <p style="margin:0;color:#856404;font-size:14px;font-weight:600;">IMPORTANT: Please change your password immediately after logging in!</p>
-                                            <p style="margin:8px 0 0 0;color:#856404;font-size:13px;">For security purposes, use a strong password with at least 8 characters including uppercase, lowercase, numbers, and special characters.</p>
+                                        <div style="background:#ffffff;border-radius:8px;padding:15px;margin-top:15px;">
+                                            <p style="margin:0;color:#666666;font-size:14px;line-height:1.6;">' . htmlspecialchars($additionalMessage) . '</p>
                                         </div>
                                     </td>
                                 </tr>
@@ -98,26 +107,25 @@ function buildEmailTemplate(string $userName, string $userEmail, string $default
                     </tr>
                     <tr>
                         <td style="padding:0 40px 20px 40px;">
-                            <h3 style="color:#1a1a1a;margin:0 0 15px 0;font-size:16px;font-weight:600;">What You Can Do with LOKA Fleet Management:</h3>
+                            <h3 style="color:#1a1a1a;margin:0 0 15px 0;font-size:16px;font-weight:600;">What You Can Expect:</h3>
                             <table width="100%" cellpadding="0" cellspacing="0">
-                                <tr><td style="padding:8px 0;border-bottom:1px solid #eee;">Submit vehicle reservation requests</td></tr>
-                                <tr><td style="padding:8px 0;border-bottom:1px solid #eee;">Track your request status in real-time</td></tr>
-                                <tr><td style="padding:8px 0;border-bottom:1px solid #eee;">View vehicle availability calendar</td></tr>
-                                <tr><td style="padding:8px 0;border-bottom:1px solid #eee;">Receive instant notifications on request updates</td></tr>
-                                <tr><td style="padding:8px 0;">Manage passenger lists for your trips</td></tr>
+                                <tr><td style="padding:10px 0;border-bottom:1px solid #eee;"><span style="color:#dc3545;margin-right:8px;">⚠</span>System will be temporarily unavailable</td></tr>
+                                <tr><td style="padding:10px 0;border-bottom:1px solid #eee;"><span style="color:#dc3545;margin-right:8px;">⚠</span>No vehicle reservations can be processed</td></tr>
+                                <tr><td style="padding:10px 0;border-bottom:1px solid #eee;"><span style="color:#dc3545;margin-right:8px;">⚠</span>All pending requests will be held until system restore</td></tr>
+                                <tr><td style="padding:10px 0;"><span style="color:#198754;margin-right:8px;">✓</span>All data will be preserved safely</td></tr>
                             </table>
                         </td>
                     </tr>
                     <tr>
-                        <td style="padding:0 40px 30px 40px;text-align:center;">
-                            <a href="' . htmlspecialchars($loginUrl) . '" style="display:inline-block;background:linear-gradient(135deg, #0d6efd 0%, #0a58ca 100%);color:#ffffff;padding:15px 40px;text-decoration:none;border-radius:8px;font-weight:bold;font-size:16px;">Login to Fleet Management</a>
-                            <p style="margin:15px 0 0 0;color:#999999;font-size:12px;">Or copy this link: ' . htmlspecialchars($loginUrl) . '</p>
+                        <td style="padding:0 40px 20px 40px;background:#f8f9fa;border-radius:10px;margin:0 40px;">
+                            <h4 style="color:#1a1a1a;margin:20px 0 10px 0;font-size:14px;font-weight:600;">Emergency Contact</h4>
+                            <p style="color:#666666;font-size:13px;margin:0;line-height:1.6;">For urgent matters during the maintenance period, please contact <strong>JE LITE (System Administrator)</strong> at <strong>jelite.demo@gmail.com</strong> or call <strong>+63 992 631 6210</strong>.</p>
                         </td>
                     </tr>
                     <tr>
-                        <td style="background:#f8f9fa;padding:25px 40px;border-top:1px solid #dee2e6;">
-                            <h4 style="color:#1a1a1a;margin:0 0 10px 0;font-size:14px;font-weight:600;">Need Help?</h4>
-                            <p style="color:#666666;font-size:13px;margin:0;line-height:1.6;">If you have any questions or need assistance with the system, please contact the system administrator. For technical issues, please submit a support ticket or reach out to the IT Department.</p>
+                        <td style="padding:0 40px 30px 40px;text-align:center;">
+                            <p style="color:#999999;font-size:14px;margin:0;">We appreciate your patience and understanding.</p>
+                            <p style="color:#1a1a1a;font-size:16px;margin:15px 0 0 0;font-weight:600;">Thank you!</p>
                         </td>
                     </tr>
                     <tr>
@@ -372,8 +380,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
             throw new Exception('User not found');
         }
 
-        $subject = "LOKA Fleet Management - Your Account Credentials";
-        $body = buildEmailTemplate($user['name'], $user['email'], $defaultPassword, $smtpFromName, $loginUrl);
+        $subject = "LOKA Fleet Management - Scheduled System Maintenance Notice";
+        $body = buildEmailTemplate($user['name'], $user['email'], $smtpFromName, $loginUrl, $maintenanceStart, $maintenanceEnd, $additionalMessage);
 
         $debugLog = '';
         $result = sendEmailDebug($smtpHost, $smtpPort, $smtpUsername, $smtpPassword, $smtpFromEmail, $smtpFromName, $smtpEncryption, $user['email'], $user['name'], $subject, $body, $debugLog);
@@ -449,8 +457,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     } elseif (empty($smtpHost) || empty($smtpUsername) || empty($smtpPassword) || empty($smtpFromEmail)) {
         $testResult = '<div class="alert alert-danger">Please fill in all SMTP fields first</div>';
     } else {
-        $subject = "LOKA Fleet Management - Test Email";
-        $body = buildEmailTemplate("User", $testEmail, $smtpFromName, $loginUrl);
+        $subject = "LOKA Fleet Management - Test Email (Maintenance Notice)";
+        $body = buildEmailTemplate("User", $testEmail, $smtpFromName, $loginUrl, $maintenanceStart, $maintenanceEnd, $additionalMessage);
 
         $debugLog = "Connecting to $smtpHost:$smtpPort...<br>";
 
@@ -492,8 +500,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
 
                 if (!$user) continue;
 
-                $subject = "LOKA Fleet Management - Your Account Credentials";
-                $body = buildEmailTemplate($user['name'], $user['email'], $defaultPassword, $smtpFromName, $loginUrl);
+                $subject = "LOKA Fleet Management - Scheduled System Maintenance Notice";
+                $body = buildEmailTemplate($user['name'], $user['email'], $smtpFromName, $loginUrl, $maintenanceStart, $maintenanceEnd, $additionalMessage);
 
                 $debugLog = '';
                 $result = sendEmailDebug($smtpHost, $smtpPort, $smtpUsername, $smtpPassword, $smtpFromEmail, $smtpFromName, $smtpEncryption, $user['email'], $user['name'], $subject, $body, $debugLog);
@@ -545,7 +553,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
             <div class="col-lg-10">
                 <div class="card">
                     <div class="card-header">
-                        <h4 class="mb-0">Mass Email Blast - User Credentials</h4>
+                        <h4 class="mb-0">Mass Email Blast - System Maintenance Notice</h4>
                     </div>
                     <div class="card-body">
                         <?php if ($message): ?>
@@ -707,8 +715,8 @@ $dbPass = "";</pre>
                             </div>
 
                             <div class="alert alert-info">
-                                <strong>Default Password:</strong> <?php echo htmlspecialchars($defaultPassword); ?>
-                                <br><strong>Login URL:</strong> <?php echo htmlspecialchars($loginUrl); ?>
+                                <strong>Maintenance Period:</strong> <?php echo htmlspecialchars($maintenanceStart); ?> to <?php echo htmlspecialchars($maintenanceEnd); ?>
+                                <br><strong>Additional Message:</strong> <?php echo htmlspecialchars($additionalMessage); ?>
                             </div>
 
                             <div class="d-flex gap-2 mb-3">
@@ -852,7 +860,7 @@ $dbPass = "";</pre>
         }
 
         function previewEmail() {
-            const previewContent = `<?php echo preg_replace('/\s+/', ' ', buildEmailTemplate("John Doe User", "john.doe@example.com", $defaultPassword, $smtpFromName, $loginUrl)); ?>`;
+            const previewContent = `<?php echo preg_replace('/\s+/', ' ', buildEmailTemplate("John Doe User", "john.doe@example.com", $smtpFromName, $loginUrl, $maintenanceStart, $maintenanceEnd, $additionalMessage)); ?>`;
             const win = window.open('', 'Preview', 'width=700,height=800');
             win.document.write('<html><head><title>Email Preview</title><link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"></head><body style="padding:20px;background:#f5f5f5;">' + previewContent + '</body></html>');
         }

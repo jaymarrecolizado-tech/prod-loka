@@ -5,7 +5,7 @@
  * Admin-only CRUD module for managing vehicle types
  */
 
-requireRole('admin');
+requireRole('approver');
 
 $pageTitle = 'Vehicle Types';
 

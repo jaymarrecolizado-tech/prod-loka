@@ -98,7 +98,7 @@
                 </a>
             </li>
 
-            <?php if (isAdmin()): ?>
+            <?php if (isAdmin() || isMotorpool() || isApprover()): ?>
             <!-- Vehicle Types -->
             <li class="nav-item">
                 <a class="nav-link <?= activeMenu('vehicle_types') ?>" href="<?= APP_URL ?>/?page=vehicle_types">

@@ -215,6 +215,19 @@ switch ($page) {
         }
         break;
 
+    case 'vehicle_types':
+        requireRole(ROLE_APPROVER);
+        if ($action === 'create') {
+            require_once PAGES_PATH . '/vehicle_types/create.php';
+        } elseif ($action === 'edit') {
+            require_once PAGES_PATH . '/vehicle_types/edit.php';
+        } elseif ($action === 'delete') {
+            require_once PAGES_PATH . '/vehicle_types/delete.php';
+        } else {
+            require_once PAGES_PATH . '/vehicle_types/index.php';
+        }
+        break;
+
     case 'drivers':
         requireRole(ROLE_APPROVER);
         if ($action === 'create') {
