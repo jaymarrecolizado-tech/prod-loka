@@ -15,8 +15,8 @@ $pageTitle = 'Completed Trips';
 $role = userRole();
 $showAll = get('all', '1'); // Default to show all completed trips
 $search = get('search', '');
-$page = getInt('page', 1);
-$limit = 25; // Increased from 20 to 25
+$page = getInt('p', 1); // Use 'p' for pagination, not 'page' (which is for routing)
+$limit = 25;
 $offset = ($page - 1) * $limit;
 
 // Date filter - only apply if not showing all
