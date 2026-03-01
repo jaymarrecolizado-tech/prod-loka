@@ -369,6 +369,10 @@ switch ($page) {
         }
         break;
 
+    case 'completed-trips':
+        require_once PAGES_PATH . '/completed-trips/index.php';
+        break;
+
     case 'guard':
         requireRole(ROLE_GUARD);
         if ($action === 'completed') {

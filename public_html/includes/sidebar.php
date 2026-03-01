@@ -17,7 +17,15 @@
                     <span>Requests</span>
                 </a>
             </li>
-            
+
+            <!-- Completed Trips -->
+            <li class="nav-item">
+                <a class="nav-link <?= activeMenu('completed-trips') ?>" href="<?= APP_URL ?>/?page=completed-trips">
+                    <i class="bi bi-check-all"></i>
+                    <span>Completed Trips</span>
+                </a>
+            </li>
+
             <!-- Schedule Calendar (All Users) -->
             <li class="nav-item">
                 <a class="nav-link <?= activeMenu('schedule') ?>" href="<?= APP_URL ?>/?page=schedule&action=calendar">
