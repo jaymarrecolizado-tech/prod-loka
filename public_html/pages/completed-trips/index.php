@@ -16,7 +16,8 @@ $role = userRole();
 $showAll = get('all', '1'); // Default to show all completed trips
 $search = get('search', '');
 $page = getInt('p', 1); // Use 'p' for pagination, not 'page' (which is for routing)
-$limit = 25;
+$perPage = getInt('per_page', 25); // Records per page: 10, 25, 50, 100
+$limit = in_array($perPage, [10, 25, 50, 100]) ? $perPage : 25;
 $offset = ($page - 1) * $limit;
 
 // Date filter - only apply if not showing all
@@ -266,7 +267,16 @@ require_once INCLUDES_PATH . '/header.php';
                     <input type="date" class="form-control" name="end_date" value="<?= $endDate ?? date('Y-m-t') ?>">
                 </div>
                 <?php endif; ?>
-                <div class="<?= $showAll === '1' ? 'col-md-8' : 'col-md-4' ?>">
+                <div class="<?= $showAll === '1' ? 'col-md-3' : 'col-md-2' ?>">
+                    <label class="form-label">Per Page</label>
+                    <select class="form-select" name="per_page" onchange="this.form.submit()">
+                        <option value="10" <?= $limit === 10 ? 'selected' : '' ?>>10</option>
+                        <option value="25" <?= $limit === 25 ? 'selected' : '' ?>>25</option>
+                        <option value="50" <?= $limit === 50 ? 'selected' : '' ?>>50</option>
+                        <option value="100" <?= $limit === 100 ? 'selected' : '' ?>>100</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
                     <label class="form-label">Search</label>
                     <input type="text" class="form-control" name="search" value="<?= e($search) ?>"
                            placeholder="Vehicle, requester, driver, destination...">
@@ -426,51 +436,108 @@ require_once INCLUDES_PATH . '/header.php';
 
                 <!-- Pagination -->
                 <?php if ($totalPages > 1): ?>
-                <nav class="mt-3">
+                <nav class="mt-3" aria-label="Trips pagination">
                     <ul class="pagination justify-content-center">
                         <?php
-                        $paginationParams = http_build_query(array_filter([
+                        // Build base query string for pagination
+                        $queryParams = [
                             'page' => 'completed-trips',
-                            'all' => $showAll,
-                            'start_date' => $startDate,
-                            'end_date' => $endDate,
-                            'search' => $search
-                        ]));
+                            'p' => null, // Will be set per link
+                            'per_page' => $limit
+                        ];
+                        if ($showAll !== '1') $queryParams['all'] = $showAll;
+                        if ($startDate) $queryParams['start_date'] = $startDate;
+                        if ($endDate) $queryParams['end_date'] = $endDate;
+                        if ($search) $queryParams['search'] = $search;
+
+                        function buildPageUrl($params, $pageNum) {
+                            $params['p'] = $pageNum;
+                            return '?' . http_build_query(array_filter($params));
+                        }
                         ?>
+
+                        <!-- First Page & Previous -->
                         <?php if ($page > 1): ?>
                         <li class="page-item">
-                            <a class="page-link" href="?<?= $paginationParams ?>&p=<?= $page - 1 ?>">
+                            <a class="page-link" href="<?= buildPageUrl($queryParams, 1) ?>" aria-label="First">
+                                <i class="bi bi-chevron-bar-left"></i>
+                            </a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="<?= buildPageUrl($queryParams, $page - 1) ?>" aria-label="Previous">
                                 <i class="bi bi-chevron-left"></i>
                             </a>
                         </li>
+                        <?php else: ?>
+                        <li class="page-item disabled">
+                            <span class="page-link"><i class="bi bi-chevron-bar-left"></i></span>
+                        </li>
+                        <li class="page-item disabled">
+                            <span class="page-link"><i class="bi bi-chevron-left"></i></span>
+                        </li>
                         <?php endif; ?>
 
+                        <!-- Page Numbers -->
                         <?php
-                        // Show limited page numbers
-                        $startPage = max(1, $page - 2);
-                        $endPage = min($totalPages, $page + 2);
-                        if ($startPage > 1) echo '<li class="page-item disabled"><span class="page-link">...</span></li>';
+                        // Always show first page
+                        if ($page > 3) {
+                            echo '<li class="page-item"><a class="page-link" href="' . buildPageUrl($queryParams, 1) . '">1</a></li>';
+                            if ($page > 4) {
+                                echo '<li class="page-item disabled"><span class="page-link">...</span></li>';
+                            }
+                        }
+
+                        // Show range around current page
+                        $startPage = max(1, $page - 1);
+                        $endPage = min($totalPages, $page + 1);
+
                         for ($i = $startPage; $i <= $endPage; $i++):
                         ?>
                         <li class="page-item <?= $i === $page ? 'active' : '' ?>">
-                            <a class="page-link" href="?<?= $paginationParams ?>&p=<?= $i ?>">
-                                <?= $i ?>
-                            </a>
+                            <?php if ($i === $page): ?>
+                                <span class="page-link"><?= $i ?></span>
+                            <?php else: ?>
+                                <a class="page-link" href="<?= buildPageUrl($queryParams, $i) ?>"><?= $i ?></a>
+                            <?php endif; ?>
                         </li>
-                        <?php endfor;
-                        if ($endPage < $totalPages) echo '<li class="page-item disabled"><span class="page-link">...</span></li>';
-                        ?>
+                        <?php endfor; ?>
 
+                        <!-- Always show last page -->
+                        <?php if ($page < $totalPages - 2) {
+                            if ($page < $totalPages - 3) {
+                                echo '<li class="page-item disabled"><span class="page-link">...</span></li>';
+                            }
+                            echo '<li class="page-item"><a class="page-link" href="' . buildPageUrl($queryParams, $totalPages) . '">' . $totalPages . '</a></li>';
+                        } ?>
+
+                        <!-- Next & Last Page -->
                         <?php if ($page < $totalPages): ?>
                         <li class="page-item">
-                            <a class="page-link" href="?<?= $paginationParams ?>&p=<?= $page + 1 ?>">
+                            <a class="page-link" href="<?= buildPageUrl($queryParams, $page + 1) ?>" aria-label="Next">
                                 <i class="bi bi-chevron-right"></i>
                             </a>
                         </li>
+                        <li class="page-item">
+                            <a class="page-link" href="<?= buildPageUrl($queryParams, $totalPages) ?>" aria-label="Last">
+                                <i class="bi bi-chevron-bar-right"></i>
+                            </a>
+                        </li>
+                        <?php else: ?>
+                        <li class="page-item disabled">
+                            <span class="page-link"><i class="bi bi-chevron-right"></i></span>
+                        </li>
+                        <li class="page-item disabled">
+                            <span class="page-link"><i class="bi bi-chevron-bar-right"></i></span>
+                        </li>
                         <?php endif; ?>
                     </ul>
-                    <div class="text-center text-muted small">
-                        Page <?= $page ?> of <?= $totalPages ?> (<?= $totalCount ?> total trips)
+
+                    <!-- Pagination Info -->
+                    <div class="text-center mt-2">
+                        <span class="text-muted small">
+                            Showing <?= ($totalCount > 0 ? ($page - 1) * $limit + 1 : 0) ?>-<?= min($page * $limit, $totalCount) ?> of <?= $totalCount ?> trips
+                            (Page <?= $page ?> of <?= $totalPages ?>)
+                        </span>
                     </div>
                 </nav>
                 <?php endif; ?>
