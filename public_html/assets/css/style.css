@@ -51,7 +51,7 @@ body {
 /* ===== SIDEBAR ===== */
 .sidebar {
     width: var(--sidebar-width);
-    min-height: calc(100vh - var(--navbar-height));
+    height: calc(100vh - var(--navbar-height));
     background: var(--sidebar-bg);
     position: fixed;
     left: 0;
@@ -69,7 +69,26 @@ body {
 .sidebar-content {
     flex: 1;
     overflow-y: auto;
+    overflow-x: hidden;
     padding: 1rem 0;
+}
+
+/* Custom scrollbar for sidebar */
+.sidebar-content::-webkit-scrollbar {
+    width: 6px;
+}
+
+.sidebar-content::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.sidebar-content::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 3px;
+}
+
+.sidebar-content::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.3);
 }
 
 .sidebar .nav-link {
