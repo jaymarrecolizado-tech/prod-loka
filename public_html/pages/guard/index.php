@@ -39,22 +39,21 @@ $params = [];
 switch ($filter) {
     case 'pending_dispatch':
         // Approved requests that haven't departed yet
-        $sql .= " AND r.actual_dispatch_datetime IS NULL";
+        $sql .= " AND r.status = 'approved' AND r.actual_dispatch_datetime IS NULL";
         break;
     case 'pending_arrival':
         // Dispatched but haven't returned yet
-        $sql .= " AND r.actual_dispatch_datetime IS NOT NULL 
+        $sql .= " AND r.status = 'approved' AND r.actual_dispatch_datetime IS NOT NULL 
                   AND r.actual_arrival_datetime IS NULL";
         break;
     case 'completed':
-        // Both dispatched and returned
-        $sql .= " AND r.actual_dispatch_datetime IS NOT NULL 
-                  AND r.actual_arrival_datetime IS NOT NULL";
+        // Trips that have been completed (returned)
+        $sql .= " AND r.status = 'approved' AND r.actual_arrival_datetime IS NOT NULL";
         break;
     case 'today':
     default:
         // Show all approved requests for today
-        $sql .= " AND DATE(r.start_datetime) = ?";
+        $sql .= " AND r.status = 'approved' AND DATE(r.start_datetime) = ?";
         $params[] = $today;
         break;
 }
@@ -63,17 +62,30 @@ $sql .= " ORDER BY r.start_datetime ASC";
 
 $trips = db()->fetchAll($sql, $params);
 
-// Get statistics for today
+// Get statistics for today (for the stat cards)
 $statsToday = db()->fetch(
-    "SELECT 
+    "SELECT
         COUNT(*) as total_scheduled,
-        SUM(CASE WHEN actual_dispatch_datetime IS NOT NULL THEN 1 ELSE 0 END) as dispatched,
+        SUM(CASE WHEN actual_dispatch_datetime IS NULL THEN 1 ELSE 0 END) as pending_dispatch,
+        SUM(CASE WHEN actual_dispatch_datetime IS NOT NULL AND actual_arrival_datetime IS NULL THEN 1 ELSE 0 END) as on_trip,
         SUM(CASE WHEN actual_arrival_datetime IS NOT NULL THEN 1 ELSE 0 END) as completed
-     FROM requests 
-     WHERE status = 'approved' 
+     FROM requests
+     WHERE status = 'approved'
      AND DATE(start_datetime) = ?
      AND deleted_at IS NULL",
     [$today]
+);
+
+// Get tab counts that reflect what each filter actually shows
+$tabCounts = db()->fetch(
+    "SELECT
+        COUNT(*) as all_scheduled,
+        SUM(CASE WHEN actual_dispatch_datetime IS NULL THEN 1 ELSE 0 END) as all_pending_dispatch,
+        SUM(CASE WHEN actual_dispatch_datetime IS NOT NULL AND actual_arrival_datetime IS NULL THEN 1 ELSE 0 END) as all_on_trip,
+        SUM(CASE WHEN actual_arrival_datetime IS NOT NULL THEN 1 ELSE 0 END) as all_completed
+     FROM requests
+     WHERE status = 'approved'
+     AND deleted_at IS NULL"
 );
 
 $pageTitle = 'Guard Dashboard';
@@ -96,7 +108,7 @@ require_once INCLUDES_PATH . '/header.php';
 
     <!-- Statistics Cards -->
     <div class="row g-3 mb-4">
-        <div class="col-md-4">
+        <div class="col-md-3">
             <div class="card border-0 shadow-sm">
                 <div class="card-body">
                     <div class="d-flex align-items-center">
@@ -113,7 +125,7 @@ require_once INCLUDES_PATH . '/header.php';
                 </div>
             </div>
         </div>
-        <div class="col-md-4">
+        <div class="col-md-3">
             <div class="card border-0 shadow-sm">
                 <div class="card-body">
                     <div class="d-flex align-items-center">
@@ -124,13 +136,30 @@ require_once INCLUDES_PATH . '/header.php';
                         </div>
                         <div class="flex-grow-1 ms-3">
                             <h6 class="text-muted mb-1">Pending Dispatch</h6>
-                            <h3 class="mb-0"><?= ($statsToday->total_scheduled ?? 0) - ($statsToday->dispatched ?? 0) ?></h3>
+                            <h3 class="mb-0"><?= $tabCounts->all_pending_dispatch ?? 0 ?></h3>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-        <div class="col-md-4">
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <div class="bg-info bg-opacity-10 rounded p-3">
+                                <i class="bi bi-arrow-return-left text-info fs-4"></i>
+                            </div>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h6 class="text-muted mb-1">On Trip</h6>
+                            <h3 class="mb-0"><?= $tabCounts->all_on_trip ?? 0 ?></h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
             <div class="card border-0 shadow-sm">
                 <div class="card-body">
                     <div class="d-flex align-items-center">
@@ -141,7 +170,7 @@ require_once INCLUDES_PATH . '/header.php';
                         </div>
                         <div class="flex-grow-1 ms-3">
                             <h6 class="text-muted mb-1">Completed</h6>
-                            <h3 class="mb-0"><?= $statsToday->completed ?? 0 ?></h3>
+                            <h3 class="mb-0"><?= $tabCounts->all_completed ?? 0 ?></h3>
                         </div>
                     </div>
                 </div>
@@ -154,42 +183,33 @@ require_once INCLUDES_PATH . '/header.php';
         <div class="card-header bg-white">
             <ul class="nav nav-tabs card-header-tabs">
                 <li class="nav-item">
-                    <a class="nav-link <?= $filter === 'today' ? 'active' : '' ?>" 
+                    <a class="nav-link <?= $filter === 'today' ? 'active' : '' ?>"
                        href="<?= APP_URL ?>/?page=guard">
                         <i class="bi bi-calendar-day me-1"></i>Today's Trips
+                        <span class="badge bg-primary ms-1"><?= $statsToday->total_scheduled ?? 0 ?></span>
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link <?= $filter === 'pending_dispatch' ? 'active' : '' ?>" 
+                    <a class="nav-link <?= $filter === 'pending_dispatch' ? 'active' : '' ?>"
                        href="<?= APP_URL ?>/?page=guard&filter=pending_dispatch">
                         <i class="bi bi-clock me-1"></i>Pending Dispatch
-                        <?php if (($statsToday->total_scheduled ?? 0) - ($statsToday->dispatched ?? 0) > 0): ?>
-                            <span class="badge bg-warning ms-1"><?= ($statsToday->total_scheduled ?? 0) - ($statsToday->dispatched ?? 0) ?></span>
-                        <?php endif; ?>
+                        <span class="badge bg-warning ms-1"><?= $tabCounts->all_pending_dispatch ?? 0 ?></span>
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link <?= $filter === 'pending_arrival' ? 'active' : '' ?>" 
+                    <a class="nav-link <?= $filter === 'pending_arrival' ? 'active' : '' ?>"
                        href="<?= APP_URL ?>/?page=guard&filter=pending_arrival">
                         <i class="bi bi-arrow-return-left me-1"></i>On Trip
+                        <span class="badge bg-info ms-1"><?= $tabCounts->all_on_trip ?? 0 ?></span>
                     </a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link <?= $filter === 'completed' ? 'active' : '' ?>"
                        href="<?= APP_URL ?>/?page=guard&filter=completed">
-                        <i class="bi bi-check-all me-1"></i>Completed
+                        <i class="bi bi-check-circle me-1"></i>Completed
+                        <span class="badge bg-success ms-1"><?= $tabCounts->all_completed ?? 0 ?></span>
                     </a>
                 </li>
-            </ul>
-        </div>
-        <div class="card-body">
-            <?php if ($filter === 'completed' && !empty($trips)): ?>
-                <div class="d-flex justify-content-end mb-3">
-                    <button type="button" class="btn btn-success" onclick="exportCompletedTrips()">
-                        <i class="bi bi-file-earmark-excel me-1"></i>Export to CSV
-                    </button>
-                </div>
-            <?php endif; ?>
             </ul>
         </div>
         <div class="card-body">
@@ -203,8 +223,10 @@ require_once INCLUDES_PATH . '/header.php';
                             No trips pending dispatch.
                         <?php elseif ($filter === 'pending_arrival'): ?>
                             No vehicles currently on trip.
+                        <?php elseif ($filter === 'completed'): ?>
+                            No trips completed today.
                         <?php else: ?>
-                            No completed trips.
+                            No trips found.
                         <?php endif; ?>
                     </p>
                 </div>
