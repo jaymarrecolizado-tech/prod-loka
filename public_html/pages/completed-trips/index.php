@@ -46,6 +46,7 @@ $sql = "SELECT r.*,
      LEFT JOIN users dispatch_guard ON r.dispatch_guard_id = dispatch_guard.id
      LEFT JOIN users arrival_guard ON r.arrival_guard_id = arrival_guard.id
      WHERE r.status = ?
+     AND r.actual_arrival_datetime IS NOT NULL
      AND r.deleted_at IS NULL";
 
 $params = [STATUS_COMPLETED];
@@ -79,7 +80,7 @@ if ($isDriver) {
 }
 
 // Apply date range filter
-$sql .= " AND DATE(r.completed_at) BETWEEN ? AND ?";
+$sql .= " AND DATE(r.actual_arrival_datetime) BETWEEN ? AND ?";
 $params[] = $startDate;
 $params[] = $endDate . ' 23:59:59';
 
@@ -107,14 +108,14 @@ $totalCount = db()->fetchColumn($countSql, $params);
 $totalPages = ceil($totalCount / $limit);
 
 // Add ordering and pagination
-$sql .= " ORDER BY r.completed_at DESC LIMIT ? OFFSET ?";
+$sql .= " ORDER BY r.actual_arrival_datetime DESC LIMIT ? OFFSET ?";
 $params[] = $limit;
 $params[] = $offset;
 
 $trips = db()->fetchAll($sql, $params);
 
 // Calculate statistics (without pagination)
-$statsSql = str_replace(' ORDER BY r.completed_at DESC LIMIT ? OFFSET ?', '', $sql);
+$statsSql = str_replace(' ORDER BY r.actual_arrival_datetime DESC LIMIT ? OFFSET ?', '', $sql);
 $statsSql = preg_replace('/LIMIT \? OFFSET \?$/', '', $statsSql);
 $allTripsForStats = db()->fetchAll($statsSql, array_slice($params, 0, -2));
 
@@ -309,7 +310,7 @@ require_once INCLUDES_PATH . '/header.php';
                                 <td>
                                     <div class="small">
                                         <i class="bi bi-calendar3 me-1"></i>
-                                        <?= formatDate($trip->completed_at) ?>
+                                        <?= formatDate($trip->actual_arrival_datetime) ?>
                                     </div>
                                 </td>
                                 <td>
