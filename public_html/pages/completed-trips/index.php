@@ -13,7 +13,7 @@
 $pageTitle = 'Completed Trips';
 
 $role = userRole();
-$showAllDates = get('all', '1'); // Default to show all completed trips
+$showAll = get('all', '1'); // Default to show all completed trips
 $search = get('search', '');
 $page = getInt('page', 1);
 $limit = 25; // Increased from 20 to 25
