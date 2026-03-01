@@ -20,6 +20,22 @@ $perPage = getInt('per_page', 25); // Records per page: 10, 25, 50, 100
 $limit = in_array($perPage, [10, 25, 50, 100]) ? $perPage : 25;
 $offset = ($page - 1) * $limit;
 
+// Sorting
+$allowedSortColumns = [
+    'id' => 'r.id',
+    'completed_date' => 'r.actual_arrival_datetime',
+    'plate_number' => 'v.plate_number',
+    'driver_name' => 'driver_user.name',
+    'requester_name' => 'u.name',
+    'destination' => 'r.destination',
+    'duration' => 'actual_duration',
+    'mileage' => 'r.mileage_actual'
+];
+$sort = get('sort', 'completed_date');
+$sortDir = get('dir', 'DESC');
+$sortDir = in_array(strtoupper($sortDir), ['ASC', 'DESC']) ? strtoupper($sortDir) : 'DESC';
+$sortColumn = $allowedSortColumns[$sort] ?? 'r.actual_arrival_datetime';
+
 // Date filter - only apply if not showing all
 $startDate = null;
 $endDate = null;
@@ -118,14 +134,15 @@ $totalCount = db()->fetchColumn($countSql, $params);
 $totalPages = ceil($totalCount / $limit);
 
 // Add ordering and pagination
-$sql .= " ORDER BY r.actual_arrival_datetime DESC LIMIT ? OFFSET ?";
+$sql .= " ORDER BY {$sortColumn} {$sortDir} LIMIT ? OFFSET ?";
 $params[] = $limit;
 $params[] = $offset;
 
 $trips = db()->fetchAll($sql, $params);
 
 // Calculate statistics (without pagination)
-$statsSql = str_replace(' ORDER BY r.actual_arrival_datetime DESC LIMIT ? OFFSET ?', '', $sql);
+$orderByPattern = '/ ORDER BY [^ ]+ (ASC|DESC)/';
+$statsSql = preg_replace($orderByPattern, '', $sql);
 $statsSql = preg_replace('/LIMIT \? OFFSET \?$/', '', $statsSql);
 $allTripsForStats = db()->fetchAll($statsSql, array_slice($params, 0, -2));
 
@@ -313,6 +330,22 @@ require_once INCLUDES_PATH . '/header.php';
             </div>
         </div>
         <div class="card-body">
+            <?php
+function buildSortUrl($column, $currentSort, $currentDir, $baseParams) {
+    $newDir = ($currentSort === $column && $currentDir === 'DESC') ? 'ASC' : 'DESC';
+    $params = array_merge($baseParams, ['sort' => $column, 'dir' => $newDir, 'p' => 1]);
+    return '?' . http_build_query(array_filter($params));
+}
+
+$baseParams = [
+    'page' => 'completed-trips',
+    'all' => $showAll,
+    'per_page' => $perPage,
+    'search' => $search
+];
+if ($startDate) $baseParams['start_date'] = $startDate;
+if ($endDate) $baseParams['end_date'] = $endDate;
+?>
             <?php if (empty($trips)): ?>
                 <div class="text-center py-5">
                     <i class="bi bi-calendar-x fs-1 text-muted"></i>
@@ -323,14 +356,14 @@ require_once INCLUDES_PATH . '/header.php';
                     <table class="table table-hover align-middle" id="completedTripsTable">
                         <thead>
                             <tr>
-                                <th>ID</th>
-                                <th>Completed Date</th>
-                                <th>Vehicle</th>
-                                <th>Driver</th>
-                                <th>Requester</th>
-                                <th>Destination</th>
-                                <th>Duration</th>
-                                <th>Mileage</th>
+                                <th><a href="<?= buildSortUrl('id', $sort, $sortDir, $baseParams) ?>" class="text-decoration-none text-dark<?= $sort === 'id' ? ' text-primary' : '' ?>" style="cursor:pointer">ID <?= $sort === 'id' ? ($sortDir === 'ASC' ? '<i class="bi bi-arrow-up"></i>' : '<i class="bi bi-arrow-down"></i>') : '' ?></a></th>
+                                <th><a href="<?= buildSortUrl('completed_date', $sort, $sortDir, $baseParams) ?>" class="text-decoration-none text-dark<?= $sort === 'completed_date' ? ' text-primary' : '' ?>" style="cursor:pointer">Completed Date <?= $sort === 'completed_date' ? ($sortDir === 'ASC' ? '<i class="bi bi-arrow-up"></i>' : '<i class="bi bi-arrow-down"></i>') : '' ?></a></th>
+                                <th><a href="<?= buildSortUrl('plate_number', $sort, $sortDir, $baseParams) ?>" class="text-decoration-none text-dark<?= $sort === 'plate_number' ? ' text-primary' : '' ?>" style="cursor:pointer">Vehicle <?= $sort === 'plate_number' ? ($sortDir === 'ASC' ? '<i class="bi bi-arrow-up"></i>' : '<i class="bi bi-arrow-down"></i>') : '' ?></a></th>
+                                <th><a href="<?= buildSortUrl('driver_name', $sort, $sortDir, $baseParams) ?>" class="text-decoration-none text-dark<?= $sort === 'driver_name' ? ' text-primary' : '' ?>" style="cursor:pointer">Driver <?= $sort === 'driver_name' ? ($sortDir === 'ASC' ? '<i class="bi bi-arrow-up"></i>' : '<i class="bi bi-arrow-down"></i>') : '' ?></a></th>
+                                <th><a href="<?= buildSortUrl('requester_name', $sort, $sortDir, $baseParams) ?>" class="text-decoration-none text-dark<?= $sort === 'requester_name' ? ' text-primary' : '' ?>" style="cursor:pointer">Requester <?= $sort === 'requester_name' ? ($sortDir === 'ASC' ? '<i class="bi bi-arrow-up"></i>' : '<i class="bi bi-arrow-down"></i>') : '' ?></a></th>
+                                <th><a href="<?= buildSortUrl('destination', $sort, $sortDir, $baseParams) ?>" class="text-decoration-none text-dark<?= $sort === 'destination' ? ' text-primary' : '' ?>" style="cursor:pointer">Destination <?= $sort === 'destination' ? ($sortDir === 'ASC' ? '<i class="bi bi-arrow-up"></i>' : '<i class="bi bi-arrow-down"></i>') : '' ?></a></th>
+                                <th><a href="<?= buildSortUrl('duration', $sort, $sortDir, $baseParams) ?>" class="text-decoration-none text-dark<?= $sort === 'duration' ? ' text-primary' : '' ?>" style="cursor:pointer">Duration <?= $sort === 'duration' ? ($sortDir === 'ASC' ? '<i class="bi bi-arrow-up"></i>' : '<i class="bi bi-arrow-down"></i>') : '' ?></a></th>
+                                <th><a href="<?= buildSortUrl('mileage', $sort, $sortDir, $baseParams) ?>" class="text-decoration-none text-dark<?= $sort === 'mileage' ? ' text-primary' : '' ?>" style="cursor:pointer">Mileage <?= $sort === 'mileage' ? ($sortDir === 'ASC' ? '<i class="bi bi-arrow-up"></i>' : '<i class="bi bi-arrow-down"></i>') : '' ?></a></th>
                                 <th>Passengers</th>
                                 <?php if (in_array($role, [ROLE_MOTORPOOL, ROLE_ADMIN])): ?>
                                 <th>Dispatch</th>
