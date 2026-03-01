@@ -373,6 +373,10 @@ switch ($page) {
         require_once PAGES_PATH . '/completed-trips/index.php';
         break;
 
+    case 'patch-notes':
+        require_once PAGES_PATH . '/patch-notes/index.php';
+        break;
+
     case 'guard':
         requireRole(ROLE_GUARD);
         if ($action === 'completed') {
