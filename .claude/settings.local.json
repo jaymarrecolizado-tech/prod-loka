@@ -55,7 +55,13 @@
       "Bash(git push origin feature/admin-export-reports)",
       "Bash(cd C:\\\\wamp64\\\\www\\\\Projects\\\\loka2:*)",
       "Bash(cd:*)",
-      "Bash(ls:*)"
+      "Bash(ls:*)",
+      "Bash(head:*)",
+      "Bash(php:*)",
+      "Bash(grep:*)",
+      "Bash(sleep 2:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)"
     ]
   }
 }
