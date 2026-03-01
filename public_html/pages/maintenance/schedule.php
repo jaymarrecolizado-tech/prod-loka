@@ -92,7 +92,7 @@ foreach ($vehicles as $vehicle) {
     // Get last completed maintenance for each type
     foreach (RECURRING_MAINTENANCE_TYPES as $type => $typeInfo) {
         $lastMaintenance = db()->fetch(
-            "SELECT mr.*, completed_at
+            "SELECT mr.*
              FROM maintenance_requests mr
              WHERE mr.vehicle_id = ?
              AND mr.type = ?
