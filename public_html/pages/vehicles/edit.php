@@ -32,16 +32,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (empty($make)) $errors[] = 'Make is required';
     if (empty($model)) $errors[] = 'Model is required';
     
-    // Validate status transitions
-    $validTransitions = [
-        'available' => ['in_use', 'maintenance'],
-        'in_use' => ['available', 'completed'],
-        'maintenance' => ['available'],
-        'completed' => ['available']
-    ];
-    
-    if (isset($validTransitions[$vehicle->status]) && !in_array($status, $validTransitions[$vehicle->status])) {
-        $errors[] = "Cannot change vehicle status from {$vehicle->status} to {$status}";
+    // Validate status transitions (only if status is actually changing)
+    if ($status !== $vehicle->status) {
+        $validTransitions = [
+            'available' => ['in_use', 'maintenance'],
+            'in_use' => ['available', 'completed'],
+            'maintenance' => ['available'],
+            'completed' => ['available']
+        ];
+
+        if (isset($validTransitions[$vehicle->status]) && !in_array($status, $validTransitions[$vehicle->status])) {
+            $errors[] = "Cannot change vehicle status from {$vehicle->status} to {$status}";
+        }
     }
     
     if (empty($errors)) {

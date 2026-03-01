@@ -38,6 +38,14 @@ function redirect(string $url): void
 }
 
 /**
+ * Set flash message
+ */
+function setFlashMessage(string $message, string $type = 'info'): void
+{
+    $_SESSION['flash'] = ['type' => $type, 'message' => $message];
+}
+
+/**
  * Redirect with message
  */
 function redirectWith(string $url, string $type, string $message): void
@@ -315,6 +323,14 @@ function pagination(int $total, int $current, int $perPage, string $baseUrl): st
 
     $html .= '</ul></nav>';
     return $html;
+}
+
+/**
+ * Check if current request is POST
+ */
+function isPost(): bool
+{
+    return $_SERVER['REQUEST_METHOD'] === 'POST';
 }
 
 /**
