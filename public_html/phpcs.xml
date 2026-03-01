@@ -1,0 +1,72 @@
+<?xml version="1.0"?>
+<ruleset name="LOKA Fleet Management">
+  <description>LOKA Fleet Management System coding standard</description>
+
+  <!-- Paths to check -->
+  <file>classes</file>
+  <file>api</file>
+  <file>includes</file>
+  <file>pages</file>
+
+  <!-- Exclude patterns -->
+  <exclude-pattern>*/vendor/*</exclude-pattern>
+  <exclude-pattern>*/node_modules/*</exclude-pattern>
+  <exclude-pattern>*/assets/dist/*</exclude-pattern>
+  <exclude-pattern>*.blade.php</exclude-pattern>
+
+  <!-- Show progress and sniff codes -->
+  <arg value="sp"/>
+  <arg name="colors"/>
+  <arg name="parallel" value="8"/>
+
+  <!-- Check up to 8 files simultaneously -->
+  <arg name="parallel" value="8"/>
+
+  <!-- Use PSR-12 as base standard -->
+  <rule ref="PSR12">
+    <!-- Allow longer lines -->
+    <exclude name="Generic.Files.LineLength.TooLong"/>
+
+    <!-- Allow underscore prefix for private properties -->
+    <exclude name="PSR2.Classes.PropertyDeclaration.Underscore"/>
+  </rule>
+
+  <!-- Additional rules -->
+  <rule ref="Generic.PHP.DisallowSilentErrors"/>
+  <rule ref="Generic.CodeAnalysis.EmptyStatement"/>
+  <rule ref="Generic.CodeAnalysis.ForLoopShouldBeWhileLoop"/>
+  <rule ref="Generic.CodeAnalysis.UnconditionalIfStatement"/>
+  <rule ref="Generic.CodeAnalysis.UnnecessaryFinalModifier"/>
+  <rule ref="Generic.CodeAnalysis.UselessOverridingMethod"/>
+  <rule ref="Generic.Classes.DuplicateClassName"/>
+  <rule ref="Generic.CodeAnalysis.UnusedFunctionParameter"/>
+  <rule ref="Squiz.PHP.NonExecutableCode"/>
+  <rule ref="Squiz.PHP.DisallowMultipleAssignments"/>
+  <rule ref="Squiz.PHP.DisallowSizeFunctionsInLoops"/>
+  <rule ref="Squiz.PHP.Eval"/>
+  <rule ref="Squiz.Operators.IncrementDecrementUsage"/>
+  <rule ref="Squiz.Operators.ValidLogicalOperators"/>
+  <rule ref="Squiz.Functions.FunctionDeclaration"/>
+  <rule ref="Squiz.Functions.FunctionDuplicateArgument"/>
+  <rule ref="Squiz.Functions.GlobalFunction"/>
+  <rule ref="Squiz.Scope.MemberVarScope"/>
+  <rule ref="Squiz.Scope.MethodScope"/>
+  <rule ref="Squiz.Scope.StaticThisUsage"/>
+  <rule ref="Squiz.WhiteSpace.SuperfluousWhitespace"/>
+  <rule ref="Squiz.WhiteSpace.CastSpacing"/>
+  <rule ref="Squiz.Arrays.ArrayBracketSpacing"/>
+  <rule ref="Squiz.ControlStructures.ControlSignature"/>
+  <rule ref="Squiz.Strings.ConcatenationSpacing"/>
+
+  <!-- Configuration for specific rules -->
+  <rule ref="PSR12.Classes.ClassDeclaration">
+    <properties>
+      <property name="skipIfAnonymousClass" value="true"/>
+    </properties>
+  </rule>
+
+  <!-- Allow underscores in test class names -->
+  <rule ref="PSR1.Classes.ClassDeclaration">
+    <exclude-pattern>/tests/.*\.php$/</exclude-pattern>
+  </rule>
+</ruleset>

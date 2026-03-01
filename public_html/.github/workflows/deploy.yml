@@ -1,0 +1,170 @@
+name: Deploy
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Deployment environment'
+        required: true
+        default: 'staging'
+        type: choice
+        options:
+          - staging
+          - production
+
+jobs:
+  # Deploy to Staging
+  deploy-staging:
+    name: Deploy to Staging
+    if: github.ref == 'refs/heads/main' || github.event.inputs.environment == 'staging'
+    runs-on: ubuntu-latest
+    environment:
+      name: staging
+      url: https://staging.loka-fleet.com
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: public_html/package-lock.json
+
+      - name: Install dependencies
+        working-directory: ./public_html
+        run: npm ci
+
+      - name: Build frontend
+        working-directory: ./public_html
+        run: npm run build
+        env:
+          NODE_ENV: production
+
+      - name: Deploy to staging server
+        uses: easingthemes/ssh-deploy@v4
+        with:
+          SSH_PRIVATE_KEY: ${{ secrets.STAGING_SSH_KEY }}
+          REMOTE_HOST: ${{ secrets.STAGING_HOST }}
+          REMOTE_USER: ${{ secrets.STAGING_USER }}
+          TARGET: /var/www/staging.loka-fleet.com
+          SOURCE: public_html/
+          ARGS: '-rlgoDzvc -i --delete'
+          EXCLUDE: '/node_modules/, /.git/, /.github/, /logs/, /vendor/'
+
+      - name: Notify deployment
+        uses: 8398a7/action-slack@v3
+        if: always()
+        with:
+          status: ${{ job.status }}
+          text: 'Deploy to staging completed'
+          webhook_url: ${{ secrets.SLACK_WEBHOOK }}
+
+  # Deploy to Production
+  deploy-production:
+    name: Deploy to Production
+    if: github.event.inputs.environment == 'production'
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+      url: https://loka-fleet.com
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: public_html/package-lock.json
+
+      - name: Install dependencies
+        working-directory: ./public_html
+        run: npm ci
+
+      - name: Run tests
+        working-directory: ./public_html
+        run: npm run validate
+
+      - name: Build frontend
+        working-directory: ./public_html
+        run: npm run build
+        env:
+          NODE_ENV: production
+
+      - name: Create deployment package
+        working-directory: ./public_html
+        run: |
+          mkdir -p ../deploy-package
+          rsync -av --exclude='node_modules' \
+                   --exclude='.git' \
+                   --exclude='.github' \
+                   --exclude='logs' \
+                   --exclude='*.log' \
+                   --exclude='.env.local' \
+                   . ../deploy-package/
+
+      - name: Deploy to production server
+        uses: easingthemes/ssh-deploy@v4
+        with:
+          SSH_PRIVATE_KEY: ${{ secrets.PRODUCTION_SSH_KEY }}
+          REMOTE_HOST: ${{ secrets.PRODUCTION_HOST }}
+          REMOTE_USER: ${{ secrets.PRODUCTION_USER }}
+          TARGET: /var/www/loka-fleet.com
+          SOURCE: public_html/
+          ARGS: '-rlgoDzvc -i --delete'
+          EXCLUDE: '/node_modules/, /.git/, /.github/, /logs/, /vendor/'
+
+      - name: Run post-deployment commands
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.PRODUCTION_HOST }}
+          username: ${{ secrets.PRODUCTION_USER }}
+          key: ${{ secrets.PRODUCTION_SSH_KEY }}
+          script: |
+            cd /var/www/loka-fleet.com
+            php artisan migrate --force
+            composer install --no-dev --optimize-autoloader
+            chmod -R 755 storage bootstrap/cache
+
+      - name: Notify deployment
+        uses: 8398a7/action-slack@v3
+        if: always()
+        with:
+          status: ${{ job.status }}
+          text: 'Deploy to production completed'
+          webhook_url: ${{ secrets.SLACK_WEBHOOK }}
+
+  # Docker Build and Push
+  docker:
+    name: Build and Push Docker Image
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Build and push
+        uses: docker/build-push-action@v5
+        with:
+          context: ./public_html
+          push: true
+          tags: |
+            lokafleet/app:latest
+            lokafleet/app:${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max

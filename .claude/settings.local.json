@@ -63,7 +63,11 @@
       "Bash(git add:*)",
       "Bash(git commit:*)",
       "Bash(mysql:*)",
-      "Bash(curl:*)"
+      "Bash(curl:*)",
+      "Bash(node:*)",
+      "Bash(npm:*)",
+      "Bash(docker:*)",
+      "Bash(git:*)"
     ]
   }
 }

@@ -1,0 +1,114 @@
+name: Code Quality
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+  schedule:
+    # Run every Monday at 9 AM UTC
+    - cron: '0 9 * * 1'
+
+jobs:
+  # Security Audit
+  security-audit:
+    name: Security Audit
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: public_html/package-lock.json
+
+      - name: Run npm audit
+        working-directory: ./public_html
+        run: npm audit --audit-level=moderate
+        continue-on-error: true
+
+      - name: Run Snyk security scan
+        uses: snyk/actions/node@master
+        continue-on-error: true
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          args: --severity-threshold=high
+          command: test
+
+  # Code Complexity Analysis
+  complexity:
+    name: Code Complexity
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: public_html/package-lock.json
+
+      - name: Install dependencies
+        working-directory: ./public_html
+        run: npm ci
+
+      - name: Run complexity report
+        working-directory: ./public_html
+        run: npx complexity-report -f json assets/js/ > complexity-report.json
+        continue-on-error: true
+
+      - name: Upload complexity report
+        uses: actions/upload-artifact@v4
+        with:
+          name: complexity-report
+          path: public_html/complexity-report.json
+
+  # Dependency Review
+  dependency-review:
+    name: Dependency Review
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Dependency Review
+        uses: actions/dependency-review-action@v4
+        with:
+          fail-on-severity: moderate
+
+  # PHP Code Quality
+  php-quality:
+    name: PHP Code Quality
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          extensions: mbstring, xml, pdo, pdo_mysql
+          coverage: none
+          tools: composer, phpstan, phpcs
+
+      - name: Install Composer dependencies
+        working-directory: ./public_html
+        run: composer install --prefer-dist --no-progress
+
+      - name: Run PHPStan
+        working-directory: ./public_html
+        run: phpstan analyse --error-format=github
+        continue-on-error: true
+
+      - name: Run PHPCS
+        working-directory: ./public_html
+        run: phpcs --report=github
+        continue-on-error: true

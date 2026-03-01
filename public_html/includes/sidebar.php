@@ -58,12 +58,6 @@
                     <span>Guard Dashboard</span>
                 </a>
             </li>
-            <li class="nav-item">
-                <a class="nav-link <?= activeMenu('guard') && get('action') === 'completed' ? 'active' : '' ?>" href="<?= APP_URL ?>/?page=guard&action=completed">
-                    <i class="bi bi-check-all"></i>
-                    <span>Completed Trips</span>
-                </a>
-            </li>
             <?php endif; ?>
             
             <?php if (isApprover()): ?>

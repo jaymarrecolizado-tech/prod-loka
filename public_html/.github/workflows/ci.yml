@@ -1,0 +1,185 @@
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+jobs:
+  # Lint and Format Check
+  lint:
+    name: Lint & Format
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: public_html/package-lock.json
+
+      - name: Install dependencies
+        working-directory: ./public_html
+        run: npm ci
+
+      - name: Run ESLint
+        working-directory: ./public_html
+        run: npm run lint
+
+      - name: Check Prettier formatting
+        working-directory: ./public_html
+        run: npm run format:check
+
+  # TypeScript Type Check
+  type-check:
+    name: Type Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: public_html/package-lock.json
+
+      - name: Install dependencies
+        working-directory: ./public_html
+        run: npm ci
+
+      - name: Run TypeScript check
+        working-directory: ./public_html
+        run: npm run type-check
+
+  # Unit Tests
+  test:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: public_html/package-lock.json
+
+      - name: Install dependencies
+        working-directory: ./public_html
+        run: npm ci
+
+      - name: Run unit tests with coverage
+        working-directory: ./public_html
+        run: npm run test:coverage
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          files: ./public_html/coverage/coverage-final.json
+          flags: unittests
+          name: codecov-umbrella
+          fail_ci_if_error: false
+
+  # E2E Tests
+  e2e:
+    name: E2E Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: public_html/package-lock.json
+
+      - name: Install dependencies
+        working-directory: ./public_html
+        run: npm ci
+
+      - name: Install Playwright browsers
+        working-directory: ./public_html
+        run: npx playwright install --with-deps chromium
+
+      - name: Run E2E tests
+        working-directory: ./public_html
+        run: npm run test:e2e
+
+      - name: Upload Playwright report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: playwright-report
+          path: public_html/playwright-report/
+          retention-days: 7
+
+  # PHP Tests
+  php-test:
+    name: PHP Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          extensions: mbstring, xml, pdo, pdo_mysql
+          coverage: xdebug
+
+      - name: Install Composer dependencies
+        working-directory: ./public_html
+        run: composer install --prefer-dist --no-progress
+
+      - name: Run PHPUnit tests
+        working-directory: ./public_html
+        run: vendor/bin/phpunit --coverage-clover=coverage.xml
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          files: ./public_html/coverage.xml
+          flags: php
+          name: codecov-php
+
+  # Build
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    needs: [lint, type-check, test]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: public_html/package-lock.json
+
+      - name: Install dependencies
+        working-directory: ./public_html
+        run: npm ci
+
+      - name: Build frontend
+        working-directory: ./public_html
+        run: npm run build
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-artifacts
+          path: public_html/assets/dist
+          retention-days: 7

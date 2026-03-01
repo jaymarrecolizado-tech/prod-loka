@@ -10,7 +10,26 @@
         }
     ],
     "require-dev": {
-        "phpunit/phpunit": "^9.5"
+        "phpunit/phpunit": "^9.5",
+        "phpstan/phpstan": "^1.12",
+        "squizlabs/php_codesniffer": "^3.10",
+        "vimeo/psalm": "^5.26",
+        "friendsofphp/php-cs-fixer": "^3.65",
+        "phpmetrics/phpmetrics": "^2.10",
+        "sebastian/phpcpd": "^6.0",
+        "phpmd/phpmd": "^2.15"
+    },
+    "scripts": {
+        "test": "phpunit",
+        "test:coverage": "phpunit --coverage-html coverage",
+        "analyze": "phpstan analyse --memory-limit=1G",
+        "cs-check": "phpcs",
+        "cs-fix": "phpcbf",
+        "cs-fix:all": "php-cs-fixer fix",
+        "psalm": "psalm --show-info=true",
+        "metrics": "phpmetrics --report-html=metrics ./classes",
+        "cpd": "phpcpd classes api includes pages",
+        "phpmd": "phpmd classes,api,includes,pages text clea,codesize,controversial,design,naming,unusedcode"
     },
     "autoload": {
         "psr-4": {

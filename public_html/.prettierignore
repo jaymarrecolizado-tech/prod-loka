@@ -1,0 +1,37 @@
+# Dependencies
+node_modules/
+vendor/
+
+# Build outputs
+dist/
+assets/dist/
+deploy-package/
+
+# Cache
+.cache/
+*.log
+
+# Lock files
+package-lock.json
+composer.lock
+yarn.lock
+
+# Environment
+.env*
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Test coverage
+coverage/
+
+# Generated files
+*.min.js
+*.min.css
