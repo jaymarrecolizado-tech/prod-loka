@@ -661,7 +661,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <div class="system-info">
       <div class="sys-badge"><div class="dot"></div> SERVER ONLINE</div>
       <div class="sys-badge"><div class="dot"></div> ENCRYPTED</div>
-      <div class="sys-badge"><div class="dot red"></div> v2.1.4</div>
+      <div class="sys-badge"><div class="dot red"></div> v<?= APP_VERSION ?></div>
     </div>
   </div>
 </div>
@@ -669,7 +669,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <!-- Status Bar -->
 <div class="status-bar">
   <div class="status-left">
-    <span>LOKA FMS <span class="status-highlight">v2.1.4</span></span>
+    <span>LOKA FMS <span class="status-highlight">v<?= APP_VERSION ?></span></span>
     <span>DICT-RO2 <span class="status-highlight">REGION II</span></span>
   </div>
   <span id="clock" class="status-highlight"></span>

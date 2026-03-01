@@ -1,4 +1,19 @@
         </main>
+        
+        <!-- Version Footer -->
+        <footer class="version-footer mt-auto py-2 px-3 border-top bg-light">
+            <div class="d-flex justify-content-between align-items-center">
+                <small class="text-muted">
+                    <span class="fw-medium"><?= APP_NAME ?></span> 
+                    <span class="badge bg-secondary ms-1">v<?= APP_VERSION ?></span>
+                </small>
+                <small class="text-muted">
+                    <a href="<?= APP_URL ?>/?page=patch-notes" class="text-decoration-none text-muted">
+                        <i class="bi bi-journal-text me-1"></i>Patch Notes
+                    </a>
+                </small>
+            </div>
+        </footer>
     </div>
     
     <!-- jQuery (required for DataTables) -->

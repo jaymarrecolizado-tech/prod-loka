@@ -181,6 +181,14 @@
                 </a>
             </li>
             <?php endif; ?>
+            
+            <!-- Patch Notes - Visible to All Roles -->
+            <li class="nav-item">
+                <a class="nav-link <?= activeMenu('patch-notes') ?>" href="<?= APP_URL ?>/?page=patch-notes">
+                    <i class="bi bi-journal-text"></i>
+                    <span>Patch Notes</span>
+                </a>
+            </li>
         </ul>
     </div>
     
