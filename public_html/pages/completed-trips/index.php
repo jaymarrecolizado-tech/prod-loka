@@ -20,6 +20,13 @@ $page = getInt('page', 1);
 $limit = 20;
 $offset = ($page - 1) * $limit;
 
+// Check if user is a driver
+$driver = db()->fetch(
+    "SELECT id FROM drivers WHERE user_id = ? AND deleted_at IS NULL",
+    [userId()]
+);
+$isDriver = ($driver !== null);
+
 // Build base query with role-based filtering
 $sql = "SELECT r.*,
             u.name as requester_name, u.phone as requester_phone,
@@ -44,49 +51,31 @@ $sql = "SELECT r.*,
 $params = [STATUS_COMPLETED];
 
 // Role-based filtering
-switch ($role) {
-    case ROLE_DRIVER:
-        // Drivers see only their completed trips
-        $driver = db()->fetch(
-            "SELECT id FROM drivers WHERE user_id = ? AND deleted_at IS NULL",
-            [userId()]
-        );
-        if (!$driver) {
-            redirectWith('/?page=dashboard', 'danger', 'Driver profile not found.');
-        }
-        $sql .= " AND (r.driver_id = ? OR r.requested_driver_id = ?)";
-        $params[] = $driver->id;
-        $params[] = $driver->id;
-        break;
-
-    case ROLE_GUARD:
-        // Guards see trips they dispatched or received
-        $sql .= " AND (r.dispatch_guard_id = ? OR r.arrival_guard_id = ?)";
-        $params[] = userId();
-        $params[] = userId();
-        break;
-
-    case ROLE_APPROVER:
-        // Approvers see completed trips from their department
-        $userDepartmentId = db()->fetchColumn(
-            "SELECT department_id FROM users WHERE id = ?",
-            [userId()]
-        );
-        $sql .= " AND r.department_id = ?";
-        $params[] = $userDepartmentId;
-        break;
-
-    case ROLE_MOTORPOOL:
-    case ROLE_ADMIN:
-        // Motorpool heads and admins see all completed trips
-        // No additional filtering needed
-        break;
-
-    default:
-        // Requesters see only their own completed trips
-        $sql .= " AND r.user_id = ?";
-        $params[] = userId();
-        break;
+if ($isDriver) {
+    // Drivers see only their completed trips
+    $sql .= " AND (r.driver_id = ? OR r.requested_driver_id = ?)";
+    $params[] = $driver->id;
+    $params[] = $driver->id;
+} elseif ($role === ROLE_GUARD) {
+    // Guards see trips they dispatched or received
+    $sql .= " AND (r.dispatch_guard_id = ? OR r.arrival_guard_id = ?)";
+    $params[] = userId();
+    $params[] = userId();
+} elseif ($role === ROLE_APPROVER) {
+    // Approvers see completed trips from their department
+    $userDepartmentId = db()->fetchColumn(
+        "SELECT department_id FROM users WHERE id = ?",
+        [userId()]
+    );
+    $sql .= " AND r.department_id = ?";
+    $params[] = $userDepartmentId;
+} elseif ($role === ROLE_MOTORPOOL || $role === ROLE_ADMIN) {
+    // Motorpool heads and admins see all completed trips
+    // No additional filtering needed
+} else {
+    // Requesters see only their own completed trips
+    $sql .= " AND r.user_id = ?";
+    $params[] = userId();
 }
 
 // Apply date range filter
@@ -153,7 +142,7 @@ require_once INCLUDES_PATH . '/header.php';
         <div>
             <h4 class="mb-1"><i class="bi bi-check-all me-2"></i>Completed Trips</h4>
             <p class="text-muted mb-0">
-                <?php if ($role === ROLE_DRIVER): ?>
+                <?php if ($isDriver): ?>
                     Your completed trip history
                 <?php elseif ($role === ROLE_GUARD): ?>
                     Trips you tracked at the gate
