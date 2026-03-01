@@ -31,13 +31,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if ($existing) {
             db()->update('settings', ['value' => $value, 'updated_at' => date(DATETIME_FORMAT)], '`key` = ?', [$key]);
         } else {
-            db()->insert('settings', [
-                'key' => $key,
-                'value' => $value,
-                'type' => 'string',
-                'created_at' => date(DATETIME_FORMAT),
-                'updated_at' => date(DATETIME_FORMAT)
-            ]);
+            db()->query(
+                "INSERT INTO settings (`key`, value, type, category, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?)",
+                [$key, $value, 'string', 'booking', date(DATETIME_FORMAT), date(DATETIME_FORMAT)]
+            );
         }
         $settings[$key] = $value;
     }

@@ -122,11 +122,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && post('action') !== 'save_workflow' 
     // Passenger count = selected passengers + requester (1)
     $passengerCount = count($passengerIds) + 1;
     
-    $vehicleId = postInt('vehicle_id') ?: null;
+$vehicleId = postInt('vehicle_id') ?: null;
     $notes = postSafe('notes', '', 1000);
     $approverId = postInt('approver_id');
     $motorpoolHeadId = postInt('motorpool_head_id');
     $requestedDriverId = postInt('requested_driver_id') ?: null;
+    
+    // Load booking rules settings
+    $bookingSettings = [];
+    $settingsData = db()->fetchAll("SELECT `key`, value FROM settings WHERE `key` IN ('max_advance_booking_days', 'min_advance_booking_hours', 'max_trip_duration_hours')");
+    foreach ($settingsData as $s) {
+        $bookingSettings[$s->key] = $s->value;
+    }
+    $maxAdvanceDays = (int) ($bookingSettings['max_advance_booking_days'] ?? 30);
+    $minAdvanceHours = (int) ($bookingSettings['min_advance_booking_hours'] ?? 24);
+    $maxTripHours = (int) ($bookingSettings['max_trip_duration_hours'] ?? 72);
     
     // Validation
     $manilaTz = new DateTimeZone('Asia/Manila');
@@ -138,11 +148,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && post('action') !== 'save_workflow' 
     if (empty($endDatetime)) {
         $errors[] = 'End date/time is required';
     }
-    if ($startDatetime && $endDatetime) {
+if ($startDatetime && $endDatetime) {
         $startDt = new DateTime($startDatetime, $manilaTz);
         $endDt = new DateTime($endDatetime, $manilaTz);
         if ($endDt <= $startDt) {
             $errors[] = 'End date/time must be after start date/time';
+        }
+        
+        // Booking rules validation
+        $hoursUntilStart = ($startDt->getTimestamp() - $now->getTimestamp()) / 3600;
+        
+        // Check minimum advance booking time
+        if ($hoursUntilStart < $minAdvanceHours) {
+            $errors[] = "Bookings must be made at least {$minAdvanceHours} hours in advance. Please select a later start time.";
+        }
+        
+        // Check maximum advance booking time
+        $maxAdvanceSeconds = $maxAdvanceDays * 24 * 3600;
+        if ($hoursUntilStart > $maxAdvanceSeconds) {
+            $errors[] = "Bookings cannot be made more than {$maxAdvanceDays} days in advance. Please select an earlier start time.";
+        }
+        
+        // Check maximum trip duration
+        $tripDurationHours = ($endDt->getTimestamp() - $startDt->getTimestamp()) / 3600;
+        if ($tripDurationHours > $maxTripHours) {
+            $errors[] = "Trip duration cannot exceed {$maxTripHours} hours. Please shorten your trip or split it into multiple requests.";
         }
     }
     if (empty($purpose)) {
@@ -1588,15 +1618,27 @@ ob_start();
         checkVehicleCapacity();
     }, 500);
     
-    // Initialize date pickers immediately (Flatpickr should be loaded by now)
+// Initialize date pickers immediately (Flatpickr should be loaded by now)
     if (typeof flatpickr !== 'undefined') {
+        // Get booking rules from PHP settings
+        const bookingMaxAdvanceDays = <?= (int) ($bookingSettings['max_advance_booking_days'] ?? 30) ?>;
+        const bookingMinAdvanceHours = <?= (int) ($bookingSettings['min_advance_booking_hours'] ?? 24) ?>;
+        const bookingMaxTripHours = <?= (int) ($bookingSettings['max_trip_duration_hours'] ?? 72) ?>;
+        
+        // Calculate min and max dates
+        const today = new Date();
+        const minDate = today;
+        const maxDate = new Date(today);
+        maxDate.setDate(maxDate.getDate() + bookingMaxAdvanceDays);
+        
         // Initialize datetime pickers
         const startPicker = flatpickr('#start_datetime', {
             enableTime: true,
             dateFormat: "Y-m-d H:i",
             time_24hr: true,
             allowInput: true,
-            minDate: "today",
+            minDate: minDate,
+            maxDate: maxDate,
             minuteIncrement: 15
         });
         
@@ -1605,7 +1647,8 @@ ob_start();
             dateFormat: "Y-m-d H:i",
             time_24hr: true,
             allowInput: true,
-            minDate: "today",
+            minDate: minDate,
+            maxDate: maxDate,
             minuteIncrement: 15
         });
         
@@ -1614,6 +1657,10 @@ ob_start();
             startPicker.config.onChange.push(function(selectedDates) {
                 if (selectedDates.length > 0) {
                     endPicker.set('minDate', selectedDates[0]);
+                    // Set max date for end time to enforce max trip duration
+                    const maxEndDate = new Date(selectedDates[0]);
+                    maxEndDate.setHours(maxEndDate.getHours() + bookingMaxTripHours);
+                    endPicker.set('maxDate', maxEndDate);
                 }
             });
         }
@@ -1621,12 +1668,20 @@ ob_start();
         // Retry if Flatpickr not loaded yet
         setTimeout(function() {
             if (typeof flatpickr !== 'undefined') {
+                const bookingMaxAdvanceDays = <?= (int) ($bookingSettings['max_advance_booking_days'] ?? 30) ?>;
+                const bookingMaxTripHours = <?= (int) ($bookingSettings['max_trip_duration_hours'] ?? 72) ?>;
+                
+                const today = new Date();
+                const maxDate = new Date(today);
+                maxDate.setDate(maxDate.getDate() + bookingMaxAdvanceDays);
+                
                 flatpickr('#start_datetime', {
                     enableTime: true,
                     dateFormat: "Y-m-d H:i",
                     time_24hr: true,
                     allowInput: true,
-                    minDate: "today",
+                    minDate: today,
+                    maxDate: maxDate,
                     minuteIncrement: 15
                 });
                 flatpickr('#end_datetime', {
@@ -1634,7 +1689,8 @@ ob_start();
                     dateFormat: "Y-m-d H:i",
                     time_24hr: true,
                     allowInput: true,
-                    minDate: "today",
+                    minDate: today,
+                    maxDate: maxDate,
                     minuteIncrement: 15
                 });
             }
