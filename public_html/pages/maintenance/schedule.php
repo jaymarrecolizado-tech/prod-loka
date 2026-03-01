@@ -502,6 +502,16 @@ require_once INCLUDES_PATH . '/header.php';
                                                 <i class="bi bi-pencil"></i>
                                             </a>
                                             <?php endif; ?>
+                                            <?php if (isAdmin()): ?>
+                                            <form method="POST" action="<?= APP_URL ?>/?page=maintenance&action=delete" class="d-inline"
+                                                  onsubmit="return confirm('Are you sure you want to delete this maintenance request?')">
+                                                <?= csrfField() ?>
+                                                <input type="hidden" name="id" value="<?= $req->id ?>">
+                                                <button type="submit" class="btn btn-sm btn-outline-danger">
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
+                                            </form>
+                                            <?php endif; ?>
                                         </div>
                                     </td>
                                 </tr>

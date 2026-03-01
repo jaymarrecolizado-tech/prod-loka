@@ -45,10 +45,20 @@ require_once INCLUDES_PATH . '/header.php';
         </div>
         <div>
             <?php if ($maintenance->status !== MAINTENANCE_STATUS_COMPLETED && $maintenance->status !== MAINTENANCE_STATUS_CANCELLED): ?>
-            <a href="<?= APP_URL ?>/?page=maintenance&action=edit&id=<?= $maintenanceId ?>" 
+            <a href="<?= APP_URL ?>/?page=maintenance&action=edit&id=<?= $maintenanceId ?>"
                class="btn btn-outline-primary">
                 <i class="bi bi-pencil me-1"></i>Edit
             </a>
+            <?php endif; ?>
+            <?php if (isAdmin() && $maintenance->status !== MAINTENANCE_STATUS_IN_PROGRESS): ?>
+            <form method="POST" action="<?= APP_URL ?>/?page=maintenance&action=delete" class="d-inline"
+                  onsubmit="return confirm('Are you sure you want to delete this maintenance request?')">
+                <?= csrfField() ?>
+                <input type="hidden" name="id" value="<?= $maintenanceId ?>">
+                <button type="submit" class="btn btn-outline-danger">
+                    <i class="bi bi-trash me-1"></i>Delete
+                </button>
+            </form>
             <?php endif; ?>
         </div>
     </div>

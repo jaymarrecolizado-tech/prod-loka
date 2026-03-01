@@ -303,6 +303,8 @@ switch ($page) {
             require_once PAGES_PATH . '/maintenance/view.php';
         } elseif ($action === 'edit') {
             require_once PAGES_PATH . '/maintenance/edit.php';
+        } elseif ($action === 'delete') {
+            require_once PAGES_PATH . '/maintenance/delete.php';
         } elseif ($action === 'schedule') {
             require_once PAGES_PATH . '/maintenance/schedule.php';
         } else {
