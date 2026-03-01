@@ -61,7 +61,9 @@
       "Bash(grep:*)",
       "Bash(sleep 2:*)",
       "Bash(git add:*)",
-      "Bash(git commit:*)"
+      "Bash(git commit:*)",
+      "Bash(mysql:*)",
+      "Bash(curl:*)"
     ]
   }
 }

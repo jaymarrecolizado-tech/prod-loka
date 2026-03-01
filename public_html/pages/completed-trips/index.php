@@ -13,12 +13,19 @@
 $pageTitle = 'Completed Trips';
 
 $role = userRole();
-$startDate = get('start_date', date('Y-m-01'));
-$endDate = get('end_date', date('Y-m-t'));
+$showAllDates = get('all', '1'); // Default to show all completed trips
 $search = get('search', '');
 $page = getInt('page', 1);
-$limit = 20;
+$limit = 25; // Increased from 20 to 25
 $offset = ($page - 1) * $limit;
+
+// Date filter - only apply if not showing all
+$startDate = null;
+$endDate = null;
+if ($showAll !== '1') {
+    $startDate = get('start_date', date('Y-m-01'));
+    $endDate = get('end_date', date('Y-m-t'));
+}
 
 // Check if user is a driver
 $driver = db()->fetch(
@@ -79,10 +86,12 @@ if ($isDriver) {
     $params[] = userId();
 }
 
-// Apply date range filter
-$sql .= " AND DATE(r.actual_arrival_datetime) BETWEEN ? AND ?";
-$params[] = $startDate;
-$params[] = $endDate . ' 23:59:59';
+// Apply date range filter (only if specific dates are set)
+if ($startDate && $endDate) {
+    $sql .= " AND DATE(r.actual_arrival_datetime) BETWEEN ? AND ?";
+    $params[] = $startDate;
+    $params[] = $endDate . ' 23:59:59';
+}
 
 // Apply search filter
 if ($search) {
@@ -240,15 +249,24 @@ require_once INCLUDES_PATH . '/header.php';
         <div class="card-body">
             <form method="GET" class="row g-3">
                 <input type="hidden" name="page" value="completed-trips">
-                <div class="col-md-3">
+                <div class="col-md-2">
+                    <label class="form-label">Date Range</label>
+                    <select class="form-select" name="all" onchange="this.form.submit()">
+                        <option value="1" <?= $showAll === '1' ? 'selected' : '' ?>>All Time</option>
+                        <option value="0" <?= $showAll !== '1' ? 'selected' : '' ?>>Custom Range</option>
+                    </select>
+                </div>
+                <?php if ($showAll !== '1'): ?>
+                <div class="col-md-2">
                     <label class="form-label">Start Date</label>
-                    <input type="date" class="form-control" name="start_date" value="<?= $startDate ?>">
+                    <input type="date" class="form-control" name="start_date" value="<?= $startDate ?? date('Y-m-01') ?>">
                 </div>
-                <div class="col-md-3">
+                <div class="col-md-2">
                     <label class="form-label">End Date</label>
-                    <input type="date" class="form-control" name="end_date" value="<?= $endDate ?>">
+                    <input type="date" class="form-control" name="end_date" value="<?= $endDate ?? date('Y-m-t') ?>">
                 </div>
-                <div class="col-md-4">
+                <?php endif; ?>
+                <div class="<?= $showAll === '1' ? 'col-md-8' : 'col-md-4' ?>">
                     <label class="form-label">Search</label>
                     <input type="text" class="form-control" name="search" value="<?= e($search) ?>"
                            placeholder="Vehicle, requester, driver, destination...">
@@ -258,7 +276,7 @@ require_once INCLUDES_PATH . '/header.php';
                         <i class="bi bi-search me-1"></i>Filter
                     </button>
                     <a href="<?= APP_URL ?>/?page=completed-trips" class="btn btn-outline-secondary">
-                        <i class="bi bi-x-circle"></i>
+                        <i class="bi bi-arrow-clockwise"></i>
                     </a>
                 </div>
             </form>
@@ -268,7 +286,21 @@ require_once INCLUDES_PATH . '/header.php';
     <!-- Completed Trips Table -->
     <div class="card">
         <div class="card-header d-flex justify-content-between align-items-center">
-            <h5 class="mb-0">Completed Trips (<?= $totalCount ?>)</h5>
+            <div>
+                <h5 class="mb-0">Completed Trips (<?= $totalCount ?> total)</h5>
+                <small class="text-muted">
+                    <?php if ($showAll === '1'): ?>
+                        Showing all time • Page <?= $page ?> of <?= $totalPages ?>
+                    <?php else: ?>
+                        Showing from <?= formatDate($startDate) ?> to <?= formatDate($endDate) ?> • Page <?= $page ?> of <?= $totalPages ?>
+                    <?php endif; ?>
+                </small>
+            </div>
+            <div class="d-flex align-items-center gap-2">
+                <span class="text-muted small">
+                    <?= ($page - 1) * $limit + 1 ?>-<?= min($page * $limit, $totalCount) ?> of <?= $totalCount ?>
+                </span>
+            </div>
         </div>
         <div class="card-body">
             <?php if (empty($trips)): ?>
@@ -396,30 +428,50 @@ require_once INCLUDES_PATH . '/header.php';
                 <?php if ($totalPages > 1): ?>
                 <nav class="mt-3">
                     <ul class="pagination justify-content-center">
+                        <?php
+                        $paginationParams = http_build_query(array_filter([
+                            'page' => 'completed-trips',
+                            'all' => $showAll,
+                            'start_date' => $startDate,
+                            'end_date' => $endDate,
+                            'search' => $search
+                        ]));
+                        ?>
                         <?php if ($page > 1): ?>
                         <li class="page-item">
-                            <a class="page-link" href="?page=completed-trips&start_date=<?= $startDate ?>&end_date=<?= $endDate ?>&search=<?= e($search) ?>&p=<?= $page - 1 ?>">
+                            <a class="page-link" href="?<?= $paginationParams ?>&p=<?= $page - 1 ?>">
                                 <i class="bi bi-chevron-left"></i>
                             </a>
                         </li>
                         <?php endif; ?>
 
-                        <?php for ($i = 1; $i <= $totalPages; $i++): ?>
+                        <?php
+                        // Show limited page numbers
+                        $startPage = max(1, $page - 2);
+                        $endPage = min($totalPages, $page + 2);
+                        if ($startPage > 1) echo '<li class="page-item disabled"><span class="page-link">...</span></li>';
+                        for ($i = $startPage; $i <= $endPage; $i++):
+                        ?>
                         <li class="page-item <?= $i === $page ? 'active' : '' ?>">
-                            <a class="page-link" href="?page=completed-trips&start_date=<?= $startDate ?>&end_date=<?= $endDate ?>&search=<?= e($search) ?>&p=<?= $i ?>">
+                            <a class="page-link" href="?<?= $paginationParams ?>&p=<?= $i ?>">
                                 <?= $i ?>
                             </a>
                         </li>
-                        <?php endfor; ?>
+                        <?php endfor;
+                        if ($endPage < $totalPages) echo '<li class="page-item disabled"><span class="page-link">...</span></li>';
+                        ?>
 
                         <?php if ($page < $totalPages): ?>
                         <li class="page-item">
-                            <a class="page-link" href="?page=completed-trips&start_date=<?= $startDate ?>&end_date=<?= $endDate ?>&search=<?= e($search) ?>&p=<?= $page + 1 ?>">
+                            <a class="page-link" href="?<?= $paginationParams ?>&p=<?= $page + 1 ?>">
                                 <i class="bi bi-chevron-right"></i>
                             </a>
                         </li>
                         <?php endif; ?>
                     </ul>
+                    <div class="text-center text-muted small">
+                        Page <?= $page ?> of <?= $totalPages ?> (<?= $totalCount ?> total trips)
+                    </div>
                 </nav>
                 <?php endif; ?>
             <?php endif; ?>
