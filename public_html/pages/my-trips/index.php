@@ -26,12 +26,16 @@ $sql = "SELECT r.*,
             u.name as requester_name, u.phone as requester_phone,
             d.name as department_name,
             v.plate_number, v.make, v.model as vehicle_model,
-            mph.name as motorpool_head_name
+            mph.name as motorpool_head_name,
+            tt.id as trip_ticket_id,
+            tt.status as trip_ticket_status,
+            tt.trip_type as trip_ticket_type
         FROM requests r
         JOIN users u ON r.user_id = u.id
         JOIN departments d ON r.department_id = d.id
         LEFT JOIN vehicles v ON r.vehicle_id = v.id AND v.deleted_at IS NULL
         LEFT JOIN users mph ON r.motorpool_head_id = mph.id
+        LEFT JOIN trip_tickets tt ON r.id = tt.request_id AND tt.deleted_at IS NULL
         WHERE (r.driver_id = ? OR r.requested_driver_id = ?)
         AND r.deleted_at IS NULL";
 
@@ -56,28 +60,44 @@ $trips = db()->fetchAll($sql, $params);
 
 $stats = [
     'upcoming' => db()->fetchColumn(
-        "SELECT COUNT(*) FROM requests 
-         WHERE (driver_id = ? OR requested_driver_id = ?) 
-         AND end_datetime >= NOW() 
+        "SELECT COUNT(*) FROM requests
+         WHERE (driver_id = ? OR requested_driver_id = ?)
+         AND end_datetime >= NOW()
          AND status IN (?, ?)
          AND deleted_at IS NULL",
         [$driver->id, $driver->id, STATUS_APPROVED, STATUS_PENDING_MOTORPOOL]
     ),
     'completed' => db()->fetchColumn(
-        "SELECT COUNT(*) FROM requests 
-         WHERE driver_id = ? 
-         AND status = ? 
+        "SELECT COUNT(*) FROM requests
+         WHERE driver_id = ?
+         AND status = ?
          AND deleted_at IS NULL",
         [$driver->id, STATUS_COMPLETED]
     ),
     'this_month' => db()->fetchColumn(
-        "SELECT COUNT(*) FROM requests 
-         WHERE driver_id = ? 
-         AND MONTH(start_datetime) = MONTH(NOW()) 
+        "SELECT COUNT(*) FROM requests
+         WHERE driver_id = ?
+         AND MONTH(start_datetime) = MONTH(NOW())
          AND YEAR(start_datetime) = YEAR(NOW())
          AND status IN (?, ?)
          AND deleted_at IS NULL",
         [$driver->id, STATUS_APPROVED, STATUS_COMPLETED]
+    ),
+    'trip_tickets_pending' => db()->fetchColumn(
+        "SELECT COUNT(*) FROM trip_tickets tt
+         JOIN requests r ON tt.request_id = r.id
+         WHERE r.driver_id = ?
+         AND tt.status = 'submitted'
+         AND tt.deleted_at IS NULL",
+        [$driver->id]
+    ),
+    'trip_tickets_approved' => db()->fetchColumn(
+        "SELECT COUNT(*) FROM trip_tickets tt
+         JOIN requests r ON tt.request_id = r.id
+         WHERE r.driver_id = ?
+         AND tt.status = 'approved'
+         AND tt.deleted_at IS NULL",
+        [$driver->id]
     )
 ];
 
@@ -101,7 +121,7 @@ require_once INCLUDES_PATH . '/header.php';
     </div>
 
     <div class="row g-3 mb-4">
-        <div class="col-md-4">
+        <div class="col-md-3">
             <div class="card border-0 shadow-sm h-100">
                 <div class="card-body">
                     <div class="d-flex align-items-center">
@@ -118,7 +138,7 @@ require_once INCLUDES_PATH . '/header.php';
                 </div>
             </div>
         </div>
-        <div class="col-md-4">
+        <div class="col-md-3">
             <div class="card border-0 shadow-sm h-100">
                 <div class="card-body">
                     <div class="d-flex align-items-center">
@@ -135,7 +155,7 @@ require_once INCLUDES_PATH . '/header.php';
                 </div>
             </div>
         </div>
-        <div class="col-md-4">
+        <div class="col-md-3">
             <div class="card border-0 shadow-sm h-100">
                 <div class="card-body">
                     <div class="d-flex align-items-center">
@@ -147,6 +167,28 @@ require_once INCLUDES_PATH . '/header.php';
                         <div class="flex-grow-1 ms-3">
                             <h6 class="text-muted mb-1">This Month</h6>
                             <h3 class="mb-0"><?= $stats['this_month'] ?></h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <div class="bg-warning bg-opacity-10 rounded p-3">
+                                <i class="bi bi-file-earmark-text text-warning fs-4"></i>
+                            </div>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h6 class="text-muted mb-1">Trip Tickets</h6>
+                            <h3 class="mb-0">
+                                <?= $stats['trip_tickets_approved'] ?>
+                                <?php if ($stats['trip_tickets_pending'] > 0): ?>
+                                    <span class="badge bg-warning ms-1"><?= $stats['trip_tickets_pending'] ?> pending</span>
+                                <?php endif; ?>
+                            </h3>
                         </div>
                     </div>
                 </div>
@@ -207,6 +249,7 @@ require_once INCLUDES_PATH . '/header.php';
                                 <th>Requester</th>
                                 <th>Status</th>
                                 <th>Role</th>
+                                <th>Trip Ticket</th>
                                 <th>Actions</th>
                             </tr>
                         </thead>
@@ -266,7 +309,45 @@ require_once INCLUDES_PATH . '/header.php';
                                         <?php endif; ?>
                                     </td>
                                     <td>
-                                        <a href="<?= APP_URL ?>/?page=requests&action=view&id=<?= $trip->id ?>" 
+                                        <!-- Trip Ticket Status -->
+                                        <?php if ($trip->trip_ticket_id): ?>
+                                            <?php
+                                            $ticketStatusClass = '';
+                                            $ticketStatusIcon = '';
+                                            switch ($trip->trip_ticket_status) {
+                                                case 'submitted':
+                                                    $ticketStatusClass = 'warning';
+                                                    $ticketStatusIcon = 'clock';
+                                                    break;
+                                                case 'reviewed':
+                                                    $ticketStatusClass = 'info';
+                                                    $ticketStatusIcon = 'arrow-counterclockwise';
+                                                    break;
+                                                case 'approved':
+                                                    $ticketStatusClass = 'success';
+                                                    $ticketStatusIcon = 'check-circle';
+                                                    break;
+                                            }
+                                            ?>
+                                            <a href="<?= APP_URL ?>/?page=trip-tickets&action=view&id=<?= $trip->trip_ticket_id ?>"
+                                               class="badge bg-<?= $ticketStatusClass ?> text-decoration-none"
+                                               title="View Trip Ticket">
+                                                <i class="bi bi-<?= $ticketStatusIcon ?> me-1"></i>
+                                                <?= ucfirst($trip->trip_ticket_status) ?>
+                                            </a>
+                                        <?php elseif ($trip->status === STATUS_COMPLETED): ?>
+                                            <button type="button" class="btn btn-sm btn-outline-success"
+                                                    onclick="createTripTicket(<?= $trip->id ?>)"
+                                                    title="Create Trip Ticket">
+                                                <i class="bi bi-file-earmark-plus me-1"></i>
+                                                Create Ticket
+                                            </button>
+                                        <?php else: ?>
+                                            <span class="text-muted">-</span>
+                                        <?php endif; ?>
+                                    </td>
+                                    <td>
+                                        <a href="<?= APP_URL ?>/?page=requests&action=view&id=<?= $trip->id ?>"
                                            class="btn btn-sm btn-outline-primary">
                                             <i class="bi bi-eye"></i> View
                                         </a>
@@ -293,5 +374,13 @@ require_once INCLUDES_PATH . '/header.php';
     </div>
     <?php endif; ?>
 </div>
+
+<script>
+function createTripTicket(requestId) {
+    if (confirm('Create a trip ticket for this completed trip?')) {
+        window.location.href = '<?= APP_URL ?>/?page=trip-tickets&action=create_form&request_id=' + requestId;
+    }
+}
+</script>
 
 <?php require_once INCLUDES_PATH . '/footer.php'; ?>
