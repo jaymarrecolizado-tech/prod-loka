@@ -31,7 +31,8 @@ class Database
         'schema_migrations',
         'password_reset_tokens',
         'maintenance_requests',
-        'assignment_history'
+        'assignment_history',
+        'trip_tickets'
     ];
 
     private function __construct()
