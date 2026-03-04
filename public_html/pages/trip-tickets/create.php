@@ -1,25 +1,30 @@
 <?php
 /**
  * LOKA - Create Trip Ticket Form
- * 
+ *
  * Pre-filled form for creating trip ticket after trip completion
+ * Only drivers can create tickets for their own completed trips
  */
 
-requireRole(ROLE_GUARD);
+// Allow drivers and guards to access
+if (!isDriver() && !isGuard() && !isAdmin()) {
+    redirectWith('/?page=dashboard', 'danger', 'You do not have permission to create trip tickets.');
+}
 
 $pageTitle = 'Create Trip Ticket';
 $requestId = (int) get('request_id', 0);
 
 // Validate request ID
 if (!$requestId) {
-    redirectWith('/?page=guard', 'danger', 'Invalid request ID.');
+    $redirectPage = isDriver() ? 'my-trips' : 'guard';
+    redirectWith('/?page=' . $redirectPage, 'danger', 'Invalid request ID.');
 }
 
 // Get request with all trip details for pre-filling
 $request = db()->fetch(
-    "SELECT r.*, 
+    "SELECT r.*,
             v.plate_number, v.make, v.model as vehicle_model, v.color,
-            d.id as driver_id, d.name as driver_name, d.license_number as driver_license,
+            d.id as driver_id, du.name as driver_name, d.license_number as driver_license,
             u.name as requester_name, u.department_id, dept.name as department_name,
             dg.name as dispatch_guard,
             r.actual_dispatch_datetime, r.actual_arrival_datetime,
@@ -27,6 +32,7 @@ $request = db()->fetch(
      FROM requests r
      LEFT JOIN vehicles v ON r.vehicle_id = v.id AND v.deleted_at IS NULL
      LEFT JOIN drivers d ON r.driver_id = d.id AND d.deleted_at IS NULL
+     LEFT JOIN users du ON d.user_id = du.id
      LEFT JOIN users u ON r.user_id = u.id
      LEFT JOIN departments dept ON u.department_id = dept.id
      LEFT JOIN users dg ON r.dispatch_guard_id = dg.id
@@ -36,11 +42,31 @@ $request = db()->fetch(
 );
 
 if (!$request) {
-    redirectWith('/?page=guard', 'danger', 'Request not found.');
+    $redirectPage = isDriver() ? 'my-trips' : 'guard';
+    redirectWith('/?page=' . $redirectPage, 'danger', 'Request not found.');
+}
+
+// Drivers can only create tickets for their own assigned trips
+if (isDriver()) {
+    // Get current user's driver ID
+    $currentDriverId = db()->fetchColumn(
+        "SELECT id FROM drivers WHERE user_id = ? AND deleted_at IS NULL",
+        [userId()]
+    );
+
+    if (!$currentDriverId) {
+        redirectWith('/?page=my-trips', 'danger', 'You are not registered as a driver.');
+    }
+
+    // Check if this trip belongs to the current driver
+    if ($request->driver_id != $currentDriverId && $request->requested_driver_id != $currentDriverId) {
+        redirectWith('/?page=my-trips', 'danger', 'You can only create trip tickets for your own assigned trips.');
+    }
 }
 
 // Can only create trip ticket for completed trips
 if ($request->status !== STATUS_COMPLETED) {
+    $redirectPage = isDriver() ? 'my-trips' : 'guard';
     redirectWith(
         '/?page=requests&action=view&id=' . $requestId,
         'warning',
@@ -55,8 +81,9 @@ $existingTicket = db()->fetch(
 );
 
 if ($existingTicket) {
+    $redirectPage = isDriver() ? 'my-trips' : 'trip-tickets';
     redirectWith(
-        '/?page=trip-tickets&action=view&id=' . $existingTicket->id,
+        '/?page=' . $redirectPage,
         'info',
         'A trip ticket already exists for this trip. You can view or update it.'
     );
@@ -82,42 +109,81 @@ if ($request->actual_dispatch_datetime && $request->actual_arrival_datetime) {
 
 // Get passengers count
 $passengers = db()->fetchColumn(
-    "SELECT COUNT(*) FROM passengers WHERE request_id = ?",
+    "SELECT COUNT(*) FROM request_passengers WHERE request_id = ?",
     [$requestId]
 );
 
 // Pre-select vehicle plate if available
-$plateNumber = $request->plate_number ? $request->plate_number . ' - ' . $request->make . ' ' . $request->vehicle_model : '';
+$plateNumber = '';
+if ($request->plate_number) {
+    $plateNumber = $request->plate_number;
+    if ($request->make) {
+        $plateNumber .= ' - ' . $request->make;
+        if ($request->vehicle_model) {
+            $plateNumber .= ' ' . $request->vehicle_model;
+        }
+    }
+}
 
 $errors = [];
+
+// Initialize form variables from request data (for GET) or POST data (for submit)
+$tripType = 'official'; // Default
+$tripTypeValue = 'official'; // For form selection
+$purposeValue = $tripPurpose; // Default to request purpose
+$destinationValue = $destination;
+$passengersValue = $passengers;
+$startMileageValue = $startMileage;
+$endMileageValue = null;
+$distanceTraveledValue = null;
+$fuelConsumedValue = null;
+$fuelCostValue = null;
+$hasIssuesValue = false;
+$issuesDescriptionValue = '';
+$resolvedValue = false;
+$resolutionNotesValue = '';
+$guardNotesValue = '';
+$tripTypeOtherValue = '';
 
 // Handle form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     requireCsrf();
-    
+
     $tripType = post('trip_type', 'official');
+    $tripTypeValue = $tripType;
     $newStartDate = post('start_date');
     $newEndDate = post('end_date');
     $destinationInput = postSafe('destination', '', 255);
     $purposeInput = postSafe('purpose', '', 500);
-    $passengersInput = (int) post('passengers', $passengers);
-    $startMileageInput = post('start_mileage') ? (int)post('start_mileage') : null;
-    $endMileageInput = post('end_mileage') ? (int)post('end_mileage') : null;
-    $distanceTraveled = post('distance_traveled') ? (int)post('distance_traveled') : null;
-    $fuelConsumed = post('fuel_consumed') ? (float)post('fuel_consumed') : null;
-    $fuelCost = post('fuel_cost') ? (float)post('fuel_cost') : null;
-    
+    $destinationValue = $destinationInput ?: $destination;
+    $purposeValue = $purposeInput ?: $tripPurpose;
+    $passengersValue = (int) post('passengers', $passengers);
+    $startMileageValue = post('start_mileage') ? (int)post('start_mileage') : $startMileage;
+    $endMileageValue = post('end_mileage') ? (int)post('end_mileage') : null;
+    $distanceTraveledValue = post('distance_traveled') ? (int)post('distance_traveled') : null;
+    $fuelConsumedValue = post('fuel_consumed') ? (float)post('fuel_consumed') : null;
+    $fuelCostValue = post('fuel_cost') ? (float)post('fuel_cost') : null;
+
+    // Other trip type description
+    $tripTypeOther = postSafe('trip_type_other', '', 100);
+    $tripTypeOtherValue = $tripTypeOther;
+
     // Documents (will be handled by upload endpoint)
     $travelOrderPath = null;
     $obSlipPath = null;
     $otherDocumentsPath = null;
-    
+
     // Issues
-    $hasIssues = post('has_issues') ? 1 : 0;
-    $issuesDescription = postSafe('issues_description', '', 1000);
-    $resolved = post('resolved') ? 1 : 0;
-    $resolutionNotes = postSafe('resolution_notes', '', 1000);
-    $guardNotes = postSafe('guard_notes', '', 1000);
+    $hasIssuesValue = post('has_issues') ? 1 : 0;
+    $hasIssues = $hasIssuesValue;
+    $issuesDescriptionValue = postSafe('issues_description', '', 1000);
+    $issuesDescription = $issuesDescriptionValue;
+    $resolvedValue = post('resolved') ? 1 : 0;
+    $resolved = $resolvedValue;
+    $resolutionNotesValue = postSafe('resolution_notes', '', 1000);
+    $resolutionNotes = $resolutionNotesValue;
+    $guardNotesValue = postSafe('guard_notes', '', 1000);
+    $guardNotes = $guardNotesValue;
     
     // Validation
     if (!$newStartDate) {
@@ -129,10 +195,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!$destinationInput) {
         $errors[] = 'Destination is required';
     }
-    if (!$tripType || !in_array($tripType, ['official', 'personal', 'maintenance', 'other'])) {
+    if (!$tripType || !in_array($tripType, ['official', 'personal', 'maintenance', 'travel_order', 'other'])) {
         $errors[] = 'Invalid trip type';
     }
-    
+    if ($tripType === 'other' && empty($tripTypeOther)) {
+        $errors[] = 'Please specify the trip type when "Other" is selected.';
+    }
+
     if (empty($errors)) {
         try {
             db()->beginTransaction();
@@ -142,27 +211,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 'request_id' => $requestId,
                 'driver_id' => $request->driver_id,
                 'trip_type' => $tripType,
+                'trip_type_other' => $tripType === 'other' ? $tripTypeOther : null,
                 'start_date' => date('Y-m-d H:i:s', strtotime($newStartDate)),
                 'end_date' => date('Y-m-d H:i:s', strtotime($newEndDate)),
-                'destination' => $destinationInput,
-                'purpose' => $purposeInput,
-                'passengers' => $passengersInput,
-                'start_mileage' => $startMileageInput,
-                'end_mileage' => $endMileageInput,
-                'distance_traveled' => $distanceTraveled,
-                'fuel_consumed' => $fuelConsumed,
-                'fuel_cost' => $fuelCost,
+                'destination' => $destinationInput ?: $destination,
+                'purpose' => $purposeInput ?: $tripPurpose,
+                'passengers' => $passengersValue,
+                'start_mileage' => $startMileageValue,
+                'end_mileage' => $endMileageValue,
+                'distance_traveled' => $distanceTraveledValue,
+                'fuel_consumed' => $fuelConsumedValue,
+                'fuel_cost' => $fuelCostValue,
                 'travel_order_path' => $travelOrderPath,
                 'ob_slip_path' => $obSlipPath,
                 'other_documents_path' => $otherDocumentsPath,
-                'has_issues' => $hasIssues,
-                'issues_description' => $issuesDescription,
-                'resolved' => $resolved,
-                'resolution_notes' => $resolutionNotes,
+                'has_issues' => $hasIssuesValue,
+                'issues_description' => $issuesDescriptionValue,
+                'resolved' => $resolvedValue,
+                'resolution_notes' => $resolutionNotesValue,
                 'dispatch_guard_id' => $request->dispatch_guard_id ?: userId(),
                 'arrival_guard_id' => userId(),
-                'guard_notes' => $guardNotes,
-                'status' => 'submitted',
+                'guard_notes' => $guardNotesValue,
+                'status' => 'draft',
                 'created_by' => userId()
             ]);
             
@@ -187,11 +257,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             );
             
             db()->commit();
-            
+
+            $redirectPage = isDriver() ? 'my-trip-tickets' : 'trip-tickets';
             redirectWith(
-                '/?page=trip-tickets&action=view&id=' . $ticketId,
+                '/?page=' . $redirectPage,
                 'success',
-                'Trip ticket created successfully! You can now upload documents.'
+                'Trip ticket created successfully! You can now review and submit it.'
             );
             
         } catch (Exception $e) {
@@ -215,12 +286,14 @@ require_once INCLUDES_PATH . '/header.php';
             <p class="text-muted mb-0">Document completed trip details and documents</p>
         </div>
         <div>
-            <a href="?page=guard" class="btn btn-outline-secondary">
-                <i class="bi bi-arrow-left me-1"></i>Back to Guard Dashboard
+            <a href="?page=<?= isDriver() ? 'my-trips' : 'guard' ?>" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left me-1"></i>Back to <?= isDriver() ? 'My Trips' : 'Guard Dashboard' ?>
             </a>
+            <?php if (!isDriver()): ?>
             <a href="?page=trip-tickets" class="btn btn-outline-primary">
                 <i class="bi bi-list-check me-1"></i>All Trip Tickets
             </a>
+            <?php endif; ?>
         </div>
     </div>
 
@@ -338,24 +411,34 @@ require_once INCLUDES_PATH . '/header.php';
             <?php endif; ?>
 
             <form method="POST" enctype="multipart/form-data" class="needs-validation">
-                <?= csrfInput() ?>
+                <?= csrfField() ?>
                 
                 <!-- Trip Type & Purpose -->
                 <div class="row mb-3">
                     <div class="col-md-6">
                         <label class="form-label">Trip Type <span class="text-danger">*</span></label>
-                        <select class="form-select" name="trip_type" required>
-                            <option value="official" <?= $tripType === 'official' ? 'selected' : '' ?>>Official Business</option>
-                            <option value="personal" <?= $tripType === 'personal' ? 'selected' : '' ?>>Personal</option>
-                            <option value="maintenance" <?= $tripType === 'maintenance' ? 'selected' : '' ?>>Maintenance Run</option>
-                            <option value="other" <?= $tripType === 'other' ? 'selected' : '' ?>>Other</option>
+                        <select class="form-select" name="trip_type" id="tripTypeSelect" required onchange="toggleTripTypeOther()">
+                            <option value="official" <?= $tripTypeValue === 'official' ? 'selected' : '' ?>>Official Business</option>
+                            <option value="personal" <?= $tripTypeValue === 'personal' ? 'selected' : '' ?>>Personal</option>
+                            <option value="maintenance" <?= $tripTypeValue === 'maintenance' ? 'selected' : '' ?>>Maintenance Run</option>
+                            <option value="travel_order" <?= $tripTypeValue === 'travel_order' ? 'selected' : '' ?>>Travel Order</option>
+                            <option value="other" <?= $tripTypeValue === 'other' ? 'selected' : '' ?>>Other</option>
                         </select>
                         <small class="text-muted">Select the nature of this trip</small>
                     </div>
                     <div class="col-md-6">
                         <label class="form-label">Purpose</label>
-                        <textarea class="form-control" name="purpose" rows="2" placeholder="Detailed purpose of the trip..."><?= e($purposeInput) ?></textarea>
-                        <small class="text-muted">Overrides original purpose if provided</small>
+                        <textarea class="form-control" name="purpose" rows="2" placeholder="Detailed purpose of the trip..."><?= e($purposeValue) ?></textarea>
+                        <small class="text-muted">Original: <?= truncate($tripPurpose, 40) ?></small>
+                    </div>
+                </div>
+
+                <!-- Other Trip Type Description (shown only when Other is selected) -->
+                <div class="row mb-3" id="tripTypeOtherRow" style="display: <?= $tripTypeValue === 'other' ? 'block' : 'none' ?>;">
+                    <div class="col-md-12">
+                        <label class="form-label">Specify Trip Type <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" name="trip_type_other" value="<?= e($tripTypeOtherValue) ?>" placeholder="Please specify the type of trip..." <?= $tripTypeValue === 'other' ? 'required' : '' ?>>
+                        <small class="text-muted">Required when "Other" is selected as trip type</small>
                     </div>
                 </div>
 
@@ -380,30 +463,32 @@ require_once INCLUDES_PATH . '/header.php';
                 <!-- Destination (Pre-filled but editable) -->
                 <div class="mb-3">
                     <label class="form-label">Destination <span class="text-danger">*</span></label>
-                    <input type="text" class="form-control" name="destination" value="<?= e($destination) ?>" required>
+                    <input type="text" class="form-control" name="destination" value="<?= e($destinationValue) ?>" required>
+                    <small class="text-muted">From request: <?= e($destination) ?></small>
                 </div>
 
                 <!-- Passengers -->
                 <div class="mb-3">
                     <label class="form-label">Number of Passengers</label>
-                    <input type="number" class="form-control" name="passengers" min="0" value="<?= $passengers ?>">
-                    <small class="text-muted">Including driver</small>
+                    <input type="number" class="form-control" name="passengers" min="0" value="<?= $passengersValue ?>">
+                    <small class="text-muted">Including driver (from request)</small>
                 </div>
 
                 <!-- Mileage -->
                 <div class="row mb-3">
                     <div class="col-md-4">
                         <label class="form-label">Start Odometer</label>
-                        <input type="number" class="form-control" name="start_mileage" value="<?= $startMileage ?>" placeholder="Starting reading">
+                        <input type="number" class="form-control" name="start_mileage" value="<?= $startMileageValue ?>" placeholder="Starting reading">
+                        <small class="text-muted">From request: <?= $startMileage ? number_format($startMileage) . ' km' : 'Not set' ?></small>
                     </div>
                     <div class="col-md-4">
                         <label class="form-label">End Odometer</label>
-                        <input type="number" class="form-control" name="end_mileage" placeholder="Ending reading" required>
+                        <input type="number" class="form-control" name="end_mileage" value="<?= $endMileageValue ?>" placeholder="Ending reading" required>
                         <small class="text-danger">Required</small>
                     </div>
                     <div class="col-md-4">
                         <label class="form-label">Distance Traveled (km)</label>
-                        <input type="number" class="form-control" name="distance_traveled" placeholder="Auto-calculated if different">
+                        <input type="number" class="form-control" name="distance_traveled" value="<?= $distanceTraveledValue ?>" placeholder="Auto-calculated if different">
                     </div>
                 </div>
 
@@ -411,11 +496,11 @@ require_once INCLUDES_PATH . '/header.php';
                 <div class="row mb-3">
                     <div class="col-md-6">
                         <label class="form-label">Fuel Consumed (L)</label>
-                        <input type="number" step="0.01" class="form-control" name="fuel_consumed" placeholder="Total liters consumed">
+                        <input type="number" step="0.01" class="form-control" name="fuel_consumed" value="<?= $fuelConsumedValue ?>" placeholder="Total liters consumed">
                     </div>
                     <div class="col-md-6">
                         <label class="form-label">Fuel Cost (PHP)</label>
-                        <input type="number" step="0.01" class="form-control" name="fuel_cost" placeholder="Total cost in PHP">
+                        <input type="number" step="0.01" class="form-control" name="fuel_cost" value="<?= $fuelCostValue ?>" placeholder="Total cost in PHP">
                     </div>
                 </div>
 
@@ -459,27 +544,27 @@ require_once INCLUDES_PATH . '/header.php';
                         Report Issues (Optional)
                     </h6>
                     <div class="form-check form-switch mb-3">
-                        <input class="form-check-input" type="checkbox" name="has_issues" id="hasIssues" onchange="toggleIssuesFields()">
+                        <input class="form-check-input" type="checkbox" name="has_issues" id="hasIssues" onchange="toggleIssuesFields()" <?= $hasIssuesValue ? 'checked' : '' ?>>
                         <label class="form-check-label" for="hasIssues">Were there any issues or incidents during this trip?</label>
                     </div>
 
-                    <div id="issuesFields" class="mb-3" style="display: none;">
+                    <div id="issuesFields" class="mb-3" style="display: <?= $hasIssuesValue ? 'block' : 'none' ?>;">
                         <div class="row">
                             <div class="col-md-6">
                                 <label class="form-label">Issues Description</label>
-                                <textarea class="form-control" name="issues_description" rows="3" placeholder="Describe any issues, incidents, or concerns..."></textarea>
+                                <textarea class="form-control" name="issues_description" rows="3" placeholder="Describe any issues, incidents, or concerns..."><?= e($issuesDescriptionValue) ?></textarea>
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">Resolved?</label>
                                 <select class="form-select" name="resolved">
-                                    <option value="0">No</option>
-                                    <option value="1">Yes</option>
+                                    <option value="0" <?= !$resolvedValue ? 'selected' : '' ?>>No</option>
+                                    <option value="1" <?= $resolvedValue ? 'selected' : '' ?>>Yes</option>
                                 </select>
                             </div>
                         </div>
                         <div class="mt-2">
                             <label class="form-label">Resolution Notes</label>
-                            <textarea class="form-control" name="resolution_notes" rows="2" placeholder="How were the issues resolved? (if applicable)"></textarea>
+                            <textarea class="form-control" name="resolution_notes" rows="2" placeholder="How were the issues resolved? (if applicable)"><?= e($resolutionNotesValue) ?></textarea>
                         </div>
                     </div>
                 </div>
@@ -489,13 +574,13 @@ require_once INCLUDES_PATH . '/header.php';
                 <!-- Guard Notes -->
                 <div class="mb-4">
                     <label class="form-label">Guard Notes</label>
-                    <textarea class="form-control" name="guard_notes" rows="3" placeholder="Any additional observations, comments, or notes..."></textarea>
+                    <textarea class="form-control" name="guard_notes" rows="3" placeholder="Any additional observations, comments, or notes..."><?= e($guardNotesValue) ?></textarea>
                     <small class="text-muted">Include any special circumstances or relevant information</small>
                 </div>
 
                 <!-- Action Buttons -->
                 <div class="d-flex justify-content-between align-items-center">
-                    <a href="?page=guard" class="btn btn-outline-secondary">
+                    <a href="?page=<?= isDriver() ? 'my-trips' : 'guard' ?>" class="btn btn-outline-secondary">
                         <i class="bi bi-x-circle me-1"></i>
                         Cancel
                     </a>
@@ -520,6 +605,27 @@ function toggleIssuesFields() {
     const hasIssues = document.getElementById('hasIssues').checked;
     document.getElementById('issuesFields').style.display = hasIssues ? 'block' : 'none';
 }
+
+function toggleTripTypeOther() {
+    const tripTypeSelect = document.getElementById('tripTypeSelect');
+    const otherRow = document.getElementById('tripTypeOtherRow');
+    const otherInput = otherRow.querySelector('input[name="trip_type_other"]');
+
+    if (tripTypeSelect.value === 'other') {
+        otherRow.style.display = 'block';
+        otherInput.required = true;
+    } else {
+        otherRow.style.display = 'none';
+        otherInput.required = false;
+        otherInput.value = '';
+    }
+}
+
+// Initialize on page load
+document.addEventListener('DOMContentLoaded', function() {
+    toggleIssuesFields();
+    toggleTripTypeOther();
+});
 
 // Handle file uploads (basic implementation)
 document.querySelector('form').addEventListener('submit', async function(e) {

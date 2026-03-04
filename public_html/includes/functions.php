@@ -147,6 +147,28 @@ function isGuard(): bool
 }
 
 /**
+ * Check if user is a driver (has a driver record)
+ */
+function isDriver(): bool
+{
+    if (!isLoggedIn()) {
+        return false;
+    }
+
+    static $isDriver = null;
+
+    if ($isDriver === null) {
+        $result = db()->fetch(
+            "SELECT id FROM drivers WHERE user_id = ? AND deleted_at IS NULL LIMIT 1",
+            [userId()]
+        );
+        $isDriver = $result !== false;
+    }
+
+    return $isDriver;
+}
+
+/**
  * Check if user is approver or higher
  */
 function isApprover(): bool
