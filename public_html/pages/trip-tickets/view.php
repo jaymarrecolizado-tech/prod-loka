@@ -1,23 +1,22 @@
 <?php
 /**
  * LOKA - View Trip Ticket
- * 
+ *
  * View details of a trip ticket
+ * Drivers can view their own tickets, guards/admins can view all
  */
-
-requireRole(ROLE_GUARD);
 
 $ticketId = (int) get('id', 0);
 if (!$ticketId) {
-    redirectWith('/?page=trip-tickets', 'danger', 'Invalid ticket ID.');
+    redirectWith('/?page=my-trips', 'danger', 'Invalid ticket ID.');
 }
 
 // Get ticket with full details
 $ticket = db()->fetch(
-    "SELECT tt.*, 
+    "SELECT tt.*,
             r.id as request_id, r.destination as trip_destination, r.purpose as trip_purpose,
             r.actual_dispatch_datetime, r.actual_arrival_datetime,
-            d.license_number as driver_license, d.name as driver_name, d.phone as driver_phone,
+            d.license_number as driver_license, du.name as driver_name, du.phone as driver_phone,
             u_req.name as requester_name, u_req.email as requester_email, u_req.phone as requester_phone,
             dg.name as dispatch_guard, dg.phone as dispatch_guard_phone,
             ag.name as arrival_guard, ag.phone as arrival_guard_phone,
@@ -25,6 +24,7 @@ $ticket = db()->fetch(
      FROM trip_tickets tt
      JOIN requests r ON tt.request_id = r.id
      LEFT JOIN drivers d ON tt.driver_id = d.id
+     LEFT JOIN users du ON d.user_id = du.id
      LEFT JOIN users u_req ON r.user_id = u_req.id
      LEFT JOIN users dg ON tt.dispatch_guard_id = dg.id
      LEFT JOIN users ag ON tt.arrival_guard_id = ag.id
@@ -34,7 +34,21 @@ $ticket = db()->fetch(
 );
 
 if (!$ticket) {
-    redirectWith('/?page=trip-tickets', 'danger', 'Ticket not found.');
+    $redirectPage = isDriver() ? 'my-trips' : 'trip-tickets';
+    redirectWith('/?page=' . $redirectPage, 'danger', 'Ticket not found.');
+}
+
+// Drivers can only view their own trip tickets
+if (isDriver()) {
+    // Get current user's driver ID
+    $currentDriverId = db()->fetchColumn(
+        "SELECT id FROM drivers WHERE user_id = ? AND deleted_at IS NULL",
+        [userId()]
+    );
+
+    if ($ticket->driver_id != $currentDriverId) {
+        redirectWith('/?page=my-trips', 'danger', 'You can only view your own trip tickets.');
+    }
 }
 
 $pageTitle = 'Trip Ticket Details';
@@ -45,8 +59,12 @@ require_once INCLUDES_PATH . '/header.php';
     <!-- Breadcrumb -->
     <nav aria-label="breadcrumb">
         <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="/?page=trip-tickets">Trip Tickets</a></li>
-            <li class="breadcrumb-item active" aria-current="page">#<?= $ticket->id ?></li>
+            <?php if (isDriver()): ?>
+                <li class="breadcrumb-item"><a href="/?page=my-trips">My Trips</a></li>
+            <?php else: ?>
+                <li class="breadcrumb-item"><a href="/?page=trip-tickets">Trip Tickets</a></li>
+            <?php endif; ?>
+            <li class="breadcrumb-item active" aria-current="page">TT-<?= $ticket->request_id ?></li>
         </ol>
     </nav>
 
@@ -57,7 +75,7 @@ require_once INCLUDES_PATH . '/header.php';
                 <div class="card-header bg-primary text-white">
                     <h4 class="mb-0">
                         <i class="bi bi-file-earmark-text me-2"></i>
-                        Trip Ticket #<?= $ticket->id ?>
+                        Trip Ticket TT-<?= $ticket->request_id ?> (Ref: VRF-<?= $ticket->request_id ?>)
                         <span class="badge bg-<?= $ticket->status === 'approved' ? 'success' : ($ticket->status === 'reviewed' ? 'info' : 'warning') ?> ms-2">
                             <?= ucfirst($ticket->status) ?>
                         </span>
@@ -112,8 +130,22 @@ require_once INCLUDES_PATH . '/header.php';
                                 <h6 class="text-muted mb-2">
                                     <i class="bi bi-calendar3 me-1"></i> Trip Type
                                 </h6>
-                                <span class="badge bg-<?= $ticket->trip_type === 'official' ? 'success' : ($ticket->trip_type === 'personal' ? 'info' : 'warning') ?>">
-                                    <?= ucfirst($ticket->trip_type) ?>
+                                <?php
+                                $tripTypeLabels = [
+                                    'official' => ['label' => 'Official Business', 'color' => 'success'],
+                                    'personal' => ['label' => 'Personal', 'color' => 'info'],
+                                    'maintenance' => ['label' => 'Maintenance Run', 'color' => 'warning'],
+                                    'travel_order' => ['label' => 'Travel Order', 'color' => 'primary'],
+                                    'other' => ['label' => 'Other', 'color' => 'secondary']
+                                ];
+                                $typeInfo = $tripTypeLabels[$ticket->trip_type] ?? $tripTypeLabels['official'];
+                                // Display custom label for "Other" type
+                                if ($ticket->trip_type === 'other' && !empty($ticket->trip_type_other)) {
+                                    $typeInfo['label'] = e($ticket->trip_type_other);
+                                }
+                                ?>
+                                <span class="badge bg-<?= $typeInfo['color'] ?>">
+                                    <?= $typeInfo['label'] ?>
                                 </span>
                             </div>
                             <div class="mb-3">
@@ -121,16 +153,18 @@ require_once INCLUDES_PATH . '/header.php';
                                     <i class="bi bi-flag me-1"></i> Destination
                                 </h6>
                                 <p class="mb-0"><?= e($ticket->destination) ?></p>
+                                <?php if ($ticket->purpose): ?>
                                 <small class="text-muted">
                                     <i class="bi bi-card-text me-1"></i>
                                     <?= truncate($ticket->purpose, 100) ?>
                                 </small>
+                                <?php endif; ?>
                             </div>
                             <div class="mb-3">
                                 <h6 class="text-muted mb-2">
                                     <i class="bi bi-people me-1"></i> Passengers
                                 </h6>
-                                <span class="fw-bold"><?= $ticket->passengers ?></span>
+                                <span class="fw-bold"><?= (int)$ticket->passengers ?></span>
                             </div>
                         </div>
                         <div class="col-md-6">
@@ -418,14 +452,20 @@ require_once INCLUDES_PATH . '/header.php';
 
                     <!-- Actions -->
                     <div class="mb-3">
-                        <a href="?page=trip-tickets" class="btn btn-outline-secondary">
-                            <i class="bi bi-arrow-left me-1"></i>Back to Trip Tickets
+                        <a href="?page=<?= isDriver() ? 'my-trips' : 'trip-tickets' ?>" class="btn btn-outline-secondary">
+                            <i class="bi bi-arrow-left me-1"></i>Back to <?= isDriver() ? 'My Trips' : 'Trip Tickets' ?>
+                        </a>
+                        <a href="?page=trip-tickets&action=export-pdf&id=<?= $ticket->id ?>" class="btn btn-danger">
+                            <i class="bi bi-file-earmark-pdf me-1"></i>Export PDF
+                        </a>
+                        <a href="?page=trip-tickets&action=export-excel&id=<?= $ticket->id ?>" class="btn btn-success">
+                            <i class="bi bi-file-earmark-excel me-1"></i>Export Excel
                         </a>
                         <button type="button" class="btn btn-primary" onclick="window.print()">
-                            <i class="bi bi-printer me-1"></i>Print Ticket
+                            <i class="bi bi-printer me-1"></i>Print
                         </button>
                         <a href="?page=requests&action=view&id=<?= $ticket->request_id ?>" class="btn btn-info">
-                            <i class="bi bi-eye me-1"></i>View Original Request
+                            <i class="bi bi-eye me-1"></i>View Request
                         </a>
                     </div>
                 </div>
@@ -471,13 +511,169 @@ require_once INCLUDES_PATH . '/header.php';
     </div>
 </div>
 
+<!-- Signature Section (Visible on Print) -->
+<div class="signature-section mt-4 d-print-block">
+    <div class="card border-primary">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">
+                <i class="bi bi-pencil-square me-2"></i>
+                SIGNATORY CLEARANCE (For Manual Routing)
+            </h5>
+        </div>
+        <div class="card-body">
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="alert alert-info mb-3">
+                        <strong>Instructions:</strong> This trip ticket must be signed by all parties below in the order indicated. Submit the completed form to the Finance Division for processing.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Driver Signature -->
+            <div class="row mb-4 p-3 bg-light rounded">
+                <div class="col-12">
+                    <h6 class="mb-3">
+                        <i class="bi bi-person me-1"></i> PREPARED BY (Driver)
+                    </h6>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-2">
+                                <strong>Name:</strong> <?= e($ticket->driver_name) ?>
+                            </div>
+                            <div class="mb-2">
+                                <strong>Date:</strong> _______________________
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="border-bottom border-dark" style="min-height: 50px;">
+                                <small class="text-muted">Signature over Printed Name:</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Passenger Acknowledgment -->
+            <div class="row mb-4 p-3 bg-light rounded">
+                <div class="col-12">
+                    <h6 class="mb-3">
+                        <span class="badge bg-info me-1">1</span>
+                        PASSENGER(S) ACKNOWLEDGMENT
+                    </h6>
+                    <p class="small text-muted mb-3">
+                        I hereby acknowledge that I was a passenger on this trip and the information stated above is correct.
+                    </p>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-2">
+                                <strong>Passenger Name(s):</strong> _________________________
+                            </div>
+                            <div class="mb-2">
+                                <strong>Date:</strong> _______________________
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="border-bottom border-dark" style="min-height: 50px;">
+                                <small class="text-muted">Signature:</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Motorpool Head -->
+            <div class="row mb-4 p-3 bg-light rounded">
+                <div class="col-12">
+                    <h6 class="mb-3">
+                        <span class="badge bg-warning text-dark me-1">2</span>
+                        MOTORPOOL HEAD - Verification & Approval
+                    </h6>
+                    <p class="small text-muted mb-3">
+                        Verified trip details, vehicle condition, and mileage recording. Approved for processing.
+                    </p>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-2">
+                                <strong>Name:</strong> _________________________
+                            </div>
+                            <div class="mb-2">
+                                <strong>Date:</strong> _______________________
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="border-bottom border-dark" style="min-height: 50px;">
+                                <small class="text-muted">Signature:</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Admin/Finance Chief -->
+            <div class="row mb-4 p-3 bg-light rounded">
+                <div class="col-12">
+                    <h6 class="mb-3">
+                        <span class="badge bg-success me-1">3</span>
+                        ADMIN / FINANCE DIVISION CHIEF - Final Approval
+                    </h6>
+                    <p class="small text-muted mb-3">
+                        Certified that all documents are complete and trip is valid for reimbursement/payment processing.
+                    </p>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-2">
+                                <strong>Name:</strong> _________________________
+                            </div>
+                            <div class="mb-2">
+                                <strong>Date:</strong> _______________________
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="border-bottom border-dark" style="min-height: 50px;">
+                                <small class="text-muted">Signature:</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Notes -->
+            <div class="alert alert-secondary mb-0">
+                <h6 class="mb-2"><i class="bi bi-info-circle me-1"></i> NOTES:</h6>
+                <ol class="mb-0 small">
+                    <li>This document must be signed by all parties indicated above.</li>
+                    <li>Attach original Travel Order (TO) and Official Business Slip if applicable.</li>
+                    <li>Submit completed form to the Finance Division for processing.</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+</div>
+
 <style>
 @media print {
-    .breadcrumb, .btn {
+    .breadcrumb, .btn:not(.btn-print) {
         display: none;
     }
     .card {
         page-break-inside: avoid;
+        border: 1px solid #ddd;
+    }
+    .signature-section {
+        page-break-before: auto;
+    }
+    body {
+        font-size: 10pt;
+    }
+    .border-bottom {
+        border-bottom-width: 2px !important;
+    }
+}
+
+@media screen {
+    .signature-section {
+        display: block;
+        margin-top: 20px;
     }
 }
 </style>

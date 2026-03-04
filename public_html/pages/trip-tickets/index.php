@@ -23,12 +23,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $action !== 'list') {
             $requestId = postInt('request_id');
             $driverId = postInt('driver_id');
             $tripType = post('trip_type', 'official');
+            $tripTypeOther = postSafe('trip_type_other', '', 100);
             $startDate = post('start_date');
             $endDate = post('end_date');
             $destination = postSafe('destination', '', 255);
             $purpose = postSafe('purpose', '', 500);
             $passengers = (int) post('passengers', 0);
-            
+
             // Mileage
             $startMileage = post('start_mileage') ? (int)post('start_mileage') : null;
             $endMileage = post('end_mileage') ? (int)post('end_mileage') : null;
@@ -59,8 +60,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $action !== 'list') {
             if (!$driverId) {
                 $errors[] = 'Driver ID is required';
             }
-            if (!$tripType || !in_array($tripType, ['official', 'personal', 'maintenance', 'other'])) {
+            if (!$tripType || !in_array($tripType, ['official', 'personal', 'maintenance', 'travel_order', 'other'])) {
                 $errors[] = 'Invalid trip type';
+            }
+            if ($tripType === 'other' && empty($tripTypeOther)) {
+                $errors[] = 'Please specify the trip type when "Other" is selected.';
             }
             if (!$startDate) {
                 $errors[] = 'Start date is required';
@@ -81,6 +85,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $action !== 'list') {
                         'request_id' => $requestId,
                         'driver_id' => $driverId,
                         'trip_type' => $tripType,
+                        'trip_type_other' => $tripType === 'other' ? $tripTypeOther : null,
                         'start_date' => date('Y-m-d H:i:s', strtotime($startDate)),
                         'end_date' => date('Y-m-d H:i:s', strtotime($endDate)),
                         'destination' => $destination,
@@ -101,7 +106,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $action !== 'list') {
                         'dispatch_guard_id' => userId(),
                         'arrival_guard_id' => userId(),
                         'guard_notes' => $guardNotes,
-                        'status' => 'submitted',
+                        'status' => 'draft',
                         'created_by' => userId()
                     ]);
                     
@@ -293,14 +298,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $action !== 'list') {
 }
 
 // Get tickets based on role
-$sql = "SELECT tt.*, 
+$sql = "SELECT tt.*,
             r.id as request_id, r.destination as trip_destination,
-            d.license_number as driver_license, d.name as driver_name,
+            d.license_number as driver_license, du.name as driver_name,
             dg.name as dispatch_guard, ag.name as arrival_guard,
             u.name as reviewed_by_name
      FROM trip_tickets tt
      JOIN requests r ON tt.request_id = r.id
      LEFT JOIN drivers d ON tt.driver_id = d.id
+     LEFT JOIN users du ON d.user_id = du.id
      LEFT JOIN users dg ON tt.dispatch_guard_id = dg.id
      LEFT JOIN users ag ON tt.arrival_guard_id = ag.id
      LEFT JOIN users u ON tt.reviewed_by = u.id
@@ -334,7 +340,7 @@ $search = get('search', '');
 if ($search) {
     $sql .= " AND (
         r.destination LIKE ? OR
-        d.name LIKE ? OR
+        du.name LIKE ? OR
         r.purpose LIKE ? OR
         tt.issues_description LIKE ?
     )";
@@ -512,14 +518,36 @@ require_once INCLUDES_PATH . '/header.php';
                         <tbody>
                             <?php foreach ($tickets as $ticket): ?>
                                 <tr>
-                                    <td><strong>#<?= $ticket->id ?></strong></td>
+                                    <td><strong>TT-<?= $ticket->request_id ?></strong></td>
                                     <td>
-                                        <small>#<?= $ticket->request_id ?></small><br>
+                                        <small>(Ref: VRF-<?= $ticket->request_id ?>)</small><br>
                                         <small class="text-muted"><?= e($ticket->trip_destination) ?></small>
                                     </td>
                                     <td>
-                                        <span class="badge bg-<?= $ticket->trip_type === 'official' ? 'success' : ($ticket->trip_type === 'personal' ? 'info' : 'warning') ?>">
-                                            <?= ucfirst($ticket->trip_type) ?>
+                                        <?php
+                                        $tripTypeColors = [
+                                            'official' => 'success',
+                                            'personal' => 'info',
+                                            'maintenance' => 'warning',
+                                            'travel_order' => 'primary',
+                                            'other' => 'secondary'
+                                        ];
+                                        $tripTypeLabels = [
+                                            'official' => 'Official Business',
+                                            'personal' => 'Personal',
+                                            'maintenance' => 'Maintenance',
+                                            'travel_order' => 'Travel Order',
+                                            'other' => 'Other'
+                                        ];
+                                        $color = $tripTypeColors[$ticket->trip_type] ?? 'secondary';
+                                        $label = $tripTypeLabels[$ticket->trip_type] ?? 'Other';
+                                        // Use custom label for "Other" type
+                                        if ($ticket->trip_type === 'other' && !empty($ticket->trip_type_other)) {
+                                            $label = e($ticket->trip_type_other);
+                                        }
+                                        ?>
+                                        <span class="badge bg-<?= $color ?>">
+                                            <?= $label ?>
                                         </span>
                                     </td>
                                     <td>
@@ -641,7 +669,7 @@ require_once INCLUDES_PATH . '/header.php';
             </div>
             <div class="modal-body">
                 <form id="createTicketForm" enctype="multipart/form-data">
-                    <?= csrfInput() ?>
+                    <?= csrfField() ?>
                     
                     <!-- Trip Selection -->
                     <div class="row mb-3">
@@ -653,11 +681,12 @@ require_once INCLUDES_PATH . '/header.php';
                                 // Get driver's recent completed trips without tickets
                                 $completedTrips = db()->fetchAll(
                                     "SELECT r.id, r.destination, r.actual_arrival_datetime,
-                                           d.id as driver_id, d.name as driver_name
+                                           d.id as driver_id, u.name as driver_name
                                      FROM requests r
                                      JOIN drivers d ON r.driver_id = d.id
+                                     JOIN users u ON d.user_id = u.id
                                      LEFT JOIN trip_tickets tt ON r.id = tt.request_id
-                                     WHERE d.id = ? 
+                                     WHERE d.user_id = ?
                                        AND r.status = 'completed'
                                        AND r.actual_arrival_datetime IS NOT NULL
                                        AND tt.id IS NULL
@@ -677,12 +706,22 @@ require_once INCLUDES_PATH . '/header.php';
                         </div>
                         <div class="col-md-6">
                             <label class="form-label">Trip Type <span class="text-danger">*</span></label>
-                            <select class="form-select" name="trip_type" required>
+                            <select class="form-select" name="trip_type" required onchange="toggleTripTypeOtherModal()">
                                 <option value="official">Official Business</option>
                                 <option value="personal">Personal</option>
                                 <option value="maintenance">Maintenance Run</option>
+                                <option value="travel_order">Travel Order</option>
                                 <option value="other">Other</option>
                             </select>
+                        </div>
+                    </div>
+
+                    <!-- Other Trip Type Description (shown only when Other is selected) -->
+                    <div class="row mb-3" id="tripTypeOtherRowModal" style="display: none;">
+                        <div class="col-12">
+                            <label class="form-label">Specify Trip Type <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" name="trip_type_other" placeholder="Please specify the type of trip...">
+                            <small class="text-muted">Required when "Other" is selected as trip type</small>
                         </div>
                     </div>
 
@@ -819,6 +858,21 @@ require_once INCLUDES_PATH . '/header.php';
 function toggleIssuesFields() {
     const hasIssues = document.getElementById('hasIssues').checked;
     document.getElementById('issuesFields').style.display = hasIssues ? 'block' : 'none';
+}
+
+function toggleTripTypeOtherModal() {
+    const tripTypeSelect = document.querySelector('#createTicketForm select[name="trip_type"]');
+    const otherRow = document.getElementById('tripTypeOtherRowModal');
+    const otherInput = otherRow.querySelector('input[name="trip_type_other"]');
+
+    if (tripTypeSelect.value === 'other') {
+        otherRow.style.display = 'block';
+        otherInput.required = true;
+    } else {
+        otherRow.style.display = 'none';
+        otherInput.required = false;
+        otherInput.value = '';
+    }
 }
 
 async function createTicket() {

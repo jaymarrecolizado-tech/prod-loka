@@ -26,6 +26,7 @@ class Database
         'rate_limits',
         'security_logs',
         'settings',
+        'trip_tickets',
         'remember_tokens',
         'audit_logs',
         'schema_migrations',

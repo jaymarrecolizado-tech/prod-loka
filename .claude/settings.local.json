@@ -67,7 +67,11 @@
       "Bash(node:*)",
       "Bash(npm:*)",
       "Bash(docker:*)",
-      "Bash(git:*)"
+      "Bash(git:*)",
+      "Bash(start:*)",
+      "Bash(netstat:*)",
+      "Bash(findstr /i vhost)",
+      "Bash(cmd:*)"
     ]
   }
 }

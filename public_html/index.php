@@ -369,6 +369,10 @@ switch ($page) {
         }
         break;
 
+    case 'my-trip-tickets':
+        require_once PAGES_PATH . '/my-trip-tickets/index.php';
+        break;
+
     case 'completed-trips':
         require_once PAGES_PATH . '/completed-trips/index.php';
         break;
@@ -393,6 +397,10 @@ switch ($page) {
             require_once PAGES_PATH . '/trip-tickets/view.php';
         } elseif ($action === 'create_form') {
             require_once PAGES_PATH . '/trip-tickets/create.php';
+        } elseif ($action === 'export-pdf') {
+            require_once PAGES_PATH . '/trip-tickets/export-pdf.php';
+        } elseif ($action === 'export-excel') {
+            require_once PAGES_PATH . '/trip-tickets/export-excel.php';
         } else {
             require_once PAGES_PATH . '/trip-tickets/index.php';
         }
