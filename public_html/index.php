@@ -388,6 +388,16 @@ switch ($page) {
         }
         break;
 
+    case 'trip-tickets':
+        if ($action === 'view') {
+            require_once PAGES_PATH . '/trip-tickets/view.php';
+        } elseif ($action === 'create_form') {
+            require_once PAGES_PATH . '/trip-tickets/create.php';
+        } else {
+            require_once PAGES_PATH . '/trip-tickets/index.php';
+        }
+        break;
+
     case 'api':
         $action = get('action');
         if ($action === 'check_conflict') {

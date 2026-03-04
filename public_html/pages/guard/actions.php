@@ -233,7 +233,11 @@ switch ($action) {
             );
         }
         
-        redirectWith('/?page=guard', 'success', "Arrival recorded for request #{$requestId}. Trip marked as completed. Vehicle and driver are now available.");
+        redirectWith(
+            '/?page=trip-tickets&action=create_form&request_id=' . $requestId,
+            'success',
+            "Arrival recorded for request #{$requestId}. Trip marked as completed. Please create a trip ticket to document details."
+        );
         break;
         
     default:
