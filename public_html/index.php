@@ -439,6 +439,11 @@ switch ($page) {
         }
         break;
 
+    case 'file-view':
+        // Public endpoint for viewing uploaded files
+        require_once PAGES_PATH . '/file-view.php';
+        break;
+
     default:
         // 404 page
         http_response_code(404);

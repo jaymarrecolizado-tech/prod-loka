@@ -11,6 +11,9 @@ if (!isDriver() && !isGuard() && !isAdmin()) {
     redirectWith('/?page=dashboard', 'danger', 'You do not have permission to create trip tickets.');
 }
 
+// Load FileUpload class
+require_once CLASSES_PATH . '/FileUpload.php';
+
 $pageTitle = 'Create Trip Ticket';
 $requestId = (int) get('request_id', 0);
 
@@ -168,10 +171,53 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $tripTypeOther = postSafe('trip_type_other', '', 100);
     $tripTypeOtherValue = $tripTypeOther;
 
-    // Documents (will be handled by upload endpoint)
+    // Documents - Handle file uploads
     $travelOrderPath = null;
     $obSlipPath = null;
     $otherDocumentsPath = null;
+
+    // Create upload handler for trip tickets
+    $uploadHandler = FileUpload::createTripTicketHandler($requestId);
+
+    // Upload Travel Order if provided
+    if (isset($_FILES['travel_order']) && $_FILES['travel_order']['error'] !== UPLOAD_ERR_NO_FILE) {
+        $travelOrderPath = $uploadHandler->upload($_FILES['travel_order'], 'travel_order');
+        if ($uploadHandler->hasErrors()) {
+            $errors[] = 'Travel Order upload failed: ' . implode(', ', $uploadHandler->getErrors());
+        }
+    }
+
+    // Upload OB Slip if provided
+    if (isset($_FILES['ob_slip']) && $_FILES['ob_slip']['error'] !== UPLOAD_ERR_NO_FILE) {
+        $obSlipPath = $uploadHandler->upload($_FILES['ob_slip'], 'ob_slip');
+        if ($uploadHandler->hasErrors()) {
+            $errors[] = 'OB Slip upload failed: ' . implode(', ', $uploadHandler->getErrors());
+        }
+    }
+
+    // Upload other documents if provided (multiple files possible)
+    $otherDocPaths = [];
+    if (isset($_FILES['other_documents']) && $_FILES['other_documents']['error'] !== UPLOAD_ERR_NO_FILE) {
+        // Check if multiple files were uploaded
+        if (is_array($_FILES['other_documents']['name'])) {
+            $otherDocPaths = $uploadHandler->uploadMultiple($_FILES['other_documents'], 'other_docs');
+            if ($uploadHandler->hasErrors()) {
+                $errors[] = 'Other documents upload failed: ' . implode(', ', $uploadHandler->getErrors());
+            }
+        } else {
+            // Single file
+            $singlePath = $uploadHandler->upload($_FILES['other_documents'], 'other_docs');
+            if ($singlePath !== false && $singlePath !== '') {
+                $otherDocPaths[] = $singlePath;
+            }
+            if ($uploadHandler->hasErrors()) {
+                $errors[] = 'Other documents upload failed: ' . implode(', ', $uploadHandler->getErrors());
+            }
+        }
+    }
+
+    // Store other documents as JSON array
+    $otherDocumentsPath = !empty($otherDocPaths) ? json_encode($otherDocPaths) : null;
 
     // Issues
     $hasIssuesValue = post('has_issues') ? 1 : 0;
@@ -591,9 +637,14 @@ require_once INCLUDES_PATH . '/header.php';
                 </div>
 
                 <!-- Info Box -->
-                <div class="alert alert-warning mb-0">
-                    <i class="bi bi-shield-check me-2"></i>
-                    <strong>Important:</strong> After creating the trip ticket, you will be able to upload documents. All trip details will be saved and linked to request #<?= $requestId ?>.
+                <div class="alert alert-info mb-0">
+                    <i class="bi bi-info-circle me-2"></i>
+                    <strong>Note:</strong> You can upload Travel Order and OB Slip documents now, or leave them empty to upload later. All trip details will be saved and linked to request #<?= $requestId ?>.
+                    <br><br>
+                    <small class="text-muted">
+                        <i class="bi bi-file-earmark-pdf me-1"></i>
+                        Accepted formats: PDF, JPG, PNG, GIF (max 10MB per file)
+                    </small>
                 </div>
             </form>
         </div>
@@ -625,50 +676,6 @@ function toggleTripTypeOther() {
 document.addEventListener('DOMContentLoaded', function() {
     toggleIssuesFields();
     toggleTripTypeOther();
-});
-
-// Handle file uploads (basic implementation)
-document.querySelector('form').addEventListener('submit', async function(e) {
-    e.preventDefault();
-    
-    const form = e.target;
-    const formData = new FormData(form);
-    
-    // Check if any files were selected
-    const hasFiles = formData.has('travel_order') || formData.has('ob_slip') || formData.has('other_documents');
-    
-    if (hasFiles) {
-        // Show loading state
-        const submitBtn = form.querySelector('button[type="submit"]');
-        submitBtn.disabled = true;
-        submitBtn.innerHTML = '<i class="spinner-border spinner-border-sm me-2"></i> Uploading...';
-        
-        // Upload files first (simplified - in production, use dedicated upload endpoint)
-        const uploadPromises = [];
-        
-        ['travel_order', 'ob_slip', 'other_documents'].forEach(fieldName => {
-            const fileInput = document.getElementById(fieldName + 'Input');
-            if (fileInput && fileInput.files[0]) {
-                const file = fileInput.files[0];
-                const uploadPromise = new Promise((resolve, reject) => {
-                    const reader = new FileReader();
-                    reader.onload = function(e) {
-                        // Store file data in FormData
-                        formData.append(fieldName + '_data', e.target.result);
-                        resolve();
-                    };
-                    reader.onerror = reject;
-                    reader.readAsDataURL(file);
-                });
-                uploadPromises.push(uploadPromise);
-            }
-        });
-        
-        await Promise.all(uploadPromises);
-    }
-    
-    // Submit the form normally
-    form.submit();
 });
 </script>
 

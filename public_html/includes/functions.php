@@ -1169,3 +1169,78 @@ function clearAppCache(): void
 {
     cache()->clear();
 }
+
+/**
+ * Generate URL to view an uploaded file
+ *
+ * @param string $filePath Relative file path from uploads directory
+ * @param string|null $label Optional label to use as link text
+ * @param string|null $class CSS class for the link
+ * @return string HTML anchor tag or plain URL if label is null
+ */
+function fileUrl(string $filePath, ?string $label = null, ?string $class = null): string
+{
+    if (empty($filePath)) {
+        return $label ? '<span class="text-muted">N/A</span>' : '';
+    }
+
+    $url = '?page=file-view&file=' . urlencode($filePath);
+
+    if ($label === null) {
+        return $url;
+    }
+
+    $classAttr = $class ? ' class="' . e($class) . '"' : '';
+    return '<a href="' . e($url) . '" target="_blank"' . $classAttr . '>' . e($label) . '</a>';
+}
+
+/**
+ * Generate download link for an uploaded file
+ *
+ * @param string $filePath Relative file path from uploads directory
+ * @param string|null $fileName Optional filename to display
+ * @return string HTML anchor tag with download icon
+ */
+function fileDownloadLink(string $filePath, ?string $fileName = null): string
+{
+    if (empty($filePath)) {
+        return '<span class="text-muted">No file</span>';
+    }
+
+    $displayFileName = $fileName ?? basename($filePath);
+    $url = '?page=file-view&file=' . urlencode($filePath);
+
+    return '<a href="' . e($url) . '" target="_blank" class="btn btn-sm btn-outline-primary me-1">
+        <i class="bi bi-download me-1"></i>' . e($displayFileName) . '
+    </a>';
+}
+
+/**
+ * Display file icon based on extension
+ *
+ * @param string $filePath File path or extension
+ * @return string HTML with Bootstrap icon
+ */
+function fileIcon(string $filePath): string
+{
+    $extension = strtolower(pathinfo($filePath, PATHINFO_EXTENSION));
+
+    $icons = [
+        'pdf' => 'bi-file-earmark-pdf text-danger',
+        'jpg' => 'bi-file-earmark-image text-primary',
+        'jpeg' => 'bi-file-earmark-image text-primary',
+        'png' => 'bi-file-earmark-image text-primary',
+        'gif' => 'bi-file-earmark-image text-primary',
+        'doc' => 'bi-file-earmark-word text-primary',
+        'docx' => 'bi-file-earmark-word text-primary',
+        'xls' => 'bi-file-earmark-excel text-success',
+        'xlsx' => 'bi-file-earmark-excel text-success',
+        'csv' => 'bi-file-earmark-spreadsheet text-success',
+        'zip' => 'bi-file-earmark-zip text-warning',
+        'txt' => 'bi-file-earmark-text text-secondary',
+    ];
+
+    $iconClass = $icons[$extension] ?? 'bi-file-earmark text-secondary';
+
+    return '<i class="bi ' . $iconClass . '"></i>';
+}

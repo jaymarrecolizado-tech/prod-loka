@@ -1,0 +1,9 @@
+# Deny direct access to uploaded files
+# Files should only be served through PHP scripts that verify permissions
+Order Deny,Allow
+Deny from all
+
+# Or use this for Apache 2.4+
+<RequireAll>
+    Require all denied
+</RequireAll>
