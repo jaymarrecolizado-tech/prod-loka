@@ -192,7 +192,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $action !== 'list') {
                     'status' => 'approved',
                     'reviewed_by' => userId(),
                     'reviewed_at' => date(DATETIME_FORMAT),
-                    'guard_notes' => ($ticket->guard_notes . "\n\n[Review] " . $reviewNotes) : $reviewNotes
+                    'guard_notes' => $ticket->guard_notes ? ($ticket->guard_notes . "\n\n[Review] " . $reviewNotes) : $reviewNotes
                 ], 'id = ?', [$ticketId]);
                 
                 // Audit log
