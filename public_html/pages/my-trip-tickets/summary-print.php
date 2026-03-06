@@ -363,6 +363,7 @@ if (!defined('BASE_PATH'))
             @page {
                 size: A4 landscape;
                 margin: 10mm;
+                counter-increment: page;
             }
 
             body {
@@ -385,9 +386,55 @@ if (!defined('BASE_PATH'))
                 page-break-inside: avoid;
             }
 
+            /* Prevent breaking within rows - keep passengers together */
+            tr {
+                page-break-inside: avoid;
+            }
+
+            /* Prevent breaking sections */
+            .sec,
+            .tbl-wrap,
+            .sigs,
+            .summary {
+                page-break-inside: avoid;
+            }
+
+            /* Allow page breaks before major sections if needed */
+            .sec {
+                page-break-before: auto;
+            }
+
             th,
             td {
                 border-color: #000 !important;
+            }
+
+            /* Header should repeat on each page */
+            thead {
+                display: table-header-group;
+            }
+
+            /* Page number display */
+            .page-number {
+                display: inline;
+                font-size: 7px;
+                color: var(--sub);
+                letter-spacing: .07em;
+                text-transform: uppercase;
+                font-weight: 500;
+            }
+
+            .page-number::after {
+                content: "Page " counter(page) " of " counter(pages);
+            }
+
+            input,
+            textarea {
+                color: #000 !important;
+            }
+
+            .sec {
+                background: transparent !important;
             }
         }
 
@@ -622,36 +669,9 @@ if (!defined('BASE_PATH'))
             font-weight: 500;
         }
 
-        /* PRINT — Folio 8.5 x 13 in */
-        @media print {
-            body {
-                background: #fff;
-                padding: 0;
-            }
-
-            .controls {
-                display: none;
-            }
-
-            .ticket {
-                box-shadow: none;
-                width: 100%;
-                border: none;
-            }
-
-            @page {
-                size: A4 landscape;
-                margin: 8mm 10mm;
-            }
-
-            input,
-            textarea {
-                color: #000 !important;
-            }
-
-            .sec {
-                background: transparent !important;
-            }
+        /* Page numbering */
+        .page-number {
+            display: none;
         }
     </style>
 </head>
@@ -950,7 +970,10 @@ if (!defined('BASE_PATH'))
         <div class="ftr">
             <span>Department of Information and Communications Technology — Region II</span>
             <span class="ftr-tno" id="footerTno">Trip No: <?= e($tripTicketNumber) ?></span>
-            <span>Vehicle Trip Ticket Form</span>
+            <div style="display: flex; gap: 15px; align-items: center;">
+                <span class="page-number"></span>
+                <span>Vehicle Trip Ticket Form</span>
+            </div>
         </div>
 
     </div><!-- /ticket -->
