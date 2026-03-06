@@ -363,12 +363,22 @@ if (!defined('BASE_PATH'))
             @page {
                 size: A4 landscape;
                 margin: 10mm 10mm 20mm 10mm;
+                counter-increment: page;
+
+                /* Page numbers in margin (appears on every page) */
+                @bottom-right {
+                    content: "Page " counter(page);
+                    font-size: 7px;
+                    color: var(--sub);
+                    letter-spacing: 0.07em;
+                    text-transform: uppercase;
+                    font-weight: 500;
+                }
             }
 
             body {
                 background: white;
                 padding: 0;
-                /* Remove counter-reset - let @page handle it */
             }
 
             .controls {
@@ -415,28 +425,18 @@ if (!defined('BASE_PATH'))
                 display: table-header-group;
             }
 
-            /* Ensure page numbers update on each page */
-            @page {
-                counter-increment: page;
-            }
-
-            /* Page number display - show page count when printing */
-            .page-number::after {
-                content: "Page " counter(page);
-            }
-
-            /* Footer - appears on each page via position fixed */
+            /* Footer - appears at end of document only */
             .ftr {
-                position: fixed;
-                bottom: 0;
-                left: 0;
-                right: 0;
+                position: relative;
                 padding: 4px 12px;
-                margin: 0;
+                margin: 20px 0 10px 0;
                 border-top: 2px solid #000;
                 background: white;
-                box-sizing: border-box;
-                width: 100%;
+            }
+
+            /* Hide the footer page number element - using @page margin instead */
+            .page-number {
+                display: none !important;
             }
 
             input,
@@ -1021,24 +1021,12 @@ if (!defined('BASE_PATH'))
         // Page numbering for printing
         window.addEventListener('load', function() {
             calcTotals();
+        });
 
-            // Handle page numbering before print - change footer from fixed to relative
-            window.addEventListener('beforeprint', function() {
-                const footer = document.getElementById('mainFooter');
-                if (footer) {
-                    footer.style.position = 'relative';
-                    footer.style.marginTop = '20px';
-                }
-            });
-
-            // Restore footer after print
-            window.addEventListener('afterprint', function() {
-                const footer = document.getElementById('mainFooter');
-                if (footer) {
-                    footer.style.position = '';
-                    footer.style.marginTop = '';
-                }
-            });
+        // Handle page numbering with CSS counter (most reliable method)
+        window.addEventListener('beforeprint', function() {
+            // CSS @bottom-right will handle page numbering automatically
+            // The .page-number span in footer is hidden during print
         });
     </script>
 </body>
