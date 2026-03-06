@@ -370,7 +370,11 @@ switch ($page) {
         break;
 
     case 'my-trip-tickets':
-        require_once PAGES_PATH . '/my-trip-tickets/index.php';
+        if ($action === 'generate-summary') {
+            require_once PAGES_PATH . '/my-trip-tickets/generate-summary.php';
+        } else {
+            require_once PAGES_PATH . '/my-trip-tickets/index.php';
+        }
         break;
 
     case 'completed-trips':
