@@ -925,8 +925,9 @@ if (!defined('BASE_PATH'))
         <div class="sigs">
             <div class="sig">
                 <div class="sig-role">Prepared by</div>
-                <input class="sig-input" type="text" placeholder="Name of preparer" value="<?= e($generatorName) ?>">
+                <div style="height:20px;"></div>
                 <div class="sig-line"></div>
+                <div class="sig-name"><?= e($generatorName) ?></div>
                 <div class="sig-title">User / Driver Assign</div>
             </div>
             <div class="sig">
