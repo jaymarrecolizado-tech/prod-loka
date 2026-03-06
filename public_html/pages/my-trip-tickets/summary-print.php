@@ -414,16 +414,7 @@ if (!defined('BASE_PATH'))
                 display: table-header-group;
             }
 
-            /* Page number display */
-            .page-number {
-                display: inline;
-                font-size: 7px;
-                color: var(--sub);
-                letter-spacing: .07em;
-                text-transform: uppercase;
-                font-weight: 500;
-            }
-
+            /* Page number display - show page count when printing */
             .page-number::after {
                 content: "Page " counter(page) " of " counter(pages);
             }
@@ -669,9 +660,14 @@ if (!defined('BASE_PATH'))
             font-weight: 500;
         }
 
-        /* Page numbering */
+        /* Page numbering - visible on screen for preview */
         .page-number {
-            display: none;
+            display: inline;
+            font-size: 7px;
+            color: var(--sub);
+            letter-spacing: .07em;
+            text-transform: uppercase;
+            font-weight: 500;
         }
     </style>
 </head>
@@ -970,10 +966,7 @@ if (!defined('BASE_PATH'))
         <div class="ftr">
             <span>Department of Information and Communications Technology — Region II</span>
             <span class="ftr-tno" id="footerTno">Trip No: <?= e($tripTicketNumber) ?></span>
-            <div style="display: flex; gap: 15px; align-items: center;">
-                <span class="page-number"></span>
-                <span>Vehicle Trip Ticket Form</span>
-            </div>
+            <span class="page-number"></span>
         </div>
 
     </div><!-- /ticket -->
