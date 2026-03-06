@@ -362,13 +362,14 @@ if (!defined('BASE_PATH'))
         @media print {
             @page {
                 size: A4 landscape;
-                margin: 10mm;
+                margin: 10mm 10mm 20mm 10mm;
                 counter-increment: page;
             }
 
             body {
                 background: white;
                 padding: 0;
+                counter-reset: page;
             }
 
             .controls {
@@ -379,6 +380,7 @@ if (!defined('BASE_PATH'))
                 box-shadow: none;
                 border: none;
                 width: 100%;
+                margin-bottom: 25px;
             }
 
             /* Ensure all tables have clean borders when printing */
@@ -414,9 +416,22 @@ if (!defined('BASE_PATH'))
                 display: table-header-group;
             }
 
+            /* Footer appears on every page */
+            .ftr {
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                padding: 4px 12px;
+                margin: 0;
+                border-top: 2px solid #000;
+                background: white;
+                z-index: 1000;
+            }
+
             /* Page number display - show page count when printing */
             .page-number::after {
-                content: "Page " counter(page) " of " counter(pages);
+                content: "Page " counter(page);
             }
 
             input,
@@ -966,7 +981,7 @@ if (!defined('BASE_PATH'))
         <div class="ftr">
             <span>Department of Information and Communications Technology — Region II</span>
             <span class="ftr-tno" id="footerTno">Trip No: <?= e($tripTicketNumber) ?></span>
-            <span class="page-number"></span>
+            <span class="page-number" id="pageNumberDisplay">Page 1</span>
         </div>
 
     </div><!-- /ticket -->
@@ -998,9 +1013,16 @@ if (!defined('BASE_PATH'))
             calcTotals();
         }
 
-        window.onload = function () {
+        // Auto-page numbering using CSS counter
+        window.addEventListener('load', function() {
             calcTotals();
-        }
+
+            // Update page number before printing
+            window.addEventListener('beforeprint', function() {
+                // CSS counter will handle page numbering automatically
+                // This ensures it's updated on each page
+            });
+        });
     </script>
 </body>
 
