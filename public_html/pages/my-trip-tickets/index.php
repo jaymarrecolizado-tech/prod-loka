@@ -109,6 +109,9 @@ require_once INCLUDES_PATH . '/header.php';
             <span class="badge bg-light text-dark border fs-6">
                 <i class="bi bi-person-badge me-1"></i><?= e($driver->name) ?>
             </span>
+            <a href="?page=my-trip-tickets&action=generate-summary" class="btn btn-outline-success">
+                <i class="bi bi-file-earmark-spreadsheet me-1"></i>Generate Vehicle Summary
+            </a>
             <a href="?page=my-trips" class="btn btn-outline-primary">
                 <i class="bi bi-calendar3 me-1"></i>My Trips
             </a>
@@ -189,25 +192,25 @@ require_once INCLUDES_PATH . '/header.php';
 
     <!-- Completed Trips Without Tickets -->
     <?php if (!empty($completedTripsWithoutTickets)): ?>
-    <div class="alert alert-warning mb-4">
-        <div class="d-flex align-items-center">
-            <i class="bi bi-exclamation-triangle me-2 fs-5"></i>
-            <div class="flex-grow-1">
-                <strong>You have completed trips without tickets!</strong>
-                <br>
-                <small>Create trip tickets for these trips:</small>
+        <div class="alert alert-warning mb-4">
+            <div class="d-flex align-items-center">
+                <i class="bi bi-exclamation-triangle me-2 fs-5"></i>
+                <div class="flex-grow-1">
+                    <strong>You have completed trips without tickets!</strong>
+                    <br>
+                    <small>Create trip tickets for these trips:</small>
+                </div>
+            </div>
+            <div class="mt-2">
+                <?php foreach ($completedTripsWithoutTickets as $trip): ?>
+                    <a href="?page=trip-tickets&action=create_form&request_id=<?= $trip->id ?>"
+                        class="btn btn-sm btn-outline-warning me-1 mb-1">
+                        <i class="bi bi-file-earmark-plus me-1"></i>
+                        Trip #<?= $trip->id ?> - <?= e($trip->destination) ?>
+                    </a>
+                <?php endforeach; ?>
             </div>
         </div>
-        <div class="mt-2">
-            <?php foreach ($completedTripsWithoutTickets as $trip): ?>
-                <a href="?page=trip-tickets&action=create_form&request_id=<?= $trip->id ?>"
-                   class="btn btn-sm btn-outline-warning me-1 mb-1">
-                    <i class="bi bi-file-earmark-plus me-1"></i>
-                    Trip #<?= $trip->id ?> - <?= e($trip->destination) ?>
-                </a>
-            <?php endforeach; ?>
-        </div>
-    </div>
     <?php endif; ?>
 
     <!-- Filters -->
@@ -217,16 +220,20 @@ require_once INCLUDES_PATH . '/header.php';
                 <div class="col-md-6">
                     <label class="form-label">Status Filter</label>
                     <div class="btn-group w-100" role="group">
-                        <a href="?page=my-trip-tickets" class="btn btn-outline-secondary <?= $statusFilter === '' ? 'active' : '' ?>">
+                        <a href="?page=my-trip-tickets"
+                            class="btn btn-outline-secondary <?= $statusFilter === '' ? 'active' : '' ?>">
                             All (<?= $stats['all'] ?>)
                         </a>
-                        <a href="?page=my-trip-tickets&status=submitted" class="btn btn-outline-warning <?= $statusFilter === 'submitted' ? 'active' : '' ?>">
+                        <a href="?page=my-trip-tickets&status=submitted"
+                            class="btn btn-outline-warning <?= $statusFilter === 'submitted' ? 'active' : '' ?>">
                             Pending (<?= $stats['submitted'] ?>)
                         </a>
-                        <a href="?page=my-trip-tickets&status=reviewed" class="btn btn-outline-info <?= $statusFilter === 'reviewed' ? 'active' : '' ?>">
+                        <a href="?page=my-trip-tickets&status=reviewed"
+                            class="btn btn-outline-info <?= $statusFilter === 'reviewed' ? 'active' : '' ?>">
                             Reviewed (<?= $stats['reviewed'] ?>)
                         </a>
-                        <a href="?page=my-trip-tickets&status=approved" class="btn btn-outline-success <?= $statusFilter === 'approved' ? 'active' : '' ?>">
+                        <a href="?page=my-trip-tickets&status=approved"
+                            class="btn btn-outline-success <?= $statusFilter === 'approved' ? 'active' : '' ?>">
                             Approved (<?= $stats['approved'] ?>)
                         </a>
                     </div>
@@ -235,7 +242,8 @@ require_once INCLUDES_PATH . '/header.php';
                     <label class="form-label">Search</label>
                     <form method="GET" class="d-flex gap-2">
                         <input type="hidden" name="page" value="my-trip-tickets">
-                        <input type="text" name="search" class="form-control" placeholder="Search destination or purpose..." value="<?= e($search) ?>">
+                        <input type="text" name="search" class="form-control"
+                            placeholder="Search destination or purpose..." value="<?= e($search) ?>">
                         <button type="submit" class="btn btn-primary">
                             <i class="bi bi-search"></i>
                         </button>
@@ -344,7 +352,7 @@ require_once INCLUDES_PATH . '/header.php';
                                     </td>
                                     <td>
                                         <div class="fw-medium"><?= $tt->plate_number ?: 'N/A' ?></div>
-                                        <small class="text-muted"><?= $tt->make ?> <?= $tt->vehicle_model ?></small>
+                                        <small class="text-muted"><?= $tt->make ?>         <?= $tt->vehicle_model ?></small>
                                     </td>
                                     <td>
                                         <span class="badge bg-<?= $statusClass ?> me-1">
@@ -358,18 +366,15 @@ require_once INCLUDES_PATH . '/header.php';
                                     <td>
                                         <div class="btn-group btn-group-sm">
                                             <a href="?page=trip-tickets&action=view&id=<?= $tt->id ?>"
-                                               class="btn btn-outline-primary"
-                                               title="View Ticket">
+                                                class="btn btn-outline-primary" title="View Ticket">
                                                 <i class="bi bi-eye"></i>
                                             </a>
                                             <a href="?page=trip-tickets&action=export-pdf&id=<?= $tt->id ?>"
-                                               class="btn btn-outline-danger"
-                                               title="Export PDF">
+                                                class="btn btn-outline-danger" title="Export PDF">
                                                 <i class="bi bi-file-earmark-pdf"></i>
                                             </a>
                                             <a href="?page=trip-tickets&action=export-excel&id=<?= $tt->id ?>"
-                                               class="btn btn-outline-success"
-                                               title="Export Excel">
+                                                class="btn btn-outline-success" title="Export Excel">
                                                 <i class="bi bi-file-earmark-excel"></i>
                                             </a>
                                         </div>

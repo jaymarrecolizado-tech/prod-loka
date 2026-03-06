@@ -3,7 +3,6 @@
  * LOKA - Export Trip Ticket to PDF
  *
  * Generates a printable trip ticket matching the official DICT format
- * Landscape, 1 page, proper signatory order, with passengers from VRF
  */
 
 require_once BASE_PATH . '/vendor/tecnickcom/tcpdf/tcpdf.php';
@@ -24,8 +23,7 @@ $ticket = db()->fetch(
             ag.name as arrival_guard, ag.phone as arrival_guard_phone,
             u_rev.name as reviewed_by_name, u_rev.email as reviewed_by_email,
             v.plate_number, v.make, v.model as vehicle_model, v.color,
-            dept.name as department_name,
-            mph.name as motorpool_head_name
+            dept.name as department_name
      FROM trip_tickets tt
      JOIN requests r ON tt.request_id = r.id
      LEFT JOIN drivers d ON tt.driver_id = d.id
@@ -36,7 +34,6 @@ $ticket = db()->fetch(
      LEFT JOIN users dg ON tt.dispatch_guard_id = dg.id
      LEFT JOIN users ag ON tt.arrival_guard_id = ag.id
      LEFT JOIN users u_rev ON tt.reviewed_by = u_rev.id
-     LEFT JOIN users mph ON r.motorpool_head_id = mph.id
      WHERE tt.id = ? AND tt.deleted_at IS NULL",
     [$ticketId]
 );
@@ -62,8 +59,7 @@ $passengers = db()->fetchAll(
             CASE
                 WHEN rp.user_id IS NOT NULL THEN u.name
                 ELSE rp.guest_name
-            END as passenger_name,
-            u.phone as passenger_phone
+            END as passenger_name
      FROM request_passengers rp
      LEFT JOIN users u ON rp.user_id = u.id
      WHERE rp.request_id = ?
@@ -93,325 +89,272 @@ $pdf->SetTitle('Trip Ticket TT-' . $ticket->request_id);
 // Remove default header/footer
 $pdf->setPrintHeader(false);
 $pdf->setPrintFooter(false);
-$pdf->SetMargins(10, 8, 10);
+$pdf->SetMargins(12, 12, 12);
 $pdf->SetAutoPageBreak(FALSE, 0);
 $pdf->AddPage();
 
-// ===== HEADER SECTION =====
-$pdf->SetFont('helvetica', 'B', 9);
-$pdf->Cell(0, 4, 'Republic of the Philippines', 0, 1, 'C');
+// Styles
+$pdf->SetFont('times', '', 10);
 
-$pdf->SetFont('helvetica', 'B', 12);
-$pdf->Cell(0, 5, 'DEPARTMENT OF INFORMATION AND COMMUNICATIONS TECHNOLOGY', 0, 1, 'C');
+// ===== HEADER =====
+// Top border line
+$pdf->Line(12, 12, 278, 12);
 
-$pdf->SetFont('helvetica', 'B', 10);
-$pdf->Cell(0, 4, 'REGION II - CAGAYAN VALLEY', 0, 1, 'C');
+$pdf->SetFont('times', 'B', 11);
+$pdf->Cell(0, 6, 'Republic of the Philippines', 0, 1, 'C');
+$pdf->Cell(0, 6, 'DEPARTMENT OF INFORMATION AND COMMUNICATIONS TECHNOLOGY', 0, 1, 'C');
+$pdf->SetFont('times', 'B', 10);
+$pdf->Cell(0, 6, 'REGION II - CAGAYAN VALLEY', 0, 1, 'C');
 
+// Bottom border line
+$pdf->Line(12, 36, 278, 36);
+$pdf->Ln(5);
+
+// Title
+$pdf->SetFont('times', 'B', 16);
+$pdf->Cell(0, 8, 'VEHICLE USE REQUEST / TRIP TICKET', 0, 1, 'C');
 $pdf->Ln(2);
 
-// ===== TITLE SECTION =====
-$pdf->SetFont('helvetica', 'B', 14);
-$pdf->SetFillColor(13, 110, 253);
-$pdf->SetTextColor(255, 255, 255);
-$pdf->Cell(0, 8, '  T R I P   T I C K E T ', 0, 1, 'C', true);
-
-$pdf->SetTextColor(0, 0, 0);
-$pdf->Ln(2);
-
-// ===== TICKET INFO =====
+// Ticket info
 $pdf->SetFont('helvetica', '', 9);
-$vrfNo = 'VRF-' . $ticket->request_id;
-$ttNo = 'TT-' . $ticket->request_id;
-
-$pdf->Cell(35, 5, 'Ticket No.:', 0, 0);
-$pdf->SetFont('helvetica', 'B', 9);
-$pdf->Cell(45, 5, $ttNo . ' (Ref: ' . $vrfNo . ')', 0, 0);
-$pdf->SetFont('helvetica', '', 9);
-$pdf->Cell(18, 5, 'Date:', 0, 0);
-$pdf->SetFont('helvetica', 'B', 9);
+$pdf->Cell(70, 5, 'Ticket No.: ______________________', 0, 0);
+$pdf->Cell(30, 5, 'Date:', 0, 0);
 $pdf->Cell(0, 5, date('F j, Y'), 0, 1);
+$pdf->SetFont('helvetica', 'B', 9);
+$pdf->Cell(70, 5, 'TT-' . $ticket->request_id . ' (Ref: VRF-' . $ticket->request_id . ')', 0, 1);
+$pdf->Ln(5);
+
+// Main content columns
+$leftColX = 12;
+$leftColWidth = 175;
+$rightColX = 195;
+$rightColWidth = 70;
+
+// ===== SECTION I: PARTICULARS OF TRIP =====
+$pdf->SetFont('helvetica', 'B', 10);
+$pdf->Cell(0, 5, 'I. PARTICULARS OF TRIP', 0, 1);
 $pdf->Ln(2);
 
-// ===== MAIN CONTENT BOX =====
-$contentY = $pdf->GetY();
-$pdf->Rect(8, $contentY, 280, 170, 'D');
+$pdf->SetFont('helvetica', '', 9);
+$pdf->Cell(35, 6, 'Date of Trip:', 0, 0);
+$pdf->Cell(80, 6, date('F j, Y', strtotime($ticket->start_date)), 'B', 0);
+$pdf->Cell(25, 6, 'Destination:', 0, 0);
+$pdf->Cell(0, 6, $ticket->destination, 'B', 1);
 
-// ===== LEFT SIDE (Trip & Driver Info) =====
-$leftX = 10;
-$leftWidth = 130;
+$pdf->Cell(35, 6, 'Time Out:', 0, 0);
+$pdf->Cell(80, 6, date('h:i A', strtotime($ticket->start_date)), 'B', 0);
+$pdf->Cell(25, 6, 'Purpose:', 0, 0);
+$pdf->Cell(0, 6, truncate($ticket->purpose ?: 'N/A', 40), 'B', 1);
 
-// TRIP INFORMATION
-$pdf->SetXY($leftX, $contentY + 3);
-$pdf->SetFont('helvetica', 'B', 9);
-$pdf->SetFillColor(240, 240, 240);
-$pdf->Cell($leftWidth, 5, '  I. TRIP INFORMATION', 0, 1, 'L', true);
+$pdf->Cell(35, 6, 'Time In:', 0, 0);
+$pdf->Cell(80, 6, date('h:i A', strtotime($ticket->end_date)), 'B', 0);
+$pdf->Cell(25, 6, 'Type of Trip:', 0, 0);
+$pdf->Cell(0, 6, $tripTypeInfo, 'B', 1);
 
-$pdf->SetFont('helvetica', '', 8);
-$tripY = $pdf->GetY() + 1;
+$pdf->Cell(35, 6, 'No. of Passengers:', 0, 0);
+$pdf->Cell(30, 6, count($passengers), 'B', 1);
+$pdf->Ln(3);
 
-$pdf->SetXY($leftX + 3, $tripY);
-$pdf->Cell(35, 4, 'Date of Trip:', 0, 0);
-$pdf->SetFont('helvetica', 'B', 8);
-$pdf->Cell(50, 4, date('F j, Y', strtotime($ticket->start_date)), 0, 1);
+// ===== SECTION II: VEHICLE & DRIVER =====
+$pdf->SetFont('helvetica', 'B', 10);
+$pdf->Cell(0, 5, 'II. VEHICLE & DRIVER INFORMATION', 0, 1);
+$pdf->Ln(2);
 
-$pdf->SetXY($leftX + 3, $tripY + 5);
-$pdf->SetFont('helvetica', '', 8);
-$pdf->Cell(35, 4, 'Vehicle No.:', 0, 0);
-$pdf->SetFont('helvetica', 'B', 8);
-$pdf->Cell(50, 4, $ticket->plate_number ?: 'N/A', 0, 1);
+$pdf->SetFont('helvetica', '', 9);
+$pdf->Cell(35, 6, 'Vehicle No.:', 0, 0);
+$pdf->Cell(80, 6, $ticket->plate_number ?: 'N/A', 'B', 0);
+$pdf->Cell(25, 6, 'Driver:', 0, 0);
+$pdf->Cell(0, 6, $ticket->driver_name, 'B', 1);
 
-$pdf->SetXY($leftX + 3, $tripY + 10);
-$pdf->SetFont('helvetica', '', 8);
-$pdf->Cell(35, 4, 'Destination:', 0, 0);
-$pdf->SetFont('helvetica', 'B', 8);
-$pdf->Cell(60, 4, $ticket->destination, 0, 1);
+$pdf->Cell(35, 6, 'Make/Model:', 0, 0);
+$pdf->Cell(80, 6, ($ticket->make ?: 'N/A') . ' ' . ($ticket->vehicle_model ?: ''), 'B', 0);
+$pdf->Cell(25, 6, 'License No.:', 0, 0);
+$pdf->Cell(0, 6, $ticket->driver_license ?: 'N/A', 'B', 1);
+$pdf->Ln(3);
 
-$pdf->SetXY($leftX + 3, $tripY + 15);
-$pdf->SetFont('helvetica', '', 8);
-$pdf->Cell(35, 4, 'Purpose:', 0, 0);
-$pdf->SetFont('helvetica', 'B', 8);
-$pdf->Cell(60, 4, truncate($ticket->purpose ?: 'N/A', 55), 0, 1);
-
-$pdf->SetXY($leftX + 3, $tripY + 20);
-$pdf->SetFont('helvetica', '', 8);
-$pdf->Cell(35, 4, 'Type of Trip:', 0, 0);
-$pdf->SetFont('helvetica', 'B', 8);
-$pdf->Cell(60, 4, $tripTypeInfo, 0, 1);
-
-// DRIVER INFORMATION
-$driverY = $tripY + 27;
-$pdf->SetXY($leftX, $driverY);
-$pdf->SetFont('helvetica', 'B', 9);
-$pdf->SetFillColor(240, 240, 240);
-$pdf->Cell($leftWidth, 5, '  II. DRIVER INFORMATION', 0, 1, 'L', true);
-
-$pdf->SetFont('helvetica', '', 8);
-$driverRowY = $pdf->GetY() + 1;
-
-$pdf->SetXY($leftX + 3, $driverRowY);
-$pdf->Cell(30, 4, 'Name:', 0, 0);
-$pdf->SetFont('helvetica', 'B', 8);
-$pdf->Cell(70, 4, $ticket->driver_name, 0, 1);
-
-$pdf->SetXY($leftX + 3, $driverRowY + 5);
-$pdf->SetFont('helvetica', '', 8);
-$pdf->Cell(30, 4, 'License No.:', 0, 0);
-$pdf->SetFont('helvetica', 'B', 8);
-$pdf->Cell(50, 4, $ticket->driver_license ?: 'N/A', 0, 1);
-
-$pdf->SetXY($leftX + 3, $driverRowY + 10);
-$pdf->SetFont('helvetica', '', 8);
-$pdf->Cell(30, 4, 'Department:', 0, 0);
-$pdf->SetFont('helvetica', 'B', 8);
-$pdf->Cell(70, 4, $ticket->department_name ?: 'N/A', 0, 1);
-
-// PASSENGERS WITH SIGNATURES
-$passengerY = $driverRowY + 17;
-$pdf->SetXY($leftX, $passengerY);
-$pdf->SetFont('helvetica', 'B', 9);
-$pdf->SetFillColor(240, 240, 240);
-$pdf->Cell($leftWidth, 5, '  III. PASSENGERS', 0, 1, 'L', true);
-
-$pdf->SetFont('helvetica', '', 8);
-$pdf->SetXY($leftX + 3, $pdf->GetY() + 1);
-$pdf->Cell(50, 4, 'No. of Passengers: ' . count($passengers), 0, 1);
+// ===== SECTION III: PASSENGERS =====
+$pdf->SetFont('helvetica', 'B', 10);
+$pdf->Cell(0, 5, 'III. PASSENGERS', 0, 1);
 $pdf->Ln(2);
 
 if (!empty($passengers)) {
-    foreach ($passengers as $index => $p) {
-        $pY = $pdf->GetY();
-        $num = $index + 1;
-
-        $pdf->SetFont('helvetica', 'B', 8);
-        $pdf->Cell(20, 4, "Passenger {$num}:", 0, 0);
-        $pdf->SetFont('helvetica', '', 8);
-        $pdf->Cell(80, 4, $p->passenger_name ?: '(Guest)', 0, 0);
-        $pdf->Cell(30, 4, 'Date: _______', 0, 1);
-
-        $sigY = $pdf->GetY() + 1;
-        $pdf->SetX($leftX + 3);
-        $pdf->SetFont('helvetica', '', 7);
-        $pdf->Cell(110, 4, 'Signature: _____________________________', 0, 1);
-
-        // Make sure we don't exceed page
-        if ($pdf->GetY() > 200) break;
+    $passNum = 1;
+    $twoCols = true;
+    foreach ($passengers as $p) {
+        if ($twoCols) {
+            $pdf->Cell(10, 6, $passNum . '.', 0, 0);
+            $pdf->Cell(70, 6, $p->passenger_name ?: '(Guest)', 'B', 0);
+        } else {
+            $pdf->Cell(10, 6, $passNum . '.', 0, 0);
+            $pdf->Cell(70, 6, $p->passenger_name ?: '(Guest)', 'B', 1);
+        }
+        $twoCols = !$twoCols;
+        $passNum++;
     }
+    if (!$twoCols) {
+        $pdf->Ln(1);
+    }
+} else {
+    $pdf->Cell(0, 6, 'No passengers', 0, 1);
 }
+$pdf->Ln(3);
 
-// ===== RIGHT SIDE (Odometer, Time, Fuel) =====
-$rightX = 145;
-$rightWidth = 60;
+// ===== RIGHT COLUMN: ODOMETER & FUEL =====
+$pdf->SetY($pdf->GetY() - 5);
+$rightY = $pdf->GetY();
 
-// ODOMETER
-$pdf->SetXY($rightX, $driverY);
-$pdf->SetFont('helvetica', 'B', 9);
-$pdf->SetFillColor(240, 240, 240);
-$pdf->Cell($rightWidth, 5, '  IV. ODOMETER', 0, 1, 'L', true);
-
-$pdf->SetFont('helvetica', '', 8);
-$odoY = $pdf->GetY() + 1;
-
-$pdf->SetXY($rightX + 2, $odoY);
-$pdf->Cell(25, 4, 'Start:', 0, 0);
-$pdf->SetFont('helvetica', 'B', 8);
-$pdf->Cell(28, 4, ($ticket->start_mileage ? number_format($ticket->start_mileage) : '______'), 0, 1);
-
-$pdf->SetXY($rightX + 2, $odoY + 5);
-$pdf->SetFont('helvetica', '', 8);
-$pdf->Cell(25, 4, 'End:', 0, 0);
-$pdf->SetFont('helvetica', 'B', 8);
-$pdf->Cell(28, 4, ($ticket->end_mileage ? number_format($ticket->end_mileage) : '______'), 0, 1);
-
-$pdf->SetXY($rightX + 2, $odoY + 10);
-$pdf->SetFont('helvetica', '', 8);
-$pdf->Cell(25, 4, 'Total:', 0, 0);
-$pdf->SetFont('helvetica', 'B', 8);
-$pdf->Cell(28, 4, ($ticket->distance_traveled ? number_format($ticket->distance_traveled) : '______'), 0, 1);
-
-// TIME
-$pdf->SetXY($rightX, $pdf->GetY() + 2);
-$pdf->SetFont('helvetica', 'B', 9);
-$pdf->SetFillColor(240, 240, 240);
-$pdf->Cell($rightWidth, 5, '  V. TIME RECORD', 0, 1, 'L', true);
+$pdf->SetX($rightColX);
+$pdf->SetFont('helvetica', 'B', 10);
+$pdf->Cell($rightColWidth, 5, 'IV. ODOMETER', 0, 1);
+$pdf->SetX($rightColX);
+$pdf->Ln(2);
 
 $pdf->SetFont('helvetica', '', 8);
-$timeY = $pdf->GetY() + 1;
+$pdf->SetX($rightColX);
+$pdf->Cell(25, 5, 'Start:', 0, 0);
+$pdf->Cell(45, 5, ($ticket->start_mileage ? number_format($ticket->start_mileage) : '____') . ' km', 'B', 1);
 
-$pdf->SetXY($rightX + 2, $timeY);
-$pdf->Cell(25, 4, 'Departed:', 0, 0);
-$pdf->SetFont('helvetica', 'B', 8);
-$pdf->Cell(30, 4, ($ticket->start_date ? date('h:i A', strtotime($ticket->start_date)) : '_____'), 0, 1);
+$pdf->SetX($rightColX);
+$pdf->Cell(25, 5, 'End:', 0, 0);
+$pdf->Cell(45, 5, ($ticket->end_mileage ? number_format($ticket->end_mileage) : '____') . ' km', 'B', 1);
 
-$pdf->SetXY($rightX + 2, $timeY + 5);
+$pdf->SetX($rightColX);
+$pdf->Cell(25, 5, 'Total:', 0, 0);
+$pdf->Cell(45, 5, ($ticket->distance_traveled ? number_format($ticket->distance_traveled) : '____') . ' km', 'B', 1);
+
+$pdf->SetX($rightColX);
+$pdf->Ln(3);
+
+$pdf->SetX($rightColX);
+$pdf->SetFont('helvetica', 'B', 10);
+$pdf->Cell($rightColWidth, 5, 'V. FUEL', 0, 1);
+$pdf->SetX($rightColX);
+$pdf->Ln(2);
+
 $pdf->SetFont('helvetica', '', 8);
-$pdf->Cell(25, 4, 'Returned:', 0, 0);
-$pdf->SetFont('helvetica', 'B', 8);
-$pdf->Cell(30, 4, ($ticket->end_date ? date('h:i A', strtotime($ticket->end_date)) : '_____'), 0, 1);
+$pdf->SetX($rightColX);
+$pdf->Cell(25, 5, 'Consumed:', 0, 0);
+$pdf->Cell(45, 5, ($ticket->fuel_consumed ? number_format($ticket->fuel_consumed, 1) . ' L' : '____'), 'B', 1);
 
-// FUEL & REFILLING
-$pdf->SetXY($rightX, $pdf->GetY() + 2);
-$pdf->SetFont('helvetica', 'B', 9);
-$pdf->SetFillColor(240, 240, 240);
-$pdf->Cell($rightWidth, 5, '  VI. FUEL & REFILLING', 0, 1, 'L', true);
+$pdf->SetX($rightColX);
+$pdf->Cell(25, 5, 'Amount:', 0, 0);
+$pdf->Cell(45, 5, ($ticket->fuel_cost ? 'P' . number_format($ticket->fuel_cost, 2) : 'P____'), 'B', 1);
 
-$pdf->SetFont('helvetica', '', 7);
-$fuelY = $pdf->GetY() + 1;
-
-$pdf->SetXY($rightX + 2, $fuelY);
-$pdf->Cell(25, 3, 'Consumed:', 0, 0);
-$pdf->SetFont('helvetica', 'B', 7);
-$pdf->Cell(30, 3, ($ticket->fuel_consumed ? number_format($ticket->fuel_consumed, 1) . ' L' : '______'), 0, 1);
-
-$pdf->SetXY($rightX + 2, $fuelY + 4);
-$pdf->SetFont('helvetica', '', 7);
-$pdf->Cell(25, 3, 'Amount:', 0, 0);
-$pdf->SetFont('helvetica', 'B', 7);
-$pdf->Cell(30, 3, ($ticket->fuel_cost ? 'P ' . number_format($ticket->fuel_cost, 2) : 'P_____'), 0, 1);
-
-$pdf->SetXY($rightX + 2, $fuelY + 8);
+$pdf->SetX($rightColX);
+$pdf->Ln(2);
+$pdf->SetX($rightColX);
 $pdf->SetFont('helvetica', 'I', 7);
-$pdf->Cell(55, 3, 'Gas Station: ______________________', 0, 1);
+$pdf->Cell(15, 4, 'Station:', 0, 0);
+$pdf->Cell(55, 4, '', 'B', 1);
 
-$pdf->SetXY($rightX + 2, $fuelY + 11);
-$pdf->SetFont('helvetica', 'I', 7);
-$pdf->Cell(55, 3, 'Amount Refilled: P ______________', 0, 1);
+$pdf->SetX($rightColX);
+$pdf->Cell(15, 4, 'Refill P', 0, 0);
+$pdf->Cell(55, 4, '', 'B', 1);
 
-$pdf->SetXY($rightX + 2, $fuelY + 14);
-$pdf->SetFont('helvetica', 'I', 7);
-$pdf->Cell(55, 3, 'Odo. Before Refill: ______ km', 0, 1);
+$pdf->SetX($rightColX);
+$pdf->Cell(20, 4, 'Odo Before:', 0, 0);
+$pdf->Cell(50, 4, '', 'B', 1);
 
-$pdf->SetXY($rightX + 2, $fuelY + 17);
-$pdf->SetFont('helvetica', 'I', 7);
-$pdf->Cell(55, 3, 'Odo. After Refill: ______ km', 0, 1);
+$pdf->SetX($rightColX);
+$pdf->Cell(20, 4, 'Odo After:', 0, 0);
+$pdf->Cell(50, 4, '', 'B', 1);
 
-// ===== DRIVER SIGNATURE (1st Signatory) =====
-$driverSignY = $pdf->GetY() + 5;
-$pdf->SetXY($leftX, $driverSignY);
-$pdf->SetFont('helvetica', 'B', 9);
-$pdf->SetFillColor(245, 245, 245);
-$pdf->Cell($leftWidth, 30, '', 0, 1, 'L', true);
+// Continue left column for signatories
+$pdf->SetY($rightY + 85);
+$pdf->SetX($leftColX);
 
-$pdf->SetXY($leftX + 3, $driverSignY + 3);
-$pdf->SetFont('helvetica', 'B', 9);
-$pdf->Cell(0, 4, '1. DRIVER CERTIFICATION', 0, 1);
-
-$pdf->SetFont('helvetica', '', 7);
-$pdf->SetXY($leftX + 3, $driverSignY + 8);
-$pdf->Cell(50, 4, 'Name: ' . $ticket->driver_name, 0, 1);
-
-$pdf->SetXY($leftX + 3, $driverSignY + 12);
-$pdf->SetFont('helvetica', '', 7);
-$pdf->Cell(50, 4, 'Date: __________________', 0, 1);
-
-$pdf->SetXY($leftX + 3, $driverSignY + 16);
-$pdf->SetFont('helvetica', '', 7);
-$pdf->Cell(70, 4, 'Signature: _____________________________', 0, 1);
-
-// ===== SIGNATORY CLEARANCE =====
-$clearanceY = $driverSignY + 28;
-$pdf->SetXY($leftX, $clearanceY);
-$pdf->SetFont('helvetica', 'B', 11);
-$pdf->SetFillColor(13, 110, 253);
-$pdf->SetTextColor(255, 255, 255);
-$pdf->Cell(270, 7, '  S I G N A T O R Y   C L E A R A N C E ', 0, 1, 'C', true);
-
-$pdf->SetTextColor(0, 0, 0);
+// ===== SECTION VI: DRIVER CERTIFICATION =====
+$pdf->SetFont('helvetica', 'B', 10);
+$pdf->Cell(0, 5, 'VI. DRIVER CERTIFICATION', 0, 1);
 $pdf->Ln(1);
 
-$signY = $pdf->GetY();
-$signColWidth = 130;
+$pdf->SetFont('helvetica', 'I', 8);
+$pdf->MultiCell(0, 4, 'I hereby certify that all information provided above is true and correct.', 0, 'L');
+$pdf->Ln(2);
 
-// ===== 2. MOTORPOOL HEAD =====
-$pdf->SetXY($leftX, $signY);
+$pdf->SetFont('helvetica', '', 9);
+$pdf->Cell(30, 6, 'Name:', 0, 0);
+$pdf->Cell(100, 6, $ticket->driver_name, 'B', 0);
+$pdf->Cell(25, 6, 'Date:', 0, 0);
+$pdf->Cell(0, 6, '', 'B', 1);
+
+$pdf->Cell(30, 6, 'Signature:', 0, 0);
+$pdf->Cell(0, 6, '', 'B', 1);
+$pdf->Ln(4);
+
+// ===== SECTION VII: SIGNATORY CLEARANCE =====
+$pdf->SetFont('helvetica', 'B', 12);
+$pdf->SetFillColor(0, 51, 102);
+$pdf->SetTextColor(255, 255, 255);
+$pdf->Cell(0, 7, 'VII. SIGNATORY CLEARANCE', 0, 1, 'C', true);
+$pdf->SetTextColor(0, 0, 0);
+$pdf->Ln(3);
+
+// Signatories in two columns
+$signColWidth = 125;
+
+// 1. PREPARED BY: DRIVER
 $pdf->SetFont('helvetica', 'B', 9);
-$pdf->Cell($signColWidth, 5, '2. MOTORPOOL HEAD', 0, 1);
+$pdf->Cell(0, 5, '1. PREPARED BY: DRIVER', 0, 1);
+$pdf->SetFont('helvetica', 'I', 8);
+$pdf->Cell(0, 4, '   Prepared this trip ticket and certifies all information is correct.', 0, 1);
+$pdf->Ln(1);
 
-$pdf->SetFont('helvetica', '', 7);
-$pdf->SetX($leftX);
-$pdf->MultiCell($signColWidth - 3, 3, 'Verifies trip details and vehicle condition.', 0, 'L');
+$pdf->SetFont('helvetica', '', 9);
+$pdf->Cell(25, 6, 'Name:', 0, 0);
+$pdf->Cell($signColWidth, 6, '', 'B', 0);
+$pdf->Cell(20, 6, 'Date:', 0, 0);
+$pdf->Cell(0, 6, '', 'B', 1);
 
-$pdf->SetX($leftX);
-$pdf->SetFont('helvetica', '', 7);
-$pdf->Cell(30, 4, 'Name: ___________________', 0, 0);
-$pdf->Cell(25, 4, 'Date: _______', 0, 1);
+$pdf->Cell(25, 6, 'Signature:', 0, 0);
+$pdf->Cell(0, 6, '', 'B', 1);
+$pdf->Ln(2);
 
-$pdf->SetX($leftX);
-$pdf->SetFont('helvetica', '', 7);
-$pdf->Cell(70, 4, 'Signature: _____________________________', 0, 1);
-
-// ===== 3. ADMIN & FINANCE DIVISION CHIEF =====
-$pdf->SetXY($leftX + $signColWidth, $signY);
+// 2. REVIEWED BY: MOTORPOOL HEAD
 $pdf->SetFont('helvetica', 'B', 9);
-$pdf->Cell($signColWidth, 5, '3. ADMIN & FINANCE DIVISION CHIEF', 0, 1);
+$pdf->Cell(0, 5, '2. REVIEWED BY: MOTORPOOL HEAD', 0, 1);
+$pdf->SetFont('helvetica', 'I', 8);
+$pdf->Cell(0, 4, '   Reviewed and verified trip details, vehicle condition, and mileage.', 0, 1);
+$pdf->Ln(1);
 
-$pdf->SetFont('helvetica', '', 7);
-$pdf->SetX($leftX + $signColWidth);
-$pdf->MultiCell($signColWidth - 3, 3, 'Reviews and approves the trip ticket. Certifies documents are complete and processes for payment.', 0, 'L');
+$pdf->SetFont('helvetica', '', 9);
+$pdf->Cell(25, 6, 'Name:', 0, 0);
+$pdf->Cell($signColWidth, 6, '', 'B', 0);
+$pdf->Cell(20, 6, 'Date:', 0, 0);
+$pdf->Cell(0, 6, '', 'B', 1);
 
-$pdf->SetX($leftX + $signColWidth);
-$pdf->SetFont('helvetica', '', 7);
-$pdf->Cell(30, 4, 'Name: ___________________', 0, 0);
-$pdf->Cell(25, 4, 'Date: _______', 0, 1);
+$pdf->Cell(25, 6, 'Signature:', 0, 0);
+$pdf->Cell(0, 6, '', 'B', 1);
+$pdf->Ln(2);
 
-$pdf->SetX($leftX + $signColWidth);
-$pdf->SetFont('helvetica', '', 7);
-$pdf->Cell(70, 4, 'Signature: _____________________________', 0, 1);
+// 3. APPROVED BY: ADMIN & FINANCE
+$pdf->SetFont('helvetica', 'B', 9);
+$pdf->Cell(0, 5, '3. APPROVED BY: ADMIN & FINANCE DIVISION CHIEF', 0, 1);
+$pdf->SetFont('helvetica', 'I', 8);
+$pdf->Cell(0, 4, '   Approved and certified that all documents are complete and trip is valid for payment.', 0, 1);
+$pdf->Ln(1);
 
-// ===== NOTES SECTION =====
-$notesY = $signY + 20;
-$pdf->SetXY($leftX, $notesY);
-$pdf->SetFont('helvetica', 'I', 7);
-$pdf->MultiCell(270, 3, "NOTES: 1) This document must be signed by all parties. 2) Attach TO/OB Slip if applicable. 3) Submit to Finance for processing.", 0, 'L');
+$pdf->SetFont('helvetica', '', 9);
+$pdf->Cell(25, 6, 'Name:', 0, 0);
+$pdf->Cell($signColWidth, 6, '', 'B', 0);
+$pdf->Cell(20, 6, 'Date:', 0, 0);
+$pdf->Cell(0, 6, '', 'B', 1);
+
+$pdf->Cell(25, 6, 'Signature:', 0, 0);
+$pdf->Cell(0, 6, '', 'B', 1);
+$pdf->Ln(4);
 
 // ===== FOOTER =====
-$pdf->SetY(-15);
+$pdf->SetY(-20);
 $pdf->SetFont('helvetica', 'I', 7);
-$pdf->SetFillColor(240, 240, 240);
-$pdf->Cell(0, 4, 'Generated by LOKA Fleet Management System | ' . date('F j, Y g:i A'), 0, 1, 'C', true);
+$pdf->Cell(0, 4, 'NOTES: (1) This document must be signed by all parties. (2) Attach TO/OB Slip if applicable. (3) Submit to Finance for processing.', 0, 1, 'C');
 
-$pdf->SetY(-10);
+$pdf->SetY(-12);
 $pdf->SetFont('helvetica', '', 6);
-$pdf->Cell(0, 4, 'DICT - Region II | ' . date('Y'), 0, 1, 'C');
+$pdf->Cell(0, 4, 'Generated by LOKA Fleet Management System | DICT Region II | ' . date('F j, Y g:i A'), 0, 1, 'C');
+
+// Border around content
+$pdf->Rect(11, 11, 268, 195);
 
 // Output PDF
 $filename = 'Trip_Ticket_TT-' . $ticket->request_id . '_VRF-' . $ticket->request_id . '_' . date('Y-m-d');

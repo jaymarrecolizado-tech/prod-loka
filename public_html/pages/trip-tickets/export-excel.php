@@ -291,14 +291,12 @@ echo '<?mso-application progid="Excel.Sheet"?>';
    </Row>
    <Row ss:Index="26"/>
 
-   <!-- Signatory Section -->
+   <!-- Driver Certification Section -->
    <Row>
-    <Cell ss:MergeAcross="7" ss:StyleID="s64"><Data ss:Type="String">  SIGNATORY CLEARANCE (For Manual Routing)</Data></Cell>
+    <Cell ss:MergeAcross="7" ss:StyleID="s66"><Data ss:Type="String">  DRIVER CERTIFICATION</Data></Cell>
    </Row>
-
-   <!-- Driver Signature -->
-   <Row ss:Index="28">
-    <Cell ss:MergeAcross="7" ss:StyleID="s66"><Data ss:Type="String">  PREPARED BY:</Data></Cell>
+   <Row>
+    <Cell ss:MergeAcross="7"><Data ss:Type="String">I hereby certify that all information stated above is true and correct.</Data></Cell>
    </Row>
    <Row>
     <Cell><Data ss:Type="String">Name:</Data></Cell>
@@ -312,31 +310,17 @@ echo '<?mso-application progid="Excel.Sheet"?>';
    </Row>
    <Row/>
 
-   <!-- Passenger Acknowledgment -->
-   <Row ss:Index="31">
-    <Cell ss:MergeAcross="7" ss:StyleID="s66"><Data ss:Type="String">  1. PASSENGER(S) ACKNOWLEDGMENT</Data></Cell>
-   </Row>
+   <!-- Signatory Clearance -->
    <Row>
-    <Cell ss:MergeAcross="7"><Data ss:Type="String">I hereby acknowledge that I was a passenger on this trip and the information stated above is correct.</Data></Cell>
+    <Cell ss:MergeAcross="7" ss:StyleID="s64"><Data ss:Type="String">  SIGNATORY CLEARANCE (For Manual Routing)</Data></Cell>
    </Row>
-   <Row>
-    <Cell><Data ss:Type="String">Name(s):</Data></Cell>
-    <Cell ss:MergeAcross="3"><Data ss:Type="String">_____________________________</Data></Cell>
-    <Cell><Data ss:Type="String">Date:</Data></Cell>
-    <Cell ss:MergeAcross="2"><Data ss:Type="String">_____________________</Data></Cell>
-   </Row>
-   <Row>
-    <Cell><Data ss:Type="String">Signature:</Data></Cell>
-    <Cell ss:MergeAcross="6"><Data ss:Type="String">___________________________________________</Data></Cell>
-   </Row>
-   <Row/>
 
-   <!-- Motorpool Head -->
-   <Row ss:Index="35">
-    <Cell ss:MergeAcross="7" ss:StyleID="s66"><Data ss:Type="String">  2. MOTORPOOL HEAD - Verification &amp; Approval</Data></Cell>
+   <!-- 1. Prepared by: Driver -->
+   <Row>
+    <Cell ss:MergeAcross="7" ss:StyleID="s66"><Data ss:Type="String">  1. PREPARED BY: DRIVER</Data></Cell>
    </Row>
    <Row>
-    <Cell ss:MergeAcross="7"><Data ss:Type="String">Verified trip details, vehicle condition, and mileage recording. Approved for processing.</Data></Cell>
+    <Cell ss:MergeAcross="7"><Data ss:Type="String">Prepared this trip ticket and certifies all information is correct.</Data></Cell>
    </Row>
    <Row>
     <Cell><Data ss:Type="String">Name:</Data></Cell>
@@ -350,12 +334,12 @@ echo '<?mso-application progid="Excel.Sheet"?>';
    </Row>
    <Row/>
 
-   <!-- Admin & Finance Division Chief -->
-   <Row ss:Index="39">
-    <Cell ss:MergeAcross="7" ss:StyleID="s66"><Data ss:Type="String">  3. ADMIN &amp; FINANCE DIVISION CHIEF - Final Approval</Data></Cell>
+   <!-- 2. Reviewed by: Motorpool Head -->
+   <Row>
+    <Cell ss:MergeAcross="7" ss:StyleID="s66"><Data ss:Type="String">  2. REVIEWED BY: MOTORPOOL HEAD</Data></Cell>
    </Row>
    <Row>
-    <Cell ss:MergeAcross="7"><Data ss:Type="String">Certified that all documents are complete and trip is valid for reimbursement/payment processing.</Data></Cell>
+    <Cell ss:MergeAcross="7"><Data ss:Type="String">Reviewed and verified trip details, vehicle condition, and mileage.</Data></Cell>
    </Row>
    <Row>
     <Cell><Data ss:Type="String">Name:</Data></Cell>
@@ -367,7 +351,26 @@ echo '<?mso-application progid="Excel.Sheet"?>';
     <Cell><Data ss:Type="String">Signature:</Data></Cell>
     <Cell ss:MergeAcross="6"><Data ss:Type="String">___________________________________________</Data></Cell>
    </Row>
-   <Row ss:Index="43"/>
+   <Row/>
+
+   <!-- 3. Approved by: Admin & Finance Division Chief -->
+   <Row>
+    <Cell ss:MergeAcross="7" ss:StyleID="s66"><Data ss:Type="String">  3. APPROVED BY: ADMIN &amp; FINANCE DIVISION CHIEF</Data></Cell>
+   </Row>
+   <Row>
+    <Cell ss:MergeAcross="7"><Data ss:Type="String">Approved and certified that all documents are complete and trip is valid for payment processing.</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">Name:</Data></Cell>
+    <Cell ss:MergeAcross="3"><Data ss:Type="String">_____________________________</Data></Cell>
+    <Cell><Data ss:Type="String">Date:</Data></Cell>
+    <Cell ss:MergeAcross="2"><Data ss:Type="String">_____________________</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="String">Signature:</Data></Cell>
+    <Cell ss:MergeAcross="6"><Data ss:Type="String">___________________________________________</Data></Cell>
+   </Row>
+   <Row/>
 
    <!-- Notes -->
    <Row>
