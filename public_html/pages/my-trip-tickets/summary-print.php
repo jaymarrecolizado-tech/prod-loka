@@ -857,7 +857,7 @@ if (!defined('BASE_PATH'))
                         <tr>
                             <td><input type="number" step="0.01" value="<?= $f['qty'] ?>" oninput="calcTotals()"></td>
                             <td><input type="number" step="0.01" value="<?= $f['amt'] ?>" oninput="calcTotals()"></td>
-                            <td><input type="date" value="<?= $f['date'] ?>"></td>
+                            <td><input type="date"></td>
                             <td><input class="left" type="text" value="<?= e($f['items']) ?>"></td>
                             <td><input class="left" type="text" value="<?= e($f['remarks']) ?>"></td>
                         </tr>
