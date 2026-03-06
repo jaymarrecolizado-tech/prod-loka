@@ -363,13 +363,12 @@ if (!defined('BASE_PATH'))
             @page {
                 size: A4 landscape;
                 margin: 10mm 10mm 20mm 10mm;
-                counter-increment: page;
             }
 
             body {
                 background: white;
                 padding: 0;
-                counter-reset: page;
+                /* Remove counter-reset - let @page handle it */
             }
 
             .controls {
@@ -416,7 +415,17 @@ if (!defined('BASE_PATH'))
                 display: table-header-group;
             }
 
-            /* Footer appears on every page */
+            /* Ensure page numbers update on each page */
+            @page {
+                counter-increment: page;
+            }
+
+            /* Page number display - show page count when printing */
+            .page-number::after {
+                content: "Page " counter(page);
+            }
+
+            /* Footer - appears on each page via position fixed */
             .ftr {
                 position: fixed;
                 bottom: 0;
@@ -426,12 +435,8 @@ if (!defined('BASE_PATH'))
                 margin: 0;
                 border-top: 2px solid #000;
                 background: white;
-                z-index: 1000;
-            }
-
-            /* Page number display - show page count when printing */
-            .page-number::after {
-                content: "Page " counter(page);
+                box-sizing: border-box;
+                width: 100%;
             }
 
             input,
@@ -978,7 +983,7 @@ if (!defined('BASE_PATH'))
         </div>
 
         <!-- FOOTER -->
-        <div class="ftr">
+        <div class="ftr" id="mainFooter">
             <span>Department of Information and Communications Technology — Region II</span>
             <span class="ftr-tno" id="footerTno">Trip No: <?= e($tripTicketNumber) ?></span>
             <span class="page-number" id="pageNumberDisplay">Page 1</span>
@@ -1013,14 +1018,26 @@ if (!defined('BASE_PATH'))
             calcTotals();
         }
 
-        // Auto-page numbering using CSS counter
+        // Page numbering for printing
         window.addEventListener('load', function() {
             calcTotals();
 
-            // Update page number before printing
+            // Handle page numbering before print - change footer from fixed to relative
             window.addEventListener('beforeprint', function() {
-                // CSS counter will handle page numbering automatically
-                // This ensures it's updated on each page
+                const footer = document.getElementById('mainFooter');
+                if (footer) {
+                    footer.style.position = 'relative';
+                    footer.style.marginTop = '20px';
+                }
+            });
+
+            // Restore footer after print
+            window.addEventListener('afterprint', function() {
+                const footer = document.getElementById('mainFooter');
+                if (footer) {
+                    footer.style.position = '';
+                    footer.style.marginTop = '';
+                }
             });
         });
     </script>
