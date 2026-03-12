@@ -912,10 +912,10 @@ if (!defined('BASE_PATH'))
                 <tfoot>
                     <tr>
                         <td class="total-lbl">Total</td>
-                        <td></td>
                         <td><input type="text" id="fuelQtyTotal" placeholder="—" value="<?= $totalFuel > 0 ? number_format($totalFuel, 2) . ' L' : '' ?>" readonly></td>
                         <td><input type="text" id="fuelAmtTotal" placeholder="—" value="<?= $totalCost > 0 ? 'PHP ' . number_format($totalCost, 2) : '' ?>" readonly></td>
-                        <td colspan="2" style="padding:3px 10px;font-size:8px;color:var(--sub);font-style:italic;">Totals are auto-calculated from Qty and Amount entries above.</td>
+                        <td></td>
+                        <td style="padding:3px 10px;font-size:8px;color:var(--sub);font-style:italic;">Totals are auto-calculated from Qty and Amount entries above.</td>
                     </tr>
                 </tfoot>
             </table>
