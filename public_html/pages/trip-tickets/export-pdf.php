@@ -143,16 +143,13 @@ $pdf->Cell(0, 6, $ticket->destination, 'B', 1);
 
 $pdf->Cell(35, 6, 'Time Out:', 0, 0);
 $pdf->Cell(80, 6, date('h:i A', strtotime($ticket->start_date)), 'B', 0);
-$pdf->Cell(25, 6, 'Purpose:', 0, 0);
-$pdf->Cell(0, 6, truncate($ticket->purpose ?: 'N/A', 40), 'B', 1);
+$pdf->Cell(25, 6, 'Time In:', 0, 0);
+$pdf->Cell(0, 6, date('h:i A', strtotime($ticket->end_date)), 'B', 1);
 
-$pdf->Cell(35, 6, 'Time In:', 0, 0);
-$pdf->Cell(80, 6, date('h:i A', strtotime($ticket->end_date)), 'B', 0);
-$pdf->Cell(25, 6, 'Type of Trip:', 0, 0);
-$pdf->Cell(0, 6, $tripTypeInfo, 'B', 1);
-
-$pdf->Cell(35, 6, 'No. of Passengers:', 0, 0);
-$pdf->Cell(30, 6, count($passengers), 'B', 1);
+$pdf->Cell(35, 6, 'Type of Trip:', 0, 0);
+$pdf->Cell(80, 6, $tripTypeInfo, 'B', 0);
+$pdf->Cell(25, 6, 'No. of Passengers:', 0, 0);
+$pdf->Cell(0, 6, count($passengers), 'B', 1);
 $pdf->Ln(3);
 
 // ===== SECTION II: VEHICLE & DRIVER =====

@@ -87,19 +87,14 @@ require_once INCLUDES_PATH . '/header.php';
                         <h6 class="text-muted mb-2">
                             <i class="bi bi-link-45deg me-1"></i> Trip Reference
                         </h6>
-                        <div class="p-3 bg-light rounded">
-                            <strong>Request #<?= $ticket->request_id ?></strong>
-                            <br>
-                            <small class="text-muted">
-                                <i class="bi bi-geo-alt me-1"></i>
-                                <?= e($ticket->trip_destination) ?>
-                            </small>
-                            <br>
-                            <small class="text-muted">
-                                <i class="bi bi-card-text me-1"></i>
-                                <?= truncate($ticket->trip_purpose, 50) ?>
-                            </small>
-                        </div>
+                         <div class="p-3 bg-light rounded">
+                             <strong>Request #<?= $ticket->request_id ?></strong>
+                             <br>
+                             <small class="text-muted">
+                                 <i class="bi bi-geo-alt me-1"></i>
+                                 <?= e($ticket->trip_destination) ?>
+                             </small>
+                         </div>
                     </div>
 
                     <!-- Driver Information -->
@@ -148,18 +143,12 @@ require_once INCLUDES_PATH . '/header.php';
                                     <?= $typeInfo['label'] ?>
                                 </span>
                             </div>
-                            <div class="mb-3">
-                                <h6 class="text-muted mb-2">
-                                    <i class="bi bi-flag me-1"></i> Destination
-                                </h6>
-                                <p class="mb-0"><?= e($ticket->destination) ?></p>
-                                <?php if ($ticket->purpose): ?>
-                                <small class="text-muted">
-                                    <i class="bi bi-card-text me-1"></i>
-                                    <?= truncate($ticket->purpose, 100) ?>
-                                </small>
-                                <?php endif; ?>
-                            </div>
+                             <div class="mb-3">
+                                 <h6 class="text-muted mb-2">
+                                     <i class="bi bi-flag me-1"></i> Destination
+                                 </h6>
+                                 <p class="mb-0"><?= e($ticket->destination) ?></p>
+                             </div>
                             <div class="mb-3">
                                 <h6 class="text-muted mb-2">
                                     <i class="bi bi-people me-1"></i> Passengers
