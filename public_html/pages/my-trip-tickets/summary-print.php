@@ -353,10 +353,11 @@ if (!defined('BASE_PATH'))
             overflow-wrap: break-word !important;
             line-height: 1.4;
             vertical-align: top !important;
-            min-height: 40px !important;
+            min-height: 80px !important;
             height: auto !important;
             padding: 6px 10px !important;
             text-align: left !important;
+            overflow: visible !important;
         }
 
         /* Landscape print */
