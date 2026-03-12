@@ -972,7 +972,12 @@ if (!defined('BASE_PATH'))
                 <div class="sig-role">Prepared by</div>
                 <div style="height:20px;"></div>
                 <div class="sig-line"></div>
-                <div class="sig-name"><?= e($generatorName) ?></div>
+                <select class="sig-select">
+                    <option value="">Select Driver...</option>
+                    <?php foreach ($drivers as $driver): ?>
+                        <option value="<?= e($driver->name) ?>" <?= $driver->name === $generatorName ? 'selected' : '' ?>><?= e($driver->name) ?></option>
+                    <?php endforeach; ?>
+                </select>
                 <div class="sig-title">User / Driver Assign</div>
             </div>
             <div class="sig">
