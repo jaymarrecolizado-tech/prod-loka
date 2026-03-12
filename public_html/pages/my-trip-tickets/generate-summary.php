@@ -119,7 +119,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' || $isPrint) {
         $year = date('Y', strtotime($dateFrom));
         $day = (int)$firstDateInMonth->format('d');
         $week = ceil($day / 7);
-        $tripTicketNumber = "{$year}-{$vInfo->plate_number}-{$selectedMonth}-W{$week}";
+        $tripTicketNumber = "{$year}-{$vInfo->plate_number}-{$selectedMonth}{$week}";
 
         // Calculate totals
         $totalFuel = 0;
