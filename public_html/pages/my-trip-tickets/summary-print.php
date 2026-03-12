@@ -440,7 +440,8 @@ if (!defined('BASE_PATH'))
             }
 
             input,
-            textarea {
+            textarea,
+            select {
                 color: #000 !important;
             }
 
@@ -594,7 +595,7 @@ if (!defined('BASE_PATH'))
         /* SIGNATORIES */
         .sigs {
             display: grid;
-            grid-template-columns: 1fr 1fr 1fr;
+            grid-template-columns: 1fr 1fr 1fr 1fr;
             border-top: 1.5px solid var(--border2);
         }
 
@@ -654,6 +655,14 @@ if (!defined('BASE_PATH'))
 
         .sig-input::placeholder {
             color: #bbb;
+        }
+
+        .sig-select {
+            text-align: center;
+        }
+
+        .sig-select:focus {
+            outline: none;
         }
 
         /* FOOTER */
@@ -947,6 +956,18 @@ if (!defined('BASE_PATH'))
         <!-- SIGNATORIES -->
         <div class="sec">Signatories</div>
         <div class="sigs">
+            <div class="sig">
+                <div class="sig-role">Guard</div>
+                <div style="height:20px;"></div>
+                <div class="sig-line"></div>
+                <select class="sig-select" style="width: 100%; border: none; background: transparent; font-family: 'DM Sans', sans-serif; font-size: 9.5px; font-weight: 500; color: var(--ink);">
+                    <option value="">Select Guard...</option>
+                    <?php foreach ($guards as $guard): ?>
+                        <option value="<?= e($guard->name) ?>"><?= e($guard->name) ?></option>
+                    <?php endforeach; ?>
+                </select>
+                <div class="sig-title">Guard on Duty</div>
+            </div>
             <div class="sig">
                 <div class="sig-role">Prepared by</div>
                 <div style="height:20px;"></div>
