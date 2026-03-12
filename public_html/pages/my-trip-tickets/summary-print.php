@@ -354,6 +354,7 @@ if (!defined('BASE_PATH'))
             line-height: 1.4;
             vertical-align: top !important;
             min-height: 40px !important;
+            height: auto !important;
             padding: 6px 10px !important;
             text-align: left !important;
         }
@@ -477,11 +478,11 @@ if (!defined('BASE_PATH'))
         }
 
         .tbl-trip col.c-dest {
-            width: 19%;
+            width: 24%;
         }
 
         .tbl-trip col.c-proj {
-            width: 22%;
+            width: 27%;
         }
 
         .tbl-trip col.c-user {
