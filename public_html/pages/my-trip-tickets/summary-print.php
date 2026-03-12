@@ -793,9 +793,8 @@ if (!defined('BASE_PATH'))
                     <col class="c-odo">
                     <col class="c-dest">
                     <col class="c-proj">
-                    <col class="c-user">
-                    <col class="c-pass">
-                    <col class="c-guard">
+                     <col class="c-user">
+                     <col class="c-pass">
                 </colgroup>
                 <thead>
                     <tr>
@@ -806,9 +805,8 @@ if (!defined('BASE_PATH'))
                         <th>Odometer<br>Arrival</th>
                         <th>Destination</th>
                         <th>Purpose</th>
-                        <th>Driver/Passenger Name</th>
-                        <th>Signature</th>
-                        <th>Guard on Duty<br>Signature</th>
+                         <th>Driver/Passenger Name</th>
+                         <th>Signature</th>
                     </tr>
                 </thead>
                 <tbody id="tripBody">
@@ -838,9 +836,6 @@ if (!defined('BASE_PATH'))
                                 <input type="hidden" class="person-role" value="<?= e($person['role']) ?>">
                             </td>
                             <td><input type="text" placeholder="Signature"></td>
-                            <?php if ($isFirstPerson): ?>
-                                <td rowspan="<?= $peopleCount ?>"><input type="text" placeholder="Guard signature"></td>
-                            <?php endif; ?>
                         </tr>
                     <?php
                         endforeach;
@@ -858,9 +853,8 @@ if (!defined('BASE_PATH'))
                             <td><input type="text" placeholder="km"></td>
                             <td><input class="left" type="text" placeholder="Destination"></td>
                             <td><input class="left" type="text" placeholder="Purpose"></td>
-                            <td><input class="left" type="text" placeholder="Name (Driver)"></td>
-                            <td><input type="text" placeholder="Signature"></td>
-                            <td><input type="text" placeholder="Guard signature"></td>
+                             <td><input class="left" type="text" placeholder="Name (Driver)"></td>
+                             <td><input type="text" placeholder="Signature"></td>
                         </tr>
                     <?php endfor; ?>
                 </tbody>
