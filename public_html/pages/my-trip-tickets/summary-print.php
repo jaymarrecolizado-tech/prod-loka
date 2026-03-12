@@ -522,6 +522,10 @@ if (!defined('BASE_PATH'))
             width: 19%;
         }
 
+        .tbl-trip col.c-sig {
+            width: 8%;
+        }
+
         .tbl-trip col.c-pass {
             width: 10%;
         }
@@ -830,6 +834,7 @@ if (!defined('BASE_PATH'))
                     <col class="c-proj">
                      <col class="c-user">
                      <col class="c-pass">
+                     <col class="c-sig">
                 </colgroup>
                 <thead>
                     <tr>
