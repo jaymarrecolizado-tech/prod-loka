@@ -440,8 +440,7 @@ if (!defined('BASE_PATH'))
             }
 
             input,
-            textarea,
-            select {
+            textarea {
                 color: #000 !important;
             }
 
@@ -655,14 +654,6 @@ if (!defined('BASE_PATH'))
 
         .sig-input::placeholder {
             color: #bbb;
-        }
-
-        .sig-select {
-            text-align: center;
-        }
-
-        .sig-select:focus {
-            outline: none;
         }
 
         /* FOOTER */
@@ -960,24 +951,24 @@ if (!defined('BASE_PATH'))
                 <div class="sig-role">Guard</div>
                 <div style="height:20px;"></div>
                 <div class="sig-line"></div>
-                <select class="sig-select" style="width: 100%; border: none; background: transparent; font-family: 'DM Sans', sans-serif; font-size: 9.5px; font-weight: 500; color: var(--ink);">
-                    <option value="">Select Guard...</option>
+                <input type="text" class="sig-input" placeholder="Guard name" list="guards-list">
+                <datalist id="guards-list">
                     <?php foreach ($guards as $guard): ?>
-                        <option value="<?= e($guard->name) ?>"><?= e($guard->name) ?></option>
+                        <option value="<?= e($guard->name) ?>">
                     <?php endforeach; ?>
-                </select>
+                </datalist>
                 <div class="sig-title">Guard on Duty</div>
             </div>
             <div class="sig">
                 <div class="sig-role">Prepared by</div>
                 <div style="height:20px;"></div>
                 <div class="sig-line"></div>
-                <select class="sig-select">
-                    <option value="">Select Driver...</option>
+                <input type="text" class="sig-input" value="<?= e($generatorName) ?>" placeholder="Driver name" list="drivers-list">
+                <datalist id="drivers-list">
                     <?php foreach ($drivers as $driver): ?>
-                        <option value="<?= e($driver->name) ?>" <?= $driver->name === $generatorName ? 'selected' : '' ?>><?= e($driver->name) ?></option>
+                        <option value="<?= e($driver->name) ?>">
                     <?php endforeach; ?>
-                </select>
+                </datalist>
                 <div class="sig-title">User / Driver Assign</div>
             </div>
             <div class="sig">
