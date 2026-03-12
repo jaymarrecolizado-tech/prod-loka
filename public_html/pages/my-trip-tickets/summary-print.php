@@ -761,18 +761,13 @@ if (!defined('BASE_PATH'))
         <!-- TRIP INFORMATION -->
         <div class="sec">Trip Information</div>
         <div class="irow">
-            <div class="if f2">
+            <div class="if">
                 <span class="lbl">Date of Trip</span>
                 <div class="date-pair">
                     <input type="date" id="dateFrom" value="<?= $dateFrom ?>">
                     <span>to</span>
                     <input type="date" id="dateTo" value="<?= $dateTo ?>">
                 </div>
-            </div>
-            <div class="if f8">
-                <span class="lbl">Purpose</span>
-                <textarea id="purpose"
-                    rows="2">To compile completed trips for vehicle <?= e($vInfo->plate_number) ?> from <?= date('M d, Y', strtotime($dateFrom)) ?> to <?= date('M d, Y', strtotime($dateTo)) ?>.</textarea>
             </div>
         </div>
 
