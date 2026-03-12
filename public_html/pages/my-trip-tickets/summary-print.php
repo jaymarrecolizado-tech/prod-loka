@@ -1005,8 +1005,8 @@ if (!defined('BASE_PATH'))
         function calcTotals() {
             let qty = 0, amt = 0;
             document.querySelectorAll('#fuelBody tr').forEach(r => {
-                qty += parseFloat(r.cells[0].querySelector('input').value) || 0;
-                amt += parseFloat(r.cells[1].querySelector('input').value) || 0;
+                qty += parseFloat(r.cells[1].querySelector('input').value) || 0; // cells[1] is qty column
+                amt += parseFloat(r.cells[2].querySelector('input').value) || 0; // cells[2] is amt column
             });
             document.getElementById('fuelQtyTotal').value = qty > 0 ? qty.toFixed(2) + ' L' : '';
             document.getElementById('fuelAmtTotal').value = amt > 0 ? 'PHP ' + amt.toLocaleString('en-PH', { minimumFractionDigits: 2 }) : '';
