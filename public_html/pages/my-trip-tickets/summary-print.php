@@ -337,6 +337,11 @@ if (!defined('BASE_PATH'))
             text-align: left;
         }
 
+        /* Signature column larger */
+        .tbl-trip td:nth-child(9) input {
+            min-height: 50px;
+        }
+
         /* Text wrapping for specific columns */
         .tbl-trip col.c-dest,
         .tbl-trip col.c-proj,
@@ -345,18 +350,46 @@ if (!defined('BASE_PATH'))
         }
 
         /* Destination, Purpose, and Driver/Passenger Name columns */
-        .tbl-trip td:nth-child(6) input,
-        .tbl-trip td:nth-child(7) input,
-        .tbl-trip td:nth-child(8) input {
+        .tbl-trip td:nth-child(6) textarea,
+        .tbl-trip td:nth-child(7) textarea {
             white-space: normal !important;
             word-wrap: break-word !important;
             overflow-wrap: break-word !important;
             line-height: 1.4;
-            vertical-align: top !important;
             min-height: 40px !important;
-            height: auto !important;
+            height: 100% !important;
+            width: 100% !important;
             padding: 6px 10px !important;
             text-align: left !important;
+            resize: none;
+            border: none;
+            outline: none;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 10px;
+            font-weight: 700;
+            color: var(--ink);
+            background: transparent;
+            box-sizing: border-box;
+            display: block;
+        }
+
+        .tbl-trip td:nth-child(6) textarea::placeholder,
+        .tbl-trip td:nth-child(7) textarea::placeholder {
+            color: #ccc;
+            font-weight: 400;
+        }
+
+        .tbl-trip textarea {
+            overflow: hidden;
+            resize: none;
+        }
+
+        @media print {
+            .tbl-trip textarea {
+                overflow: hidden !important;
+                -webkit-appearance: none;
+                appearance: none;
+            }
         }
 
         /* Landscape print */
@@ -828,10 +861,8 @@ if (!defined('BASE_PATH'))
                                 <td rowspan="<?= $peopleCount ?>"><input type="time" value="<?= date('H:i', strtotime($t->end_date)) ?>"></td>
                                 <td rowspan="<?= $peopleCount ?>"><input type="text" placeholder="km" value="<?= $t->start_mileage ?>"></td>
                                 <td rowspan="<?= $peopleCount ?>"><input type="text" placeholder="km" value="<?= $t->end_mileage ?>"></td>
-                                <td rowspan="<?= $peopleCount ?>"><input class="left" type="text" placeholder="Destination"
-                                        value="<?= e($t->destination) ?>"></td>
-                                <td rowspan="<?= $peopleCount ?>"><input class="left" type="text" placeholder="Purpose" value="<?= e($t->purpose) ?>">
-                                </td>
+                                <td rowspan="<?= $peopleCount ?>"><textarea class="left" placeholder="Destination" rows="2"><?= e($t->destination) ?></textarea></td>
+                                <td rowspan="<?= $peopleCount ?>"><textarea class="left" placeholder="Purpose" rows="2"><?= e($t->purpose) ?></textarea></td>
                             <?php endif; ?>
                             <td>
                                 <input class="left" type="text" placeholder="Name" value="<?= e($person['name']) ?><?php if ($person['role'] === 'Driver'): ?> (Driver)<?php endif; ?>">
@@ -853,8 +884,8 @@ if (!defined('BASE_PATH'))
                             <td><input type="time"></td>
                             <td><input type="text" placeholder="km"></td>
                             <td><input type="text" placeholder="km"></td>
-                            <td><input class="left" type="text" placeholder="Destination"></td>
-                            <td><input class="left" type="text" placeholder="Purpose"></td>
+                            <td><textarea class="left" placeholder="Destination" rows="2"></textarea></td>
+                            <td><textarea class="left" placeholder="Purpose" rows="2"></textarea></td>
                              <td><input class="left" type="text" placeholder="Name (Driver)"></td>
                              <td><input type="text" placeholder="Signature"></td>
                         </tr>
