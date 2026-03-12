@@ -964,11 +964,11 @@ if (!defined('BASE_PATH'))
         <div class="sec">Signatories</div>
         <div class="sigs">
             <div class="sig">
-                <div class="sig-role">Guard</div>
+                <div class="sig-role">Attested By</div>
                 <div style="height:20px;"></div>
                 <div class="sig-line"></div>
                 <select class="sig-select">
-                    <option value="">Select Guard...</option>
+                    <option value="">Select Attestor...</option>
                     <?php foreach ($guards as $guard): ?>
                         <option value="<?= e($guard->name) ?>"><?= e($guard->name) ?></option>
                     <?php endforeach; ?>
