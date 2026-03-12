@@ -91,10 +91,35 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' || $isPrint) {
         }
 
         // Calculate trip ticket number: year-vehicle plate number-month and week of the month
+        // Determine month with most days in range, then week based on first day in that month
+        $start = new DateTime($dateFrom);
+        $end = new DateTime($dateTo);
+        $end->modify('+1 day'); // include end date
+        $interval = new DateInterval('P1D');
+        $period = new DatePeriod($start, $interval, $end);
+
+        $monthCounts = [];
+        foreach ($period as $dt) {
+            $month = $dt->format('m');
+            $monthCounts[$month] = ($monthCounts[$month] ?? 0) + 1;
+        }
+
+        $maxCount = max($monthCounts);
+        $selectedMonth = array_keys($monthCounts, $maxCount)[0]; // if tie, takes first (earliest month)
+
+        // Find first date in selected month
+        $firstDateInMonth = null;
+        foreach ($period as $dt) {
+            if ($dt->format('m') == $selectedMonth) {
+                $firstDateInMonth = $dt;
+                break;
+            }
+        }
+
         $year = date('Y', strtotime($dateFrom));
-        $month = date('m', strtotime($dateFrom));
-        $week = ceil(date('d', strtotime($dateFrom)) / 7);
-        $tripTicketNumber = "{$year}-{$vInfo->plate_number}-{$month}-W{$week}";
+        $day = (int)$firstDateInMonth->format('d');
+        $week = ceil($day / 7);
+        $tripTicketNumber = "{$year}-{$vInfo->plate_number}-{$selectedMonth}-W{$week}";
 
         // Calculate totals
         $totalFuel = 0;
