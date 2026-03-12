@@ -519,11 +519,11 @@ if (!defined('BASE_PATH'))
         }
 
         .tbl-trip col.c-user {
-            width: 19%;
+            width: 17%;
         }
 
         .tbl-trip col.c-sig {
-            width: 8%;
+            width: 10%;
         }
 
         .tbl-trip col.c-pass {
