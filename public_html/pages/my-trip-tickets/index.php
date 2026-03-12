@@ -2,34 +2,21 @@
 /**
  * LOKA - My Trip Tickets Page
  *
- * Dedicated page for drivers to view their own trip tickets
+ * Dedicated page for approvers to view trip tickets
  */
 
-// Only drivers can access this page
-if (!isDriver()) {
-    redirectWith('/?page=dashboard', 'danger', 'This page is only for drivers.');
+// Only approvers can access this page
+if (!isApprover()) {
+    redirectWith('/?page=dashboard', 'danger', 'This page is only for approvers.');
 }
 
 $pageTitle = 'My Trip Tickets';
-
-// Get current user's driver record
-$driver = db()->fetch(
-    "SELECT d.*, u.name, u.email, u.phone
-     FROM drivers d
-     JOIN users u ON d.user_id = u.id
-     WHERE d.user_id = ? AND d.deleted_at IS NULL",
-    [userId()]
-);
-
-if (!$driver) {
-    redirectWith('/?page=dashboard', 'danger', 'You are not registered as a driver.');
-}
 
 // Get filter and search parameters
 $statusFilter = get('status', '');
 $search = get('search', '');
 
-// Build query for driver's trip tickets
+// Build query for trip tickets
 $sql = "SELECT tt.*,
             r.id as request_id, r.destination as trip_destination, r.purpose as trip_purpose,
             r.status as request_status,
@@ -43,9 +30,9 @@ $sql = "SELECT tt.*,
      LEFT JOIN users dg ON tt.dispatch_guard_id = dg.id
      LEFT JOIN users ag ON tt.arrival_guard_id = ag.id
      LEFT JOIN users u_rev ON tt.reviewed_by = u_rev.id
-     WHERE tt.driver_id = ? AND tt.deleted_at IS NULL";
+     WHERE tt.deleted_at IS NULL";
 
-$params = [$driver->id];
+$params = [];
 
 // Apply status filter
 if ($statusFilter && in_array($statusFilter, ['draft', 'submitted', 'reviewed', 'approved'])) {
@@ -72,28 +59,14 @@ $tripTickets = db()->fetchAll($sql, $params);
 
 // Get counts for each status
 $stats = [
-    'all' => db()->fetchColumn("SELECT COUNT(*) FROM trip_tickets WHERE driver_id = ? AND deleted_at IS NULL", [$driver->id]),
-    'draft' => db()->fetchColumn("SELECT COUNT(*) FROM trip_tickets WHERE driver_id = ? AND status = 'draft' AND deleted_at IS NULL", [$driver->id]),
-    'submitted' => db()->fetchColumn("SELECT COUNT(*) FROM trip_tickets WHERE driver_id = ? AND status = 'submitted' AND deleted_at IS NULL", [$driver->id]),
-    'reviewed' => db()->fetchColumn("SELECT COUNT(*) FROM trip_tickets WHERE driver_id = ? AND status = 'reviewed' AND deleted_at IS NULL", [$driver->id]),
-    'approved' => db()->fetchColumn("SELECT COUNT(*) FROM trip_tickets WHERE driver_id = ? AND status = 'approved' AND deleted_at IS NULL", [$driver->id]),
+    'all' => db()->fetchColumn("SELECT COUNT(*) FROM trip_tickets WHERE deleted_at IS NULL"),
+    'draft' => db()->fetchColumn("SELECT COUNT(*) FROM trip_tickets WHERE status = 'draft' AND deleted_at IS NULL"),
+    'submitted' => db()->fetchColumn("SELECT COUNT(*) FROM trip_tickets WHERE status = 'submitted' AND deleted_at IS NULL"),
+    'reviewed' => db()->fetchColumn("SELECT COUNT(*) FROM trip_tickets WHERE status = 'reviewed' AND deleted_at IS NULL"),
+    'approved' => db()->fetchColumn("SELECT COUNT(*) FROM trip_tickets WHERE status = 'approved' AND deleted_at IS NULL"),
 ];
 
-// Get completed trips without tickets (for quick create)
-$completedTripsWithoutTickets = db()->fetchAll(
-    "SELECT r.id, r.destination, r.actual_arrival_datetime,
-            v.plate_number, v.make, v.model as vehicle_model
-     FROM requests r
-     LEFT JOIN vehicles v ON r.vehicle_id = v.id AND v.deleted_at IS NULL
-     LEFT JOIN trip_tickets tt ON r.id = tt.request_id AND tt.deleted_at IS NULL
-     WHERE r.driver_id = ?
-       AND r.status = 'completed'
-       AND r.actual_arrival_datetime IS NOT NULL
-       AND tt.id IS NULL
-     ORDER BY r.actual_arrival_datetime DESC
-     LIMIT 5",
-    [$driver->id]
-);
+// Approvers don't create tickets, so no completed trips section
 
 require_once INCLUDES_PATH . '/header.php';
 ?>
@@ -103,17 +76,11 @@ require_once INCLUDES_PATH . '/header.php';
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
             <h4 class="mb-1"><i class="bi bi-file-earmark-text me-2"></i>My Trip Tickets</h4>
-            <p class="text-muted mb-0">View and manage your trip tickets</p>
+            <p class="text-muted mb-0">View and manage trip tickets</p>
         </div>
         <div class="d-flex gap-2">
-            <span class="badge bg-light text-dark border fs-6">
-                <i class="bi bi-person-badge me-1"></i><?= e($driver->name) ?>
-            </span>
             <a href="?page=my-trip-tickets&action=generate-summary" class="btn btn-outline-success">
                 <i class="bi bi-file-earmark-spreadsheet me-1"></i>Generate Vehicle Summary
-            </a>
-            <a href="?page=my-trips" class="btn btn-outline-primary">
-                <i class="bi bi-calendar3 me-1"></i>My Trips
             </a>
         </div>
     </div>
@@ -190,28 +157,7 @@ require_once INCLUDES_PATH . '/header.php';
         </div>
     </div>
 
-    <!-- Completed Trips Without Tickets -->
-    <?php if (!empty($completedTripsWithoutTickets)): ?>
-        <div class="alert alert-warning mb-4">
-            <div class="d-flex align-items-center">
-                <i class="bi bi-exclamation-triangle me-2 fs-5"></i>
-                <div class="flex-grow-1">
-                    <strong>You have completed trips without tickets!</strong>
-                    <br>
-                    <small>Create trip tickets for these trips:</small>
-                </div>
-            </div>
-            <div class="mt-2">
-                <?php foreach ($completedTripsWithoutTickets as $trip): ?>
-                    <a href="?page=trip-tickets&action=create_form&request_id=<?= $trip->id ?>"
-                        class="btn btn-sm btn-outline-warning me-1 mb-1">
-                        <i class="bi bi-file-earmark-plus me-1"></i>
-                        Trip #<?= $trip->id ?> - <?= e($trip->destination) ?>
-                    </a>
-                <?php endforeach; ?>
-            </div>
-        </div>
-    <?php endif; ?>
+
 
     <!-- Filters -->
     <div class="card mb-4">

@@ -34,25 +34,15 @@
                 </a>
             </li>
             
-            <?php
-            $isDriver = db()->fetchColumn(
-                "SELECT COUNT(*) FROM drivers WHERE user_id = ? AND deleted_at IS NULL",
-                [userId()]
-            );
-            if ($isDriver):
-            ?>
-            <!-- My Trip Tickets (Drivers Only) -->
+            <?php if (isApprover()): ?>
+            <!-- My Trip Tickets (Approvers Only) -->
             <li class="nav-item">
                 <a class="nav-link <?= activeMenu('my-trip-tickets') ?>" href="<?= APP_URL ?>/?page=my-trip-tickets">
                     <i class="bi bi-file-earmark-text"></i>
                     <span>My Trip Tickets</span>
                     <?php
                     $pendingTicketsCount = db()->fetchColumn(
-                        "SELECT COUNT(*) FROM trip_tickets tt
-                         JOIN requests r ON tt.request_id = r.id
-                         JOIN drivers d ON tt.driver_id = d.id
-                         WHERE d.user_id = ? AND tt.status = 'submitted' AND tt.deleted_at IS NULL",
-                        [userId()]
+                        "SELECT COUNT(*) FROM trip_tickets WHERE status = 'submitted' AND deleted_at IS NULL"
                     );
                     if ($pendingTicketsCount > 0):
                     ?>
