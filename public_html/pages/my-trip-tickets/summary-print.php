@@ -247,8 +247,8 @@ if (!defined('BASE_PATH'))
             border: none;
             outline: none;
             font-family: 'DM Sans', sans-serif;
-            font-size: 9.5px;
-            font-weight: 500;
+            font-size: 11px;
+            font-weight: 700;
             color: var(--ink);
             background: transparent;
             padding: 0;
@@ -321,8 +321,8 @@ if (!defined('BASE_PATH'))
             border: none;
             outline: none;
             font-family: 'DM Sans', sans-serif;
-            font-size: 8.5px;
-            font-weight: 400;
+            font-size: 10px;
+            font-weight: 700;
             color: var(--ink);
             background: transparent;
             padding: 4px 6px;
@@ -530,7 +530,7 @@ if (!defined('BASE_PATH'))
 
         tfoot td input {
             font-weight: 700;
-            font-size: 9px;
+            font-size: 11px;
             color: var(--accent);
             cursor: default;
             min-height: 18px;
@@ -580,8 +580,8 @@ if (!defined('BASE_PATH'))
             border-bottom: 1px solid var(--border);
             outline: none;
             font-family: 'DM Mono', monospace;
-            font-size: 10px;
-            font-weight: 500;
+            font-size: 12px;
+            font-weight: 700;
             color: var(--ink);
             text-align: center;
             padding: 1px 0;
@@ -647,11 +647,12 @@ if (!defined('BASE_PATH'))
             outline: none;
             background: transparent;
             font-family: 'DM Sans', sans-serif;
-            font-size: 9.5px;
-            font-weight: 500;
+            font-size: 11px;
+            font-weight: 700;
             color: var(--ink);
             text-align: center;
             padding: 1px 2px;
+            text-transform: uppercase;
         }
 
         .sig-input::placeholder {
