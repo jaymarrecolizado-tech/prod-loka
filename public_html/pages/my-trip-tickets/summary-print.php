@@ -873,7 +873,7 @@ if (!defined('BASE_PATH'))
                                 <input class="left" type="text" placeholder="Name" value="<?= e($person['name']) ?><?php if ($person['role'] === 'Driver'): ?> (Driver)<?php endif; ?>">
                                 <input type="hidden" class="person-role" value="<?= e($person['role']) ?>">
                             </td>
-                            <td><input type="text" placeholder="Signature"></td>
+                             <td><input type="text"></td>
                         </tr>
                     <?php
                         endforeach;
@@ -892,7 +892,7 @@ if (!defined('BASE_PATH'))
                             <td><textarea class="left" placeholder="Destination" rows="2"></textarea></td>
                             <td><textarea class="left" placeholder="Purpose" rows="2"></textarea></td>
                              <td><input class="left" type="text" placeholder="Name (Driver)"></td>
-                             <td><input type="text" placeholder="Signature"></td>
+                            <td><input type="text"></td>
                         </tr>
                     <?php endfor; ?>
                 </tbody>
