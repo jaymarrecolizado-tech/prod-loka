@@ -84,9 +84,9 @@ if (!defined('BASE_PATH'))
             background: #eee;
         }
 
-        /* TICKET — landscape A4 width */
+        /* TICKET — portrait A4 */
         .ticket {
-            width: 297mm;
+            width: 210mm;
             max-width: 100%;
             background: #fff;
             box-shadow: 0 6px 40px rgba(0, 0, 0, .18);
@@ -292,19 +292,19 @@ if (!defined('BASE_PATH'))
 
         th {
             font-family: 'DM Sans', sans-serif;
-            font-size: 7px;
+            font-size: 6px;
             font-weight: 700;
-            letter-spacing: .07em;
+            letter-spacing: .05em;
             text-transform: uppercase;
             color: var(--dark);
             text-align: center;
             vertical-align: middle;
-            padding: 6px 4px;
+            padding: 4px 2px;
             border: 1px solid var(--border2);
             border-bottom: 1.5px solid var(--ink);
             background: var(--white);
             white-space: nowrap;
-            line-height: 1.35;
+            line-height: 1.2;
         }
 
         td {
@@ -317,15 +317,15 @@ if (!defined('BASE_PATH'))
         td input {
             width: 100%;
             height: 100%;
-            min-height: 26px;
+            min-height: 22px;
             border: none;
             outline: none;
             font-family: 'DM Sans', sans-serif;
-            font-size: 10px;
+            font-size: 9px;
             font-weight: 700;
             color: var(--ink);
             background: transparent;
-            padding: 4px 6px;
+            padding: 2px 4px;
             text-align: center;
         }
 
@@ -359,18 +359,19 @@ if (!defined('BASE_PATH'))
             min-height: 40px !important;
             height: 100% !important;
             width: 100% !important;
-            padding: 6px 10px !important;
+            padding: 2px 4px !important;
             text-align: left !important;
             resize: none;
             border: none;
             outline: none;
             font-family: 'DM Sans', sans-serif;
-            font-size: 10px;
+            font-size: 9px !important;
             font-weight: 700;
             color: var(--ink);
             background: transparent;
             box-sizing: border-box;
             display: block;
+            min-height: 22px !important;
         }
 
         .tbl-trip td:nth-child(6) textarea::placeholder,
@@ -392,10 +393,10 @@ if (!defined('BASE_PATH'))
             }
         }
 
-        /* Landscape print */
+        /* Portrait print */
         @media print {
             @page {
-                size: A4 landscape;
+                size: A4 portrait;
                 margin: 10mm 10mm 20mm 10mm;
                 counter-increment: page;
 
@@ -482,6 +483,22 @@ if (!defined('BASE_PATH'))
             .sec {
                 background: transparent !important;
             }
+
+            /* Portrait-specific adjustments */
+            .tbl-trip th,
+            .tbl-trip td input,
+            .tbl-trip td textarea {
+                font-size: 8px !important;
+                padding: 2px 4px !important;
+            }
+
+            .tbl-trip th {
+                padding: 3px 2px !important;
+            }
+
+            .tbl-trip td {
+                padding: 0 !important;
+            }
         }
 
         td[rowspan] input {
@@ -497,33 +514,37 @@ if (!defined('BASE_PATH'))
             border: 1.5px solid var(--border2);
         }
 
-        /* trip col widths */
+        /* trip col widths - portrait */
         .tbl-trip col.c-date {
-            width: 7%;
+            width: 8%;
         }
 
         .tbl-trip col.c-time {
-            width: 5.5%;
+            width: 7%;
         }
 
         .tbl-trip col.c-odo {
-            width: 6.5%;
+            width: 8%;
         }
 
         .tbl-trip col.c-dest {
-            width: 24%;
+            width: 20%;
         }
 
         .tbl-trip col.c-proj {
-            width: 27%;
+            width: 20%;
         }
 
         .tbl-trip col.c-user {
-            width: 17%;
+            width: 18%;
+        }
+
+        .tbl-trip col.c-pass {
+            width: 12%;
         }
 
         .tbl-trip col.c-sig {
-            width: 10%;
+            width: 7%;
         }
 
         .tbl-trip col.c-pass {
