@@ -717,7 +717,7 @@ if (!defined('BASE_PATH'))
             <div class="hdr-right">
                 <span class="lbl">Trip No.</span>
                 <span class="tno" id="tripnoBadge">
-                    <?= date('Y') . "-" . $vInfo->plate_number ?>
+                    <?= e($tripTicketNumber) ?>
                 </span>
                 <span class="lbl" style="margin-top:5px;">Location / Base</span>
                 <!-- Default Base -->
