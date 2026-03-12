@@ -912,8 +912,8 @@ if (!defined('BASE_PATH'))
                 <tfoot>
                     <tr>
                         <td class="total-lbl">Total</td>
-                        <td><input type="text" id="fuelQtyTotal" placeholder="—" value="<?= $totalFuel > 0 ? number_format($totalFuel, 2) . ' L' : '' ?>" readonly></td>
-                        <td><input type="text" id="fuelAmtTotal" placeholder="—" value="<?= $totalCost > 0 ? 'PHP ' . number_format($totalCost, 2) : '' ?>" readonly></td>
+                        <td><input type="text" id="fuelQtyTotal" placeholder="—" value="<?= $totalFuel > 0 ? number_format($totalFuel, 2) : '' ?>" readonly></td>
+                        <td><input type="text" id="fuelAmtTotal" placeholder="—" value="<?= $totalCost > 0 ? number_format($totalCost, 2) : '' ?>" readonly></td>
                         <td></td>
                         <td style="padding:3px 10px;font-size:8px;color:var(--sub);font-style:italic;">Totals are auto-calculated from Qty and Amount entries above.</td>
                     </tr>
@@ -925,27 +925,27 @@ if (!defined('BASE_PATH'))
         <div class="sec"></div>
         <div class="summary">
             <div class="sum-c">
-                <span class="lbl">Balance<br>(Start of Trip)</span>
-                <input type="text" id="balStart" placeholder="— L">
+                <span class="lbl">Balance (L)<br>(Start of Trip)</span>
+                <input type="text" id="balStart" placeholder="—">
             </div>
             <div class="sum-c">
-                <span class="lbl">Total Fuel<br>Loaded</span>
-                <input type="text" id="fuelLoaded" placeholder="— L"
-                    value="<?= $totalFuel > 0 ? number_format($totalFuel, 2) . ' L' : '' ?>">
+                <span class="lbl">Total Fuel Loaded (L)</span>
+                <input type="text" id="fuelLoaded" placeholder="—"
+                    value="<?= $totalFuel > 0 ? number_format($totalFuel, 2) : '' ?>">
             </div>
             <div class="sum-c">
-                <span class="lbl">Total Fuel<br>Consumed</span>
-                <input type="text" id="fuelConsumed" placeholder="— L"
-                    value="<?= $totalFuel > 0 ? number_format($totalFuel, 2) . ' L' : '' ?>">
+                <span class="lbl">Total Fuel Consumed (L)</span>
+                <input type="text" id="fuelConsumed" placeholder="—"
+                    value="">
             </div>
             <div class="sum-c">
-                <span class="lbl">Total Distance<br>Travelled</span>
-                <input type="text" id="distTotal" placeholder="— km"
-                    value="<?= $totalDist > 0 ? number_format($totalDist) . ' km' : '' ?>">
+                <span class="lbl">Total Distance Travelled (km)</span>
+                <input type="text" id="distTotal" placeholder="—"
+                    value="<?= $totalDist > 0 ? number_format($totalDist) : '' ?>">
             </div>
             <div class="sum-c">
-                <span class="lbl">Balance<br>(End of Trip)</span>
-                <input type="text" id="balEnd" placeholder="— L">
+                <span class="lbl">Balance (L)<br>(End of Trip)</span>
+                <input type="text" id="balEnd" placeholder="—">
             </div>
         </div>
 
@@ -1008,9 +1008,11 @@ if (!defined('BASE_PATH'))
                 qty += parseFloat(r.cells[1].querySelector('input').value) || 0; // cells[1] is qty column
                 amt += parseFloat(r.cells[2].querySelector('input').value) || 0; // cells[2] is amt column
             });
-            document.getElementById('fuelQtyTotal').value = qty > 0 ? qty.toFixed(2) + ' L' : '';
-            document.getElementById('fuelAmtTotal').value = amt > 0 ? 'PHP ' + amt.toLocaleString('en-PH', { minimumFractionDigits: 2 }) : '';
-            document.getElementById('fuelLoaded').value = qty > 0 ? qty.toFixed(2) + ' L' : '';
+            document.getElementById('fuelQtyTotal').value = qty > 0 ? qty.toFixed(2) : '';
+            document.getElementById('fuelAmtTotal').value = amt > 0 ? amt.toFixed(2) : '';
+            document.getElementById('fuelLoaded').value = qty > 0 ? qty.toFixed(2) : '';
+            document.getElementById('fuelConsumed').value = qty > 0 ? qty.toFixed(2) : '';
+            document.getElementById('distTotal').value = '<?= $totalDist > 0 ? number_format($totalDist) : '' ?>'; // Keep as is for now
         }
 
         function syncTripNo(v) {
