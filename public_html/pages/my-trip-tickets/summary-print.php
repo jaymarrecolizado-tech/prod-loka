@@ -867,47 +867,44 @@ if (!defined('BASE_PATH'))
         <div class="tbl-wrap">
             <table class="tbl-fuel">
                 <colgroup>
+                    <col class="c-dt">
                     <col class="c-qty">
                     <col class="c-amt">
-                    <col class="c-dt">
                     <col class="c-add">
                     <col class="c-rem">
                 </colgroup>
                 <thead>
                     <tr>
+                        <th>Date</th>
                         <th>Qty.<br>(Liters)</th>
                         <th>Amount<br>(PHP)</th>
-                        <th>Date</th>
                         <th>Additional Items
-                            <span style="font-weight:500;text-transform:none;letter-spacing:0;font-size:7px;">(Oil, Oil
-                                Filter, Fuel Filter, etc.)</span>
+                            <span style="font-weight:500;text-transform:none;letter-spacing:0;font-size:7px;">(Oil, Oil Filter, Fuel Filter, etc.)</span>
                         </th>
                         <th>Remarks
-                            <span style="font-weight:500;text-transform:none;letter-spacing:0;font-size:7px;">(please
-                                indicate GAS voucher number)</span>
+                            <span style="font-weight:500;text-transform:none;letter-spacing:0;font-size:7px;">(please indicate GAS voucher number)</span>
                         </th>
                     </tr>
                 </thead>
                 <tbody id="fuelBody">
                     <?php foreach ($fuelEntries as $f): ?>
                         <tr>
+                            <td><input type="date" value="<?= $f['date'] ?>"></td>
                             <td><input type="number" step="0.01" value="<?= $f['qty'] ?>" oninput="calcTotals()"></td>
                             <td><input type="number" step="0.01" value="<?= $f['amt'] ?>" oninput="calcTotals()"></td>
-                            <td><input type="date"></td>
                             <td><input class="left" type="text" value="<?= e($f['items']) ?>"></td>
                             <td><input class="left" type="text" value="<?= e($f['remarks']) ?>"></td>
                         </tr>
                     <?php endforeach; ?>
                     <?php
-                    $fuelRem = 3 - count($fuelEntries);
+                    $fuelRem = 4 - count($fuelEntries); // Add 1 additional row
                     for ($j = 0; $j < max(0, $fuelRem); $j++):
                         ?>
                         <tr>
-                            <td><input type="number" step="0.01" placeholder="0.00" oninput="calcTotals()"></td>
-                            <td><input type="number" step="0.01" placeholder="0.00" oninput="calcTotals()"></td>
                             <td><input type="date"></td>
-                            <td><input class="left" type="text" placeholder="e.g. Engine oil, oil filter, fuel filter...">
-                            </td>
+                            <td><input type="number" step="0.01" placeholder="0.00" oninput="calcTotals()"></td>
+                            <td><input type="number" step="0.01" placeholder="0.00" oninput="calcTotals()"></td>
+                            <td><input class="left" type="text" placeholder="e.g. Engine oil, oil filter, fuel filter..."></td>
                             <td><input class="left" type="text" placeholder="GAS Voucher No."></td>
                         </tr>
                     <?php endfor; ?>
@@ -915,14 +912,10 @@ if (!defined('BASE_PATH'))
                 <tfoot>
                     <tr>
                         <td class="total-lbl">Total</td>
-                        <td><input type="text" id="fuelQtyTotal" placeholder="—"
-                                value="<?= $totalFuel > 0 ? number_format($totalFuel, 2) . ' L' : '' ?>" readonly></td>
-                        <td><input type="text" id="fuelAmtTotal" placeholder="—"
-                                value="<?= $totalCost > 0 ? 'PHP ' . number_format($totalCost, 2) : '' ?>" readonly>
-                        </td>
-                        <td colspan="2" style="padding:3px 10px;font-size:8px;color:var(--sub);font-style:italic;">
-                            Totals are auto-calculated from Qty and Amount entries above.
-                        </td>
+                        <td></td>
+                        <td><input type="text" id="fuelQtyTotal" placeholder="—" value="<?= $totalFuel > 0 ? number_format($totalFuel, 2) . ' L' : '' ?>" readonly></td>
+                        <td><input type="text" id="fuelAmtTotal" placeholder="—" value="<?= $totalCost > 0 ? 'PHP ' . number_format($totalCost, 2) : '' ?>" readonly></td>
+                        <td colspan="2" style="padding:3px 10px;font-size:8px;color:var(--sub);font-style:italic;">Totals are auto-calculated from Qty and Amount entries above.</td>
                     </tr>
                 </tfoot>
             </table>
