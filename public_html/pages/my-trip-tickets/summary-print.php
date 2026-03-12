@@ -663,13 +663,14 @@ if (!defined('BASE_PATH'))
             background: transparent;
             font-family: 'DM Sans', sans-serif;
             font-size: 9.5px;
-            font-weight: 500;
+            font-weight: 700;
             color: var(--ink);
             text-align: center;
             outline: none;
             -webkit-appearance: none;
             -moz-appearance: none;
             appearance: none;
+            text-transform: uppercase;
         }
 
         /* FOOTER */
@@ -970,7 +971,7 @@ if (!defined('BASE_PATH'))
                 <select class="sig-select">
                     <option value="">Select Attestor...</option>
                     <?php foreach ($guards as $guard): ?>
-                        <option value="<?= e($guard->name) ?>"><?= e($guard->name) ?></option>
+                        <option value="<?= e($guard->name) ?>"><?= strtoupper(e($guard->name)) ?></option>
                     <?php endforeach; ?>
                 </select>
                 <div class="sig-title">Guard on Duty</div>
@@ -982,7 +983,7 @@ if (!defined('BASE_PATH'))
                 <select class="sig-select">
                     <option value="">Select Driver...</option>
                     <?php foreach ($drivers as $driver): ?>
-                        <option value="<?= e($driver->name) ?>" <?= $driver->name === $generatorName ? 'selected' : '' ?>><?= e($driver->name) ?></option>
+                        <option value="<?= e($driver->name) ?>" <?= $driver->name === $generatorName ? 'selected' : '' ?>><?= strtoupper(e($driver->name)) ?></option>
                     <?php endforeach; ?>
                 </select>
                 <div class="sig-title">User / Driver Assign</div>
