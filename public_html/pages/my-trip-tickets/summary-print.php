@@ -926,7 +926,7 @@ if (!defined('BASE_PATH'))
         <div class="sec"></div>
         <div class="summary">
             <div class="sum-c">
-                <span class="lbl">Balance (L)<br>(Start of Trip)</span>
+                <span class="lbl">Balance (L) (Start of Trip)</span>
                 <input type="text" id="balStart" placeholder="—">
             </div>
             <div class="sum-c">
@@ -945,7 +945,7 @@ if (!defined('BASE_PATH'))
                     value="<?= $totalDist > 0 ? number_format($totalDist) : '' ?>">
             </div>
             <div class="sum-c">
-                <span class="lbl">Balance (L)<br>(End of Trip)</span>
+                <span class="lbl">Balance (L) (End of Trip)</span>
                 <input type="text" id="balEnd" placeholder="—">
             </div>
         </div>
