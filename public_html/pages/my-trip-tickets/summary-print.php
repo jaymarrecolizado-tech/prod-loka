@@ -749,19 +749,6 @@ if (!defined('BASE_PATH'))
                 <input type="text" id="driver" value="<?= e($generatorName) ?>" placeholder="Full name of driver">
             </div>
             <div class="if f2">
-                <span class="lbl">Trip No.</span>
-                <input type="text" id="tripno" value="<?= e($tripTicketNumber) ?>" oninput="syncTripNo(this.value)">
-            </div>
-            <div class="if">
-                <span class="lbl">Date Prepared</span>
-                <input type="date" id="datePrepared" value="<?= date('Y-m-d') ?>">
-            </div>
-        </div>
-
-        <!-- TRIP INFORMATION -->
-        <div class="sec">Trip Information</div>
-        <div class="irow">
-            <div class="if">
                 <span class="lbl">Date of Trip</span>
                 <div class="date-pair">
                     <input type="date" id="dateFrom" value="<?= $dateFrom ?>">
@@ -769,7 +756,13 @@ if (!defined('BASE_PATH'))
                     <input type="date" id="dateTo" value="<?= $dateTo ?>">
                 </div>
             </div>
+            <div class="if">
+                <span class="lbl">Date Prepared</span>
+                <input type="date" id="datePrepared" value="<?= date('Y-m-d') ?>">
+            </div>
         </div>
+
+
 
         <!-- TRIP DETAILS -->
         <div class="sec">Trip Details &nbsp;<em>(to be filled-up by driver assigned)</em></div>
