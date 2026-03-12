@@ -46,6 +46,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' || $isPrint) {
         // Fetch guards for dropdown
         $guards = db()->fetchAll("SELECT id, name FROM users WHERE role = 'guard' ORDER BY name");
 
+        // Fetch drivers for dropdown
+        $drivers = db()->fetchAll("SELECT u.id, u.name FROM drivers d JOIN users u ON d.user_id = u.id ORDER BY u.name");
+
         // Fetch all completed trips (requests) for this vehicle within date range
         $sql = "SELECT r.id as req_id, r.destination, r.purpose,
                        du.name as trip_driver_name, r.passenger_count as passengers,
