@@ -137,24 +137,35 @@ $pdf->Ln(2);
 
 $pdf->SetFont('helvetica', '', 9);
 
-// Row 1: Date of Trip & Destination (balanced layout)
-$pdf->Cell(35, 7, 'Date of Trip:', 0, 0);
-$pdf->SetFont('helvetica', 'B', 10);
-$pdf->Cell(80, 7, date('F j, Y', strtotime($ticket->start_date)), 'B', 0);
+// Row 1: Date of Trip & Destination (stacked dates, reduced margins, better fill)
+$pdf->Cell(25, 7, 'Date of Trip:', 0, 0);
+$pdf->SetFont('helvetica', 'B', 9);
+
+// Check if it's a multi-day trip
+$startDate = date('F j, Y', strtotime($ticket->start_date));
+$endDate = date('F j, Y', strtotime($ticket->end_date));
+if ($startDate !== $endDate) {
+    // Multi-day trip: stack both dates
+    $pdf->Cell(95, 7, $startDate . "\n" . $endDate, 'B', 0, 'L', false, false, 1, false, '', 'T');
+} else {
+    // Single day trip
+    $pdf->Cell(95, 7, $startDate, 'B', 0);
+}
+
 $pdf->SetFont('helvetica', '', 9);
-$pdf->Cell(25, 7, 'Destination:', 0, 0);
+$pdf->Cell(20, 7, 'Destination:', 0, 0);
 $pdf->Cell(0, 7, $ticket->destination, 'B', 1, 'L', false, false, 1, false, '', 'T');
 
-// Row 2: Time Out & Time In (balanced)
-$pdf->Cell(35, 7, 'Time Out:', 0, 0);
-$pdf->Cell(80, 7, date('h:i A', strtotime($ticket->start_date)), 'B', 0, 'C', false, false, 1, false, '', 'T');
-$pdf->Cell(25, 7, 'Time In:', 0, 0);
+// Row 2: Time Out & Time In (adjusted for new spacing)
+$pdf->Cell(25, 7, 'Time Out:', 0, 0);
+$pdf->Cell(95, 7, date('h:i A', strtotime($ticket->start_date)), 'B', 0, 'C', false, false, 1, false, '', 'T');
+$pdf->Cell(20, 7, 'Time In:', 0, 0);
 $pdf->Cell(0, 7, date('h:i A', strtotime($ticket->end_date)), 'B', 1, 'C', false, false, 1, false, '', 'T');
 
-// Row 3: Type of Trip & No. of Passengers (balanced)
-$pdf->Cell(35, 7, 'Type of Trip:', 0, 0);
-$pdf->Cell(80, 7, $tripTypeInfo, 'B', 0, 'L', false, false, 1, false, '', 'T');
-$pdf->Cell(25, 7, 'No. of Passengers:', 0, 0);
+// Row 3: Type of Trip & No. of Passengers (adjusted for new spacing)
+$pdf->Cell(25, 7, 'Type of Trip:', 0, 0);
+$pdf->Cell(95, 7, $tripTypeInfo, 'B', 0, 'L', false, false, 1, false, '', 'T');
+$pdf->Cell(20, 7, 'No. of Passengers:', 0, 0);
 $pdf->Cell(0, 7, count($passengers), 'B', 1, 'C', false, false, 1, false, '', 'T');
 $pdf->Ln(3);
 
@@ -165,23 +176,23 @@ $pdf->Ln(2);
 
 $pdf->SetFont('helvetica', '', 9);
 
-// Row 1: Plate Number & Driver (consistent with Section I)
-$pdf->Cell(35, 7, 'Plate Number:', 0, 0);
-$pdf->Cell(80, 7, ($ticket->plate_number ?: 'N/A'), 'B', 0, 'L', false, false, 1, false, '', 'T');
-$pdf->Cell(30, 7, 'Driver:', 0, 0);
+// Row 1: Plate Number & Driver (reduced margins, better fill)
+$pdf->Cell(25, 7, 'Plate Number:', 0, 0);
+$pdf->Cell(95, 7, ($ticket->plate_number ?: 'N/A'), 'B', 0, 'L', false, false, 1, false, '', 'T');
+$pdf->Cell(20, 7, 'Driver:', 0, 0);
 $pdf->Cell(0, 7, ($ticket->driver_name ?: 'N/A'), 'B', 1, 'L', false, false, 1, false, '', 'T');
 
-// Row 2: Make / Model & License (consistent with Section I)
-$pdf->Cell(35, 7, 'Make / Model:', 0, 0);
-$pdf->Cell(80, 7, trim((($ticket->make ?: 'N/A') . ' ' . ($ticket->vehicle_model ?: 'N/A'))), 'B', 0, 'L', false, false, 1, false, '', 'T');
-$pdf->Cell(30, 7, 'License No.:', 0, 0);
+// Row 2: Make / Model & License (reduced margins, better fill)
+$pdf->Cell(25, 7, 'Make / Model:', 0, 0);
+$pdf->Cell(95, 7, trim((($ticket->make ?: 'N/A') . ' ' . ($ticket->vehicle_model ?: 'N/A'))), 'B', 0, 'L', false, false, 1, false, '', 'T');
+$pdf->Cell(20, 7, 'License No.:', 0, 0);
 $pdf->Cell(0, 7, ($ticket->driver_license ?: 'N/A'), 'B', 1, 'L', false, false, 1, false, '', 'T');
 
-// Row 3: Fuel Type (if available) & Color (consistent with Section I)
-$pdf->Cell(35, 7, 'Fuel Type:', 0, 0);
+// Row 3: Fuel Type (if available) & Color (reduced margins, better fill)
+$pdf->Cell(25, 7, 'Fuel Type:', 0, 0);
 $fuelType = $ticket->fuel_type ?? 'N/A';
-$pdf->Cell(80, 7, ucfirst($fuelType), 'B', 0, 'L', false, false, 1, false, '', 'T');
-$pdf->Cell(30, 7, 'Color:', 0, 0);
+$pdf->Cell(95, 7, ucfirst($fuelType), 'B', 0, 'L', false, false, 1, false, '', 'T');
+$pdf->Cell(20, 7, 'Color:', 0, 0);
 $color = $ticket->color ?? 'N/A';
 $pdf->Cell(0, 7, ucfirst($color), 'B', 1, 'L', false, false, 1, false, '', 'T');
 
