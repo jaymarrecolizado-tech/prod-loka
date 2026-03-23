@@ -137,8 +137,8 @@ $pdf->Ln(2);
 
 $pdf->SetFont('helvetica', '', 9);
 
-// Row 1: Date of Trip & Destination (stacked dates, reduced margins, better fill)
-$pdf->Cell(25, 7, 'Date of Trip:', 0, 0);
+// Row 1: Date of Trip & Destination (using MultiCell for proper wrapping)
+$pdf->Cell(25, 6, 'Date of Trip:', 0, 0);
 $pdf->SetFont('helvetica', 'B', 9);
 
 // Check if it's a multi-day trip
@@ -146,27 +146,28 @@ $startDate = date('F j, Y', strtotime($ticket->start_date));
 $endDate = date('F j, Y', strtotime($ticket->end_date));
 if ($startDate !== $endDate) {
     // Multi-day trip: stack both dates
-    $pdf->Cell(95, 7, $startDate . "\n" . $endDate, 'B', 0, 'L', false, false, 1, false, '', 'T');
+    $dateText = $startDate . "\n" . $endDate;
 } else {
     // Single day trip
-    $pdf->Cell(95, 7, $startDate, 'B', 0);
+    $dateText = $startDate;
 }
-
+// Use WriteHTMLCell for proper formatting
+$pdf->WriteHTMLCell(85, 6, '', '', $dateText, 'B', 0, 0, true, 'L', true);
 $pdf->SetFont('helvetica', '', 9);
-$pdf->Cell(20, 7, 'Destination:', 0, 0);
-$pdf->Cell(0, 7, $ticket->destination, 'B', 1, 'L', false, false, 1, false, '', 'T');
+$pdf->Cell(22, 6, 'Destination:', 0, 0);
+$pdf->WriteHTMLCell(0, 6, '', '', $ticket->destination, 'B', 1, 0, true, 'L', true);
 
-// Row 2: Time Out & Time In (adjusted for new spacing)
-$pdf->Cell(25, 7, 'Time Out:', 0, 0);
-$pdf->Cell(95, 7, date('h:i A', strtotime($ticket->start_date)), 'B', 0, 'C', false, false, 1, false, '', 'T');
-$pdf->Cell(20, 7, 'Time In:', 0, 0);
-$pdf->Cell(0, 7, date('h:i A', strtotime($ticket->end_date)), 'B', 1, 'C', false, false, 1, false, '', 'T');
+// Row 2: Time Out & Time In
+$pdf->Cell(25, 6, 'Time Out:', 0, 0);
+$pdf->Cell(85, 6, date('h:i A', strtotime($ticket->start_date)), 'B', 0, 'C');
+$pdf->Cell(22, 6, 'Time In:', 0, 0);
+$pdf->Cell(0, 6, date('h:i A', strtotime($ticket->end_date)), 'B', 1, 'C');
 
-// Row 3: Type of Trip & No. of Passengers (adjusted for new spacing)
-$pdf->Cell(25, 7, 'Type of Trip:', 0, 0);
-$pdf->Cell(95, 7, $tripTypeInfo, 'B', 0, 'L', false, false, 1, false, '', 'T');
-$pdf->Cell(20, 7, 'No. of Passengers:', 0, 0);
-$pdf->Cell(0, 7, count($passengers), 'B', 1, 'C', false, false, 1, false, '', 'T');
+// Row 3: Type of Trip & No. of Passengers
+$pdf->Cell(25, 6, 'Type of Trip:', 0, 0);
+$pdf->WriteHTMLCell(85, 6, '', '', $tripTypeInfo, 'B', 0, 0, true, 'L', true);
+$pdf->Cell(22, 6, 'No. of Passengers:', 0, 0);
+$pdf->Cell(0, 6, count($passengers), 'B', 1, 'C');
 $pdf->Ln(3);
 
 // ===== SECTION II: VEHICLE & DRIVER =====
@@ -176,25 +177,26 @@ $pdf->Ln(2);
 
 $pdf->SetFont('helvetica', '', 9);
 
-// Row 1: Plate Number & Driver (reduced margins, better fill)
-$pdf->Cell(25, 7, 'Plate Number:', 0, 0);
-$pdf->Cell(95, 7, ($ticket->plate_number ?: 'N/A'), 'B', 0, 'L', false, false, 1, false, '', 'T');
-$pdf->Cell(20, 7, 'Driver:', 0, 0);
-$pdf->Cell(0, 7, ($ticket->driver_name ?: 'N/A'), 'B', 1, 'L', false, false, 1, false, '', 'T');
+// Row 1: Plate Number & Driver (using WriteHTMLCell for proper wrapping)
+$pdf->Cell(25, 6, 'Plate Number:', 0, 0);
+$pdf->WriteHTMLCell(85, 6, '', '', ($ticket->plate_number ?: 'N/A'), 'B', 0, 0, true, 'L', true);
+$pdf->Cell(22, 6, 'Driver:', 0, 0);
+$pdf->WriteHTMLCell(0, 6, '', '', ($ticket->driver_name ?: 'N/A'), 'B', 1, 0, true, 'L', true);
 
-// Row 2: Make / Model & License (reduced margins, better fill)
-$pdf->Cell(25, 7, 'Make / Model:', 0, 0);
-$pdf->Cell(95, 7, trim((($ticket->make ?: 'N/A') . ' ' . ($ticket->vehicle_model ?: 'N/A'))), 'B', 0, 'L', false, false, 1, false, '', 'T');
-$pdf->Cell(20, 7, 'License No.:', 0, 0);
-$pdf->Cell(0, 7, ($ticket->driver_license ?: 'N/A'), 'B', 1, 'L', false, false, 1, false, '', 'T');
+// Row 2: Make / Model & License
+$pdf->Cell(25, 6, 'Make / Model:', 0, 0);
+$makeModel = trim((($ticket->make ?: 'N/A') . ' ' . ($ticket->vehicle_model ?: 'N/A')));
+$pdf->WriteHTMLCell(85, 6, '', '', $makeModel, 'B', 0, 0, true, 'L', true);
+$pdf->Cell(22, 6, 'License No.:', 0, 0);
+$pdf->WriteHTMLCell(0, 6, '', '', ($ticket->driver_license ?: 'N/A'), 'B', 1, 0, true, 'L', true);
 
-// Row 3: Fuel Type (if available) & Color (reduced margins, better fill)
-$pdf->Cell(25, 7, 'Fuel Type:', 0, 0);
+// Row 3: Fuel Type & Color
+$pdf->Cell(25, 6, 'Fuel Type:', 0, 0);
 $fuelType = $ticket->fuel_type ?? 'N/A';
-$pdf->Cell(95, 7, ucfirst($fuelType), 'B', 0, 'L', false, false, 1, false, '', 'T');
-$pdf->Cell(20, 7, 'Color:', 0, 0);
+$pdf->WriteHTMLCell(85, 6, '', '', ucfirst($fuelType), 'B', 0, 0, true, 'L', true);
+$pdf->Cell(22, 6, 'Color:', 0, 0);
 $color = $ticket->color ?? 'N/A';
-$pdf->Cell(0, 7, ucfirst($color), 'B', 1, 'L', false, false, 1, false, '', 'T');
+$pdf->WriteHTMLCell(0, 6, '', '', ucfirst($color), 'B', 1, 0, true, 'L', true);
 
 $pdf->Ln(2);
 
@@ -206,13 +208,14 @@ $pdf->Ln(2);
 if (!empty($passengers)) {
     $passNum = 1;
     $twoCols = true;
+    $startY = $pdf->GetY();
     foreach ($passengers as $p) {
         if ($twoCols) {
-            $pdf->Cell(10, 6, $passNum . '.', 0, 0);
-            $pdf->Cell(70, 6, $p->passenger_name ?: '(Guest)', 'B', 0);
+            $pdf->Cell(12, 5, $passNum . '.', 0, 0);
+            $pdf->WriteHTMLCell(85, 5, '', '', ($p->passenger_name ?: '(Guest)'), 'B', 0, 0, true, 'L', true);
         } else {
-            $pdf->Cell(10, 6, $passNum . '.', 0, 0);
-            $pdf->Cell(70, 6, $p->passenger_name ?: '(Guest)', 'B', 1);
+            $pdf->Cell(12, 5, $passNum . '.', 0, 0);
+            $pdf->WriteHTMLCell(85, 5, '', '', ($p->passenger_name ?: '(Guest)'), 'B', 1, 0, true, 'L', true);
         }
         $twoCols = !$twoCols;
         $passNum++;
@@ -299,13 +302,13 @@ $pdf->MultiCell(0, 4, 'I hereby certify that all information provided above is t
 $pdf->Ln(2);
 
 $pdf->SetFont('helvetica', '', 9);
-$pdf->Cell(30, 6, 'Name:', 0, 0);
-$pdf->Cell(100, 6, $ticket->driver_name, 'B', 0);
-$pdf->Cell(25, 6, 'Date:', 0, 0);
-$pdf->Cell(0, 6, '', 'B', 1);
+$pdf->Cell(30, 8, 'Name:', 0, 0);
+$pdf->WriteHTMLCell(100, 8, '', '', $ticket->driver_name, 'B', 0, 0, true, 'L', true);
+$pdf->Cell(25, 8, 'Date:', 0, 0);
+$pdf->Cell(0, 8, '', 'B', 1);
 
-$pdf->Cell(30, 6, 'Signature:', 0, 0);
-$pdf->Cell(0, 6, '', 'B', 1);
+$pdf->Cell(30, 8, 'Signature:', 0, 0);
+$pdf->Cell(0, 8, '', 'B', 1);
 $pdf->Ln(4);
 
 // ===== SECTION VII: SIGNATORY CLEARANCE =====
@@ -327,13 +330,13 @@ $pdf->Cell(0, 4, '   Prepared this trip ticket and certifies all information is 
 $pdf->Ln(1);
 
 $pdf->SetFont('helvetica', '', 9);
-$pdf->Cell(25, 6, 'Name:', 0, 0);
-$pdf->Cell($signColWidth, 6, '', 'B', 0);
-$pdf->Cell(20, 6, 'Date:', 0, 0);
-$pdf->Cell(0, 6, '', 'B', 1);
+$pdf->Cell(25, 8, 'Name:', 0, 0);
+$pdf->Cell($signColWidth, 8, '', 'B', 0);
+$pdf->Cell(20, 8, 'Date:', 0, 0);
+$pdf->Cell(0, 8, '', 'B', 1);
 
-$pdf->Cell(25, 6, 'Signature:', 0, 0);
-$pdf->Cell(0, 6, '', 'B', 1);
+$pdf->Cell(25, 8, 'Signature:', 0, 0);
+$pdf->Cell(0, 8, '', 'B', 1);
 $pdf->Ln(2);
 
 // 2. REVIEWED BY: MOTORPOOL HEAD
@@ -344,13 +347,13 @@ $pdf->Cell(0, 4, '   Reviewed and verified trip details, vehicle condition, and 
 $pdf->Ln(1);
 
 $pdf->SetFont('helvetica', '', 9);
-$pdf->Cell(25, 6, 'Name:', 0, 0);
-$pdf->Cell($signColWidth, 6, '', 'B', 0);
-$pdf->Cell(20, 6, 'Date:', 0, 0);
-$pdf->Cell(0, 6, '', 'B', 1);
+$pdf->Cell(25, 8, 'Name:', 0, 0);
+$pdf->Cell($signColWidth, 8, '', 'B', 0);
+$pdf->Cell(20, 8, 'Date:', 0, 0);
+$pdf->Cell(0, 8, '', 'B', 1);
 
-$pdf->Cell(25, 6, 'Signature:', 0, 0);
-$pdf->Cell(0, 6, '', 'B', 1);
+$pdf->Cell(25, 8, 'Signature:', 0, 0);
+$pdf->Cell(0, 8, '', 'B', 1);
 $pdf->Ln(2);
 
 // 3. APPROVED BY: ADMIN & FINANCE
@@ -361,19 +364,20 @@ $pdf->Cell(0, 4, '   Approved and certified that all documents are complete and 
 $pdf->Ln(1);
 
 $pdf->SetFont('helvetica', '', 9);
-$pdf->Cell(25, 6, 'Name:', 0, 0);
-$pdf->Cell($signColWidth, 6, '', 'B', 0);
-$pdf->Cell(20, 6, 'Date:', 0, 0);
-$pdf->Cell(0, 6, '', 'B', 1);
+$pdf->Cell(25, 8, 'Name:', 0, 0);
+$pdf->Cell($signColWidth, 8, '', 'B', 0);
+$pdf->Cell(20, 8, 'Date:', 0, 0);
+$pdf->Cell(0, 8, '', 'B', 1);
 
-$pdf->Cell(25, 6, 'Signature:', 0, 0);
-$pdf->Cell(0, 6, '', 'B', 1);
+$pdf->Cell(25, 8, 'Signature:', 0, 0);
+$pdf->Cell(0, 8, '', 'B', 1);
 $pdf->Ln(4);
 
 // ===== FOOTER =====
-$pdf->SetY(-20);
+$pdf->SetY(-22);
 $pdf->SetFont('helvetica', 'I', 7);
-$pdf->Cell(0, 4, 'NOTES: (1) This document must be signed by all parties. (2) Attach TO/OB Slip if applicable. (3) Submit to Finance for processing.', 0, 1, 'C');
+$footerText = 'NOTES: (1) This document must be signed by all parties. (2) Attach TO/OB Slip if applicable. (3) Submit to Finance for processing.';
+$pdf->WriteHTMLCell(0, 4, '', '', $footerText, 0, 1, 0, true, 'C', true);
 
 $pdf->SetY(-12);
 $pdf->SetFont('helvetica', '', 6);
