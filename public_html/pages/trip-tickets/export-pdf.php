@@ -136,22 +136,25 @@ $pdf->Cell(0, 5, 'I. PARTICULARS OF TRIP', 0, 1);
 $pdf->Ln(2);
 
 $pdf->SetFont('helvetica', '', 9);
-// Date of Trip - make more prominent with larger cell height
-$pdf->Cell(45, 8, 'Date of Trip:', 0, 0);
-$pdf->SetFont('helvetica', 'B', 10);
-$pdf->Cell(70, 8, date('F j, Y', strtotime($ticket->start_date)), 'B', 0);
-$pdf->SetFont('helvetica', '', 9);
-$pdf->Cell(30, 8, 'Destination:', 0, 0);
-$pdf->Cell(0, 8, $ticket->destination, 'B', 1, 'L', false, false, 1, false, '', 'T');
 
-$pdf->Cell(45, 7, 'Time Out:', 0, 0);
-$pdf->Cell(70, 7, date('h:i A', strtotime($ticket->start_date)), 'B', 0, 'C', false, false, 1, false, '', 'T');
-$pdf->Cell(30, 7, 'Time In:', 0, 0);
+// Row 1: Date of Trip & Destination (balanced layout)
+$pdf->Cell(35, 7, 'Date of Trip:', 0, 0);
+$pdf->SetFont('helvetica', 'B', 10);
+$pdf->Cell(80, 7, date('F j, Y', strtotime($ticket->start_date)), 'B', 0);
+$pdf->SetFont('helvetica', '', 9);
+$pdf->Cell(25, 7, 'Destination:', 0, 0);
+$pdf->Cell(0, 7, $ticket->destination, 'B', 1, 'L', false, false, 1, false, '', 'T');
+
+// Row 2: Time Out & Time In (balanced)
+$pdf->Cell(35, 7, 'Time Out:', 0, 0);
+$pdf->Cell(80, 7, date('h:i A', strtotime($ticket->start_date)), 'B', 0, 'C', false, false, 1, false, '', 'T');
+$pdf->Cell(25, 7, 'Time In:', 0, 0);
 $pdf->Cell(0, 7, date('h:i A', strtotime($ticket->end_date)), 'B', 1, 'C', false, false, 1, false, '', 'T');
 
-$pdf->Cell(45, 7, 'Type of Trip:', 0, 0);
-$pdf->Cell(70, 7, $tripTypeInfo, 'B', 0, 'L', false, false, 1, false, '', 'T');
-$pdf->Cell(30, 7, 'No. of Passengers:', 0, 0);
+// Row 3: Type of Trip & No. of Passengers (balanced)
+$pdf->Cell(35, 7, 'Type of Trip:', 0, 0);
+$pdf->Cell(80, 7, $tripTypeInfo, 'B', 0, 'L', false, false, 1, false, '', 'T');
+$pdf->Cell(25, 7, 'No. of Passengers:', 0, 0);
 $pdf->Cell(0, 7, count($passengers), 'B', 1, 'C', false, false, 1, false, '', 'T');
 $pdf->Ln(3);
 
@@ -162,22 +165,22 @@ $pdf->Ln(2);
 
 $pdf->SetFont('helvetica', '', 9);
 
-// Row 1: Plate Number & Driver
-$pdf->Cell(40, 7, 'Plate Number:', 0, 0);
-$pdf->Cell(75, 7, ($ticket->plate_number ?: 'N/A'), 'B', 0, 'L', false, false, 1, false, '', 'T');
+// Row 1: Plate Number & Driver (consistent with Section I)
+$pdf->Cell(35, 7, 'Plate Number:', 0, 0);
+$pdf->Cell(80, 7, ($ticket->plate_number ?: 'N/A'), 'B', 0, 'L', false, false, 1, false, '', 'T');
 $pdf->Cell(30, 7, 'Driver:', 0, 0);
 $pdf->Cell(0, 7, ($ticket->driver_name ?: 'N/A'), 'B', 1, 'L', false, false, 1, false, '', 'T');
 
-// Row 2: Make / Model & License
-$pdf->Cell(40, 7, 'Make / Model:', 0, 0);
-$pdf->Cell(75, 7, trim((($ticket->make ?: 'N/A') . ' ' . ($ticket->vehicle_model ?: 'N/A'))), 'B', 0, 'L', false, false, 1, false, '', 'T');
+// Row 2: Make / Model & License (consistent with Section I)
+$pdf->Cell(35, 7, 'Make / Model:', 0, 0);
+$pdf->Cell(80, 7, trim((($ticket->make ?: 'N/A') . ' ' . ($ticket->vehicle_model ?: 'N/A'))), 'B', 0, 'L', false, false, 1, false, '', 'T');
 $pdf->Cell(30, 7, 'License No.:', 0, 0);
 $pdf->Cell(0, 7, ($ticket->driver_license ?: 'N/A'), 'B', 1, 'L', false, false, 1, false, '', 'T');
 
-// Row 3: Fuel Type (if available) & Color
-$pdf->Cell(40, 7, 'Fuel Type:', 0, 0);
+// Row 3: Fuel Type (if available) & Color (consistent with Section I)
+$pdf->Cell(35, 7, 'Fuel Type:', 0, 0);
 $fuelType = $ticket->fuel_type ?? 'N/A';
-$pdf->Cell(75, 7, ucfirst($fuelType), 'B', 0, 'L', false, false, 1, false, '', 'T');
+$pdf->Cell(80, 7, ucfirst($fuelType), 'B', 0, 'L', false, false, 1, false, '', 'T');
 $pdf->Cell(30, 7, 'Color:', 0, 0);
 $color = $ticket->color ?? 'N/A';
 $pdf->Cell(0, 7, ucfirst($color), 'B', 1, 'L', false, false, 1, false, '', 'T');
