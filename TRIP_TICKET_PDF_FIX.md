@@ -108,6 +108,12 @@ $pdf->Cell(0, 7, ucfirst($color), 'B', 1, 'L', false, false, 1, false, '', 'T');
    - **Fuel Type:** Displays vehicle fuel type (Diesel, Gasoline, Electric, Hybrid)
    - **Color:** Displays vehicle color (replaces Location/Base since that column doesn't exist in database)
 
+5. **Updated Spacing (March 22, 2026):**
+   - All labels now use consistent width: 35 for first label, 30 for second label
+   - All values use width: 80 for first value, remaining space for second value
+   - "Date of Trip" label reduced from 45 to 35 (saves 10 characters)
+   - Result: Balanced, uniform layout with better space distribution
+
 5. **Better Content Handling:**
    - Added `trim()` to Make/Model to remove extra spaces
    - Fallback values for missing data using null coalescing operator (`??`)
