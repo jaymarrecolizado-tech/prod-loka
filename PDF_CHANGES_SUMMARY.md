@@ -7,7 +7,16 @@
 
 ## Recent Commits (Latest to Oldest)
 
-### 5. Date Stacking & Reduced Margins ✨ NEW
+### 6. Text Wrapping Fix (Latest) 🎯 IMPORTANT
+**Commit:** `b70b11c` (docs), `7c4d583` (code)
+- **FIXED:** All content now fits properly in PDF cells
+- Replaced Cell() with WriteHTMLCell() for proper text wrapping
+- Auto-expanding cells for long destinations, driver names, etc.
+- Multi-day dates now stack correctly
+- Signature fields increased to 8 units height
+- No more cut-off text!
+
+### 5. Date Stacking & Reduced Margins
 **Commit:** `ccc363b`
 - Stacked dates for multi-day trips (shows start and end dates)
 - Single-day trips show just one date
@@ -32,29 +41,41 @@
 
 ### Section I: Particulars of Trip
 
-| Field | Label Width | Value Width |
-|-------|-----------|-------------|
-| Date of Trip | 25 | 95 |
-| Time Out | 25 | 95 |
-| Type of Trip | 25 | 95 |
-| Destination | 20 | Flex |
-| Time In | 20 | Flex |
-| No. of Passengers | 20 | Flex |
+| Field | Label Width | Value Width | Method |
+|-------|-----------|-------------|---------|
+| Date of Trip | 25 | 85 | WriteHTMLCell |
+| Time Out | 25 | 85 | Cell |
+| Type of Trip | 25 | 85 | WriteHTMLCell |
+| Destination | 22 | Flex | WriteHTMLCell |
+| Time In | 22 | Flex | Cell |
+| No. of Passengers | 22 | Flex | Cell |
 
 ### Section II: Vehicle & Driver Information
 
-| Field | Label Width | Value Width |
-|-------|-----------|-------------|
-| Plate Number | 25 | 95 |
-| Make / Model | 25 | 95 |
-| Fuel Type | 25 | 95 |
-| Driver | 20 | Flex |
-| License No. | 20 | Flex |
-| Color | 20 | Flex |
+| Field | Label Width | Value Width | Method |
+|-------|-----------|-------------|---------|
+| Plate Number | 25 | 85 | WriteHTMLCell |
+| Make / Model | 25 | 85 | WriteHTMLCell |
+| Fuel Type | 25 | 85 | WriteHTMLCell |
+| Driver | 22 | Flex | WriteHTMLCell |
+| License No. | 22 | Flex | WriteHTMLCell |
+| Color | 22 | Flex | WriteHTMLCell |
+
+### Section III: Passengers
+
+| Field | Number Width | Name Width | Method |
+|-------|------------|-----------|---------|
+| Passenger | 12 | 85 | WriteHTMLCell |
 
 ---
 
 ## Key Features
+
+### Text Wrapping (NEW!)
+- **WriteHTMLCell** for all value fields that may contain long text
+- Auto-expanding cells - height grows to fit content
+- No more cut-off destinations, driver names, or license numbers
+- Multi-line text displays correctly
 
 ### Date Stacking
 - **Single-day trips:** Shows one date (e.g., "March 22, 2026")
@@ -62,18 +83,27 @@
 - Automatic detection based on start_date vs end_date comparison
 
 ### Reduced Margins
-- **More content space:** 15 extra characters per row for values
-- **Compact labels:** Reduced label widths for cleaner appearance
-- **Better fill:** Utilizes available page width more effectively
+- **More content space:** Tighter layout with proper wrapping
+- **Compact labels:** Reduced label widths
+- **Better fill:** Utilizes available page width effectively
 
-### Text Wrapping
-- All value cells support text wrapping
-- 'T' border mode for proper wrapping
-- Top alignment for wrapped text
+### Signature Space
+- Increased height from 6 to 8 units for all signature fields
+- Adequate space for handwritten signatures
 
 ### New Fields
 - **Fuel Type:** Displays diesel/gasoline/electric/hybrid
 - **Color:** Displays vehicle color
+
+---
+
+## Cell Functions Used
+
+| Function | Used For | Features |
+|----------|----------|----------|
+| WriteHTMLCell | All value fields (destinations, names, etc.) | Auto-expand, text wrapping, HTML support |
+| Cell | Labels, times, short values | Fixed height, simple |
+| MultiCell | Certification text | Multi-line, auto-expand |
 
 ---
 
@@ -94,6 +124,7 @@
 
 | File | Purpose |
 |------|---------|
+| `TRIP_TICKET_TEXT_WRAPPING_FIX.md` | Text wrapping fix documentation (NEW!) |
 | `TRIP_TICKET_DATE_STACKING.md` | Date stacking feature documentation |
 | `TRIP_TICKET_PDF_SPACING_FIX.md` | Spacing improvements documentation |
 | `TRIP_TICKET_PDF_FIX.md` | Original PDF fix documentation |
