@@ -68,8 +68,8 @@ Options -Indexes
     Header set Referrer-Policy "strict-origin-when-cross-origin"
 </IfModule>
 
-# Protect sensitive files
-<FilesMatch "\.(php|sql|log|md|example)$">
+# Protect sensitive non-PHP files (SQL dumps, logs, backups, docs)
+<FilesMatch "\.(sql|log|bak|backup|example)$">
     <IfModule mod_authz_core.c>
         Require all denied
     </IfModule>
@@ -79,14 +79,25 @@ Options -Indexes
     </IfModule>
 </FilesMatch>
 
-# Allow access to index.php and assets
-<FilesMatch "^(index\.php|.*\.(css|js|jpg|jpeg|png|gif|ico|svg|woff|woff2|ttf|eot))$">
+# Block markdown documentation files
+<FilesMatch "\.md$">
     <IfModule mod_authz_core.c>
-        Require all granted
+        Require all denied
     </IfModule>
     <IfModule !mod_authz_core.c>
-        Order allow,deny
-        Allow from all
+        Order deny,allow
+        Deny from all
+    </IfModule>
+</FilesMatch>
+
+# Block dangerous utility scripts that should never be web-accessible on production
+<FilesMatch "^(diagnostic|db-test|verify-production|setup_database|setup_complete|import_users|run-migrations|migrate|welcome|db-test)\.php$">
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        Order deny,allow
+        Deny from all
     </IfModule>
 </FilesMatch>
 

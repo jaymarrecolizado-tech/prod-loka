@@ -855,7 +855,7 @@ require_once INCLUDES_PATH . '/header.php';
 </div>
 <?php endif; ?>
 
-<script type="text/javascript">
+<script>
 function toggleIssuesFields() {
     const hasIssues = document.getElementById('hasIssues').checked;
     document.getElementById('issuesFields').style.display = hasIssues ? 'block' : 'none';

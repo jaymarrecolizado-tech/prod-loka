@@ -20,7 +20,7 @@ $smtpFromEmail = 'jelite.demo@gmail.com';
 $smtpFromName = 'LOKA Fleet Management';
 
 $defaultPassword = 'password123';
-$loginUrl = 'https://lokafleet.dictr2.online/';
+$loginUrl = 'https://lokafleet.dictr2.cloud/';
 $lokaVersion = '2.5.1';
 
 // Output variables
@@ -41,6 +41,15 @@ $debugLog = '';
 $maintenanceStart = 'February 27, 2026 at 9:00 AM';
 $maintenanceEnd = 'March 1, 2026 at 11:59 PM';
 $additionalMessage = 'We apologize for any inconvenience this may cause. Thank you for your understanding and patience.';
+
+// Migration Announcement Variables
+$newServerUrl = 'https://dictr2links.dictr2.cloud/';
+$migrationDate = 'March 18, 2026';
+$servicesList = [
+    'LOKA Fleet Management System',
+    'DocTrax',
+    'Other DICT Online Services'
+];
 
 function buildEmailTemplate(string $userName, string $userEmail, string $fromName, string $loginUrl, string $maintenanceStart, string $maintenanceEnd, string $additionalMessage): string
 {
@@ -151,6 +160,60 @@ function buildBackOnlineTemplate(string $userName, string $userEmail, string $fr
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.1); opacity: 0.8; }
+        }
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        @keyframes float {
+            0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(-100px) rotate(180deg); opacity: 0; }
+        }
+        @keyframes shimmer {
+            0% { background-position: -200% center; }
+            100% { background-position: 200% center; }
+        }
+        @keyframes glow {
+            0%, 100% { box-shadow: 0 0 20px rgba(13, 110, 253, 0.4); }
+            50% { box-shadow: 0 0 40px rgba(13, 110, 253, 0.8); }
+        }
+        @keyframes slideIn {
+            0% { transform: translateX(-50px); opacity: 0; }
+            100% { transform: translateX(0); opacity: 1; }
+        }
+        .icon-animation { animation: pulse 2s ease-in-out infinite; }
+        .bounce-animation { animation: bounce 1s ease-in-out infinite; }
+        .shimmer-text {
+            background: linear-gradient(90deg, #ffffff, #cfe2ff, #ffffff);
+            background-size: 200% auto;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: shimmer 3s linear infinite;
+        }
+        .glow-box { animation: glow 2s ease-in-out infinite; }
+        .slide-in { animation: slideIn 0.8s ease-out forwards; }
+        .confetti {
+            position: relative;
+            display: inline-block;
+        }
+        .confetti-piece {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            animation: float 3s ease-out infinite;
+        }
+        .cta-button {
+            animation: glow 2s ease-in-out infinite;
+            transition: transform 0.3s ease;
+        }
+        .cta-button:hover { transform: scale(1.05); }
+    </style>
 </head>
 <body style="margin:0;padding:0;font-family:Arial,sans-serif;background-color:#f4f4f4;">
     <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#f4f4f4;padding:20px;">
@@ -158,36 +221,59 @@ function buildBackOnlineTemplate(string $userName, string $userEmail, string $fr
             <td align="center">
                 <table width="650" cellpadding="0" cellspacing="0" style="background-color:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 4px 15px rgba(0,0,0,0.1);">
                     <tr>
-                        <td style="background:linear-gradient(135deg, #198754 0%, #146c43 100%);padding:40px 30px;text-align:center;">
-                            <div style="margin-bottom:10px;">
-                                <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <td style="background:linear-gradient(135deg, #0d6efd 0%, #0a58ca 100%);padding:40px 30px;text-align:center;position:relative;overflow:hidden;">
+                            <div class="confetti" style="position:absolute;top:20px;left:50%;transform:translateX(-50%);width:200px;height:100px;">
+                                <div class="confetti-piece" style="background:#0d6efd;left:20%;animation-delay:0s;"></div>
+                                <div class="confetti-piece" style="background:#6ea8fe;left:40%;animation-delay:0.5s;"></div>
+                                <div class="confetti-piece" style="background:#3d8bfd;left:60%;animation-delay:1s;"></div>
+                                <div class="confetti-piece" style="background:#9ec5fe;left:80%;animation-delay:1.5s;"></div>
+                                <div class="confetti-piece" style="background:#cfe2ff;left:30%;animation-delay:0.3s;"></div>
+                                <div class="confetti-piece" style="background:#a5c9ff;left:70%;animation-delay:0.8s;"></div>
+                            </div>
+                            <div style="margin-bottom:10px;animation:bounce 2s ease-in-out infinite;">
+                                <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                     <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
                                     <polyline points="22 4 12 14.01 9 11.01"></polyline>
                                 </svg>
                             </div>
-                            <h1 style="color:#ffffff;margin:0;font-size:28px;font-weight:bold;">We Are Back Online!</h1>
-                            <p style="color:#ffffff;margin:10px 0 0 0;font-size:14px;opacity:0.9;">LOKA Fleet Management</p>
+                            <h1 style="color:#ffffff;margin:0;font-size:28px;font-weight:bold;" class="shimmer-text">We Are Back Online!</h1>
+                            <p style="color:#ffffff;margin:10px 0 0 0;font-size:14px;opacity:0.9;" class="bounce-animation">LOKA Fleet Management</p>
                         </td>
                     </tr>
                     <tr>
                         <td style="padding:40px 40px 20px 40px;">
                             <h2 style="color:#1a1a1a;margin:0 0 15px 0;font-size:22px;font-weight:600;">System is Up and Running</h2>
                             <p style="color:#555555;font-size:15px;line-height:1.7;margin:0;">
-                                Dear <strong style="color:#198754;">' . htmlspecialchars($userName) . '</strong>,
+                                Dear <strong style="color:#0d6efd;">' . htmlspecialchars($userName) . '</strong>,
                             </p>
                             <p style="color:#555555;font-size:15px;line-height:1.7;margin:15px 0;">
                                 Great news! The <strong>LOKA Fleet Management System</strong> is now back online and fully operational. You can access it again using the link below.
                             </p>
+                            <div style="background:#fff3cd;border:1px solid #ffc107;border-radius:8px;padding:20px;margin:20px 0;">
+                                <h4 style="color:#856404;margin:0 0 10px 0;font-size:16px;font-weight:600;">&#9888; Important: Server Migration Notice</h4>
+                                <p style="color:#664d03;font-size:14px;line-height:1.6;margin:0 0 10px 0;">
+                                    We are pleased to announce that the <strong>migration from the previous server to the new one has been successfully completed!</strong>
+                                </p>
+                                <p style="color:#664d03;font-size:14px;line-height:1.6;margin:0 0 10px 0;">
+                                    <strong>Please note:</strong> The old link <span style="text-decoration:line-through;color:#dc3545;">https://lokafleet.dictr2.online/</span> is <strong>no longer active</strong> and should not be used.
+                                </p>
+                                <p style="color:#664d03;font-size:14px;line-height:1.6;margin:0;">
+                                    Please use the new link: <strong><a href="https://lokafleet.dictr2.cloud/" target="_blank" style="color:#0d6efd;">https://lokafleet.dictr2.cloud/</a></strong>
+                                </p>
+                                <p style="color:#664d03;font-size:14px;line-height:1.6;margin:15px 0 0 0;">
+                                    For other DICT R2 services, please visit: <a href="https://dictr2links.dictr2.cloud/" target="_blank" style="color:#0d6efd;">https://dictr2links.dictr2.cloud/</a>
+                                </p>
+                            </div>
                         </td>
                     </tr>
                     <tr>
                         <td style="padding:0 40px 20px 40px;">
-                            <table width="100%" cellpadding="0" cellspacing="0" style="background:linear-gradient(135deg, #d1e7dd 0%, #198754 100%);border-radius:10px;border:1px solid #198754;">
+                            <table width="100%" cellpadding="0" cellspacing="0" style="background:linear-gradient(135deg, #cfe2ff 0%, #0d6efd 100%);border-radius:10px;border:1px solid #0d6efd;" class="glow-box">
                                 <tr>
                                     <td style="padding:30px;text-align:center;">
                                         <h3 style="color:#ffffff;margin:0 0 10px 0;font-size:20px;font-weight:600;">Access Your Account</h3>
                                         <p style="color:#ffffff;margin:0 0 20px 0;font-size:14px;">Version ' . htmlspecialchars($version) . '</p>
-                                        <a href="' . htmlspecialchars($loginUrl) . '" style="display:inline-block;background:#ffffff;color:#198754;padding:15px 35px;text-decoration:none;border-radius:8px;font-weight:bold;font-size:16px;">Login to LOKA</a>
+                                        <a href="' . htmlspecialchars($loginUrl) . '" target="_blank" class="cta-button" style="display:inline-block;background:#ffffff;color:#0d6efd;padding:15px 35px;text-decoration:none;border-radius:8px;font-weight:bold;font-size:16px;">Login to LOKA</a>
                                         <p style="color:#ffffff;margin:15px 0 0 0;font-size:12px;opacity:0.9;">' . htmlspecialchars($loginUrl) . '</p>
                                     </td>
                                 </tr>
@@ -198,10 +284,10 @@ function buildBackOnlineTemplate(string $userName, string $userEmail, string $fr
                         <td style="padding:0 40px 20px 40px;">
                             <h3 style="color:#1a1a1a;margin:0 0 15px 0;font-size:16px;font-weight:600;">What is New in Version ' . htmlspecialchars($version) . ':</h3>
                             <table width="100%" cellpadding="0" cellspacing="0">
-                                <tr><td style="padding:10px 0;border-bottom:1px solid #eee;"><span style="color:#198754;margin-right:8px;">✓</span>Improved system performance and reliability</td></tr>
-                                <tr><td style="padding:10px 0;border-bottom:1px solid #eee;"><span style="color:#198754;margin-right:8px;">✓</span>Enhanced user experience</td></tr>
-                                <tr><td style="padding:10px 0;border-bottom:1px solid #eee;"><span style="color:#198754;margin-right:8px;">✓</span>Bug fixes and system optimizations</td></tr>
-                                <tr><td style="padding:10px 0;"><span style="color:#198754;margin-right:8px;">✓</span>New features and improvements</td></tr>
+                                <tr><td style="padding:10px 0;border-bottom:1px solid #eee;"><span style="color:#0d6efd;margin-right:8px;">✓</span>Improved system performance and reliability</td></tr>
+                                <tr><td style="padding:10px 0;border-bottom:1px solid #eee;"><span style="color:#0d6efd;margin-right:8px;">✓</span>Enhanced user experience</td></tr>
+                                <tr><td style="padding:10px 0;border-bottom:1px solid #eee;"><span style="color:#0d6efd;margin-right:8px;">✓</span>Bug fixes and system optimizations</td></tr>
+                                <tr><td style="padding:10px 0;"><span style="color:#0d6efd;margin-right:8px;">✓</span>New features and improvements</td></tr>
                             </table>
                         </td>
                     </tr>
@@ -214,7 +300,7 @@ function buildBackOnlineTemplate(string $userName, string $userEmail, string $fr
                     <tr>
                         <td style="padding:0 40px 30px 40px;text-align:center;">
                             <p style="color:#999999;font-size:14px;margin:0;">We appreciate your patience during the maintenance period.</p>
-                            <p style="color:#1a1a1a;font-size:16px;margin:15px 0 0 0;font-weight:600;">Welcome back!</p>
+                            <p style="color:#1a1a1a;font-size:16px;margin:15px 0 0 0;font-weight:600;" class="bounce-animation">Welcome back!</p>
                         </td>
                     </tr>
                     <tr>
@@ -700,6 +786,122 @@ function buildSystemUpdateTemplate(string $userName, string $fromName, string $l
 </html>';
 }
 
+// Server Migration Template
+function buildMigrationTemplate(string $userName, string $fromName, string $newServerUrl, string $migrationDate, array $servicesList): string
+{
+    $servicesHtml = '';
+    foreach ($servicesList as $service) {
+        $servicesHtml .= '<tr><td style="padding:10px 0;border-bottom:1px solid #eee;"><span style="color:#198754;margin-right:8px;">&#10003;</span>' . htmlspecialchars($service) . '</td></tr>';
+    }
+
+    return '<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body style="margin:0;padding:0;font-family:Arial,sans-serif;background-color:#f4f4f4;">
+    <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#f4f4f4;padding:20px;">
+        <tr>
+            <td align="center">
+                <table width="650" cellpadding="0" cellspacing="0" style="background-color:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 4px 15px rgba(0,0,0,0.1);">
+                    <tr>
+                        <td style="background:linear-gradient(135deg, #0d6efd 0%, #0a58ca 100%);padding:40px 30px;text-align:center;">
+                            <div style="margin-bottom:10px;">
+                                <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+                                    <line x1="8" y1="21" x2="16" y2="21"></line>
+                                    <line x1="12" y1="17" x2="12" y2="21"></line>
+                                </svg>
+                            </div>
+                            <h1 style="color:#ffffff;margin:0;font-size:28px;font-weight:bold;">Important: Server Migration</h1>
+                            <p style="color:#ffffff;margin:10px 0 0 0;font-size:14px;opacity:0.9;">DICT Online Services</p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="padding:40px 40px 20px 40px;">
+                            <h2 style="color:#1a1a1a;margin:0 0 15px 0;font-size:22px;font-weight:600;">We Are Migrating to a New Server</h2>
+                            <p style="color:#555555;font-size:15px;line-height:1.7;margin:0;">
+                                Dear <strong style="color:#0d6efd;">' . htmlspecialchars($userName) . '</strong>,
+                            </p>
+                            <p style="color:#555555;font-size:15px;line-height:1.7;margin:15px 0;">
+                                We are pleased to announce that we will be <strong>migrating our services to a new and improved server</strong> to provide you with better performance, reliability, and enhanced features.
+                            </p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="padding:0 40px 20px 40px;">
+                            <table width="100%" cellpadding="0" cellspacing="0" style="background:linear-gradient(135deg, #d1e7dd 0%, #198754 100%);border-radius:10px;border:1px solid #198754;">
+                                <tr>
+                                    <td style="padding:30px;text-align:center;">
+                                        <h3 style="color:#ffffff;margin:0 0 10px 0;font-size:20px;font-weight:600;">Migration Date</h3>
+                                        <p style="color:#ffffff;font-size:24px;font-weight:bold;margin:0;">' . htmlspecialchars($migrationDate) . '</p>
+                                        <p style="color:#ffffff;margin:10px 0 0 0;font-size:14px;">All services will be temporarily unavailable during this time</p>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="padding:0 40px 20px 40px;">
+                            <h3 style="color:#1a1a1a;margin:0 0 15px 0;font-size:16px;font-weight:600;">Services Being Migrated:</h3>
+                            <table width="100%" cellpadding="0" cellspacing="0">
+                                ' . $servicesHtml . '
+                            </table>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="padding:0 40px 20px 40px;">
+                            <table width="100%" cellpadding="0" cellspacing="0" style="background:#f8f9fa;border-radius:10px;border:1px solid #dee2e6;">
+                                <tr>
+                                    <td style="padding:20px;">
+                                        <h4 style="color:#1a1a1a;margin:0 0 15px 0;font-size:16px;font-weight:600;">What You Need to Know:</h4>
+                                        <table width="100%" cellpadding="0" cellspacing="0">
+                                            <tr><td style="padding:8px 0;border-bottom:1px solid #dee2e6;"><span style="color:#198754;margin-right:8px;">&#10003;</span>All your data will be safely migrated to the new server</td></tr>
+                                            <tr><td style="padding:8px 0;border-bottom:1px solid #dee2e6;"><span style="color:#198754;margin-right:8px;">&#10003;</span>Your existing accounts and credentials will remain valid</td></tr>
+                                            <tr><td style="padding:8px 0;border-bottom:1px solid #dee2e6;"><span style="color:#198754;margin-right:8px;">&#10003;</span>Access the services using the new server link below</td></tr>
+                                            <tr><td style="padding:8px 0;"><span style="color:#198754;margin-right:8px;">&#10003;</span>You will be notified once migration is complete</td></tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="padding:0 40px 20px 40px;">
+                            <table width="100%" cellpadding="0" cellspacing="0" style="background:linear-gradient(135deg, #e7f1ff 0%, #0d6efd 100%);border-radius:10px;border:1px solid #0d6efd;">
+                                <tr>
+                                    <td style="padding:30px;text-align:center;">
+                                        <h3 style="color:#ffffff;margin:0 0 10px 0;font-size:20px;font-weight:600;">Access the New Server</h3>
+                                        <p style="color:#ffffff;margin:0 0 20px 0;font-size:14px;">Click the button below to access the services on our new server</p>
+                                        <a href="' . htmlspecialchars($newServerUrl) . '" style="display:inline-block;background:#ffffff;color:#0d6efd;padding:15px 35px;text-decoration:none;border-radius:8px;font-weight:bold;font-size:16px;">Access New Server</a>
+                                        <p style="color:#ffffff;margin:15px 0 0 0;font-size:12px;opacity:0.9;">' . htmlspecialchars($newServerUrl) . '</p>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="padding:0 40px 30px 40px;text-align:center;">
+                            <p style="color:#999999;font-size:14px;margin:0;">We apologize for any inconvenience this may cause during the migration process.</p>
+                            <p style="color:#1a1a1a;font-size:16px;margin:15px 0 0 0;font-weight:600;">Thank you for your patience and understanding!</p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="background:#1a1a1a;padding:20px 40px;text-align:center;">
+                            <p style="color:#999999;font-size:12px;margin:0;">This is an automated message from <strong style="color:#ffffff;">DICT Online Services</strong></p>
+                            <p style="color:#666666;font-size:11px;margin:8px 0 0 0;">Department of Information and Communications Technology</p>
+                            <p style="color:#666666;font-size:11px;margin:8px 0 0 0;">Please do not reply to this email.</p>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>';
+}
+
 function sendEmailDebug($host, $port, $username, $password, $fromEmail, $fromName, $encryption, $to, $toName, $subject, $body, &$log) {
     $log = '';
 
@@ -973,6 +1175,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                 $subject = "LOKA Fleet Management - System Update Available";
                 $body = buildSystemUpdateTemplate($user['name'], $smtpFromName, $loginUrl, $lokaVersion, $updateNotes);
                 break;
+            case 'migration':
+                $subject = "Important: Server Migration - DICT Online Services";
+                $body = buildMigrationTemplate($user['name'], $smtpFromName, $newServerUrl, $migrationDate, $servicesList);
+                break;
             default:
                 $subject = "LOKA Fleet Management - We Are Back Online!";
                 $body = buildBackOnlineTemplate($user['name'], $user['email'], $smtpFromName, $loginUrl, $lokaVersion);
@@ -1087,6 +1293,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                 $subject = "LOKA Fleet Management - System Update (Test)";
                 $body = buildSystemUpdateTemplate("User", $smtpFromName, $loginUrl, $lokaVersion, $updateNotes);
                 break;
+            case 'migration':
+                $subject = "Important: Server Migration - DICT Online Services (Test)";
+                $body = buildMigrationTemplate("User", $smtpFromName, $newServerUrl, $migrationDate, $servicesList);
+                break;
             default:
                 $subject = "LOKA Fleet Management - Test Email";
                 $body = buildBackOnlineTemplate("User", $testEmail, $smtpFromName, $loginUrl, $lokaVersion);
@@ -1167,6 +1377,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                         $subject = "LOKA Fleet Management - System Update Available";
                         $body = buildSystemUpdateTemplate($user['name'], $smtpFromName, $loginUrl, $lokaVersion, $updateNotes);
                         break;
+                    case 'migration':
+                        $subject = "Important: Server Migration - DICT Online Services";
+                        $body = buildMigrationTemplate($user['name'], $smtpFromName, $newServerUrl, $migrationDate, $servicesList);
+                        break;
                     default:
                         $subject = "LOKA Fleet Management - Notification";
                         $body = buildBackOnlineTemplate($user['name'], $user['email'], $smtpFromName, $loginUrl, $lokaVersion);
@@ -1222,7 +1436,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
             <div class="col-lg-10">
                 <div class="card">
                     <div class="card-header">
-                        <h4 class="mb-0">Mass Email Blast - System Maintenance Notice</h4>
+                        <h4 class="mb-0"><i class="fas fa-envelope me-2"></i>Mass Email Blast - <span id="templateTitle">System Back Online</span></h4>
                     </div>
                     <div class="card-body">
                         <?php if ($message): ?>
@@ -1399,6 +1613,7 @@ $dbPass = "";</pre>
                                         <option value="account_suspended">Account Suspended</option>
                                         <option value="holiday">Holiday Announcement</option>
                                         <option value="system_update">System Update</option>
+                                        <option value="migration">Server Migration Announcement</option>
                                     </select>
                                 </div>
                             </div>
@@ -1414,6 +1629,19 @@ $dbPass = "";</pre>
                                 <div class="alert alert-success">
                                     <strong>Version:</strong> <?php echo htmlspecialchars($lokaVersion); ?>
                                     <br><strong>Login URL:</strong> <?php echo htmlspecialchars($loginUrl); ?>
+                                </div>
+                            </div>
+
+                            <div id="migrationFields" style="display:none;">
+                                <div class="alert alert-info">
+                                    <strong>Migration Date:</strong> <?php echo htmlspecialchars($migrationDate); ?>
+                                    <br><strong>New Server URL:</strong> <?php echo htmlspecialchars($newServerUrl); ?>
+                                    <br><strong>Services:</strong>
+                                    <ul class="mb-0">
+                                        <?php foreach ($servicesList as $service): ?>
+                                            <li><?php echo htmlspecialchars($service); ?></li>
+                                        <?php endforeach; ?>
+                                    </ul>
                                 </div>
                             </div>
 
@@ -1550,13 +1778,34 @@ $dbPass = "";</pre>
             const template = document.getElementById('emailTemplate').value;
             const maintenanceFields = document.getElementById('maintenanceFields');
             const backOnlineFields = document.getElementById('backOnlineFields');
+            const migrationFields = document.getElementById('migrationFields');
+            
+            const templateTitles = {
+                'back_online': 'System Back Online',
+                'maintenance': 'Maintenance Notice',
+                'password_reset': 'Password Reset',
+                'welcome': 'Welcome New User',
+                'trip_confirmation': 'Trip Confirmation',
+                'account_suspended': 'Account Suspended',
+                'holiday': 'Holiday Announcement',
+                'system_update': 'System Update',
+                'migration': 'Server Migration Announcement'
+            };
+            
+            document.getElementById('templateTitle').textContent = templateTitles[template] || 'Mass Email';
             
             if (template === 'maintenance') {
                 maintenanceFields.style.display = 'block';
                 backOnlineFields.style.display = 'none';
+                migrationFields.style.display = 'none';
+            } else if (template === 'migration') {
+                maintenanceFields.style.display = 'none';
+                backOnlineFields.style.display = 'none';
+                migrationFields.style.display = 'block';
             } else {
                 maintenanceFields.style.display = 'none';
                 backOnlineFields.style.display = 'block';
+                migrationFields.style.display = 'none';
             }
         }
 
@@ -1629,8 +1878,15 @@ $dbPass = "";</pre>
                     previewTitle = 'Email Preview - Holiday Announcement';
                     break;
                 case 'system_update':
-                    previewContent = `<?php echo addcslashes(preg_replace('/\s+/', ' ', buildSystemUpdateTemplate("John Doe User", $smtpFromName, $loginUrl, $lokaVersion, "• Improved system performance\\n• Enhanced user interface\\n• Bug fixes and optimizations")), '"'); ?>`;
+                    previewContent = `<?php echo addcslashes(preg_replace('/\s+/', ' ', buildSystemUpdateTemplate("John Doe User", $smtpFromName, $loginUrl, $lokaVersion, "• Improved system performance\n• Enhanced user interface\n• Bug fixes and optimizations")), '"'); ?>`;
                     previewTitle = 'Email Preview - System Update (v<?php echo $lokaVersion; ?>)';
+                    break;
+                case 'migration':
+                    previewContent = <?php 
+                        $migrationPreview = buildMigrationTemplate("John Doe User", $smtpFromName, $newServerUrl, $migrationDate, array("LOKA Fleet Management System", "DocTrax", "Other DICT Online Services"));
+                        echo json_encode($migrationPreview);
+                    ?>;
+                    previewTitle = 'Email Preview - Server Migration Announcement';
                     break;
                 default:
                     previewContent = `<?php echo addcslashes(preg_replace('/\s+/', ' ', buildBackOnlineTemplate("John Doe User", "john.doe@example.com", $smtpFromName, $loginUrl, $lokaVersion)), '"'); ?>`;

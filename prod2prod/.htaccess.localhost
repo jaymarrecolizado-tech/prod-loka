@@ -1,0 +1,70 @@
+# LOKA Fleet Management - Localhost .htaccess (Development)
+# Copy this to .htaccess for localhost development
+
+# =============================================================================
+# DDoS & Attack Protection Settings
+# =============================================================================
+
+# Limit request size (prevents large payload attacks)
+<IfModule mod_core.c>
+    LimitRequestBody 1048576
+</IfModule>
+
+# =============================================================================
+# Directory & File Security
+# =============================================================================
+
+# Prevent directory browsing
+Options -Indexes
+
+# =============================================================================
+# URL Routing
+# =============================================================================
+
+# Enable Rewrite Engine
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteBase /Projects/loka2/prod2prod/
+
+    # Force HTTPS - DISABLED FOR LOCALHOST
+    # RewriteCond %{HTTPS} off
+    # RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+    # Prevent direct access to config files
+    RewriteRule ^config/ - [F,L]
+    RewriteRule ^classes/ - [F,L]
+    RewriteRule ^includes/ - [F,L]
+    RewriteRule ^cron/ - [F,L]
+
+    # Route all requests through index.php
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule ^(.*)$ index.php [QSA,L]
+</IfModule>
+
+# Security Headers
+<IfModule mod_headers.c>
+    Header set X-Content-Type-Options "nosniff"
+    Header set X-Frame-Options "SAMEORIGIN"  # Changed from DENY for localhost
+    Header set X-XSS-Protection "1; mode=block"
+    Header set Referrer-Policy "strict-origin-when-cross-origin"
+</IfModule>
+
+# Protect sensitive files
+<FilesMatch "\.(php|sql|log|md|example)$">
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+</FilesMatch>
+
+# Allow access to index.php and assets
+<FilesMatch "^(index\.php|.*\.(css|js|jpg|jpeg|png|gif|ico|svg|woff|woff2|ttf|eot))$">
+    <IfModule mod_authz_core.c>
+        Require all granted
+    </IfModule>
+</FilesMatch>
+
+# Enable Gzip Compression
+<IfModule mod_deflate.c>
+    AddOutputFilterByType DEFLATE text/html text/plain text/xml text/css text/javascript application/javascript application/json
+</IfModule>

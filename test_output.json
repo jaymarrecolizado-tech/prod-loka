@@ -1,0 +1,274 @@
+[
+    {
+        "Field": "id",
+        "Type": "int(10) unsigned",
+        "Null": "NO",
+        "Key": "PRI",
+        "Default": null,
+        "Extra": "auto_increment"
+    },
+    {
+        "Field": "user_id",
+        "Type": "int(10) unsigned",
+        "Null": "NO",
+        "Key": "MUL",
+        "Default": null,
+        "Extra": ""
+    },
+    {
+        "Field": "vehicle_id",
+        "Type": "int(10) unsigned",
+        "Null": "YES",
+        "Key": "MUL",
+        "Default": null,
+        "Extra": ""
+    },
+    {
+        "Field": "driver_id",
+        "Type": "int(10) unsigned",
+        "Null": "YES",
+        "Key": "MUL",
+        "Default": null,
+        "Extra": ""
+    },
+    {
+        "Field": "requested_driver_id",
+        "Type": "int(10) unsigned",
+        "Null": "YES",
+        "Key": "MUL",
+        "Default": null,
+        "Extra": ""
+    },
+    {
+        "Field": "department_id",
+        "Type": "int(10) unsigned",
+        "Null": "NO",
+        "Key": "MUL",
+        "Default": null,
+        "Extra": ""
+    },
+    {
+        "Field": "approver_id",
+        "Type": "int(10) unsigned",
+        "Null": "YES",
+        "Key": "MUL",
+        "Default": null,
+        "Extra": ""
+    },
+    {
+        "Field": "motorpool_head_id",
+        "Type": "int(10) unsigned",
+        "Null": "YES",
+        "Key": "MUL",
+        "Default": null,
+        "Extra": ""
+    },
+    {
+        "Field": "start_datetime",
+        "Type": "datetime",
+        "Null": "NO",
+        "Key": "MUL",
+        "Default": null,
+        "Extra": ""
+    },
+    {
+        "Field": "end_datetime",
+        "Type": "datetime",
+        "Null": "NO",
+        "Key": "",
+        "Default": null,
+        "Extra": ""
+    },
+    {
+        "Field": "purpose",
+        "Type": "text",
+        "Null": "NO",
+        "Key": "",
+        "Default": null,
+        "Extra": ""
+    },
+    {
+        "Field": "destination",
+        "Type": "text",
+        "Null": "NO",
+        "Key": "",
+        "Default": null,
+        "Extra": ""
+    },
+    {
+        "Field": "passenger_count",
+        "Type": "int(11)",
+        "Null": "NO",
+        "Key": "",
+        "Default": "1",
+        "Extra": ""
+    },
+    {
+        "Field": "status",
+        "Type": "enum('draft','pending','pending_motorpool','approved','rejected','cancelled','completed','modified','revision')",
+        "Null": "NO",
+        "Key": "MUL",
+        "Default": "draft",
+        "Extra": ""
+    },
+    {
+        "Field": "notes",
+        "Type": "text",
+        "Null": "YES",
+        "Key": "",
+        "Default": null,
+        "Extra": ""
+    },
+    {
+        "Field": "mileage_start",
+        "Type": "int(10) unsigned",
+        "Null": "YES",
+        "Key": "",
+        "Default": null,
+        "Extra": ""
+    },
+    {
+        "Field": "mileage_end",
+        "Type": "int(10) unsigned",
+        "Null": "YES",
+        "Key": "",
+        "Default": null,
+        "Extra": ""
+    },
+    {
+        "Field": "mileage_actual",
+        "Type": "int(10) unsigned",
+        "Null": "YES",
+        "Key": "",
+        "Default": null,
+        "Extra": ""
+    },
+    {
+        "Field": "has_travel_order",
+        "Type": "tinyint(1)",
+        "Null": "NO",
+        "Key": "",
+        "Default": "0",
+        "Extra": ""
+    },
+    {
+        "Field": "has_official_business_slip",
+        "Type": "tinyint(1)",
+        "Null": "NO",
+        "Key": "",
+        "Default": "0",
+        "Extra": ""
+    },
+    {
+        "Field": "travel_order_number",
+        "Type": "varchar(50)",
+        "Null": "YES",
+        "Key": "",
+        "Default": null,
+        "Extra": ""
+    },
+    {
+        "Field": "ob_slip_number",
+        "Type": "varchar(50)",
+        "Null": "YES",
+        "Key": "",
+        "Default": null,
+        "Extra": ""
+    },
+    {
+        "Field": "created_at",
+        "Type": "datetime",
+        "Null": "NO",
+        "Key": "",
+        "Default": "current_timestamp()",
+        "Extra": ""
+    },
+    {
+        "Field": "updated_at",
+        "Type": "datetime",
+        "Null": "NO",
+        "Key": "",
+        "Default": "current_timestamp()",
+        "Extra": "on update current_timestamp()"
+    },
+    {
+        "Field": "viewed_at",
+        "Type": "datetime",
+        "Null": "YES",
+        "Key": "",
+        "Default": null,
+        "Extra": ""
+    },
+    {
+        "Field": "cancelled_at",
+        "Type": "datetime",
+        "Null": "YES",
+        "Key": "",
+        "Default": null,
+        "Extra": ""
+    },
+    {
+        "Field": "deleted_at",
+        "Type": "datetime",
+        "Null": "YES",
+        "Key": "MUL",
+        "Default": null,
+        "Extra": ""
+    },
+    {
+        "Field": "actual_dispatch_datetime",
+        "Type": "datetime",
+        "Null": "YES",
+        "Key": "",
+        "Default": null,
+        "Extra": ""
+    },
+    {
+        "Field": "actual_arrival_datetime",
+        "Type": "datetime",
+        "Null": "YES",
+        "Key": "",
+        "Default": null,
+        "Extra": ""
+    },
+    {
+        "Field": "dispatch_guard_id",
+        "Type": "int(10) unsigned",
+        "Null": "YES",
+        "Key": "",
+        "Default": null,
+        "Extra": ""
+    },
+    {
+        "Field": "arrival_guard_id",
+        "Type": "int(10) unsigned",
+        "Null": "YES",
+        "Key": "",
+        "Default": null,
+        "Extra": ""
+    },
+    {
+        "Field": "trip_ticket_id",
+        "Type": "int(10) unsigned",
+        "Null": "YES",
+        "Key": "MUL",
+        "Default": null,
+        "Extra": ""
+    },
+    {
+        "Field": "guard_notes",
+        "Type": "text",
+        "Null": "YES",
+        "Key": "",
+        "Default": null,
+        "Extra": ""
+    },
+    {
+        "Field": "completed_at",
+        "Type": "timestamp",
+        "Null": "YES",
+        "Key": "",
+        "Default": null,
+        "Extra": ""
+    }
+]
