@@ -1,0 +1,249 @@
+<?php
+/**
+ * LOKA - Gas Voucher Approval Processing Page
+ *
+ * Two-step workflow:
+ *  Step 1 (pending_review)    → Reviewed by OIC Motorpool → moves to pending_approval
+ *  Step 2 (pending_approval)  → Approved/Rejected by Chief Admin & Finance
+ */
+
+requireAnyRole([ROLE_APPROVER, ROLE_MOTORPOOL, ROLE_ADMIN]);
+
+$voucherId = (int) get('id', 0);
+if (!$voucherId) {
+    redirectWith('/?page=gas-vouchers', 'danger', 'Invalid voucher ID.');
+}
+
+$voucher = db()->fetch(
+    "SELECT gv.*, u.name AS requester_name
+     FROM gas_vouchers gv
+     JOIN users u ON gv.requested_by_user_id = u.id
+     WHERE gv.id = ? AND gv.deleted_at IS NULL",
+    [$voucherId]
+);
+
+if (!$voucher) {
+    redirectWith('/?page=gas-vouchers', 'danger', 'Voucher not found.');
+}
+
+// Determine which step we're at and what actions are available
+$canReview  = ($voucher->status === 'pending_review' && (isMotorpool() || isApprover() || isAdmin()));
+$canApprove = ($voucher->status === 'pending_approval' && (isAdmin() || isMotorpool()));
+
+if (!$canReview && !$canApprove) {
+    redirectWith('/?page=gas-vouchers&action=view&id=' . $voucherId, 'warning', 'This voucher cannot be processed at this stage by your role.');
+}
+
+$errors = [];
+$pageTitle = 'Process Gas Voucher: ' . $voucher->voucher_no;
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    requireCsrf();
+
+    $decision = post('decision', '');
+    $notes    = postSafe('notes', '', 500);
+
+    if (!in_array($decision, ['review_approve', 'final_approve', 'reject'])) {
+        $errors[] = 'Invalid decision.';
+    }
+
+    if ($decision === 'reject' && empty($notes)) {
+        $errors[] = 'A rejection reason is required.';
+    }
+
+    if (empty($errors)) {
+        db()->beginTransaction();
+        try {
+            if ($decision === 'review_approve') {
+                // Step 1: OIC Motorpool approves → move to pending_approval
+                db()->update('gas_vouchers', [
+                    'status'         => 'pending_approval',
+                    'reviewed_by'    => userId(),
+                    'reviewed_at'    => date(DATETIME_FORMAT),
+                    'reviewer_notes' => $notes ?: null,
+                    'updated_at'     => date(DATETIME_FORMAT),
+                ], 'id = ?', [$voucherId]);
+                auditLog('review', 'gas_voucher', $voucherId);
+                db()->commit();
+                redirectWith('/?page=gas-vouchers&action=view&id=' . $voucherId, 'success', 'Gas voucher reviewed. Now awaiting final approval.');
+
+            } elseif ($decision === 'final_approve') {
+                // Step 2: Chief Admin approves → approved
+                db()->update('gas_vouchers', [
+                    'status'         => 'approved',
+                    'approved_by'    => userId(),
+                    'approved_at'    => date(DATETIME_FORMAT),
+                    'approver_notes' => $notes ?: null,
+                    'updated_at'     => date(DATETIME_FORMAT),
+                ], 'id = ?', [$voucherId]);
+                auditLog('approve', 'gas_voucher', $voucherId);
+                db()->commit();
+                redirectWith('/?page=gas-vouchers&action=view&id=' . $voucherId, 'success', 'Gas voucher approved. Print the voucher to authorize fuel pick-up.');
+
+            } elseif ($decision === 'reject') {
+                db()->update('gas_vouchers', [
+                    'status'           => 'rejected',
+                    'rejected_by'      => userId(),
+                    'rejected_at'      => date(DATETIME_FORMAT),
+                    'rejection_reason' => $notes,
+                    'updated_at'       => date(DATETIME_FORMAT),
+                ], 'id = ?', [$voucherId]);
+                auditLog('reject', 'gas_voucher', $voucherId);
+                db()->commit();
+                redirectWith('/?page=gas-vouchers&action=view&id=' . $voucherId, 'warning', 'Gas voucher has been rejected.');
+            }
+        } catch (Exception $e) {
+            db()->rollback();
+            $errors[] = 'Error: ' . $e->getMessage();
+        }
+    }
+}
+
+require_once INCLUDES_PATH . '/header.php';
+?>
+
+<div class="container-fluid py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8 col-xl-7">
+
+            <!-- Page Header -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h4 class="mb-1"><i class="bi bi-check-circle me-2"></i>Process Gas Voucher</h4>
+                    <nav aria-label="breadcrumb">
+                        <ol class="breadcrumb mb-0">
+                            <li class="breadcrumb-item"><a href="<?= APP_URL ?>">Dashboard</a></li>
+                            <li class="breadcrumb-item"><a href="<?= APP_URL ?>/?page=gas-vouchers">Gas Vouchers</a></li>
+                            <li class="breadcrumb-item"><a href="<?= APP_URL ?>/?page=gas-vouchers&action=view&id=<?= $voucher->id ?>"><?= e($voucher->voucher_no) ?></a></li>
+                            <li class="breadcrumb-item active">Process</li>
+                        </ol>
+                    </nav>
+                </div>
+                <a href="<?= APP_URL ?>/?page=gas-vouchers&action=view&id=<?= $voucher->id ?>" class="btn btn-outline-secondary">
+                    <i class="bi bi-arrow-left me-1"></i>Back
+                </a>
+            </div>
+
+            <?php if (!empty($errors)): ?>
+            <div class="alert alert-danger">
+                <?php foreach ($errors as $err): ?><div><?= e($err) ?></div><?php endforeach; ?>
+            </div>
+            <?php endif; ?>
+
+            <!-- Voucher Summary Card -->
+            <div class="card mb-4 border-primary">
+                <div class="card-header bg-primary text-white">
+                    <h6 class="mb-0"><i class="bi bi-fuel-pump me-2"></i>Voucher Summary</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-sm-4">
+                            <small class="text-muted">Voucher No.</small>
+                            <div class="fw-bold fs-5"><?= e($voucher->voucher_no) ?></div>
+                        </div>
+                        <div class="col-sm-4">
+                            <small class="text-muted">Request Date</small>
+                            <div><?= e(date('M d, Y', strtotime($voucher->request_date))) ?></div>
+                        </div>
+                        <div class="col-sm-4">
+                            <small class="text-muted">Requested By</small>
+                            <div><?= e($voucher->requester_name) ?></div>
+                        </div>
+                        <div class="col-sm-4">
+                            <small class="text-muted">Driver / Bearer</small>
+                            <div class="fw-semibold"><?= e($voucher->driver_name) ?></div>
+                        </div>
+                        <div class="col-sm-4">
+                            <small class="text-muted">Vehicle Plate</small>
+                            <div><span class="badge bg-dark"><?= e($voucher->vehicle_plate) ?></span></div>
+                        </div>
+                        <div class="col-sm-4">
+                            <small class="text-muted">Fuel</small>
+                            <div><?= e($voucher->quantity) ?> <?= e($voucher->unit) ?> – <?= e($voucher->fuel_type) ?></div>
+                        </div>
+                        <div class="col-sm-6">
+                            <small class="text-muted">Fund Source</small>
+                            <div><span class="badge bg-secondary"><?= e($voucher->fund_source) ?></span></div>
+                        </div>
+                        <div class="col-12">
+                            <small class="text-muted">Purpose</small>
+                            <div><?= e($voucher->purpose) ?></div>
+                        </div>
+                        <?php if ($voucher->other_items): ?>
+                        <div class="col-12">
+                            <small class="text-muted">Other Items</small>
+                            <div><?= e($voucher->other_items) ?></div>
+                        </div>
+                        <?php endif; ?>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Current Stage Banner -->
+            <?php if ($canReview): ?>
+            <div class="alert alert-warning">
+                <i class="bi bi-person-badge me-2"></i>
+                <strong>Step 1 – Review:</strong> As OIC, Motor Pool Unit, you are reviewing this voucher before it goes for final approval.
+            </div>
+            <?php elseif ($canApprove): ?>
+            <div class="alert alert-info">
+                <i class="bi bi-person-check me-2"></i>
+                <strong>Step 2 – Final Approval:</strong> As Chief, Admin. and Finance Division, you are authorizing the bearer to secure fuel/items.
+            </div>
+            <?php endif; ?>
+
+            <!-- Decision Form -->
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="mb-0"><i class="bi bi-clipboard-check me-2"></i>Your Decision</h6>
+                </div>
+                <div class="card-body">
+                    <div class="mb-4 d-flex justify-content-between align-items-center bg-light p-3 rounded border">
+                        <div>
+                            <strong>Need to change something?</strong>
+                            <div class="text-muted small">You can correct the fund source, quantity, or purpose before approving.</div>
+                        </div>
+                        <a href="<?= APP_URL ?>/?page=gas-vouchers&action=edit&id=<?= $voucher->id ?>" class="btn btn-outline-primary btn-sm">
+                            <i class="bi bi-pencil me-1"></i>Edit Voucher Fields
+                        </a>
+                    </div>
+                    
+                    <form method="POST">
+                        <?= csrfField() ?>
+
+                        <div class="mb-4">
+                            <label class="form-label fw-semibold">Notes / Comments</label>
+                            <textarea name="notes" class="form-control" rows="3"
+                                      placeholder="Optional notes. Required if rejecting."></textarea>
+                        </div>
+
+                        <div class="d-flex gap-3 flex-wrap">
+                            <?php if ($canReview): ?>
+                            <button type="submit" name="decision" value="review_approve"
+                                    class="btn btn-success flex-fill"
+                                    onclick="return confirm('Approve this voucher for final review?')">
+                                <i class="bi bi-check-circle me-1"></i>Approve for Final Review
+                            </button>
+                            <?php elseif ($canApprove): ?>
+                            <button type="submit" name="decision" value="final_approve"
+                                    class="btn btn-success flex-fill"
+                                    onclick="return confirm('Authorize this gas voucher?')">
+                                <i class="bi bi-check2-all me-1"></i>Authorize Voucher
+                            </button>
+                            <?php endif; ?>
+
+                            <button type="submit" name="decision" value="reject"
+                                    class="btn btn-danger flex-fill"
+                                    onclick="return confirm('Are you sure you want to reject this voucher?')">
+                                <i class="bi bi-x-circle me-1"></i>Reject
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<?php require_once INCLUDES_PATH . '/footer.php'; ?>

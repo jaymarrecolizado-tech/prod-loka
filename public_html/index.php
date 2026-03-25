@@ -372,6 +372,8 @@ switch ($page) {
     case 'my-trip-tickets':
         if ($action === 'generate-summary') {
             require_once PAGES_PATH . '/my-trip-tickets/generate-summary.php';
+        } elseif ($action === 'test-travelorder') {
+            require_once PAGES_PATH . '/my-trip-tickets/test-travelorder.php';
         } else {
             require_once PAGES_PATH . '/my-trip-tickets/index.php';
         }
@@ -440,6 +442,28 @@ switch ($page) {
             require_once PAGES_PATH . '/admin/exports/pdf.php';
         } else {
             redirectWith('/?page=admin-reports', 'danger', 'Invalid export format.');
+        }
+        break;
+
+    case 'gas-vouchers':
+        if ($action === 'create') {
+            require_once PAGES_PATH . '/gas-vouchers/create.php';
+        } elseif ($action === 'edit') {
+            require_once PAGES_PATH . '/gas-vouchers/create.php'; // reuses same form file
+        } elseif ($action === 'view') {
+            require_once PAGES_PATH . '/gas-vouchers/view.php';
+        } elseif ($action === 'approve') {
+            requireAnyRole([ROLE_APPROVER, ROLE_MOTORPOOL, ROLE_ADMIN]);
+            require_once PAGES_PATH . '/gas-vouchers/approve.php';
+        } elseif ($action === 'print') {
+            require_once PAGES_PATH . '/gas-vouchers/print.php';
+        } elseif ($action === 'cancel') {
+            require_once PAGES_PATH . '/gas-vouchers/cancel.php';
+        } elseif ($action === 'update-payment') {
+            requireRole(ROLE_ADMIN);
+            require_once PAGES_PATH . '/gas-vouchers/update-payment.php';
+        } else {
+            require_once PAGES_PATH . '/gas-vouchers/index.php';
         }
         break;
 

@@ -26,6 +26,24 @@
                 </a>
             </li>
 
+            <!-- Gas Vouchers -->
+            <li class="nav-item">
+                <a class="nav-link <?= activeMenu('gas-vouchers') ?>" href="<?= APP_URL ?>/?page=gas-vouchers">
+                    <i class="bi bi-fuel-pump"></i>
+                    <span>Gas Vouchers</span>
+                    <?php
+                    // Show badge for approvers/motorpool: pending_review count
+                    if (isApprover() || isMotorpool() || isAdmin()):
+                        $pendingGv = db()->fetchColumn(
+                            "SELECT COUNT(*) FROM gas_vouchers WHERE status IN ('pending_review','pending_approval') AND deleted_at IS NULL"
+                        );
+                        if ($pendingGv > 0):
+                    ?>
+                    <span class="badge bg-warning ms-auto"><?= $pendingGv ?></span>
+                    <?php endif; endif; ?>
+                </a>
+            </li>
+
             <!-- Schedule Calendar (All Users) -->
             <li class="nav-item">
                 <a class="nav-link <?= activeMenu('schedule') ?>" href="<?= APP_URL ?>/?page=schedule&action=calendar">

@@ -33,7 +33,8 @@ class Database
         'password_reset_tokens',
         'maintenance_requests',
         'assignment_history',
-        'trip_tickets'
+        'trip_tickets',
+        'gas_vouchers'
     ];
 
     private function __construct()

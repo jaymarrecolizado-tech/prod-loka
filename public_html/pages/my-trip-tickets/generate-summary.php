@@ -17,6 +17,7 @@ $dateTo = get('date_to', date('Y-m-t')); // Default to last day of current month
 
 // Action can be to print
 $isPrint = get('print') == '1';
+$templateType = get('template', 'vehicle'); // 'vehicle' or 'travelorder'
 
 // Fetch vehicles for dropdown
 $vehicles = db()->fetchAll("SELECT id, plate_number, make, model FROM vehicles WHERE deleted_at IS NULL ORDER BY plate_number");
@@ -154,8 +155,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' || $isPrint) {
         }
 
         if ($isPrint) {
-            // Include html layout directly
-            require_once __DIR__ . '/summary-print.php';
+            // Include html layout directly based on template type
+            if ($templateType === 'travelorder') {
+                require_once __DIR__ . '/summary-print-travelorder.php';
+            } else {
+                require_once __DIR__ . '/summary-print.php';
+            }
             exit;
         }
     }
@@ -229,6 +234,15 @@ require_once INCLUDES_PATH . '/header.php';
                                 <label class="form-label">Date To <span class="text-danger">*</span></label>
                                 <input type="date" class="form-control" name="date_to" value="<?= $dateTo ?>" required>
                             </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Template Style</label>
+                            <select class="form-select" name="template" id="templateSelect">
+                                <option value="vehicle" <?= $templateType === 'vehicle' ? 'selected' : '' ?>>Vehicle Trip Ticket</option>
+                                <option value="travelorder" <?= $templateType === 'travelorder' ? 'selected' : '' ?>>Travel Order</option>
+                            </select>
+                            <div class="form-text">Select the format for your trip ticket printout.</div>
                         </div>
 
                         <div class="d-grid mt-3">

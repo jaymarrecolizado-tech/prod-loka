@@ -145,10 +145,14 @@ require_once INCLUDES_PATH . '/header.php';
                             </div>
                              <div class="mb-3">
                                  <h6 class="text-muted mb-2">
-                                     <i class="bi bi-flag me-1"></i> Destination
+                                     <i class="bi bi-calendar3 me-1"></i> Trip Type
                                  </h6>
-                                 <p class="mb-0"><?= e($ticket->destination) ?></p>
                              </div>
+                              <div class="mb-3">
+                                  <h6 class="text-muted mb-2">
+                                      <i class="bi bi-flag me-1"></i> Destination
+                                  </h6>
+                              </div>
                             <div class="mb-3">
                                 <h6 class="text-muted mb-2">
                                     <i class="bi bi-people me-1"></i> Passengers

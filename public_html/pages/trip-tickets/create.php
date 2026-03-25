@@ -99,6 +99,15 @@ $tripPurpose = $request->purpose;
 $destination = $request->destination;
 $startMileage = $request->mileage_start;
 
+// Get available drivers for dropdown
+$drivers = db()->fetchAll(
+    "SELECT d.id, du.name as driver_name, d.license_number 
+     FROM drivers d 
+     JOIN users du ON d.user_id = du.id 
+     WHERE d.deleted_at IS NULL 
+     ORDER BY du.name"
+);
+
 // Calculate duration
 $durationHours = 0;
 $durationMinutes = 0;
@@ -148,24 +157,25 @@ $resolutionNotesValue = '';
 $guardNotesValue = '';
 $tripTypeOtherValue = '';
 
-// Handle form submission
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    requireCsrf();
+    // Handle form submission
+    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+        requireCsrf();
 
-    $tripType = post('trip_type', 'official');
-    $tripTypeValue = $tripType;
-    $newStartDate = post('start_date');
-    $newEndDate = post('end_date');
-    $destinationInput = postSafe('destination', '', 255);
-    $purposeInput = postSafe('purpose', '', 500);
-    $destinationValue = $destinationInput ?: $destination;
-    $purposeValue = $purposeInput ?: $tripPurpose;
-    $passengersValue = (int) post('passengers', $passengers);
-    $startMileageValue = post('start_mileage') ? (int)post('start_mileage') : $startMileage;
-    $endMileageValue = post('end_mileage') ? (int)post('end_mileage') : null;
-    $distanceTraveledValue = post('distance_traveled') ? (int)post('distance_traveled') : null;
-    $fuelConsumedValue = post('fuel_consumed') ? (float)post('fuel_consumed') : null;
-    $fuelCostValue = post('fuel_cost') ? (float)post('fuel_cost') : null;
+        $tripType = post('trip_type', 'official');
+        $tripTypeValue = $tripType;
+        $driverId = (int)post('driver_id'); // Selected driver from dropdown
+        $newStartDate = post('start_date');
+        $newEndDate = post('end_date');
+        $destinationInput = postSafe('destination', '', 255);
+        $purposeInput = postSafe('purpose', '', 500);
+        $destinationValue = $destinationInput ?: $destination;
+        $purposeValue = $purposeInput ?: $tripPurpose;
+        $passengersValue = (int) post('passengers', $passengers);
+        $startMileageValue = post('start_mileage') ? (int)post('start_mileage') : $startMileage;
+        $endMileageValue = post('end_mileage') ? (int)post('end_mileage') : null;
+        $distanceTraveledValue = post('distance_traveled') ? (int)post('distance_traveled') : null;
+        $fuelConsumedValue = post('fuel_consumed') ? (float)post('fuel_consumed') : null;
+        $fuelCostValue = post('fuel_cost') ? (float)post('fuel_cost') : null;
 
     // Other trip type description
     $tripTypeOther = postSafe('trip_type_other', '', 100);
@@ -241,6 +251,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!$destinationInput) {
         $errors[] = 'Destination is required';
     }
+    if (!$driverId) {
+        $errors[] = 'Driver assignment is required';
+    }
     if (!$tripType || !in_array($tripType, ['official', 'personal', 'maintenance', 'travel_order', 'other'])) {
         $errors[] = 'Invalid trip type';
     }
@@ -252,35 +265,35 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         try {
             db()->beginTransaction();
             
-            // Insert trip ticket
-            $ticketId = db()->insert('trip_tickets', [
-                'request_id' => $requestId,
-                'driver_id' => $request->driver_id,
-                'trip_type' => $tripType,
-                'trip_type_other' => $tripType === 'other' ? $tripTypeOther : null,
-                'start_date' => date('Y-m-d H:i:s', strtotime($newStartDate)),
-                'end_date' => date('Y-m-d H:i:s', strtotime($newEndDate)),
-                'destination' => $destinationInput ?: $destination,
-                'purpose' => $purposeInput ?: $tripPurpose,
-                'passengers' => $passengersValue,
-                'start_mileage' => $startMileageValue,
-                'end_mileage' => $endMileageValue,
-                'distance_traveled' => $distanceTraveledValue,
-                'fuel_consumed' => $fuelConsumedValue,
-                'fuel_cost' => $fuelCostValue,
-                'travel_order_path' => $travelOrderPath,
-                'ob_slip_path' => $obSlipPath,
-                'other_documents_path' => $otherDocumentsPath,
-                'has_issues' => $hasIssuesValue,
-                'issues_description' => $issuesDescriptionValue,
-                'resolved' => $resolvedValue,
-                'resolution_notes' => $resolutionNotesValue,
-                'dispatch_guard_id' => $request->dispatch_guard_id ?: userId(),
-                'arrival_guard_id' => userId(),
-                'guard_notes' => $guardNotesValue,
-                'status' => 'draft',
-                'created_by' => userId()
-            ]);
+             // Insert trip ticket
+             $ticketId = db()->insert('trip_tickets', [
+                 'request_id' => $requestId,
+                 'driver_id' => $driverId ?: $request->driver_id, // Use selected driver or fallback to request driver
+                 'trip_type' => $tripType,
+                 'trip_type_other' => $tripType === 'other' ? $tripTypeOther : null,
+                 'start_date' => date('Y-m-d H:i:s', strtotime($newStartDate)),
+                 'end_date' => date('Y-m-d H:i:s', strtotime($newEndDate)),
+                 'destination' => $destinationInput ?: $destination,
+                 'purpose' => $purposeInput ?: $tripPurpose,
+                 'passengers' => $passengersValue,
+                 'start_mileage' => $startMileageValue,
+                 'end_mileage' => $endMileageValue,
+                 'distance_traveled' => $distanceTraveledValue,
+                 'fuel_consumed' => $fuelConsumedValue,
+                 'fuel_cost' => $fuelCostValue,
+                 'travel_order_path' => $travelOrderPath,
+                 'ob_slip_path' => $obSlipPath,
+                 'other_documents_path' => $otherDocumentsPath,
+                 'has_issues' => $hasIssuesValue,
+                 'issues_description' => $issuesDescriptionValue,
+                 'resolved' => $resolvedValue,
+                 'resolution_notes' => $resolutionNotesValue,
+                 'dispatch_guard_id' => $request->dispatch_guard_id ?: userId(),
+                 'arrival_guard_id' => userId(),
+                 'guard_notes' => $guardNotesValue,
+                 'status' => 'draft',
+                 'created_by' => userId()
+             ]);
             
             // Link ticket to request
             db()->update('requests', 
@@ -354,19 +367,28 @@ require_once INCLUDES_PATH . '/header.php';
         <div class="card-body">
             <div class="row">
                 <div class="col-md-6">
-                    <dl class="row">
-                        <dt class="col-sm-4">Requester:</dt>
-                        <dd class="col-sm-8"><?= e($request->requester_name) ?></dd>
-                        
-                        <dt class="col-sm-4">Department:</dt>
-                        <dd class="col-sm-8"><?= e($request->department_name) ?></dd>
-                        
-                        <dt class="col-sm-4">Driver:</dt>
-                        <dd class="col-sm-8">
-                            <?= e($request->driver_name) ?>
-                            <small class="text-muted">(<?= e($request->driver_license) ?>)</small>
-                        </dd>
-                    </dl>
+                     <dl class="row">
+                         <dt class="col-sm-4">Requester:</dt>
+                         <dd class="col-sm-8"><?= e($request->requester_name) ?></dd>
+                         
+                         <dt class="col-sm-4">Department:</dt>
+                         <dd class="col-sm-8"><?= e($request->department_name) ?></dd>
+                         
+                         <dt class="col-sm-4">Driver Assigned:</dt>
+                         <dd class="col-sm-8">
+                             <select class="form-select" id="driverSelect" onchange="updateDriverInfo()">
+                                 <option value="">-- Select Driver --</option>
+                                 <?php foreach ($drivers as $driver): ?>
+                                     <option value="<?= $driver->id ?>" <?= $request->driver_id == $driver->id ? 'selected' : '' ?>>
+                                         <?= e($driver->driver_name) ?> (<?= e($driver->license_number) ?>)
+                                     </option>
+                                 <?php endforeach; ?>
+                             </select>
+                             <small class="text-muted" id="currentDriverInfo">
+                                 Currently: <?= e($request->driver_name) ?> (<?= e($request->driver_license) ?>)
+                             </small>
+                         </dd>
+                     </dl>
                 </div>
                 <div class="col-md-6">
                     <dl class="row">

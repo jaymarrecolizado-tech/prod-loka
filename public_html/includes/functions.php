@@ -1244,3 +1244,58 @@ function fileIcon(string $filePath): string
 
     return '<i class="bi ' . $iconClass . '"></i>';
 }
+
+// =============================================================================
+// GAS VOUCHER HELPERS
+// =============================================================================
+
+define('GAS_VOUCHER_STATUSES', [
+    'draft'            => ['label' => 'Draft',              'color' => 'secondary'],
+    'pending_review'   => ['label' => 'Pending Review',     'color' => 'warning'],
+    'pending_approval' => ['label' => 'Pending Approval',   'color' => 'info'],
+    'approved'         => ['label' => 'Approved',           'color' => 'success'],
+    'rejected'         => ['label' => 'Rejected',           'color' => 'danger'],
+    'cancelled'        => ['label' => 'Cancelled',          'color' => 'dark'],
+]);
+
+/**
+ * Return a Bootstrap badge for a gas voucher status.
+ */
+function gasVoucherStatusBadge(string $status): string
+{
+    return statusBadge($status, GAS_VOUCHER_STATUSES);
+}
+
+/**
+ * Return the Bootstrap color key for a gas voucher status (used for alert classes).
+ */
+function gasVoucherStatusColor(string $status): string
+{
+    return GAS_VOUCHER_STATUSES[$status]['color'] ?? 'secondary';
+}
+
+/**
+ * Return the human-readable label for a gas voucher status.
+ */
+function gasVoucherStatusLabel(string $status): string
+{
+    return GAS_VOUCHER_STATUSES[$status]['label'] ?? ucfirst($status);
+}
+
+/**
+ * Require the user to have at least ONE of the given roles.
+ * Accepts either a single role string or an array of role strings.
+ *
+ * @param string|array $roles
+ */
+function requireAnyRole($roles): void
+{
+    requireAuth();
+    $roles = (array) $roles;
+    foreach ($roles as $role) {
+        if (hasRole($role)) {
+            return; // Passes – at least one role matches
+        }
+    }
+    redirectWith('/?page=dashboard', 'danger', 'You do not have permission to access this page.');
+}

@@ -137,25 +137,25 @@ $pdf->Ln(2);
 
 $pdf->SetFont('helvetica', '', 9);
 
-// Row 1: Date of Trip & Destination (using MultiCell for proper wrapping)
-$pdf->Cell(25, 6, 'Date of Trip:', 0, 0);
-$pdf->SetFont('helvetica', 'B', 9);
-
-// Check if it's a multi-day trip
-$startDate = date('F j, Y', strtotime($ticket->start_date));
-$endDate = date('F j, Y', strtotime($ticket->end_date));
-if ($startDate !== $endDate) {
-    // Multi-day trip: stack both dates
-    $dateText = $startDate . "\n" . $endDate;
-} else {
-    // Single day trip
-    $dateText = $startDate;
-}
-// Use WriteHTMLCell for proper formatting
-$pdf->WriteHTMLCell(85, 6, '', '', $dateText, 'B', 0, 0, true, 'L', true);
-$pdf->SetFont('helvetica', '', 9);
-$pdf->Cell(22, 6, 'Destination:', 0, 0);
-$pdf->WriteHTMLCell(0, 6, '', '', $ticket->destination, 'B', 1, 0, true, 'L', true);
+  // Row 1: Date of Trip & Destination (using MultiCell for proper wrapping)
+  $pdf->Cell(25, 6, 'Date of Trip:', 0, 0);
+  $pdf->SetFont('helvetica', 'B', 9);
+  
+  // Check if it's a multi-day trip
+  $startDate = date('F j, Y', strtotime($ticket->start_date));
+  $endDate = date('F j, Y', strtotime($ticket->end_date));
+  if ($startDate !== $endDate) {
+      // Multi-day trip: stack both dates
+      $dateText = $startDate . "\n" . $endDate;
+  } else {
+      // Single day trip
+      $dateText = $startDate;
+  }
+  // Use WriteHTMLCell for proper formatting
+  $pdf->WriteHTMLCell(85, 0, '', '', $dateText, 'B', 0, 0, true, 'L', true);
+  $pdf->SetFont('helvetica', '', 9);
+  $pdf->Cell(22, 6, 'Destination:', 0, 0);
+  $pdf->WriteHTMLCell(0, 0, '', '', $ticket->destination, 'B', 1, 0, true, 'L', true);
 
 // Row 2: Time Out & Time In
 $pdf->Cell(25, 6, 'Time Out:', 0, 0);
@@ -163,11 +163,11 @@ $pdf->Cell(85, 6, date('h:i A', strtotime($ticket->start_date)), 'B', 0, 'C');
 $pdf->Cell(22, 6, 'Time In:', 0, 0);
 $pdf->Cell(0, 6, date('h:i A', strtotime($ticket->end_date)), 'B', 1, 'C');
 
-// Row 3: Type of Trip & No. of Passengers
-$pdf->Cell(25, 6, 'Type of Trip:', 0, 0);
-$pdf->WriteHTMLCell(85, 6, '', '', $tripTypeInfo, 'B', 0, 0, true, 'L', true);
-$pdf->Cell(22, 6, 'No. of Passengers:', 0, 0);
-$pdf->Cell(0, 6, count($passengers), 'B', 1, 'C');
+  // Row 3: Type of Trip & No. of Passengers
+  $pdf->Cell(25, 6, 'Type of Trip:', 0, 0);
+  $pdf->WriteHTMLCell(85, 0, '', '', $tripTypeInfo, 'B', 0, 0, true, 'L', true);
+  $pdf->Cell(22, 6, 'No. of Passengers:', 0, 0);
+  $pdf->Cell(0, 6, count($passengers), 'B', 1, 'C');
 $pdf->Ln(3);
 
 // ===== SECTION II: VEHICLE & DRIVER =====
@@ -177,26 +177,26 @@ $pdf->Ln(2);
 
 $pdf->SetFont('helvetica', '', 9);
 
-// Row 1: Plate Number & Driver (using WriteHTMLCell for proper wrapping)
-$pdf->Cell(25, 6, 'Plate Number:', 0, 0);
-$pdf->WriteHTMLCell(85, 6, '', '', ($ticket->plate_number ?: 'N/A'), 'B', 0, 0, true, 'L', true);
-$pdf->Cell(22, 6, 'Driver:', 0, 0);
-$pdf->WriteHTMLCell(0, 6, '', '', ($ticket->driver_name ?: 'N/A'), 'B', 1, 0, true, 'L', true);
+  // Row 1: Plate Number & Driver (using WriteHTMLCell for proper wrapping)
+  $pdf->Cell(25, 6, 'Plate Number:', 0, 0);
+  $pdf->WriteHTMLCell(85, 0, '', '', ($ticket->plate_number ?: 'N/A'), 'B', 0, 0, true, 'L', true);
+  $pdf->Cell(22, 6, 'Driver:', 0, 0);
+  $pdf->WriteHTMLCell(0, 0, '', '', ($ticket->driver_name ?: 'N/A'), 'B', 1, 0, true, 'L', true);
 
-// Row 2: Make / Model & License
-$pdf->Cell(25, 6, 'Make / Model:', 0, 0);
-$makeModel = trim((($ticket->make ?: 'N/A') . ' ' . ($ticket->vehicle_model ?: 'N/A')));
-$pdf->WriteHTMLCell(85, 6, '', '', $makeModel, 'B', 0, 0, true, 'L', true);
-$pdf->Cell(22, 6, 'License No.:', 0, 0);
-$pdf->WriteHTMLCell(0, 6, '', '', ($ticket->driver_license ?: 'N/A'), 'B', 1, 0, true, 'L', true);
+  // Row 2: Make / Model & License
+  $pdf->Cell(25, 6, 'Make / Model:', 0, 0);
+  $makeModel = trim((($ticket->make ?: 'N/A') . ' ' . ($ticket->vehicle_model ?: 'N/A')));
+  $pdf->WriteHTMLCell(85, 0, '', '', $makeModel, 'B', 0, 0, true, 'L', true);
+  $pdf->Cell(22, 6, 'License No.:', 0, 0);
+  $pdf->WriteHTMLCell(0, 0, '', '', ($ticket->driver_license ?: 'N/A'), 'B', 1, 0, true, 'L', true);
 
-// Row 3: Fuel Type & Color
-$pdf->Cell(25, 6, 'Fuel Type:', 0, 0);
-$fuelType = $ticket->fuel_type ?? 'N/A';
-$pdf->WriteHTMLCell(85, 6, '', '', ucfirst($fuelType), 'B', 0, 0, true, 'L', true);
-$pdf->Cell(22, 6, 'Color:', 0, 0);
-$color = $ticket->color ?? 'N/A';
-$pdf->WriteHTMLCell(0, 6, '', '', ucfirst($color), 'B', 1, 0, true, 'L', true);
+  // Row 3: Fuel Type & Color
+  $pdf->Cell(25, 6, 'Fuel Type:', 0, 0);
+  $fuelType = $ticket->fuel_type ?? 'N/A';
+  $pdf->WriteHTMLCell(85, 0, '', '', ucfirst($fuelType), 'B', 0, 0, true, 'L', true);
+  $pdf->Cell(22, 6, 'Color:', 0, 0);
+  $color = $ticket->color ?? 'N/A';
+  $pdf->WriteHTMLCell(0, 0, '', '', ucfirst($color), 'B', 1, 0, true, 'L', true);
 
 $pdf->Ln(2);
 
@@ -212,10 +212,10 @@ if (!empty($passengers)) {
     foreach ($passengers as $p) {
         if ($twoCols) {
             $pdf->Cell(12, 5, $passNum . '.', 0, 0);
-            $pdf->WriteHTMLCell(85, 5, '', '', ($p->passenger_name ?: '(Guest)'), 'B', 0, 0, true, 'L', true);
+            $pdf->WriteHTMLCell(85, 0, '', '', ($p->passenger_name ?: '(Guest)'), 'B', 0, 0, true, 'L', true);
         } else {
             $pdf->Cell(12, 5, $passNum . '.', 0, 0);
-            $pdf->WriteHTMLCell(85, 5, '', '', ($p->passenger_name ?: '(Guest)'), 'B', 1, 0, true, 'L', true);
+            $pdf->WriteHTMLCell(85, 0, '', '', ($p->passenger_name ?: '(Guest)'), 'B', 1, 0, true, 'L', true);
         }
         $twoCols = !$twoCols;
         $passNum++;
@@ -303,7 +303,7 @@ $pdf->Ln(2);
 
 $pdf->SetFont('helvetica', '', 9);
 $pdf->Cell(30, 8, 'Name:', 0, 0);
-$pdf->WriteHTMLCell(100, 8, '', '', $ticket->driver_name, 'B', 0, 0, true, 'L', true);
+$pdf->WriteHTMLCell(100, 0, '', '', $ticket->driver_name, 'B', 0, 0, true, 'L', true);
 $pdf->Cell(25, 8, 'Date:', 0, 0);
 $pdf->Cell(0, 8, '', 'B', 1);
 

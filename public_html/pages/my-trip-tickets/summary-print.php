@@ -242,7 +242,10 @@ if (!defined('BASE_PATH'))
         }
 
         .if input,
-        .if textarea {
+        .if textarea,
+        .if select {
+            -webkit-appearance: none;
+            appearance: none;
             width: 100%;
             border: none;
             outline: none;
@@ -269,19 +272,25 @@ if (!defined('BASE_PATH'))
 
         .date-pair {
             display: flex;
+            flex-direction: column;
             align-items: center;
-            gap: 5px;
+            gap: 1.5px;
         }
 
         .date-pair>span {
-            font-size: 8px;
+            font-size: 7px;
             color: var(--sub);
             white-space: nowrap;
             font-weight: 600;
+            line-height: 1;
         }
 
         .date-pair input {
-            flex: 1;
+            width: 100%;
+            font-size: 8.5px;
+            text-align: center;
+            padding: 1px 0;
+            flex: none;
         }
 
         /* TABLES */
@@ -350,14 +359,11 @@ if (!defined('BASE_PATH'))
         }
 
         /* Destination, Purpose, and Driver/Passenger Name columns */
-        .tbl-trip td:nth-child(6) textarea,
-        .tbl-trip td:nth-child(7) textarea {
+        .tbl-trip textarea.auto-expand {
             white-space: normal !important;
             word-wrap: break-word !important;
             overflow-wrap: break-word !important;
             line-height: 1.4;
-            min-height: 40px !important;
-            height: 100% !important;
             width: 100% !important;
             padding: 2px 4px !important;
             text-align: left !important;
@@ -371,11 +377,9 @@ if (!defined('BASE_PATH'))
             background: transparent;
             box-sizing: border-box;
             display: block;
-            min-height: 22px !important;
-        }
+            }
 
-        .tbl-trip td:nth-child(6) textarea::placeholder,
-        .tbl-trip td:nth-child(7) textarea::placeholder {
+        .tbl-trip textarea.auto-expand::placeholder {
             color: #ccc;
             font-weight: 400;
         }
@@ -387,7 +391,6 @@ if (!defined('BASE_PATH'))
 
         @media print {
             .tbl-trip textarea {
-                overflow: hidden !important;
                 -webkit-appearance: none;
                 appearance: none;
             }
@@ -503,8 +506,7 @@ if (!defined('BASE_PATH'))
 
         td[rowspan] input {
             height: auto;
-            min-height: 40px !important;
-        }
+            }
 
         td[rowspan] {
             vertical-align: top;
@@ -515,45 +517,13 @@ if (!defined('BASE_PATH'))
         }
 
         /* trip col widths - portrait */
-        .tbl-trip col.c-date {
-            width: 8%;
-        }
-
-        .tbl-trip col.c-time {
-            width: 7%;
-        }
-
-        .tbl-trip col.c-odo {
-            width: 8%;
-        }
-
-        .tbl-trip col.c-dest {
-            width: 20%;
-        }
-
-        .tbl-trip col.c-proj {
-            width: 20%;
-        }
-
-        .tbl-trip col.c-user {
-            width: 18%;
-        }
-
-        .tbl-trip col.c-pass {
-            width: 12%;
-        }
-
-        .tbl-trip col.c-sig {
-            width: 7%;
-        }
-
-        .tbl-trip col.c-pass {
-            width: 10%;
-        }
-
-        .tbl-trip col.c-guard {
-            width: 5.5%;
-        }
+        .tbl-trip col.c-date { width: 8%; }
+        .tbl-trip col.c-time { width: 6%; }
+        .tbl-trip col.c-odo { width: 7%; }
+        .tbl-trip col.c-dest { width: 21%; }
+        .tbl-trip col.c-proj { width: 21%; }
+        .tbl-trip col.c-user { width: 16%; }
+        .tbl-trip col.c-sig { width: 8%; }
 
         /* fuel col widths */
         .tbl-fuel col.c-qty {
@@ -823,16 +793,23 @@ if (!defined('BASE_PATH'))
             </div>
             <div class="if f2">
                 <span class="lbl">Driver Assigned</span>
-                <input type="text" id="driver" value="<?= e($generatorName) ?>" placeholder="Full name of driver">
+                <select id="driver">
+                    <option value="">Select Driver...</option>
+                    <?php foreach ($drivers as $drv): ?>
+                        <option value="<?= e($drv->name) ?>" <?= $drv->name === $generatorName ? 'selected' : '' ?>><?= strtoupper(e($drv->name)) ?></option>
+                    <?php endforeach; ?>
+                </select>
             </div>
-            <div class="if f2">
-                <span class="lbl">Date of Trip</span>
-                <div class="date-pair">
-                    <input type="date" id="dateFrom" value="<?= $dateFrom ?>">
-                    <span>to</span>
-                    <input type="date" id="dateTo" value="<?= $dateTo ?>">
-                </div>
-            </div>
+             <div class="if f2">
+                 <span class="lbl">Date of Trip</span>
+                 <div class="date-pair">
+                     <input type="date" id="dateFrom" value="<?= $dateFrom ?>">
+                     <span>to</span>
+                     <input type="date" id="dateTo" value="<?= $dateTo ?>">
+                 </div>
+             </div>
+    </div>
+             </div>
             <div class="if">
                 <span class="lbl">Date Prepared</span>
                 <input type="date" id="datePrepared" value="<?= date('Y-m-d') ?>">
@@ -854,7 +831,6 @@ if (!defined('BASE_PATH'))
                     <col class="c-dest">
                     <col class="c-proj">
                      <col class="c-user">
-                     <col class="c-pass">
                      <col class="c-sig">
                 </colgroup>
                 <thead>
@@ -887,11 +863,11 @@ if (!defined('BASE_PATH'))
                                 <td rowspan="<?= $peopleCount ?>"><input type="time" value="<?= date('H:i', strtotime($t->end_date)) ?>"></td>
                                 <td rowspan="<?= $peopleCount ?>"><input type="text" placeholder="km" value="<?= $t->start_mileage ?>"></td>
                                 <td rowspan="<?= $peopleCount ?>"><input type="text" placeholder="km" value="<?= $t->end_mileage ?>"></td>
-                                <td rowspan="<?= $peopleCount ?>"><textarea class="left" placeholder="Destination" rows="2"><?= e($t->destination) ?></textarea></td>
-                                <td rowspan="<?= $peopleCount ?>"><textarea class="left" placeholder="Purpose" rows="2"><?= e($t->purpose) ?></textarea></td>
+                                <td rowspan="<?= $peopleCount ?>"><textarea class="left auto-expand" placeholder="Destination" rows="1"><?= e($t->destination) ?></textarea></td>
+                                <td rowspan="<?= $peopleCount ?>"><textarea class="left auto-expand" placeholder="Purpose" rows="1"><?= e($t->purpose) ?></textarea></td>
                             <?php endif; ?>
                             <td>
-                                <input class="left" type="text" placeholder="Name" value="<?= e($person['name']) ?><?php if ($person['role'] === 'Driver'): ?> (Driver)<?php endif; ?>">
+                                <textarea class="left auto-expand" placeholder="Name" rows="1"><?= e($person['name']) ?><?php if ($person['role'] === 'Driver'): ?> (Driver)<?php endif; ?></textarea>
                                 <input type="hidden" class="person-role" value="<?= e($person['role']) ?>">
                             </td>
                              <td><input type="text"></td>
@@ -910,9 +886,9 @@ if (!defined('BASE_PATH'))
                             <td><input type="time"></td>
                             <td><input type="text" placeholder="km"></td>
                             <td><input type="text" placeholder="km"></td>
-                            <td><textarea class="left" placeholder="Destination" rows="2"></textarea></td>
-                            <td><textarea class="left" placeholder="Purpose" rows="2"></textarea></td>
-                             <td><input class="left" type="text" placeholder="Name (Driver)"></td>
+                            <td><textarea class="left auto-expand" placeholder="Destination" rows="1"></textarea></td>
+                            <td><textarea class="left auto-expand" placeholder="Purpose" rows="1"></textarea></td>
+                             <td><textarea class="left auto-expand" placeholder="Name (Driver)" rows="1"></textarea></td>
                             <td><input type="text"></td>
                         </tr>
                     <?php endfor; ?>
@@ -1089,7 +1065,18 @@ if (!defined('BASE_PATH'))
         }
 
         // Page numbering for printing
+                function autoResizeTextarea(el) {
+            el.style.height = 'auto';
+            el.style.height = el.scrollHeight + 'px';
+        }
+
         window.addEventListener('load', function() {
+            document.querySelectorAll('textarea.auto-expand').forEach(el => {
+                autoResizeTextarea(el);
+                el.addEventListener('input', function() {
+                    autoResizeTextarea(this);
+                });
+            });
             calcTotals();
         });
 
@@ -1102,3 +1089,7 @@ if (!defined('BASE_PATH'))
 </body>
 
 </html>
+
+
+
+
