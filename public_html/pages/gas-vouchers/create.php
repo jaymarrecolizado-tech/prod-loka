@@ -8,21 +8,22 @@ $voucherId = (int) get('id', 0);
 $voucher = null;
 $errors  = [];
 
-// Auto-generate voucher number: YYYY-MMNN
+// Auto-generate voucher number: YYYY-MM-NNN
 function generateVoucherNo(): string {
     $year  = date('Y');
     $month = date('m');
-    $prefix = "{$year}-{$month}";
+    $prefix = "{$year}-{$month}-";
     $last = db()->fetchColumn(
         "SELECT voucher_no FROM gas_vouchers WHERE voucher_no LIKE ? ORDER BY voucher_no DESC LIMIT 1",
         ["{$prefix}%"]
     );
     if ($last) {
-        $seq = (int) substr($last, -2) + 1;
+        $parts = explode('-', $last);
+        $seq = (int) end($parts) + 1;
     } else {
         $seq = 1;
     }
-    return $prefix . str_pad($seq, 2, '0', STR_PAD_LEFT);
+    return $prefix . str_pad($seq, 3, '0', STR_PAD_LEFT);
 }
 
 // Fetch for edit
@@ -68,6 +69,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $quantity     = (float) post('quantity', 0);
     $unit         = postSafe('unit', 'L', 20);
     $otherItems   = postSafe('other_items', '', 500);
+    $otherQty     = post('other_qty', '');
+    $otherUnit    = postSafe('other_unit', '', 20);
     $fundSource   = postSafe('fund_source', '', 100);
     $purpose      = postSafe('purpose', '', 1000);
     $chargeableAgainst = postSafe('chargeable_against', '', 100);
@@ -105,6 +108,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'quantity'           => $quantity,
             'unit'               => $unit,
             'other_items'        => $otherItems ?: null,
+            'other_qty'          => ($otherQty !== '' && $otherQty !== null) ? (float) $otherQty : null,
+            'other_unit'         => $otherUnit ?: null,
             'fund_source'        => $fundSource,
             'purpose'            => $purpose,
             'chargeable_against' => $chargeableAgainst ?: null,
@@ -276,12 +281,21 @@ require_once INCLUDES_PATH . '/header.php';
                                     <option value="FULL TANK">
                                 </datalist>
                             </div>
-                            <div class="col-12">
-                                <label class="form-label fw-semibold">Other Items</label>
-                                <input type="text" name="other_items" class="form-control"
-                                       placeholder="e.g., 2 Liters Engine Oil, 1 Liter Brake Fluid"
-                                       value="<?= e($d?->other_items ?? '') ?>">
-                                <div class="form-text">Motor oil, brake fluid, oil filter, etc. Include quantity and unit.</div>
+                            <div class="col-12 mt-3">
+                                <hr>
+                                <label class="form-label fw-semibold">Other Articles / Particulars (Optional)</label>
+                                <div class="row g-2">
+                                    <div class="col-md-3">
+                                        <input type="number" name="other_qty" class="form-control" step="0.01" min="0.01" placeholder="Qty" value="<?= e($d?->other_qty ?? '') ?>">
+                                    </div>
+                                    <div class="col-md-3">
+                                        <input type="text" name="other_unit" class="form-control" placeholder="Unit" value="<?= e($d?->other_unit ?? '') ?>">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <input type="text" name="other_items" class="form-control" placeholder="e.g., Engine Oil, Brake Fluid" value="<?= e($d?->other_items ?? '') ?>">
+                                    </div>
+                                </div>
+                                <div class="form-text">Specify any additional items needing separate quantity and unit on the voucher.</div>
                             </div>
                         </div>
                     </div>

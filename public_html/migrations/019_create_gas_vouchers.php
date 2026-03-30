@@ -65,6 +65,8 @@ try {
         quantity DECIMAL(10,2) NOT NULL COMMENT 'Qty in liters (or unit)',
         unit VARCHAR(20) NOT NULL DEFAULT 'L' COMMENT 'Unit: L, liters, full tank, etc.',
         other_items TEXT DEFAULT NULL COMMENT 'e.g. engine oil, brake fluid',
+        other_qty DECIMAL(10,2) DEFAULT NULL COMMENT 'Qty for other items',
+        other_unit VARCHAR(20) DEFAULT NULL COMMENT 'Unit for other items',
 
         -- Fund & Purpose
         fund_source VARCHAR(100) NOT NULL COMMENT 'e.g. Free WiFi, GASS, ELGU',

@@ -169,10 +169,15 @@ require_once INCLUDES_PATH . '/header.php';
                             <small class="text-muted">Purpose</small>
                             <div><?= e($voucher->purpose) ?></div>
                         </div>
-                        <?php if ($voucher->other_items): ?>
+                        <?php if ($voucher->other_items || $voucher->other_qty || $voucher->other_unit): ?>
                         <div class="col-12">
                             <small class="text-muted">Other Items</small>
-                            <div><?= e($voucher->other_items) ?></div>
+                            <div>
+                                <?php if ($voucher->other_qty || $voucher->other_unit): ?>
+                                    <strong><?= e($voucher->other_qty) ?> <?= e($voucher->other_unit) ?></strong> - 
+                                <?php endif; ?>
+                                <?= e($voucher->other_items) ?>
+                            </div>
                         </div>
                         <?php endif; ?>
                     </div>

@@ -66,8 +66,9 @@ if ($voucher->requested_by_user_id != userId() && !isAdmin() && !isApprover() &&
             margin-bottom: 20px;
         }
         .header-logo {
-            width: 80px;
-            margin-right: 15px;
+            width: 100px;
+            object-fit: contain;
+            mix-blend-mode: multiply; /* Fixes transparency/white background issues on print */
         }
         .header-text {
             flex: 1;
@@ -210,13 +211,13 @@ if ($voucher->requested_by_user_id != userId() && !isAdmin() && !isApprover() &&
 
     <!-- Formal Header -->
     <div class="grid-header">
-        <img src="<?= APP_URL ?>/assets/img/dict-logo.png" class="header-logo" alt="DICT Logo" onerror="this.style.display='none'">
+        <img src="<?= APP_URL ?>/assets/img/dict_logo.png" class="header-logo" alt="DICT Logo" onerror="this.style.display='none'" style="margin-right:15px;">
         <div class="header-text">
             <div class="republic">Republic of the Philippines</div>
             <div class="dept">Department of Information and Communications Technology</div>
             <div class="office">Regional Office 02, 02 Bagay Road, San Gabriel, Tuguegarao City, Cagayan 3500</div>
         </div>
-        <img src="<?= APP_URL ?>/assets/img/bagong-pilipinas-logo.png" class="header-logo" alt="..." onerror="this.style.display='none'" style="margin-right:0;margin-left:15px;">
+        <img src="<?= APP_URL ?>/assets/img/bp_logo.png" class="header-logo" alt="BP Logo" onerror="this.style.display='none'" style="margin-left:15px;">
     </div>
 
     <div class="header-title">G A S &nbsp; V O U C H E R</div>
@@ -255,17 +256,14 @@ if ($voucher->requested_by_user_id != userId() && !isAdmin() && !isApprover() &&
             <td class="center" style="font-weight:bold; font-size:12pt; padding:12px;"><?= e($voucher->quantity) ?></td>
             <td class="center" style="font-weight:bold; font-size:12pt; padding:12px;"><?= e($voucher->unit) ?></td>
             <td colspan="2" style="font-weight:bold; font-size:11pt; padding:12px; vertical-align:middle; color:#000;">
-                <div>
-                    [ <?= $voucher->fuel_type === 'Gasoline' ? 'X' : '&nbsp;&nbsp;' ?> ] Gasoline &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
-                    [ <?= $voucher->fuel_type === 'Diesel' ? 'X' : '&nbsp;&nbsp;' ?> ] Diesel &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
-                    [ <?= (!in_array($voucher->fuel_type, ['Gasoline', 'Diesel'])) ? 'X' : '&nbsp;&nbsp;' ?> ] Motor Oil / Others
-                </div>
+                <?= e($voucher->fuel_type) ?>
             </td>
         </tr>
-        <?php if ($voucher->other_items): ?>
+        <?php if ($voucher->other_items || $voucher->other_qty || $voucher->other_unit): ?>
         <tr>
-            <td colspan="2" class="center"></td>
-            <td colspan="2" style="font-weight:bold; font-size:11pt; padding:12px; vertical-align:middle; color:#000; border-top:none;">
+            <td class="center" style="font-weight:bold; font-size:12pt; padding:12px;"><?= e($voucher->other_qty) ?></td>
+            <td class="center" style="font-weight:bold; font-size:12pt; padding:12px;"><?= e($voucher->other_unit) ?></td>
+            <td colspan="2" style="font-weight:bold; font-size:11pt; padding:12px; vertical-align:middle; color:#000;">
                 <?= e($voucher->other_items) ?>
             </td>
         </tr>
