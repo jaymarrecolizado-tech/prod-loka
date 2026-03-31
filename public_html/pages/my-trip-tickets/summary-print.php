@@ -272,25 +272,29 @@ if (!defined('BASE_PATH'))
 
         .date-pair {
             display: flex;
-            flex-direction: column;
+            flex-direction: row;
             align-items: center;
-            gap: 1.5px;
+            justify-content: center;
+            gap: 4px;
+            margin-top: 2px;
         }
 
         .date-pair>span {
-            font-size: 7px;
+            font-size: 8px;
             color: var(--sub);
             white-space: nowrap;
             font-weight: 600;
-            line-height: 1;
         }
 
         .date-pair input {
+            flex: 1;
             width: 100%;
-            font-size: 8.5px;
+            font-size: 10px;
             text-align: center;
-            padding: 1px 0;
-            flex: none;
+            padding: 2px 0;
+            margin: 0;
+            -webkit-appearance: none;
+            appearance: none;
         }
 
         /* TABLES */
@@ -750,25 +754,31 @@ if (!defined('BASE_PATH'))
 
         <!-- HEADER -->
         <div class="hdr">
-            <div class="hdr-left">
-                <strong>Republic of the Philippines</strong>
-                Department of Information and<br>
-                Communications Technology<br>
-                Regional Office No. II
+            <div class="hdr-left" style="display: flex; align-items: center; gap: 8px; text-align: left;">
+                <img src="<?= APP_URL ?>/assets/img/dict_logo.png" style="width: 50px; height: auto; object-fit: contain; mix-blend-mode: multiply;" alt="DICT" onerror="this.style.display='none'">
+                <div>
+                    <strong>Republic of the Philippines</strong>
+                    Department of Information and<br>
+                    Communications Technology<br>
+                    Regional Office No. II
+                </div>
             </div>
             <div class="hdr-center">
                 <div class="hdr-title">Vehicle Trip Ticket</div>
                 <div class="hdr-bar"></div>
                 <div class="hdr-sub">Motorpool Unit &nbsp;·&nbsp; Admin and Finance Division</div>
             </div>
-            <div class="hdr-right">
-                <span class="lbl">Trip No.</span>
-                <span class="tno" id="tripnoBadge">
-                    <?= e($tripTicketNumber) ?>
-                </span>
-                <span class="lbl" style="margin-top:5px;">Location / Base</span>
-                <!-- Default Base -->
-                <span class="base">Tuguegarao City</span>
+            <div class="hdr-right" style="display: flex; align-items: center; gap: 10px; justify-content: flex-end; text-align: right;">
+                <div>
+                    <span class="lbl">Trip No.</span>
+                    <span class="tno" id="tripnoBadge">
+                        <?= e($tripTicketNumber) ?>
+                    </span>
+                    <span class="lbl" style="margin-top:5px;">Location / Base</span>
+                    <!-- Default Base -->
+                    <span class="base">Tuguegarao City</span>
+                </div>
+                <img src="<?= APP_URL ?>/assets/img/bp_logo.png" style="width: 50px; height: auto; object-fit: contain; mix-blend-mode: multiply;" alt="BP" onerror="this.style.display='none'">
             </div>
         </div>
 
@@ -791,6 +801,8 @@ if (!defined('BASE_PATH'))
                 <span class="lbl">Location / Base</span>
                 <input type="text" id="location" value="Tuguegarao City">
             </div>
+        </div>
+        <div class="irow">
             <div class="if f2">
                 <span class="lbl">Driver Assigned</span>
                 <select id="driver">
@@ -800,16 +812,14 @@ if (!defined('BASE_PATH'))
                     <?php endforeach; ?>
                 </select>
             </div>
-             <div class="if f2">
-                 <span class="lbl">Date of Trip</span>
-                 <div class="date-pair">
-                     <input type="date" id="dateFrom" value="<?= $dateFrom ?>">
-                     <span>to</span>
-                     <input type="date" id="dateTo" value="<?= $dateTo ?>">
-                 </div>
-             </div>
-    </div>
-             </div>
+            <div class="if f2">
+                <span class="lbl">Date of Trip</span>
+                <div class="date-pair">
+                    <input type="date" id="dateFrom" value="<?= $dateFrom ?>">
+                    <span>to</span>
+                    <input type="date" id="dateTo" value="<?= $dateTo ?>">
+                </div>
+            </div>
             <div class="if">
                 <span class="lbl">Date Prepared</span>
                 <input type="date" id="datePrepared" value="<?= date('Y-m-d') ?>">

@@ -42,6 +42,16 @@ $maintenanceStart = 'February 27, 2026 at 9:00 AM';
 $maintenanceEnd = 'March 1, 2026 at 11:59 PM';
 $additionalMessage = 'We apologize for any inconvenience this may cause. Thank you for your understanding and patience.';
 
+// April 2026 Maintenance Reminder
+$maintenanceReminderStart = 'April 1, 2026 at 12:00 NN';
+$maintenanceReminderEnd = 'To be announced';
+$maintenanceReminderMessage = 'Please save your work and log out before the maintenance window. We will notify you once the system is back online.';
+
+// April 2026 Maintenance Reminder
+$maintenanceReminderStart = 'April 1, 2026 at 12:00 NN';
+$maintenanceReminderEnd = 'To be announced';
+$maintenanceReminderMessage = 'Please save your work and log out before the maintenance window. We will notify you once the system is back online.';
+
 // Migration Announcement Variables
 $newServerUrl = 'https://dictr2links.dictr2.cloud/';
 $migrationDate = 'March 18, 2026';
@@ -710,6 +720,109 @@ function buildHolidayTemplate(string $userName, string $fromName): string
 </html>';
 }
 
+// Maintenance Reminder Template
+function buildMaintenanceReminderTemplate(string $userName, string $userEmail, string $fromName, string $loginUrl, string $maintenanceStart, string $maintenanceEnd, string $additionalMessage): string
+{
+    return '<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body style="margin:0;padding:0;font-family:Arial,sans-serif;background-color:#f4f4f4;">
+    <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#f4f4f4;padding:20px;">
+        <tr>
+            <td align="center">
+                <table width="650" cellpadding="0" cellspacing="0" style="background-color:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 4px 15px rgba(0,0,0,0.1);">
+                    <tr>
+                        <td style="background:linear-gradient(135deg, #ff6b35 0%, #e8552d 100%);padding:40px 30px;text-align:center;">
+                            <div style="margin-bottom:10px;">
+                                <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="12" cy="12" r="10"></circle>
+                                    <polyline points="12 6 12 12 16 14"></polyline>
+                                </svg>
+                            </div>
+                            <h1 style="color:#ffffff;margin:0;font-size:28px;font-weight:bold;">Maintenance Reminder</h1>
+                            <p style="color:#ffffff;margin:10px 0 0 0;font-size:14px;opacity:0.9;">LOKA Fleet Management</p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="padding:40px 40px 20px 40px;">
+                            <h2 style="color:#1a1a1a;margin:0 0 15px 0;font-size:22px;font-weight:600;">Reminder: Scheduled Maintenance</h2>
+                            <p style="color:#555555;font-size:15px;line-height:1.7;margin:0;">
+                                Dear <strong style="color:#ff6b35;">' . htmlspecialchars($userName) . '</strong>,
+                            </p>
+                            <p style="color:#555555;font-size:15px;line-height:1.7;margin:15px 0;">
+                                This is a friendly reminder that the <strong>LOKA Fleet Management System</strong> will undergo scheduled maintenance as indicated below. Please plan accordingly and ensure all pending requests are submitted before the maintenance window.
+                            </p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="padding:0 40px 20px 40px;">
+                            <table width="100%" cellpadding="0" cellspacing="0" style="background:linear-gradient(135deg, #fff3cd 0%, #ffc107 100%);border-radius:10px;border:1px solid #ffc107;">
+                                <tr>
+                                    <td style="padding:25px;text-align:center;">
+                                        <h3 style="color:#856404;margin:0 0 15px 0;font-size:18px;font-weight:600;">Maintenance Schedule</h3>
+                                        <table width="100%" cellpadding="0" cellspacing="0">
+                                            <tr>
+                                                <td style="padding:10px 0;border-bottom:1px solid rgba(133, 100, 4, 0.3);text-align:center;">
+                                                    <span style="color:#856404;font-size:13px;">START</span><br>
+                                                    <strong style="color:#1a1a1a;font-size:18px;">' . htmlspecialchars($maintenanceStart) . '</strong>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td style="padding:10px 0;border-bottom:1px solid rgba(133, 100, 4, 0.3);text-align:center;">
+                                                    <span style="color:#856404;font-size:13px;">END</span><br>
+                                                    <strong style="color:#1a1a1a;font-size:18px;">' . htmlspecialchars($maintenanceEnd) . '</strong>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                        <div style="background:#ffffff;border-radius:8px;padding:15px;margin-top:15px;">
+                                            <p style="margin:0;color:#666666;font-size:14px;line-height:1.6;">' . htmlspecialchars($additionalMessage) . '</p>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="padding:0 40px 20px 40px;">
+                            <h3 style="color:#1a1a1a;margin:0 0 15px 0;font-size:16px;font-weight:600;">Action Required:</h3>
+                            <table width="100%" cellpadding="0" cellspacing="0">
+                                <tr><td style="padding:10px 0;border-bottom:1px solid #eee;"><span style="color:#ff6b35;margin-right:8px;">⏰</span>Submit any pending vehicle requests before maintenance</td></tr>
+                                <tr><td style="padding:10px 0;border-bottom:1px solid #eee;"><span style="color:#ff6b35;margin-right:8px;">⏰</span>Save your work and log out before the start time</td></tr>
+                                <tr><td style="padding:10px 0;border-bottom:1px solid #eee;"><span style="color:#ff6b35;margin-right:8px;">⏰</span>System will be temporarily unavailable</td></tr>
+                                <tr><td style="padding:10px 0;"><span style="color:#198754;margin-right:8px;">✓</span>All data will be preserved safely</td></tr>
+                            </table>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="padding:0 40px 20px 40px;background:#f8f9fa;border-radius:10px;margin:0 40px;">
+                            <h4 style="color:#1a1a1a;margin:20px 0 10px 0;font-size:14px;font-weight:600;">Emergency Contact</h4>
+                            <p style="color:#666666;font-size:13px;margin:0;line-height:1.6;">For urgent matters during the maintenance period, please contact <strong>JE LITE (System Administrator)</strong> at <strong>jelite.demo@gmail.com</strong> or call <strong>+63 992 631 6210</strong>.</p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="padding:0 40px 30px 40px;text-align:center;">
+                            <p style="color:#999999;font-size:14px;margin:0;">We appreciate your patience and cooperation.</p>
+                            <p style="color:#1a1a1a;font-size:16px;margin:15px 0 0 0;font-weight:600;">Thank you!</p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="background:#1a1a1a;padding:20px 40px;text-align:center;">
+                            <p style="color:#999999;font-size:12px;margin:0;">This is an automated message from <strong style="color:#ffffff;">LOKA Fleet Management System</strong></p>
+                            <p style="color:#666666;font-size:11px;margin:8px 0 0 0;">Department of Information and Communications Technology</p>
+                            <p style="color:#666666;font-size:11px;margin:8px 0 0 0;">Please do not reply to this email.</p>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>';
+}
+
 // System Update Template
 function buildSystemUpdateTemplate(string $userName, string $fromName, string $loginUrl, string $version, string $updateNotes): string
 {
@@ -1151,6 +1264,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                 $subject = "LOKA Fleet Management - Scheduled System Maintenance Notice";
                 $body = buildEmailTemplate($user['name'], $user['email'], $smtpFromName, $loginUrl, $maintenanceStart, $maintenanceEnd, $additionalMessage);
                 break;
+            case 'maintenance_reminder':
+                $subject = "LOKA Fleet Management - Maintenance Reminder";
+                $body = buildMaintenanceReminderTemplate($user['name'], $user['email'], $smtpFromName, $loginUrl, $maintenanceReminderStart, $maintenanceReminderEnd, $maintenanceReminderMessage);
+                break;
+            case 'maintenance_reminder':
+                $subject = "LOKA Fleet Management - Maintenance Reminder";
+                $body = buildMaintenanceReminderTemplate($user['name'], $user['email'], $smtpFromName, $loginUrl, $maintenanceReminderStart, $maintenanceReminderEnd, $maintenanceReminderMessage);
+                break;
             case 'password_reset':
                 $subject = "LOKA Fleet Management - Password Reset";
                 $body = buildPasswordResetTemplate($user['name'], $user['email'], $smtpFromName, $loginUrl, $defaultPassword);
@@ -1269,6 +1390,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                 $subject = "LOKA Fleet Management - Test Email (Maintenance Notice)";
                 $body = buildEmailTemplate("User", $testEmail, $smtpFromName, $loginUrl, $maintenanceStart, $maintenanceEnd, $additionalMessage);
                 break;
+            case 'maintenance_reminder':
+                $subject = "LOKA Fleet Management - Test Email (Maintenance Reminder)";
+                $body = buildMaintenanceReminderTemplate("User", $testEmail, $smtpFromName, $loginUrl, $maintenanceReminderStart, $maintenanceReminderEnd, $maintenanceReminderMessage);
+                break;
+            case 'maintenance_reminder':
+                $subject = "LOKA Fleet Management - Test Email (Maintenance Reminder)";
+                $body = buildMaintenanceReminderTemplate("User", $testEmail, $smtpFromName, $loginUrl, $maintenanceReminderStart, $maintenanceReminderEnd, $maintenanceReminderMessage);
+                break;
             case 'password_reset':
                 $subject = "LOKA Fleet Management - Password Reset (Test)";
                 $body = buildPasswordResetTemplate("User", $testEmail, $smtpFromName, $loginUrl, $defaultPassword);
@@ -1352,6 +1481,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                     case 'maintenance':
                         $subject = "LOKA Fleet Management - Scheduled System Maintenance Notice";
                         $body = buildEmailTemplate($user['name'], $user['email'], $smtpFromName, $loginUrl, $maintenanceStart, $maintenanceEnd, $additionalMessage);
+                        break;
+                    case 'maintenance_reminder':
+                        $subject = "LOKA Fleet Management - Maintenance Reminder";
+                        $body = buildMaintenanceReminderTemplate($user['name'], $user['email'], $smtpFromName, $loginUrl, $maintenanceReminderStart, $maintenanceReminderEnd, $maintenanceReminderMessage);
+                        break;
+                    case 'maintenance_reminder':
+                        $subject = "LOKA Fleet Management - Maintenance Reminder";
+                        $body = buildMaintenanceReminderTemplate($user['name'], $user['email'], $smtpFromName, $loginUrl, $maintenanceReminderStart, $maintenanceReminderEnd, $maintenanceReminderMessage);
                         break;
                     case 'password_reset':
                         $subject = "LOKA Fleet Management - Password Reset";
@@ -1607,6 +1744,7 @@ $dbPass = "";</pre>
                                     <select name="email_template" id="emailTemplate" class="form-select" onchange="toggleTemplateFields()">
                                         <option value="back_online" selected>System Back Online</option>
                                         <option value="maintenance">Maintenance Notice</option>
+                                        <option value="maintenance_reminder">Maintenance Reminder</option>
                                         <option value="password_reset">Password Reset</option>
                                         <option value="welcome">Welcome New User</option>
                                         <option value="trip_confirmation">Trip Confirmation</option>
@@ -1783,6 +1921,7 @@ $dbPass = "";</pre>
             const templateTitles = {
                 'back_online': 'System Back Online',
                 'maintenance': 'Maintenance Notice',
+                'maintenance_reminder': 'Maintenance Reminder',
                 'password_reset': 'Password Reset',
                 'welcome': 'Welcome New User',
                 'trip_confirmation': 'Trip Confirmation',
@@ -1794,7 +1933,7 @@ $dbPass = "";</pre>
             
             document.getElementById('templateTitle').textContent = templateTitles[template] || 'Mass Email';
             
-            if (template === 'maintenance') {
+            if (template === 'maintenance' || template === 'maintenance_reminder') {
                 maintenanceFields.style.display = 'block';
                 backOnlineFields.style.display = 'none';
                 migrationFields.style.display = 'none';
@@ -1856,6 +1995,10 @@ $dbPass = "";</pre>
                 case 'maintenance':
                     previewContent = `<?php echo addcslashes(preg_replace('/\s+/', ' ', buildEmailTemplate("John Doe User", "john.doe@example.com", $smtpFromName, $loginUrl, $maintenanceStart, $maintenanceEnd, $additionalMessage)), '"'); ?>`;
                     previewTitle = 'Email Preview - Maintenance Notice';
+                    break;
+                case 'maintenance_reminder':
+                    previewContent = `<?php echo addcslashes(preg_replace('/\s+/', ' ', buildMaintenanceReminderTemplate("John Doe User", "john.doe@example.com", $smtpFromName, $loginUrl, $maintenanceReminderStart, $maintenanceReminderEnd, $maintenanceReminderMessage)), '"'); ?>`;
+                    previewTitle = 'Email Preview - Maintenance Reminder';
                     break;
                 case 'password_reset':
                     previewContent = `<?php echo addcslashes(preg_replace('/\s+/', ' ', buildPasswordResetTemplate("John Doe User", "john.doe@example.com", $smtpFromName, $loginUrl, $defaultPassword)), '"'); ?>`;
