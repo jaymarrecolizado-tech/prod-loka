@@ -23,23 +23,27 @@
 // Determine environment
 $isProduction = (getEnvVar('APP_ENV') === 'production');
 
-// SMTP Settings - All values read from environment variables
-// No hardcoded credentials - all must be set via environment variables
+// =====================================================================
+// SMTP Settings
+// Supports two naming conventions (SMTP_* preferred, MAIL_* as fallback)
+// Preferred (.env):       SMTP_HOST, SMTP_USER, SMTP_PASSWORD, SMTP_FROM_EMAIL
+// Legacy fallback:        MAIL_HOST, MAIL_USERNAME, MAIL_PASSWORD, MAIL_FROM_ADDRESS
+// =====================================================================
 
-// Basic SMTP Configuration
-define('MAIL_HOST', getEnvVar('SMTP_HOST', ''));
-define('MAIL_PORT', (int) getEnvVar('SMTP_PORT', 587));
-define('MAIL_ENCRYPTION', getEnvVar('SMTP_ENCRYPTION', 'tls'));
+// Basic SMTP Configuration - SMTP_* primary, MAIL_* fallback
+define('MAIL_HOST',       getEnvVar(['SMTP_HOST', 'MAIL_HOST'], ''));
+define('MAIL_PORT',  (int) getEnvVar(['SMTP_PORT', 'MAIL_PORT'], 587));
+define('MAIL_ENCRYPTION', getEnvVar(['SMTP_ENCRYPTION', 'MAIL_ENCRYPTION'], 'tls'));
 
-// Authentication - CRITICAL: These must be set via environment variables
-define('MAIL_USERNAME', getEnvVar('SMTP_USER', ''));
-define('MAIL_PASSWORD', getEnvVar('SMTP_PASSWORD', ''));
+// Authentication - CRITICAL: must be set via environment variables
+define('MAIL_USERNAME',   getEnvVar(['SMTP_USER', 'MAIL_USERNAME'], ''));
+define('MAIL_PASSWORD',   getEnvVar(['SMTP_PASSWORD', 'MAIL_PASSWORD'], ''));
 
 // From Address Configuration
-define('MAIL_FROM_ADDRESS', getEnvVar('SMTP_FROM_EMAIL', ''));
-define('MAIL_FROM_NAME', getEnvVar('SMTP_FROM_NAME', 'LOKA Fleet Management'));
+define('MAIL_FROM_ADDRESS', getEnvVar(['SMTP_FROM_EMAIL', 'MAIL_FROM_ADDRESS'], ''));
+define('MAIL_FROM_NAME',    getEnvVar(['SMTP_FROM_NAME',  'MAIL_FROM_NAME'],  'LOKA Fleet Management'));
 
-// Enable/disable mail functionality based on configuration
+// Enable/disable mail (defaults to TRUE so dev environments get emails)
 define('MAIL_ENABLED', getEnvVar('MAIL_ENABLED', 'true') === 'true');
 
 // Configuration validation - check if email is properly configured
@@ -143,7 +147,7 @@ define('MAIL_TEMPLATES', [
         'subject' => 'Trip Has Started',
         'template' => 'Your assigned trip has officially started. Safe travels!'
     ],
-    'trip_completed' => [
+    'trip_completed_driver' => [
         'subject' => 'Trip Completed',
         'template' => 'Your assigned trip has been completed. Thank you for your service.'
     ],
@@ -222,10 +226,6 @@ define('MAIL_TEMPLATES', [
     'driver_not_selected' => [
         'subject' => 'Driver Assignment Update',
         'template' => 'A trip you were requested to drive has been assigned to another driver.'
-    ],
-    'driver_requested' => [
-        'subject' => 'You Have Been Requested as Driver',
-        'template' => 'You have been requested as the driver for a vehicle request. The request is pending approval.'
     ],
     
     // Override/conflict notifications
