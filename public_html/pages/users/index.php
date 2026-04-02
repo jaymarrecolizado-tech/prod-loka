@@ -106,7 +106,7 @@ require_once INCLUDES_PATH . '/header.php';
     <div class="card table-card">
         <div class="card-body">
             <div class="table-responsive">
-                <table class="table table-hover data-table">
+                <table class="table table-hover">
                     <thead>
                         <tr><th>Name</th><th>Email</th><th>Department</th><th>Role</th><th>Status</th><th>Last Login</th><th>Actions</th></tr>
                     </thead>
