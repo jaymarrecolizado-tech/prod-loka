@@ -405,14 +405,14 @@ require_once INCLUDES_PATH . '/header.php';
                             <!-- Date/Time -->
                             <div class="col-md-6">
                                 <label for="start_datetime" class="form-label">Start Date/Time <span class="text-danger">*</span></label>
-                                <input type="text" class="form-control datetimepicker" id="start_datetime" 
+                                <input type="text" class="form-control" id="start_datetime" 
                                        name="start_datetime" value="<?= e(post('start_datetime', '')) ?>" required>
                                 <div class="invalid-feedback">Please select start date/time</div>
                             </div>
                             
                             <div class="col-md-6">
                                 <label for="end_datetime" class="form-label">End Date/Time <span class="text-danger">*</span></label>
-                                <input type="text" class="form-control datetimepicker" id="end_datetime" 
+                                <input type="text" class="form-control" id="end_datetime" 
                                        name="end_datetime" value="<?= e(post('end_datetime', '')) ?>" required>
                                 <div class="invalid-feedback">Please select end date/time</div>
                             </div>
