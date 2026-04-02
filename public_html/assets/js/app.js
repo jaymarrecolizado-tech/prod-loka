@@ -165,7 +165,9 @@ function initDatePickers() {
         flatpickr(el, {
             enableTime: true,
             dateFormat: "Y-m-d H:i",
-            time_24hr: true,
+            altInput: true,
+            altFormat: "Y-m-d h:i K",
+            time_24hr: false,
             allowInput: true,
             minDate: "today",
             minuteIncrement: 15
