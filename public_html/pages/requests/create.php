@@ -1635,7 +1635,9 @@ ob_start();
         const startPicker = flatpickr('#start_datetime', {
             enableTime: true,
             dateFormat: "Y-m-d H:i",
-            time_24hr: true,
+            altInput: true,
+            altFormat: "Y-m-d h:i K",
+            time_24hr: false,
             allowInput: true,
             minDate: minDate,
             maxDate: maxDate,
@@ -1645,7 +1647,9 @@ ob_start();
         const endPicker = flatpickr('#end_datetime', {
             enableTime: true,
             dateFormat: "Y-m-d H:i",
-            time_24hr: true,
+            altInput: true,
+            altFormat: "Y-m-d h:i K",
+            time_24hr: false,
             allowInput: true,
             minDate: minDate,
             maxDate: maxDate,
@@ -1678,7 +1682,9 @@ ob_start();
                 flatpickr('#start_datetime', {
                     enableTime: true,
                     dateFormat: "Y-m-d H:i",
-                    time_24hr: true,
+                    altInput: true,
+                    altFormat: "Y-m-d h:i K",
+                    time_24hr: false,
                     allowInput: true,
                     minDate: today,
                     maxDate: maxDate,
@@ -1687,7 +1693,9 @@ ob_start();
                 flatpickr('#end_datetime', {
                     enableTime: true,
                     dateFormat: "Y-m-d H:i",
-                    time_24hr: true,
+                    altInput: true,
+                    altFormat: "Y-m-d h:i K",
+                    time_24hr: false,
                     allowInput: true,
                     minDate: today,
                     maxDate: maxDate,
