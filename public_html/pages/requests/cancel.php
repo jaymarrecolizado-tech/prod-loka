@@ -178,13 +178,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && post('confirm_cancel') === '1') {
             ? 'You'
             : (currentUser()->name ?? 'An administrator');
 
-        // Try to send email notification (don't fail if it errors)
-        try {
-            @NotificationService::requestCancelled($requestId, userId());
-        } catch (Exception $e) {
-            error_log("Email notification failed: " . $e->getMessage());
-        }
-
         // Try to send in-app notifications (don't fail if they error)
         try {
             // Notify requester

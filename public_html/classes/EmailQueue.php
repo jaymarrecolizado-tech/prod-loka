@@ -92,6 +92,10 @@ class EmailQueue
             'request_confirmation',
             'request_approved', 
             'request_rejected',
+            'request_revision',
+            'request_cancelled',
+            'department_approved',
+            'request_fully_approved',
             'driver_assigned'
         ];
         

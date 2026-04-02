@@ -601,27 +601,6 @@ try {
     // This prevents orphaned emails if transaction fails
     // =====================================================
 
-    // Send email notifications for key events
-    if ($approvalAction === 'approve') {
-        if ($approvalType === 'motorpool') {
-            // Final approval - send vehicle assignment email
-            NotificationService::vehicleAssigned($requestId);
-            // Also notify driver
-            if ($driverId) {
-                NotificationService::driverAssigned($requestId);
-            }
-        } else {
-            // Department approved - send approval email
-            NotificationService::requestApproved($requestId);
-        }
-    } elseif ($approvalAction === 'reject') {
-        // Send rejection email
-        NotificationService::requestRejected($requestId, $comments);
-    } elseif ($approvalAction === 'revision') {
-        // Send revision requested email
-        NotificationService::revisionRequested($requestId, userId(), $comments);
-    }
-
     // Send queued notifications
     foreach ($notificationsToSend as $notif) {
         notify($notif['user_id'], $notif['type'], $notif['title'], $notif['message'], $notif['link']);
