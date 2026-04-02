@@ -97,6 +97,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && post('action') === 'delete_workflow
     redirectWith('/?page=requests&action=create', 'success', 'Workflow deleted.');
 }
 
+// Load booking rules settings globally for both GET and POST requests
+$bookingSettings = [];
+$settingsData = db()->fetchAll("SELECT `key`, value FROM settings WHERE `key` IN ('max_advance_booking_days', 'min_advance_booking_hours', 'max_trip_duration_hours')");
+foreach ($settingsData as $s) {
+    $bookingSettings[$s->key] = $s->value;
+}
+$maxAdvanceDays = (int) ($bookingSettings['max_advance_booking_days'] ?? 30);
+$minAdvanceHours = (int) ($bookingSettings['min_advance_booking_hours'] ?? 24);
+$maxTripHours = (int) ($bookingSettings['max_trip_duration_hours'] ?? 72);
+
 // Handle form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && post('action') !== 'save_workflow' && post('action') !== 'delete_workflow') {
     requireCsrf();
@@ -127,16 +137,6 @@ $vehicleId = postInt('vehicle_id') ?: null;
     $approverId = postInt('approver_id');
     $motorpoolHeadId = postInt('motorpool_head_id');
     $requestedDriverId = postInt('requested_driver_id') ?: null;
-    
-    // Load booking rules settings
-    $bookingSettings = [];
-    $settingsData = db()->fetchAll("SELECT `key`, value FROM settings WHERE `key` IN ('max_advance_booking_days', 'min_advance_booking_hours', 'max_trip_duration_hours')");
-    foreach ($settingsData as $s) {
-        $bookingSettings[$s->key] = $s->value;
-    }
-    $maxAdvanceDays = (int) ($bookingSettings['max_advance_booking_days'] ?? 30);
-    $minAdvanceHours = (int) ($bookingSettings['min_advance_booking_hours'] ?? 24);
-    $maxTripHours = (int) ($bookingSettings['max_trip_duration_hours'] ?? 72);
     
     // Validation
     $manilaTz = new DateTimeZone('Asia/Manila');
