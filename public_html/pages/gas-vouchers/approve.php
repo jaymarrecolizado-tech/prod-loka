@@ -28,7 +28,7 @@ if (!$voucher) {
 
 // Determine which step we're at and what actions are available
 $canReview  = ($voucher->status === 'pending_review' && (isMotorpool() || isApprover() || isAdmin()));
-$canApprove = ($voucher->status === 'pending_approval' && (isAdmin() || isMotorpool()));
+$canApprove = ($voucher->status === 'pending_approval' && (isAdmin() || isMotorpool() || isChiefAdminFinance()));
 
 if (!$canReview && !$canApprove) {
     redirectWith('/?page=gas-vouchers&action=view&id=' . $voucherId, 'warning', 'This voucher cannot be processed at this stage by your role.');
