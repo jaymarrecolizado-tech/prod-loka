@@ -7,7 +7,7 @@
  *  Step 2 (pending_approval)  → Approved/Rejected by Chief Admin & Finance
  */
 
-requireAnyRole([ROLE_APPROVER, ROLE_MOTORPOOL, ROLE_ADMIN]);
+requireAnyRole([ROLE_APPROVER, ROLE_MOTORPOOL, ROLE_ADMIN, ROLE_CHIEF_ADMIN_FINANCE]);
 
 $voucherId = (int) get('id', 0);
 if (!$voucherId) {
