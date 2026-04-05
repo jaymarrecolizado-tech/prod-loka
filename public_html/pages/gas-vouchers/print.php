@@ -31,7 +31,7 @@ if ($voucher->status !== 'approved') {
 }
 
 // Access control
-if ($voucher->requested_by_user_id != userId() && !isAdmin() && !isApprover() && !isMotorpool()) {
+if ($voucher->requested_by_user_id != userId() && !isAdmin() && !isApprover() && !isMotorpool() && !isChiefAdminFinance()) {
     redirectWith('/?page=gas-vouchers', 'danger', 'Access denied.');
 }
 ?>

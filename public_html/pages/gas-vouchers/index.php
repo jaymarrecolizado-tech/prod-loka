@@ -14,8 +14,8 @@ $dateTo       = getSafe('date_to', '', 20);
 $whereClause = 'gv.deleted_at IS NULL';
 $params = [];
 
-// Non-admins see only their own vouchers unless they are approvers
-if (!isAdmin() && !isMotorpool() && !isApprover()) {
+// Non-admins see only their own vouchers unless they are approvers or Chief Admin/Finance
+if (!isAdmin() && !isMotorpool() && !isApprover() && !isChiefAdminFinance()) {
     $whereClause .= ' AND gv.requested_by_user_id = ?';
     $params[] = userId();
 }
@@ -64,13 +64,13 @@ foreach ($statusCounts as $s) {
 
 // Pending review (for OIC Motorpool / Motorpool Head)
 $pendingReviewCount = 0;
-if (isMotorpool() || isApprover() || isAdmin()) {
+if (isMotorpool() || isApprover() || isAdmin() || isChiefAdminFinance()) {
     $pendingReviewCount = $counts['pending_review'] ?? 0;
 }
 
-// Pending approval (for Admin & Finance / Admin role)
+// Pending approval (for Chief Admin & Finance / Admin role)
 $pendingApprovalCount = 0;
-if (isAdmin() || isMotorpool()) {
+if (isAdmin() || isMotorpool() || isChiefAdminFinance()) {
     $pendingApprovalCount = $counts['pending_approval'] ?? 0;
 }
 
@@ -209,7 +209,7 @@ require_once INCLUDES_PATH . '/header.php';
                         <tr>
                             <td>
                                 <strong class="text-primary"><?= e($v->voucher_no) ?></strong>
-                                <?php if (!isAdmin() && !isApprover() && !isMotorpool()): ?>
+                                <?php if (!isAdmin() && !isApprover() && !isMotorpool() && !isChiefAdminFinance()): ?>
                                 <br><small class="text-muted">by Me</small>
                                 <?php else: ?>
                                 <br><small class="text-muted"><?= e($v->requester_name) ?></small>
@@ -263,8 +263,8 @@ require_once INCLUDES_PATH . '/header.php';
                                         <i class="bi bi-printer"></i>
                                     </a>
                                     <?php endif; ?>
-                                    <?php if (($v->status === 'pending_review' && (isMotorpool() || isApprover() || isAdmin())) ||
-                                              ($v->status === 'pending_approval' && (isAdmin() || isMotorpool()))): ?>
+                                    <?php if (($v->status === 'pending_review' && (isMotorpool() || isApprover() || isAdmin() || isChiefAdminFinance())) ||
+                                              ($v->status === 'pending_approval' && (isAdmin() || isMotorpool() || isChiefAdminFinance()))): ?>
                                     <a href="<?= APP_URL ?>/?page=gas-vouchers&action=approve&id=<?= $v->id ?>"
                                        class="btn btn-sm btn-outline-warning" title="Process">
                                         <i class="bi bi-check-circle"></i>

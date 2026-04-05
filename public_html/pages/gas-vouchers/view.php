@@ -27,8 +27,8 @@ if (!$voucher) {
     redirectWith('/?page=gas-vouchers', 'danger', 'Gas voucher not found.');
 }
 
-// Access control: only owner, admin, approvers can view
-if ($voucher->requested_by_user_id != userId() && !isAdmin() && !isApprover() && !isMotorpool()) {
+// Access control: only owner, admin, approvers, or Chief Admin/Finance can view
+if ($voucher->requested_by_user_id != userId() && !isAdmin() && !isApprover() && !isMotorpool() && !isChiefAdminFinance()) {
     redirectWith('/?page=gas-vouchers', 'danger', 'Access denied.');
 }
 
@@ -64,7 +64,7 @@ require_once INCLUDES_PATH . '/header.php';
                     $canEditView = false;
                     if ($voucher->status === 'draft' && ($voucher->requested_by_user_id == userId() || isAdmin())) {
                         $canEditView = true;
-                    } elseif (in_array($voucher->status, ['pending_review', 'pending_approval']) && (isApprover() || isMotorpool() || isAdmin())) {
+                    } elseif (in_array($voucher->status, ['pending_review', 'pending_approval']) && (isApprover() || isMotorpool() || isAdmin() || isChiefAdminFinance())) {
                         $canEditView = true;
                     }
                     if ($canEditView):
@@ -318,7 +318,7 @@ require_once INCLUDES_PATH . '/header.php';
                             <div class="mt-2 text-muted small">Withdrawn: <?= e(date('M d, Y', strtotime($voucher->date_withdrawn))) ?></div>
                             <?php endif; ?>
                         </div>
-                        <?php if (isAdmin() && $voucher->status === 'approved'): ?>
+                        <?php if ((isAdmin() || isChiefAdminFinance()) && $voucher->status === 'approved'): ?>
                         <div class="card-footer">
                             <form method="POST" action="<?= APP_URL ?>/?page=gas-vouchers&action=update-payment&id=<?= $voucher->id ?>">
                                 <?= csrfField() ?>
@@ -337,8 +337,8 @@ require_once INCLUDES_PATH . '/header.php';
                     </div>
 
                     <!-- Process Actions -->
-                    <?php if (($voucher->status === 'pending_review' && (isMotorpool() || isApprover() || isAdmin())) ||
-                              ($voucher->status === 'pending_approval' && (isAdmin() || isMotorpool()))): ?>
+                    <?php if (($voucher->status === 'pending_review' && (isMotorpool() || isApprover() || isAdmin() || isChiefAdminFinance())) ||
+                              ($voucher->status === 'pending_approval' && (isAdmin() || isMotorpool() || isChiefAdminFinance()))): ?>
                     <div class="card border-warning">
                         <div class="card-header bg-warning text-dark">
                             <h6 class="mb-0"><i class="bi bi-check-circle me-2"></i>Process This Voucher</h6>

@@ -3,7 +3,7 @@
  * LOKA - Gas Voucher Payment Status Update Handler (Admin only)
  */
 
-requireRole(ROLE_ADMIN);
+requireAnyRole([ROLE_ADMIN, ROLE_CHIEF_ADMIN_FINANCE]);
 
 $voucherId = (int) get('id', 0);
 if (!$voucherId) {

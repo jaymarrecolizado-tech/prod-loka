@@ -32,8 +32,8 @@
                     <i class="bi bi-fuel-pump"></i>
                     <span>Gas Vouchers</span>
                     <?php
-                    // Show badge for approvers/motorpool: pending_review count
-                    if (isApprover() || isMotorpool() || isAdmin()):
+                    // Show badge for approvers/motorpool/Chief Admin/Finance: pending_review count
+                    if (isApprover() || isMotorpool() || isAdmin() || isChiefAdminFinance()):
                         $pendingGv = db()->fetchColumn(
                             "SELECT COUNT(*) FROM gas_vouchers WHERE status IN ('pending_review','pending_approval') AND deleted_at IS NULL"
                         );

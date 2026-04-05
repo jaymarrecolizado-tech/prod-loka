@@ -177,6 +177,14 @@ function isApprover(): bool
 }
 
 /**
+ * Check if user is Chief Admin & Finance
+ */
+function isChiefAdminFinance(): bool
+{
+    return userRole() === ROLE_CHIEF_ADMIN_FINANCE;
+}
+
+/**
  * Generate CSRF token
  */
 function csrfToken(): string

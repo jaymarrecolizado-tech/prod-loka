@@ -41,13 +41,15 @@ define('ROLE_APPROVER', 'approver');
 define('ROLE_MOTORPOOL', 'motorpool_head');
 define('ROLE_GUARD', 'guard');
 define('ROLE_ADMIN', 'admin');
+define('ROLE_CHIEF_ADMIN_FINANCE', 'chief_admin_finance');
 
 define('ROLE_LEVELS', [
     ROLE_REQUESTER => 1,
     ROLE_GUARD => 1,
     ROLE_APPROVER => 3,
     ROLE_MOTORPOOL => 4,
-    ROLE_ADMIN => 5
+    ROLE_ADMIN => 5,
+    ROLE_CHIEF_ADMIN_FINANCE => 2
 ]);
 
 // Request Status
@@ -128,6 +130,7 @@ define('ROLE_LABELS', [
     ROLE_APPROVER => ['label' => 'Approver', 'color' => 'info'],
     ROLE_MOTORPOOL => ['label' => 'Motorpool Head', 'color' => 'primary'],
     ROLE_GUARD => ['label' => 'Guard', 'color' => 'warning'],
+    ROLE_CHIEF_ADMIN_FINANCE => ['label' => 'Chief Admin & Finance', 'color' => 'dark'],
     ROLE_ADMIN => ['label' => 'Administrator', 'color' => 'danger']
 ]);
 

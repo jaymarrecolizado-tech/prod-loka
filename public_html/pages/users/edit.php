@@ -71,7 +71,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         } catch (Exception $e) {
             db()->rollback();
-            $errors[] = 'Failed to update user';
+            $errors[] = 'Failed to update user: ' . $e->getMessage();
         }
     }
 }

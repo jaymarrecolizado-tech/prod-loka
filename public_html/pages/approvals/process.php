@@ -12,6 +12,13 @@
  * - FOR UPDATE row-level locking prevents concurrent approval processing
  * - Notifications deferred until AFTER commit to prevent orphaned emails
  * - State machine validation prevents invalid status transitions
+// Add this right after the opening PHP tag and before requireRole():
+<?php
+require_once dirname(__DIR__) . '/../config/constants.php';
+require_once dirname(__DIR__) . '/../config/mail.php';
+require_once dirname(__DIR__) . '/../config/database.php';
+require_once dirname(__DIR__) . '/../includes/functions.php';
+?>
  * - Admin override audit trail
  */
 

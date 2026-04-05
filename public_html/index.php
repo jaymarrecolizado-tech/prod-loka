@@ -453,14 +453,14 @@ switch ($page) {
         } elseif ($action === 'view') {
             require_once PAGES_PATH . '/gas-vouchers/view.php';
         } elseif ($action === 'approve') {
-            requireAnyRole([ROLE_APPROVER, ROLE_MOTORPOOL, ROLE_ADMIN]);
+            requireAnyRole([ROLE_APPROVER, ROLE_MOTORPOOL, ROLE_ADMIN, ROLE_CHIEF_ADMIN_FINANCE]);
             require_once PAGES_PATH . '/gas-vouchers/approve.php';
         } elseif ($action === 'print') {
             require_once PAGES_PATH . '/gas-vouchers/print.php';
         } elseif ($action === 'cancel') {
             require_once PAGES_PATH . '/gas-vouchers/cancel.php';
         } elseif ($action === 'update-payment') {
-            requireRole(ROLE_ADMIN);
+            requireAnyRole([ROLE_ADMIN, ROLE_CHIEF_ADMIN_FINANCE]);
             require_once PAGES_PATH . '/gas-vouchers/update-payment.php';
         } else {
             require_once PAGES_PATH . '/gas-vouchers/index.php';
