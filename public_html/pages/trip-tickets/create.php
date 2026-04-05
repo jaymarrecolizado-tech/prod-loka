@@ -6,8 +6,8 @@
  * Only drivers can create tickets for their own completed trips
  */
 
-// Allow drivers and guards to access
-if (!isDriver() && !isGuard() && !isAdmin()) {
+// Allow department approvers, motorpool head, and admins to access
+if (!hasRole(ROLE_APPROVER) && !hasRole(ROLE_MOTORPOOL) && !isAdmin()) {
     redirectWith('/?page=dashboard', 'danger', 'You do not have permission to create trip tickets.');
 }
 
@@ -19,8 +19,7 @@ $requestId = (int) get('request_id', 0);
 
 // Validate request ID
 if (!$requestId) {
-    $redirectPage = isDriver() ? 'my-trips' : 'guard';
-    redirectWith('/?page=' . $redirectPage, 'danger', 'Invalid request ID.');
+    redirectWith('/?page=trip-tickets', 'danger', 'Invalid request ID.');
 }
 
 // Get request with all trip details for pre-filling
@@ -45,31 +44,20 @@ $request = db()->fetch(
 );
 
 if (!$request) {
-    $redirectPage = isDriver() ? 'my-trips' : 'guard';
-    redirectWith('/?page=' . $redirectPage, 'danger', 'Request not found.');
-}
-
-// Drivers can only create tickets for their own assigned trips
-if (isDriver()) {
-    // Get current user's driver ID
-    $currentDriverId = db()->fetchColumn(
-        "SELECT id FROM drivers WHERE user_id = ? AND deleted_at IS NULL",
-        [userId()]
-    );
-
-    if (!$currentDriverId) {
-        redirectWith('/?page=my-trips', 'danger', 'You are not registered as a driver.');
-    }
-
-    // Check if this trip belongs to the current driver
-    if ($request->driver_id != $currentDriverId && $request->requested_driver_id != $currentDriverId) {
-        redirectWith('/?page=my-trips', 'danger', 'You can only create trip tickets for your own assigned trips.');
-    }
+    redirectWith('/?page=trip-tickets', 'danger', 'Request not found.');
 }
 
 // Can only create trip ticket for completed trips
 if ($request->status !== STATUS_COMPLETED) {
-    $redirectPage = isDriver() ? 'my-trips' : 'guard';
+    redirectWith(
+        '/?page=requests&action=view&id=' . $requestId,
+        'warning',
+        'Trip ticket can only be created for completed trips. Current status: ' . $request->status
+    );
+}
+
+// Can only create trip ticket for completed trips
+if ($request->status !== STATUS_COMPLETED) {
     redirectWith(
         '/?page=requests&action=view&id=' . $requestId,
         'warning',
@@ -317,7 +305,7 @@ $tripTypeOtherValue = '';
             
             db()->commit();
 
-            $redirectPage = isDriver() ? 'my-trip-tickets' : 'trip-tickets';
+            $redirectPage = 'trip-tickets';
             redirectWith(
                 '/?page=' . $redirectPage,
                 'success',
@@ -345,14 +333,9 @@ require_once INCLUDES_PATH . '/header.php';
             <p class="text-muted mb-0">Document completed trip details and documents</p>
         </div>
         <div>
-            <a href="?page=<?= isDriver() ? 'my-trips' : 'guard' ?>" class="btn btn-outline-secondary">
-                <i class="bi bi-arrow-left me-1"></i>Back to <?= isDriver() ? 'My Trips' : 'Guard Dashboard' ?>
+            <a href="?page=trip-tickets" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left me-1"></i>Back to Trip Tickets
             </a>
-            <?php if (!isDriver()): ?>
-            <a href="?page=trip-tickets" class="btn btn-outline-primary">
-                <i class="bi bi-list-check me-1"></i>All Trip Tickets
-            </a>
-            <?php endif; ?>
         </div>
     </div>
 

@@ -3,12 +3,14 @@
  * LOKA - View Trip Ticket
  *
  * View details of a trip ticket
- * Drivers can view their own tickets, guards/admins can view all
+ * Only accessible by department approvers, motorpool head, and admins
  */
+
+requireAnyRole([ROLE_APPROVER, ROLE_MOTORPOOL, ROLE_ADMIN]);
 
 $ticketId = (int) get('id', 0);
 if (!$ticketId) {
-    redirectWith('/?page=my-trips', 'danger', 'Invalid ticket ID.');
+    redirectWith('/?page=trip-tickets', 'danger', 'Invalid ticket ID.');
 }
 
 // Get ticket with full details
@@ -34,21 +36,33 @@ $ticket = db()->fetch(
 );
 
 if (!$ticket) {
-    $redirectPage = isDriver() ? 'my-trips' : 'trip-tickets';
-    redirectWith('/?page=' . $redirectPage, 'danger', 'Ticket not found.');
+    redirectWith('/?page=trip-tickets', 'danger', 'Ticket not found.');
 }
 
-// Drivers can only view their own trip tickets
-if (isDriver()) {
-    // Get current user's driver ID
-    $currentDriverId = db()->fetchColumn(
-        "SELECT id FROM drivers WHERE user_id = ? AND deleted_at IS NULL",
-        [userId()]
-    );
+// Get ticket with full details
+$ticket = db()->fetch(
+    "SELECT tt.*,
+            r.id as request_id, r.destination as trip_destination, r.purpose as trip_purpose,
+            r.actual_dispatch_datetime, r.actual_arrival_datetime,
+            d.license_number as driver_license, du.name as driver_name, du.phone as driver_phone,
+            u_req.name as requester_name, u_req.email as requester_email, u_req.phone as requester_phone,
+            dg.name as dispatch_guard, dg.phone as dispatch_guard_phone,
+            ag.name as arrival_guard, ag.phone as arrival_guard_phone,
+            u_rev.name as reviewed_by_name, u_rev.email as reviewed_by_email
+     FROM trip_tickets tt
+     JOIN requests r ON tt.request_id = r.id
+     LEFT JOIN drivers d ON tt.driver_id = d.id
+     LEFT JOIN users du ON d.user_id = du.id
+     LEFT JOIN users u_req ON r.user_id = u_req.id
+     LEFT JOIN users dg ON tt.dispatch_guard_id = dg.id
+     LEFT JOIN users ag ON tt.arrival_guard_id = ag.id
+     LEFT JOIN users u_rev ON tt.reviewed_by = u_rev.id
+     WHERE tt.id = ? AND tt.deleted_at IS NULL",
+    [$ticketId]
+);
 
-    if ($ticket->driver_id != $currentDriverId) {
-        redirectWith('/?page=my-trips', 'danger', 'You can only view your own trip tickets.');
-    }
+if (!$ticket) {
+    redirectWith('/?page=trip-tickets', 'danger', 'Ticket not found.');
 }
 
 $pageTitle = 'Trip Ticket Details';
@@ -445,8 +459,8 @@ require_once INCLUDES_PATH . '/header.php';
 
                     <!-- Actions -->
                     <div class="mb-3">
-                        <a href="?page=<?= isDriver() ? 'my-trips' : 'trip-tickets' ?>" class="btn btn-outline-secondary">
-                            <i class="bi bi-arrow-left me-1"></i>Back to <?= isDriver() ? 'My Trips' : 'Trip Tickets' ?>
+                        <a href="?page=trip-tickets" class="btn btn-outline-secondary">
+                            <i class="bi bi-arrow-left me-1"></i>Back to Trip Tickets
                         </a>
                         <a href="?page=trip-tickets&action=export-pdf&id=<?= $ticket->id ?>" class="btn btn-danger">
                             <i class="bi bi-file-earmark-pdf me-1"></i>Export PDF

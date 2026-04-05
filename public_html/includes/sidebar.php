@@ -70,14 +70,7 @@
             </li>
             <?php endif; ?>
             
-            <?php if (isGuard()): ?>
-            <!-- Guard Dashboard -->
-            <li class="nav-item">
-                <a class="nav-link <?= activeMenu('guard') ?>" href="<?= APP_URL ?>/?page=guard">
-                    <i class="bi bi-shield-check"></i>
-                    <span>Guard Dashboard</span>
-                </a>
-            </li>
+            <?php if (isApprover() || isMotorpool() || isAdmin()): ?>
             <!-- Trip Tickets -->
             <li class="nav-item">
                 <a class="nav-link <?= activeMenu('trip-tickets') ?>" href="<?= APP_URL ?>/?page=trip-tickets">

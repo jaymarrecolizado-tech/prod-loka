@@ -1,11 +1,11 @@
 <?php
 /**
- * LOKA - Guard Trip Tickets Page
+ * LOKA - Trip Tickets Management Page
  * 
- * Dedicated page for guards to manage trip tickets for completed trips
+ * Dedicated page for department approvers, motorpool head, and admins to manage trip tickets
  */
 
-requireRole(ROLE_GUARD);
+requireAnyRole([ROLE_APPROVER, ROLE_MOTORPOOL, ROLE_ADMIN]);
 
 $pageTitle = 'Trip Tickets';
 $action = get('action', 'list');

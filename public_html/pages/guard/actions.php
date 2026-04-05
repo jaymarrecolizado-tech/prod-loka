@@ -234,9 +234,9 @@ switch ($action) {
         }
         
         redirectWith(
-            '/?page=trip-tickets&action=create_form&request_id=' . $requestId,
+            '/?page=guard',
             'success',
-            "Arrival recorded for request #{$requestId}. Trip marked as completed. Please create a trip ticket to document details."
+            "Arrival recorded for request #{$requestId}. Trip marked as completed."
         );
         break;
         

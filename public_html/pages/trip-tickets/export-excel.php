@@ -5,6 +5,10 @@
  * Generates an Excel file for trip tickets with signature lines
  */
 
+requireAnyRole([ROLE_APPROVER, ROLE_MOTORPOOL, ROLE_ADMIN]);
+
+requireAnyRole([ROLE_APPROVER, ROLE_MOTORPOOL, ROLE_ADMIN]);
+
 $ticketId = (int) get('id', 0);
 if (!$ticketId) {
     die('Invalid ticket ID.');
@@ -40,15 +44,34 @@ if (!$ticket) {
     die('Ticket not found.');
 }
 
-// Check permission
-if (isDriver()) {
-    $currentDriverId = db()->fetchColumn(
-        "SELECT id FROM drivers WHERE user_id = ? AND deleted_at IS NULL",
-        [userId()]
-    );
-    if ($ticket->driver_id != $currentDriverId) {
-        die('You can only export your own trip tickets.');
-    }
+// Get ticket with full details
+$ticket = db()->fetch(
+    "SELECT tt.*,
+            r.id as request_id, r.destination as trip_destination, r.purpose as trip_purpose,
+            r.actual_dispatch_datetime, r.actual_arrival_datetime,
+            d.license_number as driver_license, du.name as driver_name, du.phone as driver_phone,
+            u_req.name as requester_name, u_req.email as requester_email, u_req.phone as requester_phone,
+            dg.name as dispatch_guard, dg.phone as dispatch_guard_phone,
+            ag.name as arrival_guard, ag.phone as arrival_guard_phone,
+            u_rev.name as reviewed_by_name, u_rev.email as reviewed_by_email,
+            v.plate_number, v.make, v.model as vehicle_model, v.color,
+            dept.name as department_name
+     FROM trip_tickets tt
+     JOIN requests r ON tt.request_id = r.id
+     LEFT JOIN drivers d ON tt.driver_id = d.id
+     LEFT JOIN users du ON d.user_id = du.id
+     LEFT JOIN users u_req ON r.user_id = u_req.id
+     LEFT JOIN departments dept ON u_req.department_id = dept.id
+     LEFT JOIN vehicles v ON r.vehicle_id = v.id AND v.deleted_at IS NULL
+     LEFT JOIN users dg ON tt.dispatch_guard_id = dg.id
+     LEFT JOIN users ag ON tt.arrival_guard_id = ag.id
+     LEFT JOIN users u_rev ON tt.reviewed_by = u_rev.id
+     WHERE tt.id = ? AND tt.deleted_at IS NULL",
+    [$ticketId]
+);
+
+if (!$ticket) {
+    die('Ticket not found.');
 }
 
 // Get passengers from the original VRF (request)

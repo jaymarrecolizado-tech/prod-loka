@@ -329,19 +329,12 @@ require_once INCLUDES_PATH . '/header.php';
                                                     break;
                                             }
                                             ?>
-                                            <a href="<?= APP_URL ?>/?page=trip-tickets&action=view&id=<?= $trip->trip_ticket_id ?>"
-                                               class="badge bg-<?= $ticketStatusClass ?> text-decoration-none"
-                                               title="View Trip Ticket">
+                                            <span class="badge bg-<?= $ticketStatusClass ?>">
                                                 <i class="bi bi-<?= $ticketStatusIcon ?> me-1"></i>
                                                 <?= ucfirst($trip->trip_ticket_status) ?>
-                                            </a>
+                                            </span>
                                         <?php elseif ($trip->status === STATUS_COMPLETED): ?>
-                                            <button type="button" class="btn btn-sm btn-outline-success"
-                                                    onclick="createTripTicket(<?= $trip->id ?>)"
-                                                    title="Create Trip Ticket">
-                                                <i class="bi bi-file-earmark-plus me-1"></i>
-                                                Create Ticket
-                                            </button>
+                                            <span class="text-muted">-</span>
                                         <?php else: ?>
                                             <span class="text-muted">-</span>
                                         <?php endif; ?>
@@ -374,13 +367,5 @@ require_once INCLUDES_PATH . '/header.php';
     </div>
     <?php endif; ?>
 </div>
-
-<script>
-function createTripTicket(requestId) {
-    if (confirm('Create a trip ticket for this completed trip?')) {
-        window.location.href = '<?= APP_URL ?>/?page=trip-tickets&action=create_form&request_id=' + requestId;
-    }
-}
-</script>
 
 <?php require_once INCLUDES_PATH . '/footer.php'; ?>
