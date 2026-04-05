@@ -27,7 +27,7 @@
             </li>
 
             <!-- Gas Vouchers -->
-            <?php if (isApprover() || isMotorpool() || isAdmin() || isChiefAdminFinance()): ?>
+            <?php if (hasRole(ROLE_REQUESTER) || isApprover() || isMotorpool() || isAdmin() || isChiefAdminFinance()): ?>
             <li class="nav-item">
                 <a class="nav-link <?= activeMenu('gas-vouchers') ?>" href="<?= APP_URL ?>/?page=gas-vouchers">
                     <i class="bi bi-fuel-pump"></i>

@@ -3,6 +3,8 @@
  * LOKA - Gas Voucher Create / Edit Page
  */
 
+requireAnyRole([ROLE_REQUESTER, ROLE_APPROVER, ROLE_MOTORPOOL, ROLE_ADMIN, ROLE_CHIEF_ADMIN_FINANCE]);
+
 $isEdit  = (get('action') === 'edit');
 $voucherId = (int) get('id', 0);
 $voucher = null;

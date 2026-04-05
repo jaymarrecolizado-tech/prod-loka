@@ -446,14 +446,13 @@ switch ($page) {
         break;
 
     case 'gas-vouchers':
-        requireAnyRole([ROLE_APPROVER, ROLE_MOTORPOOL, ROLE_ADMIN, ROLE_CHIEF_ADMIN_FINANCE]);
-        if ($action === 'create') {
+        if ($action === 'create' || $action === 'edit') {
+            requireAnyRole([ROLE_REQUESTER, ROLE_APPROVER, ROLE_MOTORPOOL, ROLE_ADMIN, ROLE_CHIEF_ADMIN_FINANCE]);
             require_once PAGES_PATH . '/gas-vouchers/create.php';
-        } elseif ($action === 'edit') {
-            require_once PAGES_PATH . '/gas-vouchers/create.php'; // reuses same form file
         } elseif ($action === 'view') {
             require_once PAGES_PATH . '/gas-vouchers/view.php';
         } elseif ($action === 'approve') {
+            requireAnyRole([ROLE_APPROVER, ROLE_MOTORPOOL, ROLE_ADMIN, ROLE_CHIEF_ADMIN_FINANCE]);
             require_once PAGES_PATH . '/gas-vouchers/approve.php';
         } elseif ($action === 'print') {
             require_once PAGES_PATH . '/gas-vouchers/print.php';
@@ -463,6 +462,7 @@ switch ($page) {
             requireAnyRole([ROLE_ADMIN, ROLE_CHIEF_ADMIN_FINANCE]);
             require_once PAGES_PATH . '/gas-vouchers/update-payment.php';
         } else {
+            requireAnyRole([ROLE_REQUESTER, ROLE_APPROVER, ROLE_MOTORPOOL, ROLE_ADMIN, ROLE_CHIEF_ADMIN_FINANCE]);
             require_once PAGES_PATH . '/gas-vouchers/index.php';
         }
         break;
