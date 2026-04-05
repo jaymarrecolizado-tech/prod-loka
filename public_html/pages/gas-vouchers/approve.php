@@ -81,6 +81,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $requesterUserId = $voucher->requested_by_user_id;
 
         if ($decision === 'review_approve') {
+            // Notify requester
             $notificationsToSend[] = [
                 'user_id' => $requesterUserId,
                 'type' => 'gas_voucher_reviewed',
@@ -89,6 +90,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 'link' => '/?page=gas-vouchers&action=view&id=' . $voucherId,
                 'requestId' => $voucherId
             ];
+
+            // Notify Chief Admin & Finance for final approval
+            $chiefFinanceUsers = db()->fetchAll(
+                "SELECT id FROM users WHERE role = ? AND deleted_at IS NULL AND status = 'active'",
+                [ROLE_CHIEF_ADMIN_FINANCE]
+            );
+            foreach ($chiefFinanceUsers as $user) {
+                $notificationsToSend[] = [
+                    'user_id' => $user->id,
+                    'type' => 'gas_voucher_reviewed',
+                    'title' => 'Gas Voucher Awaiting Final Approval',
+                    'message' => "Gas voucher {$voucher->voucher_no} has been reviewed and requires your final approval.",
+                    'link' => '/?page=gas-vouchers&action=view&id=' . $voucherId,
+                    'requestId' => $voucherId
+                ];
+            }
 
             db()->beginTransaction();
             try {
@@ -113,6 +130,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
 
         } elseif ($decision === 'final_approve') {
+            // Notify requester
             $notificationsToSend[] = [
                 'user_id' => $requesterUserId,
                 'type' => 'gas_voucher_approved',
@@ -121,6 +139,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 'link' => '/?page=gas-vouchers&action=view&id=' . $voucherId,
                 'requestId' => $voucherId
             ];
+
+            // Notify Motorpool Head and Chief Admin & Finance
+            $admins = db()->fetchAll(
+                "SELECT id FROM users WHERE role IN (?, ?) AND deleted_at IS NULL AND status = 'active'",
+                [ROLE_MOTORPOOL, ROLE_CHIEF_ADMIN_FINANCE]
+            );
+            foreach ($admins as $user) {
+                $notificationsToSend[] = [
+                    'user_id' => $user->id,
+                    'type' => 'gas_voucher_approved',
+                    'title' => 'Gas Voucher Approved',
+                    'message' => "Gas voucher {$voucher->voucher_no} has been approved and is ready for fuel pickup.",
+                    'link' => '/?page=gas-vouchers&action=view&id=' . $voucherId,
+                    'requestId' => $voucherId
+                ];
+            }
 
             db()->beginTransaction();
             try {
@@ -145,6 +179,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
 
         } elseif ($decision === 'reject') {
+            // Notify requester
             $notificationsToSend[] = [
                 'user_id' => $requesterUserId,
                 'type' => 'gas_voucher_rejected',
@@ -153,6 +188,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 'link' => '/?page=gas-vouchers&action=view&id=' . $voucherId,
                 'requestId' => $voucherId
             ];
+
+            // Notify Motorpool Head and Chief Admin & Finance
+            $admins = db()->fetchAll(
+                "SELECT id FROM users WHERE role IN (?, ?) AND deleted_at IS NULL AND status = 'active'",
+                [ROLE_MOTORPOOL, ROLE_CHIEF_ADMIN_FINANCE]
+            );
+            foreach ($admins as $user) {
+                $notificationsToSend[] = [
+                    'user_id' => $user->id,
+                    'type' => 'gas_voucher_rejected',
+                    'title' => 'Gas Voucher Rejected',
+                    'message' => "Gas voucher {$voucher->voucher_no} has been rejected." . ($notes ? " Reason: {$notes}" : ""),
+                    'link' => '/?page=gas-vouchers&action=view&id=' . $voucherId,
+                    'requestId' => $voucherId
+                ];
+            }
 
             db()->beginTransaction();
             try {

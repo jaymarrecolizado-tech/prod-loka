@@ -35,8 +35,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Notify approvers if it was pending
     if ($voucher->status === 'pending_review') {
         $approvers = db()->fetchAll(
-            "SELECT id FROM users WHERE role IN (?, ?, ?) AND deleted_at IS NULL",
-            [ROLE_APPROVER, ROLE_MOTORPOOL, ROLE_ADMIN]
+            "SELECT id FROM users WHERE role IN (?, ?, ?, ?) AND deleted_at IS NULL",
+            [ROLE_APPROVER, ROLE_MOTORPOOL, ROLE_ADMIN, ROLE_CHIEF_ADMIN_FINANCE]
         );
         $cancelledBy = currentUser()->name;
         foreach ($approvers as $approver) {
