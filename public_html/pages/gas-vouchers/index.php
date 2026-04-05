@@ -3,6 +3,8 @@
  * LOKA - Gas Vouchers List Page
  */
 
+requireAnyRole([ROLE_APPROVER, ROLE_MOTORPOOL, ROLE_ADMIN, ROLE_CHIEF_ADMIN_FINANCE]);
+
 $pageTitle = 'Gas Vouchers';
 
 // Determine what the user can see

@@ -446,6 +446,7 @@ switch ($page) {
         break;
 
     case 'gas-vouchers':
+        requireAnyRole([ROLE_APPROVER, ROLE_MOTORPOOL, ROLE_ADMIN, ROLE_CHIEF_ADMIN_FINANCE]);
         if ($action === 'create') {
             require_once PAGES_PATH . '/gas-vouchers/create.php';
         } elseif ($action === 'edit') {
@@ -453,7 +454,6 @@ switch ($page) {
         } elseif ($action === 'view') {
             require_once PAGES_PATH . '/gas-vouchers/view.php';
         } elseif ($action === 'approve') {
-            requireAnyRole([ROLE_APPROVER, ROLE_MOTORPOOL, ROLE_ADMIN, ROLE_CHIEF_ADMIN_FINANCE]);
             require_once PAGES_PATH . '/gas-vouchers/approve.php';
         } elseif ($action === 'print') {
             require_once PAGES_PATH . '/gas-vouchers/print.php';

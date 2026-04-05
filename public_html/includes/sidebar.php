@@ -27,22 +27,22 @@
             </li>
 
             <!-- Gas Vouchers -->
+            <?php if (isApprover() || isMotorpool() || isAdmin() || isChiefAdminFinance()): ?>
             <li class="nav-item">
                 <a class="nav-link <?= activeMenu('gas-vouchers') ?>" href="<?= APP_URL ?>/?page=gas-vouchers">
                     <i class="bi bi-fuel-pump"></i>
                     <span>Gas Vouchers</span>
                     <?php
-                    // Show badge for approvers/motorpool/Chief Admin/Finance: pending_review count
-                    if (isApprover() || isMotorpool() || isAdmin() || isChiefAdminFinance()):
-                        $pendingGv = db()->fetchColumn(
-                            "SELECT COUNT(*) FROM gas_vouchers WHERE status IN ('pending_review','pending_approval') AND deleted_at IS NULL"
-                        );
-                        if ($pendingGv > 0):
+                    $pendingGv = db()->fetchColumn(
+                        "SELECT COUNT(*) FROM gas_vouchers WHERE status IN ('pending_review','pending_approval') AND deleted_at IS NULL"
+                    );
+                    if ($pendingGv > 0):
                     ?>
                     <span class="badge bg-warning ms-auto"><?= $pendingGv ?></span>
-                    <?php endif; endif; ?>
+                    <?php endif; ?>
                 </a>
             </li>
+            <?php endif; ?>
 
             <!-- Schedule Calendar (All Users) -->
             <li class="nav-item">
