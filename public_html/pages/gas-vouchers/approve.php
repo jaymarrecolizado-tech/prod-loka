@@ -34,6 +34,21 @@ if (!$canReview && !$canApprove) {
     redirectWith('/?page=gas-vouchers&action=view&id=' . $voucherId, 'warning', 'This voucher cannot be processed at this stage by your role.');
 }
 
+// Fetch signatories for dropdowns
+$motorpoolHeads = db()->fetchAll(
+    "SELECT u.id, u.name FROM users u 
+     WHERE u.role = ? AND u.deleted_at IS NULL AND u.is_active = 1 
+     ORDER BY u.name",
+    [ROLE_MOTORPOOL]
+);
+
+$chiefFinanceUsers = db()->fetchAll(
+    "SELECT u.id, u.name FROM users u 
+     WHERE u.role = ? AND u.deleted_at IS NULL AND u.is_active = 1 
+     ORDER BY u.name",
+    [ROLE_CHIEF_ADMIN_FINANCE]
+);
+
 $errors = [];
 $pageTitle = 'Process Gas Voucher: ' . $voucher->voucher_no;
 
@@ -42,6 +57,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     $decision = post('decision', '');
     $notes    = postSafe('notes', '', 500);
+    $selectedReviewer = (int) post('reviewed_by', userId());
+    $selectedApprover = (int) post('approved_by', userId());
 
     if (!in_array($decision, ['review_approve', 'final_approve', 'reject'])) {
         $errors[] = 'Invalid decision.';
@@ -49,6 +66,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if ($decision === 'reject' && empty($notes)) {
         $errors[] = 'A rejection reason is required.';
+    }
+
+    if ($decision === 'review_approve' && $selectedReviewer <= 0) {
+        $errors[] = 'Please select a reviewer.';
+    }
+
+    if ($decision === 'final_approve' && $selectedApprover <= 0) {
+        $errors[] = 'Please select an approver.';
     }
 
     if (empty($errors)) {
@@ -69,7 +94,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             try {
                 db()->update('gas_vouchers', [
                     'status'         => 'pending_approval',
-                    'reviewed_by'    => userId(),
+                    'reviewed_by'    => $selectedReviewer,
                     'reviewed_at'    => date(DATETIME_FORMAT),
                     'reviewer_notes' => $notes ?: null,
                     'updated_at'     => date(DATETIME_FORMAT),
@@ -101,7 +126,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             try {
                 db()->update('gas_vouchers', [
                     'status'         => 'approved',
-                    'approved_by'    => userId(),
+                    'approved_by'    => $selectedApprover,
                     'approved_at'    => date(DATETIME_FORMAT),
                     'approver_notes' => $notes ?: null,
                     'updated_at'     => date(DATETIME_FORMAT),
@@ -270,6 +295,32 @@ require_once INCLUDES_PATH . '/header.php';
                     
                     <form method="POST">
                         <?= csrfField() ?>
+
+                        <?php if ($canReview): ?>
+                        <div class="mb-4">
+                            <label class="form-label fw-semibold">Reviewed By (OIC, Motor Pool Unit) <span class="text-danger">*</span></label>
+                            <select name="reviewed_by" class="form-select" required>
+                                <option value="">-- Select Reviewer --</option>
+                                <?php foreach ($motorpoolHeads as $mp): ?>
+                                <option value="<?= $mp->id ?>" <?= $mp->id == userId() ? 'selected' : '' ?>>
+                                    <?= e($mp->name) ?>
+                                </option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                        <?php elseif ($canApprove): ?>
+                        <div class="mb-4">
+                            <label class="form-label fw-semibold">Approved By (Chief, Admin. and Finance) <span class="text-danger">*</span></label>
+                            <select name="approved_by" class="form-select" required>
+                                <option value="">-- Select Approver --</option>
+                                <?php foreach ($chiefFinanceUsers as $cf): ?>
+                                <option value="<?= $cf->id ?>" <?= $cf->id == userId() ? 'selected' : '' ?>>
+                                    <?= e($cf->name) ?>
+                                </option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                        <?php endif; ?>
 
                         <div class="mb-4">
                             <label class="form-label fw-semibold">Notes / Comments</label>
