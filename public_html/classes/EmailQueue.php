@@ -35,7 +35,8 @@ class EmailQueue
         ?string $template = null,
         int $priority = 5,
         ?string $scheduledAt = null,
-        ?int $requestId = null
+        ?int $requestId = null,
+        string $status = 'pending'
     ): int {
         return $this->db->insert('email_queue', [
             'to_email' => $toEmail,
@@ -46,7 +47,9 @@ class EmailQueue
             'priority' => $priority,
             'scheduled_at' => $scheduledAt,
             'request_id' => $requestId,  // Store request ID for audit trail
-            'created_at' => date('Y-m-d H:i:s')
+            'status' => $status,
+            'created_at' => date('Y-m-d H:i:s'),
+            'sent_at' => $status === 'sent' ? date('Y-m-d H:i:s') : null
         ]);
     }
     
@@ -86,7 +89,31 @@ class EmailQueue
         // Build email body
         $body = $this->buildEmailBody($templateKey, $template, $data);
         
-        // HYBRID SYNC/ASYNC: Send critical emails immediately
+        // DEVELOPMENT MODE: Send ALL emails synchronously for testing
+        // No cron job needed - emails go out immediately
+        $isDevelopment = !defined('APP_ENV') || APP_ENV !== 'production';
+        
+        if ($isDevelopment && MAIL_ENABLED) {
+            try {
+                $mailer = new Mailer();
+                $syncSent = $mailer->send($toEmail, $subject, $body, $toName);
+                
+                if ($syncSent) {
+                    error_log("[DEV-EMAIL] Sync email sent: {$templateKey} to {$toEmail}");
+                    return $this->queue($toEmail, $subject, $body, $toName, $templateKey, $priority, null, $requestId, 'sent');
+                } else {
+                    $errors = $mailer->getErrors();
+                    error_log("[DEV-EMAIL] Sync send failed: {$templateKey} to {$toEmail} - " . implode(', ', $errors));
+                    // Still queue as pending so it can be retried by cron if needed
+                    return $this->queue($toEmail, $subject, $body, $toName, $templateKey, $priority, null, $requestId);
+                }
+            } catch (Exception $e) {
+                error_log("[DEV-EMAIL] Sync send exception: {$templateKey} to {$toEmail} - " . $e->getMessage());
+                return $this->queue($toEmail, $subject, $body, $toName, $templateKey, $priority, null, $requestId);
+            }
+        }
+        
+        // PRODUCTION MODE: HYBRID SYNC/ASYNC
         // Critical templates require instant delivery for better UX
         $criticalTemplates = [
             'request_confirmation',
@@ -106,6 +133,8 @@ class EmailQueue
                 
                 if ($syncSent) {
                     error_log("[HYBRID-EMAIL] Sync email sent successfully: {$templateKey} to {$toEmail}");
+                    // It sent successfully synchronously, so skip 'pending' and queue it as 'sent'
+                    return $this->queue($toEmail, $subject, $body, $toName, $templateKey, $priority, null, $requestId, 'sent');
                 } else {
                     $errors = $mailer->getErrors();
                     error_log("[HYBRID-EMAIL] Sync send failed (queued as backup): {$templateKey} to {$toEmail} - " . implode(', ', $errors));
