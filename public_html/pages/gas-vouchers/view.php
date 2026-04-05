@@ -13,12 +13,16 @@ $voucher = db()->fetch(
             u.name AS requester_name, u.email AS requester_email,
             reviewer.name AS reviewer_name,
             approver.name AS approver_name_full,
-            rejector.name AS rejector_name
+            rejector.name AS rejector_name,
+            req_reviewer.name AS requested_reviewer_name,
+            req_approver.name AS requested_approver_name
      FROM gas_vouchers gv
      JOIN users u ON gv.requested_by_user_id = u.id
      LEFT JOIN users reviewer ON gv.reviewed_by = reviewer.id
      LEFT JOIN users approver ON gv.approved_by = approver.id
      LEFT JOIN users rejector ON gv.rejected_by = rejector.id
+     LEFT JOIN users req_reviewer ON gv.requested_reviewer_id = req_reviewer.id
+     LEFT JOIN users req_approver ON gv.requested_approver_id = req_approver.id
      WHERE gv.id = ? AND gv.deleted_at IS NULL",
     [$voucherId]
 );
@@ -245,6 +249,9 @@ require_once INCLUDES_PATH . '/header.php';
                                         <?php if ($voucher->reviewer_notes): ?>
                                         <div class="mt-1"><em class="text-muted small">"<?= e($voucher->reviewer_notes) ?>"</em></div>
                                         <?php endif; ?>
+                                        <?php if ($voucher->requested_reviewer_name && $voucher->requested_reviewer_name !== $voucher->reviewer_name): ?>
+                                        <div class="mt-1 small text-muted">Preferred: <?= e($voucher->requested_reviewer_name) ?></div>
+                                        <?php endif; ?>
                                     </div>
                                     <?php elseif ($voucher->status === 'pending_review'): ?>
                                     <div class="text-warning mt-1"><i class="bi bi-hourglass-split fs-5"></i></div>
@@ -271,6 +278,9 @@ require_once INCLUDES_PATH . '/header.php';
                                         <small class="text-muted"><?= e(date('M d, Y h:i A', strtotime($voucher->approved_at))) ?></small>
                                         <?php if ($voucher->approver_notes): ?>
                                         <div class="mt-1"><em class="text-muted small">"<?= e($voucher->approver_notes) ?>"</em></div>
+                                        <?php endif; ?>
+                                        <?php if ($voucher->requested_approver_name && $voucher->requested_approver_name !== $voucher->approver_name_full): ?>
+                                        <div class="mt-1 small text-muted">Preferred: <?= e($voucher->requested_approver_name) ?></div>
                                         <?php endif; ?>
                                     </div>
                                     <?php elseif ($voucher->status === 'rejected'): ?>

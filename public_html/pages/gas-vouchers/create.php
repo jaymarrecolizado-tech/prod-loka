@@ -58,6 +58,18 @@ $vehicles = db()->fetchAll("SELECT plate_number FROM vehicles WHERE deleted_at I
 // Build drivers list for datalist
 $driversList = db()->fetchAll("SELECT u.name FROM drivers d JOIN users u ON d.user_id = u.id WHERE d.deleted_at IS NULL ORDER BY u.name ASC");
 
+// Fetch Motorpool Heads for signatory selection
+$motorpoolHeads = db()->fetchAll(
+    "SELECT id, name FROM users WHERE role = ? AND deleted_at IS NULL AND status = 'active' ORDER BY name",
+    [ROLE_MOTORPOOL]
+);
+
+// Fetch Chief Admin & Finance users for signatory selection
+$chiefFinanceUsers = db()->fetchAll(
+    "SELECT id, name FROM users WHERE role = ? AND deleted_at IS NULL AND status = 'active' ORDER BY name",
+    [ROLE_CHIEF_ADMIN_FINANCE]
+);
+
 // Handle POST
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     requireCsrf();
@@ -78,6 +90,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $totalCost    = post('total_cost', '');
     $saro         = postSafe('saro_no', '', 50);
     $dateWithdrawn = post('date_withdrawn', '');
+    $requestedReviewerId = (int) post('requested_reviewer_id', 0) ?: null;
+    $requestedApproverId = (int) post('requested_approver_id', 0) ?: null;
 
     // Validation
     if (empty($driverName))   $errors[] = 'Driver name is required.';
@@ -118,6 +132,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'saro_no'            => $saro ?: null,
             'date_withdrawn'     => $dateWithdrawn ?: null,
             'status'             => $newStatus,
+            'requested_reviewer_id' => $requestedReviewerId,
+            'requested_approver_id' => $requestedApproverId,
             'updated_at'         => date(DATETIME_FORMAT),
         ];
 
@@ -234,6 +250,28 @@ require_once INCLUDES_PATH . '/header.php';
                                 <input type="date" name="request_date" class="form-control"
                                        value="<?= e($d ? $d->request_date : $defaultDate) ?>" required>
                             </div>
+                            <?php if (!$isEdit): ?>
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold">Preferred Motorpool Head</label>
+                                <select name="requested_reviewer_id" class="form-select">
+                                    <option value="">-- Auto-assign --</option>
+                                    <?php foreach ($motorpoolHeads as $mp): ?>
+                                    <option value="<?= $mp->id ?>"><?= e($mp->name) ?></option>
+                                    <?php endforeach; ?>
+                                </select>
+                                <div class="form-text">Select a preferred reviewer (optional)</div>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold">Preferred Chief A&F</label>
+                                <select name="requested_approver_id" class="form-select">
+                                    <option value="">-- Auto-assign --</option>
+                                    <?php foreach ($chiefFinanceUsers as $cf): ?>
+                                    <option value="<?= $cf->id ?>"><?= e($cf->name) ?></option>
+                                    <?php endforeach; ?>
+                                </select>
+                                <div class="form-text">Select a preferred approver (optional)</div>
+                            </div>
+                            <?php endif; ?>
                         </div>
                     </div>
                 </div>

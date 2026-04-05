@@ -36,15 +36,15 @@ if (!$canReview && !$canApprove) {
 
 // Fetch signatories for dropdowns
 $motorpoolHeads = db()->fetchAll(
-    "SELECT u.id, u.name FROM users u 
-     WHERE u.role = ? AND u.deleted_at IS NULL AND u.is_active = 1 
+    "SELECT u.id, u.name FROM users u
+     WHERE u.role = ? AND u.deleted_at IS NULL AND u.status = 'active'
      ORDER BY u.name",
     [ROLE_MOTORPOOL]
 );
 
 $chiefFinanceUsers = db()->fetchAll(
-    "SELECT u.id, u.name FROM users u 
-     WHERE u.role = ? AND u.deleted_at IS NULL AND u.is_active = 1 
+    "SELECT u.id, u.name FROM users u
+     WHERE u.role = ? AND u.deleted_at IS NULL AND u.status = 'active'
      ORDER BY u.name",
     [ROLE_CHIEF_ADMIN_FINANCE]
 );
@@ -302,7 +302,10 @@ require_once INCLUDES_PATH . '/header.php';
                             <select name="reviewed_by" class="form-select" required>
                                 <option value="">-- Select Reviewer --</option>
                                 <?php foreach ($motorpoolHeads as $mp): ?>
-                                <option value="<?= $mp->id ?>" <?= $mp->id == userId() ? 'selected' : '' ?>>
+                                <option value="<?= $mp->id ?>" <?= 
+                                    ($voucher->requested_reviewer_id && $mp->id == $voucher->requested_reviewer_id) ? 'selected' : 
+                                    (!$voucher->requested_reviewer_id && $mp->id == userId() ? 'selected' : '')
+                                ?>>
                                     <?= e($mp->name) ?>
                                 </option>
                                 <?php endforeach; ?>
@@ -314,7 +317,10 @@ require_once INCLUDES_PATH . '/header.php';
                             <select name="approved_by" class="form-select" required>
                                 <option value="">-- Select Approver --</option>
                                 <?php foreach ($chiefFinanceUsers as $cf): ?>
-                                <option value="<?= $cf->id ?>" <?= $cf->id == userId() ? 'selected' : '' ?>>
+                                <option value="<?= $cf->id ?>" <?= 
+                                    ($voucher->requested_approver_id && $cf->id == $voucher->requested_approver_id) ? 'selected' : 
+                                    (!$voucher->requested_approver_id && $cf->id == userId() ? 'selected' : '')
+                                ?>>
                                     <?= e($cf->name) ?>
                                 </option>
                                 <?php endforeach; ?>
