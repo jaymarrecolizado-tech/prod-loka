@@ -242,6 +242,28 @@ define('MAIL_TEMPLATES', [
     'default' => [
         'subject' => 'LOKA Notification',
         'template' => 'You have a new notification from LOKA Fleet Management.'
+    ],
+    
+    // Gas Voucher notifications
+    'gas_voucher_submitted' => [
+        'subject' => 'New Gas Voucher Request Submitted',
+        'template' => 'A new gas voucher request has been submitted and requires your review.'
+    ],
+    'gas_voucher_reviewed' => [
+        'subject' => 'Gas Voucher Reviewed - Awaiting Final Approval',
+        'template' => 'Your gas voucher request has been reviewed and is now awaiting final approval.'
+    ],
+    'gas_voucher_approved' => [
+        'subject' => 'Gas Voucher Approved',
+        'template' => 'Great news! Your gas voucher request has been approved.'
+    ],
+    'gas_voucher_rejected' => [
+        'subject' => 'Gas Voucher Rejected',
+        'template' => 'Your gas voucher request has been rejected.'
+    ],
+    'gas_voucher_cancelled' => [
+        'subject' => 'Gas Voucher Cancelled',
+        'template' => 'A gas voucher request has been cancelled.'
     ]
 ]);
 

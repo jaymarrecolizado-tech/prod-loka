@@ -130,6 +130,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     : 'Gas voucher updated.';
                 auditLog('update', 'gas_voucher', $voucherId);
                 db()->commit();
+
+                if ($newStatus === 'pending_review' && $voucher->status !== 'pending_review') {
+                    $approvers = db()->fetchAll(
+                        "SELECT id FROM users WHERE role IN (?, ?, ?) AND deleted_at IS NULL",
+                        [ROLE_APPROVER, ROLE_MOTORPOOL, ROLE_ADMIN]
+                    );
+                    $requester = currentUser();
+                    foreach ($approvers as $approver) {
+                        notify($approver->id, 'gas_voucher_submitted', 'New Gas Voucher Request', "A new gas voucher has been submitted for review by {$requester->name}.", '/?page=gas-vouchers&action=view&id=' . $voucherId, $voucherId);
+                    }
+                }
+
                 redirectWith('/?page=gas-vouchers&action=view&id=' . $voucherId, 'success', $message);
             } else {
                 $data['voucher_no']          = generateVoucherNo();
@@ -142,6 +154,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $message = $newStatus === 'pending_review'
                     ? 'Gas voucher submitted for review.'
                     : 'Gas voucher saved as draft.';
+
+                if ($newStatus === 'pending_review') {
+                    $approvers = db()->fetchAll(
+                        "SELECT id FROM users WHERE role IN (?, ?, ?) AND deleted_at IS NULL",
+                        [ROLE_APPROVER, ROLE_MOTORPOOL, ROLE_ADMIN]
+                    );
+                    $requester = currentUser();
+                    foreach ($approvers as $approver) {
+                        notify($approver->id, 'gas_voucher_submitted', 'New Gas Voucher Request', "A new gas voucher has been submitted for review by {$requester->name}.", '/?page=gas-vouchers&action=view&id=' . $id, $id);
+                    }
+                }
+
                 redirectWith('/?page=gas-vouchers&action=view&id=' . $id, 'success', $message);
             }
         } catch (Exception $e) {

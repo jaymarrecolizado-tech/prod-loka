@@ -349,4 +349,187 @@ class NotificationTemplate
             "
         ];
     }
+
+    /**
+     * Gas Voucher Submitted Template (for Approvers)
+     */
+    public static function gasVoucherSubmitted($voucher, $requester)
+    {
+        $appName = APP_NAME;
+        $voucherId = $voucher->id;
+        $requesterName = $requester->name ?? 'Unknown';
+
+        return [
+            'subject' => "[$appName] New Gas Voucher Request #$voucherId",
+            'body' => "
+                <div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;'>
+                    <div style='background: #ffc107; color: #333; padding: 20px; text-align: center;'>
+                        <h1 style='margin: 0;'>⛽ New Gas Voucher Request</h1>
+                    </div>
+                    <div style='padding: 20px; background: #f8f9fa;'>
+                        <p>A new gas voucher request requires your review.</p>
+
+                        <div style='background: white; padding: 15px; border-radius: 8px; margin: 15px 0;'>
+                            <h3 style='margin-top: 0; color: #ffc107;'>Voucher Details</h3>
+                            <p><strong>Voucher ID:</strong> #$voucherId</p>
+                            <p><strong>Requester:</strong> $requesterName</p>
+                            <p><strong>Vehicle:</strong> " . ($voucher->vehicle_plate ?? 'N/A') . "</p>
+                            <p><strong>Request Date:</strong> " . formatDate($voucher->request_date) . "</p>
+                            <p><strong>Status:</strong> Pending Review</p>
+                        </div>
+
+                        <p><a href='" . APP_URL . "/?page=gas-vouchers&action=view&id=$voucherId' style='background: #ffc107; color: #333; padding: 10px 20px; text-decoration: none; border-radius: 5px; display: inline-block;'>Review Voucher</a></p>
+                    </div>
+                    <div style='background: #6c757d; color: white; padding: 15px; text-align: center; font-size: 12px;'>
+                        <p style='margin: 0;'>This is an automated message from $appName Fleet Management System</p>
+                    </div>
+                </div>
+            "
+        ];
+    }
+
+    /**
+     * Gas Voucher Reviewed Template (for Requester)
+     */
+    public static function gasVoucherReviewed($voucher, $reviewer)
+    {
+        $appName = APP_NAME;
+        $voucherId = $voucher->id;
+        $reviewerName = $reviewer->name ?? 'Unknown';
+
+        return [
+            'subject' => "[$appName] Gas Voucher #$voucherId Reviewed",
+            'body' => "
+                <div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;'>
+                    <div style='background: #0dcaf0; color: white; padding: 20px; text-align: center;'>
+                        <h1 style='margin: 0;'>📋 Gas Voucher Reviewed</h1>
+                    </div>
+                    <div style='padding: 20px; background: #f8f9fa;'>
+                        <p>Your gas voucher request has been reviewed and is now awaiting final approval.</p>
+
+                        <div style='background: white; padding: 15px; border-radius: 8px; margin: 15px 0;'>
+                            <h3 style='margin-top: 0; color: #0dcaf0;'>Voucher Details</h3>
+                            <p><strong>Voucher ID:</strong> #$voucherId</p>
+                            <p><strong>Reviewed by:</strong> $reviewerName</p>
+                            <p><strong>Status:</strong> Pending Final Approval</p>
+                        </div>
+
+                        <p><a href='" . APP_URL . "/?page=gas-vouchers&action=view&id=$voucherId' style='background: #0dcaf0; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; display: inline-block;'>View Voucher</a></p>
+                    </div>
+                    <div style='background: #6c757d; color: white; padding: 15px; text-align: center; font-size: 12px;'>
+                        <p style='margin: 0;'>This is an automated message from $appName Fleet Management System</p>
+                    </div>
+                </div>
+            "
+        ];
+    }
+
+    /**
+     * Gas Voucher Approved Template (for Requester)
+     */
+    public static function gasVoucherApproved($voucher, $approver)
+    {
+        $appName = APP_NAME;
+        $voucherId = $voucher->id;
+        $approverName = $approver->name ?? 'Unknown';
+
+        return [
+            'subject' => "[$appName] Gas Voucher #$voucherId Approved",
+            'body' => "
+                <div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;'>
+                    <div style='background: #198754; color: white; padding: 20px; text-align: center;'>
+                        <h1 style='margin: 0;'>✅ Gas Voucher Approved</h1>
+                    </div>
+                    <div style='padding: 20px; background: #f8f9fa;'>
+                        <p>Great news! Your gas voucher request has been <strong>approved</strong>.</p>
+
+                        <div style='background: white; padding: 15px; border-radius: 8px; margin: 15px 0;'>
+                            <h3 style='margin-top: 0; color: #198754;'>Voucher Details</h3>
+                            <p><strong>Voucher ID:</strong> #$voucherId</p>
+                            <p><strong>Approved by:</strong> $approverName</p>
+                            <p><strong>Status:</strong> Approved</p>
+                        </div>
+
+                        <p>You may now print your approved gas voucher.</p>
+                        <p><a href='" . APP_URL . "/?page=gas-vouchers&action=view&id=$voucherId' style='background: #198754; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; display: inline-block;'>View & Print Voucher</a></p>
+                    </div>
+                    <div style='background: #6c757d; color: white; padding: 15px; text-align: center; font-size: 12px;'>
+                        <p style='margin: 0;'>This is an automated message from $appName Fleet Management System</p>
+                    </div>
+                </div>
+            "
+        ];
+    }
+
+    /**
+     * Gas Voucher Rejected Template (for Requester)
+     */
+    public static function gasVoucherRejected($voucher, $rejector, $reason)
+    {
+        $appName = APP_NAME;
+        $voucherId = $voucher->id;
+        $rejectorName = $rejector->name ?? 'Unknown';
+
+        return [
+            'subject' => "[$appName] Gas Voucher #$voucherId Rejected",
+            'body' => "
+                <div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;'>
+                    <div style='background: #dc3545; color: white; padding: 20px; text-align: center;'>
+                        <h1 style='margin: 0;'>❌ Gas Voucher Rejected</h1>
+                    </div>
+                    <div style='padding: 20px; background: #f8f9fa;'>
+                        <p>Your gas voucher request has been <strong>rejected</strong>.</p>
+
+                        <div style='background: white; padding: 15px; border-radius: 8px; margin: 15px 0;'>
+                            <h3 style='margin-top: 0; color: #dc3545;'>Voucher Details</h3>
+                            <p><strong>Voucher ID:</strong> #$voucherId</p>
+                            <p><strong>Rejected by:</strong> $rejectorName</p>
+                            " . ($reason ? "<p><strong>Reason:</strong> " . htmlspecialchars($reason) . "</p>" : "") . "
+                        </div>
+
+                        <p>You may submit a new gas voucher request with the necessary adjustments.</p>
+                        <p><a href='" . APP_URL . "/?page=gas-vouchers' style='background: #0d6efd; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; display: inline-block;'>Create New Voucher</a></p>
+                    </div>
+                    <div style='background: #6c757d; color: white; padding: 15px; text-align: center; font-size: 12px;'>
+                        <p style='margin: 0;'>This is an automated message from $appName Fleet Management System</p>
+                    </div>
+                </div>
+            "
+        ];
+    }
+
+    /**
+     * Gas Voucher Cancelled Template (for Approvers)
+     */
+    public static function gasVoucherCancelled($voucher, $cancelledBy)
+    {
+        $appName = APP_NAME;
+        $voucherId = $voucher->id;
+
+        return [
+            'subject' => "[$appName] Gas Voucher #$voucherId Cancelled",
+            'body' => "
+                <div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;'>
+                    <div style='background: #6c757d; color: white; padding: 20px; text-align: center;'>
+                        <h1 style='margin: 0;'>📋 Gas Voucher Cancelled</h1>
+                    </div>
+                    <div style='padding: 20px; background: #f8f9fa;'>
+                        <p>A gas voucher request has been cancelled.</p>
+
+                        <div style='background: white; padding: 15px; border-radius: 8px; margin: 15px 0;'>
+                            <h3 style='margin-top: 0; color: #6c757d;'>Cancelled Voucher Details</h3>
+                            <p><strong>Voucher ID:</strong> #$voucherId</p>
+                            <p><strong>Vehicle:</strong> " . ($voucher->vehicle_plate ?? 'N/A') . "</p>
+                            <p><strong>Cancelled by:</strong> $cancelledBy</p>
+                        </div>
+
+                        <p>No further action is required.</p>
+                    </div>
+                    <div style='background: #6c757d; color: white; padding: 15px; text-align: center; font-size: 12px;'>
+                        <p style='margin: 0;'>This is an automated message from $appName Fleet Management System</p>
+                    </div>
+                </div>
+            "
+        ];
+    }
 }

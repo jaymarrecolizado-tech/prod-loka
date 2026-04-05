@@ -52,10 +52,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     if (empty($errors)) {
-        db()->beginTransaction();
-        try {
-            if ($decision === 'review_approve') {
-                // Step 1: OIC Motorpool approves → move to pending_approval
+        $notificationsToSend = [];
+        $requesterUserId = $voucher->requested_by_user_id;
+
+        if ($decision === 'review_approve') {
+            $notificationsToSend[] = [
+                'user_id' => $requesterUserId,
+                'type' => 'gas_voucher_reviewed',
+                'title' => 'Gas Voucher Reviewed',
+                'message' => "Your gas voucher {$voucher->voucher_no} has been reviewed and is now awaiting final approval.",
+                'link' => '/?page=gas-vouchers&action=view&id=' . $voucherId,
+                'requestId' => $voucherId
+            ];
+
+            db()->beginTransaction();
+            try {
                 db()->update('gas_vouchers', [
                     'status'         => 'pending_approval',
                     'reviewed_by'    => userId(),
@@ -65,10 +76,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 ], 'id = ?', [$voucherId]);
                 auditLog('review', 'gas_voucher', $voucherId);
                 db()->commit();
-                redirectWith('/?page=gas-vouchers&action=view&id=' . $voucherId, 'success', 'Gas voucher reviewed. Now awaiting final approval.');
 
-            } elseif ($decision === 'final_approve') {
-                // Step 2: Chief Admin approves → approved
+                foreach ($notificationsToSend as $notif) {
+                    notify($notif['user_id'], $notif['type'], $notif['title'], $notif['message'], $notif['link'], $notif['requestId']);
+                }
+
+                redirectWith('/?page=gas-vouchers&action=view&id=' . $voucherId, 'success', 'Gas voucher reviewed. Now awaiting final approval.');
+            } catch (Exception $e) {
+                db()->rollback();
+                $errors[] = 'Error: ' . $e->getMessage();
+            }
+
+        } elseif ($decision === 'final_approve') {
+            $notificationsToSend[] = [
+                'user_id' => $requesterUserId,
+                'type' => 'gas_voucher_approved',
+                'title' => 'Gas Voucher Approved',
+                'message' => "Your gas voucher {$voucher->voucher_no} has been approved. You may now print it.",
+                'link' => '/?page=gas-vouchers&action=view&id=' . $voucherId,
+                'requestId' => $voucherId
+            ];
+
+            db()->beginTransaction();
+            try {
                 db()->update('gas_vouchers', [
                     'status'         => 'approved',
                     'approved_by'    => userId(),
@@ -78,9 +108,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 ], 'id = ?', [$voucherId]);
                 auditLog('approve', 'gas_voucher', $voucherId);
                 db()->commit();
-                redirectWith('/?page=gas-vouchers&action=view&id=' . $voucherId, 'success', 'Gas voucher approved. Print the voucher to authorize fuel pick-up.');
 
-            } elseif ($decision === 'reject') {
+                foreach ($notificationsToSend as $notif) {
+                    notify($notif['user_id'], $notif['type'], $notif['title'], $notif['message'], $notif['link'], $notif['requestId']);
+                }
+
+                redirectWith('/?page=gas-vouchers&action=view&id=' . $voucherId, 'success', 'Gas voucher approved. Print the voucher to authorize fuel pick-up.');
+            } catch (Exception $e) {
+                db()->rollback();
+                $errors[] = 'Error: ' . $e->getMessage();
+            }
+
+        } elseif ($decision === 'reject') {
+            $notificationsToSend[] = [
+                'user_id' => $requesterUserId,
+                'type' => 'gas_voucher_rejected',
+                'title' => 'Gas Voucher Rejected',
+                'message' => "Your gas voucher {$voucher->voucher_no} has been rejected." . ($notes ? " Reason: {$notes}" : ""),
+                'link' => '/?page=gas-vouchers&action=view&id=' . $voucherId,
+                'requestId' => $voucherId
+            ];
+
+            db()->beginTransaction();
+            try {
                 db()->update('gas_vouchers', [
                     'status'           => 'rejected',
                     'rejected_by'      => userId(),
@@ -90,11 +140,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 ], 'id = ?', [$voucherId]);
                 auditLog('reject', 'gas_voucher', $voucherId);
                 db()->commit();
+
+                foreach ($notificationsToSend as $notif) {
+                    notify($notif['user_id'], $notif['type'], $notif['title'], $notif['message'], $notif['link'], $notif['requestId']);
+                }
+
                 redirectWith('/?page=gas-vouchers&action=view&id=' . $voucherId, 'warning', 'Gas voucher has been rejected.');
+            } catch (Exception $e) {
+                db()->rollback();
+                $errors[] = 'Error: ' . $e->getMessage();
             }
-        } catch (Exception $e) {
-            db()->rollback();
-            $errors[] = 'Error: ' . $e->getMessage();
         }
     }
 }
