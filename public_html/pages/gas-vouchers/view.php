@@ -250,7 +250,7 @@ require_once INCLUDES_PATH . '/header.php';
                                         <div class="mt-1"><em class="text-muted small">"<?= e($voucher->reviewer_notes) ?>"</em></div>
                                         <?php endif; ?>
                                         <?php if ($voucher->requested_reviewer_name && $voucher->requested_reviewer_name !== $voucher->reviewer_name): ?>
-                                        <div class="mt-1 small text-muted">Preferred: <?= e($voucher->requested_reviewer_name) ?></div>
+                                        <div class="mt-1 small text-muted">Motorpool Head: <?= e($voucher->requested_reviewer_name) ?></div>
                                         <?php endif; ?>
                                     </div>
                                     <?php elseif ($voucher->status === 'pending_review'): ?>
@@ -280,7 +280,7 @@ require_once INCLUDES_PATH . '/header.php';
                                         <div class="mt-1"><em class="text-muted small">"<?= e($voucher->approver_notes) ?>"</em></div>
                                         <?php endif; ?>
                                         <?php if ($voucher->requested_approver_name && $voucher->requested_approver_name !== $voucher->approver_name_full): ?>
-                                        <div class="mt-1 small text-muted">Preferred: <?= e($voucher->requested_approver_name) ?></div>
+                                        <div class="mt-1 small text-muted">Chief Admin & Finance: <?= e($voucher->requested_approver_name) ?></div>
                                         <?php endif; ?>
                                     </div>
                                     <?php elseif ($voucher->status === 'rejected'): ?>

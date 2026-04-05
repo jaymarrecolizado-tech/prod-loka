@@ -252,7 +252,7 @@ require_once INCLUDES_PATH . '/header.php';
                             </div>
                             <?php if (!$isEdit): ?>
                             <div class="col-md-4">
-                                <label class="form-label fw-semibold">Preferred Motorpool Head</label>
+                                <label class="form-label fw-semibold">Motorpool Head</label>
                                 <select name="requested_reviewer_id" class="form-select">
                                     <option value="">-- Auto-assign --</option>
                                     <?php foreach ($motorpoolHeads as $mp): ?>
@@ -262,7 +262,7 @@ require_once INCLUDES_PATH . '/header.php';
                                 <div class="form-text">Select a preferred reviewer (optional)</div>
                             </div>
                             <div class="col-md-4">
-                                <label class="form-label fw-semibold">Preferred Chief A&F</label>
+                                <label class="form-label fw-semibold">Chief Admin & Finance</label>
                                 <select name="requested_approver_id" class="form-select">
                                     <option value="">-- Auto-assign --</option>
                                     <?php foreach ($chiefFinanceUsers as $cf): ?>
