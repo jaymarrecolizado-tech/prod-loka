@@ -150,13 +150,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 db()->commit();
 
                 if ($newStatus === 'pending_review' && $voucher->status !== 'pending_review') {
-                    $approvers = db()->fetchAll(
-                        "SELECT id FROM users WHERE role IN (?, ?, ?) AND deleted_at IS NULL",
-                        [ROLE_APPROVER, ROLE_MOTORPOOL, ROLE_ADMIN]
-                    );
-                    $requester = currentUser();
-                    foreach ($approvers as $approver) {
-                        notify($approver->id, 'gas_voucher_submitted', 'New Gas Voucher Request', "A new gas voucher has been submitted for review by {$requester->name}.", '/?page=gas-vouchers&action=view&id=' . $voucherId, $voucherId);
+                    // Notify only the selected reviewer, or all approvers if none selected
+                    if ($requestedReviewerId) {
+                        $requester = currentUser();
+                        notify($requestedReviewerId, 'gas_voucher_submitted', 'New Gas Voucher Request', "A new gas voucher has been submitted for review by {$requester->name}.", '/?page=gas-vouchers&action=view&id=' . $voucherId, $voucherId);
+                    } else {
+                        $approvers = db()->fetchAll(
+                            "SELECT id FROM users WHERE role IN (?, ?, ?) AND deleted_at IS NULL",
+                            [ROLE_APPROVER, ROLE_MOTORPOOL, ROLE_ADMIN]
+                        );
+                        $requester = currentUser();
+                        foreach ($approvers as $approver) {
+                            notify($approver->id, 'gas_voucher_submitted', 'New Gas Voucher Request', "A new gas voucher has been submitted for review by {$requester->name}.", '/?page=gas-vouchers&action=view&id=' . $voucherId, $voucherId);
+                        }
                     }
                 }
 
@@ -174,13 +180,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     : 'Gas voucher saved as draft.';
 
                 if ($newStatus === 'pending_review') {
-                    $approvers = db()->fetchAll(
-                        "SELECT id FROM users WHERE role IN (?, ?, ?, ?) AND deleted_at IS NULL",
-                        [ROLE_APPROVER, ROLE_MOTORPOOL, ROLE_ADMIN, ROLE_CHIEF_ADMIN_FINANCE]
-                    );
+                    // Notify only selected reviewers/approvers
+                    $notifiedIds = [];
                     $requester = currentUser();
-                    foreach ($approvers as $approver) {
-                        notify($approver->id, 'gas_voucher_submitted', 'New Gas Voucher Request', "A new gas voucher has been submitted for review by {$requester->name}.", '/?page=gas-vouchers&action=view&id=' . $id, $id);
+                    $url = '/?page=gas-vouchers&action=view&id=' . $id;
+
+                    if ($requestedReviewerId) {
+                        notify($requestedReviewerId, 'gas_voucher_submitted', 'New Gas Voucher Request', "A new gas voucher has been submitted for review by {$requester->name}.", $url, $id);
+                        $notifiedIds[] = $requestedReviewerId;
+                    }
+                    if ($requestedApproverId) {
+                        notify($requestedApproverId, 'gas_voucher_submitted', 'New Gas Voucher Request', "A new gas voucher has been submitted for your final approval by {$requester->name}.", $url, $id);
+                        $notifiedIds[] = $requestedApproverId;
+                    }
+                    if (empty($notifiedIds)) {
+                        $approvers = db()->fetchAll(
+                            "SELECT id FROM users WHERE role IN (?, ?, ?, ?) AND deleted_at IS NULL",
+                            [ROLE_APPROVER, ROLE_MOTORPOOL, ROLE_ADMIN, ROLE_CHIEF_ADMIN_FINANCE]
+                        );
+                        foreach ($approvers as $approver) {
+                            notify($approver->id, 'gas_voucher_submitted', 'New Gas Voucher Request', "A new gas voucher has been submitted for review by {$requester->name}.", $url, $id);
+                        }
                     }
                 }
 

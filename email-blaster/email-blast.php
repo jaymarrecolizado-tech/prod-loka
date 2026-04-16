@@ -1015,6 +1015,118 @@ function buildMigrationTemplate(string $userName, string $fromName, string $newS
 </html>';
 }
 
+function buildUpdateRevertedTemplate($userName, $smtpFromName, $loginUrl) {
+    $currentDate = date('F d, Y');
+
+    return '<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>System Update Reverted</title>
+</head>
+<body style="margin:0;padding:0;background-color:#f4f4f4;font-family:\'Segoe UI\',Tahoma,Geneva,Verdana,sans-serif;">
+    <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#f4f4f4;padding:40px 0;">
+        <tr>
+            <td align="center">
+                <table width="600" cellpadding="0" cellspacing="0" style="background-color:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 4px 12px rgba(0,0,0,0.1);">
+                    <tr>
+                        <td style="background:linear-gradient(135deg, #EAB308 0%, #F59E0B 100%);padding:30px 40px;text-align:center;">
+                            <h1 style="color:#ffffff;margin:0;font-size:28px;font-weight:700;">System Update Reverted</h1>
+                            <p style="color:#ffffff;margin:8px 0 0 0;font-size:14px;opacity:0.9;">Important System Notification</p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="padding:30px 40px 10px 40px;">
+                            <p style="color:#1a1a1a;font-size:16px;margin:0;">Dear ' . htmlspecialchars($userName) . ',</p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="padding:15px 40px 20px 40px;">
+                            <p style="color:#555555;font-size:15px;line-height:1.7;margin:0;">
+                                We are writing to inform you that the <strong>scheduled system update that was planned for Holy Week has been reverted</strong>. The system will be returning to its previous stable version.
+                            </p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="padding:0 40px 20px 40px;">
+                            <table width="100%" cellpadding="0" cellspacing="0" style="background:linear-gradient(135deg, #fef3c7 0%, #EAB308 100%);border-radius:10px;border:1px solid #EAB308;">
+                                <tr>
+                                    <td style="padding:25px;text-align:center;">
+                                        <h3 style="color:#ffffff;margin:0 0 8px 0;font-size:18px;font-weight:600;">What This Means</h3>
+                                        <p style="color:#ffffff;font-size:14px;margin:0;">The system has been restored to its previous working version</p>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="padding:0 40px 20px 40px;">
+                            <table width="100%" cellpadding="0" cellspacing="0" style="background:#f8f9fa;border-radius:10px;border:1px solid #dee2e6;">
+                                <tr>
+                                    <td style="padding:20px;">
+                                        <h4 style="color:#1a1a1a;margin:0 0 15px 0;font-size:16px;font-weight:600;">Key Information:</h4>
+                                        <table width="100%" cellpadding="0" cellspacing="0">
+                                            <tr><td style="padding:8px 0;border-bottom:1px solid #dee2e6;"><span style="color:#EAB308;margin-right:8px;">&#9888;</span>The Holy Week update has been rolled back</td></tr>
+                                            <tr><td style="padding:8px 0;border-bottom:1px solid #dee2e6;"><span style="color:#EAB308;margin-right:8px;">&#9888;</span>The system is running on the previous stable version</td></tr>
+                                            <tr><td style="padding:8px 0;border-bottom:1px solid #dee2e6;"><span style="color:#EAB308;margin-right:8px;">&#9888;</span>All your data and settings remain intact</td></tr>
+                                            <tr><td style="padding:8px 0;"><span style="color:#EAB308;margin-right:8px;">&#9888;</span>No action is required on your part</td></tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="padding:0 40px 20px 40px;">
+                            <table width="100%" cellpadding="0" cellspacing="0" style="background:#f8f9fa;border-radius:10px;border:1px solid #dee2e6;">
+                                <tr>
+                                    <td style="padding:20px;">
+                                        <h4 style="color:#1a1a1a;margin:0 0 15px 0;font-size:16px;font-weight:600;">What You Need to Do:</h4>
+                                        <table width="100%" cellpadding="0" cellspacing="0">
+                                            <tr><td style="padding:8px 0;border-bottom:1px solid #dee2e6;"><span style="color:#198754;margin-right:8px;">&#10003;</span>Continue using the system as normal</td></tr>
+                                            <tr><td style="padding:8px 0;border-bottom:1px solid #dee2e6;"><span style="color:#198754;margin-right:8px;">&#10003;</span>All existing features remain available</td></tr>
+                                            <tr><td style="padding:8px 0;"><span style="color:#198754;margin-right:8px;">&#10003;</span>Report any issues to the IT support team</td></tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="padding:0 40px 20px 40px;">
+                            <table width="100%" cellpadding="0" cellspacing="0" style="background:linear-gradient(135deg, #e7f1ff 0%, #0d6efd 100%);border-radius:10px;border:1px solid #0d6efd;">
+                                <tr>
+                                    <td style="padding:25px;text-align:center;">
+                                        <h3 style="color:#ffffff;margin:0 0 10px 0;font-size:18px;font-weight:600;">Access the System</h3>
+                                        <p style="color:#ffffff;margin:0 0 15px 0;font-size:14px;">Click the button below to access the system</p>
+                                        <a href="' . htmlspecialchars($loginUrl) . '" style="display:inline-block;background:#ffffff;color:#0d6efd;padding:12px 30px;text-decoration:none;border-radius:8px;font-weight:bold;font-size:15px;">Access System</a>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="padding:0 40px 30px 40px;text-align:center;">
+                            <p style="color:#999999;font-size:14px;margin:0;">We apologize for any confusion this may have caused.</p>
+                            <p style="color:#1a1a1a;font-size:16px;margin:15px 0 0 0;font-weight:600;">Thank you for your understanding!</p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="background:#1a1a1a;padding:20px 40px;text-align:center;">
+                            <p style="color:#999999;font-size:12px;margin:0;">This is an automated message from <strong style="color:#ffffff;">' . htmlspecialchars($smtpFromName) . '</strong></p>
+                            <p style="color:#666666;font-size:11px;margin:8px 0 0 0;">Department of Information and Communications Technology</p>
+                            <p style="color:#666666;font-size:11px;margin:8px 0 0 0;">Please do not reply to this email.</p>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>';
+}
+
 function sendEmailDebug($host, $port, $username, $password, $fromEmail, $fromName, $encryption, $to, $toName, $subject, $body, &$log) {
     $log = '';
 
@@ -1300,6 +1412,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                 $subject = "Important: Server Migration - DICT Online Services";
                 $body = buildMigrationTemplate($user['name'], $smtpFromName, $newServerUrl, $migrationDate, $servicesList);
                 break;
+            case 'update_reverted':
+                $subject = "LOKA Fleet Management - System Update Reverted";
+                $body = buildUpdateRevertedTemplate($user['name'], $smtpFromName, $loginUrl);
+                break;
             default:
                 $subject = "LOKA Fleet Management - We Are Back Online!";
                 $body = buildBackOnlineTemplate($user['name'], $user['email'], $smtpFromName, $loginUrl, $lokaVersion);
@@ -1426,6 +1542,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                 $subject = "Important: Server Migration - DICT Online Services (Test)";
                 $body = buildMigrationTemplate("User", $smtpFromName, $newServerUrl, $migrationDate, $servicesList);
                 break;
+            case 'update_reverted':
+                $subject = "LOKA Fleet Management - System Update Reverted (Test)";
+                $body = buildUpdateRevertedTemplate("User", $smtpFromName, $loginUrl);
+                break;
             default:
                 $subject = "LOKA Fleet Management - Test Email";
                 $body = buildBackOnlineTemplate("User", $testEmail, $smtpFromName, $loginUrl, $lokaVersion);
@@ -1517,6 +1637,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                     case 'migration':
                         $subject = "Important: Server Migration - DICT Online Services";
                         $body = buildMigrationTemplate($user['name'], $smtpFromName, $newServerUrl, $migrationDate, $servicesList);
+                        break;
+                    case 'update_reverted':
+                        $subject = "LOKA Fleet Management - System Update Reverted";
+                        $body = buildUpdateRevertedTemplate($user['name'], $smtpFromName, $loginUrl);
                         break;
                     default:
                         $subject = "LOKA Fleet Management - Notification";
@@ -1752,6 +1876,7 @@ $dbPass = "";</pre>
                                         <option value="holiday">Holiday Announcement</option>
                                         <option value="system_update">System Update</option>
                                         <option value="migration">Server Migration Announcement</option>
+                                        <option value="update_reverted">System Update Reverted</option>
                                     </select>
                                 </div>
                             </div>
@@ -1928,7 +2053,8 @@ $dbPass = "";</pre>
                 'account_suspended': 'Account Suspended',
                 'holiday': 'Holiday Announcement',
                 'system_update': 'System Update',
-                'migration': 'Server Migration Announcement'
+                'migration': 'Server Migration Announcement',
+                'update_reverted': 'System Update Reverted'
             };
             
             document.getElementById('templateTitle').textContent = templateTitles[template] || 'Mass Email';
@@ -2030,6 +2156,10 @@ $dbPass = "";</pre>
                         echo json_encode($migrationPreview);
                     ?>;
                     previewTitle = 'Email Preview - Server Migration Announcement';
+                    break;
+                case 'update_reverted':
+                    previewContent = `<?php echo addcslashes(preg_replace('/\s+/', ' ', buildUpdateRevertedTemplate("John Doe User", $smtpFromName, $loginUrl)), '"'); ?>`;
+                    previewTitle = 'Email Preview - System Update Reverted';
                     break;
                 default:
                     previewContent = `<?php echo addcslashes(preg_replace('/\s+/', ' ', buildBackOnlineTemplate("John Doe User", "john.doe@example.com", $smtpFromName, $loginUrl, $lokaVersion)), '"'); ?>`;
