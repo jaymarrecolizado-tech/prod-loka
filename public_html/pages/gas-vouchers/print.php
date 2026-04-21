@@ -240,7 +240,7 @@ if ($voucher->requested_by_user_id != userId() && !isAdmin() && !isApprover() &&
         <!-- Authorization Row -->
         <tr>
             <td colspan="4" class="auth-row" style="text-align: left; padding-left: 20px !important;">
-                This is to authorize the bearer <strong><?= e(strtoupper($voucher->driver_name)) ?></strong> to withdraw and secure the following products and/or services charge to the Account of <strong style="font-style:normal;text-decoration:underline;">DICT ROO LC1</strong>.
+                This is to authorize the bearer <strong><?= e(strtoupper($voucher->driver_name)) ?></strong> to withdraw and secure the following products and/or services charge to the Account of <strong style="font-style:normal;text-decoration:underline;">DICT Region 02</strong>.
             </td>
         </tr>
 

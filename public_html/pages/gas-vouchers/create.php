@@ -80,8 +80,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $driverName   = postSafe('driver_name', '', 100);
     $vehiclePlate = postSafe('vehicle_plate', '', 30);
     $fuelType     = post('fuel_type', 'Diesel');
-    $quantity     = (float) post('quantity', 0);
-    $unit         = postSafe('unit', 'L', 20);
+    $quantityMode = post('quantity_mode', 'liters'); // 'full' or 'liters'
+    if ($quantityMode === 'full') {
+        $quantity = 0;          // sentinel for FULL TANK
+        $unit     = 'FULL TANK';
+    } else {
+        $rawQty   = post('quantity', '20');
+        $quantity = (float) $rawQty;
+        $unit     = postSafe('unit', 'Liters', 20);
+    }
     $otherItems   = postSafe('other_items', '', 500);
     $otherQty     = post('other_qty', '');
     $otherUnit    = postSafe('other_unit', '', 20);
@@ -99,7 +106,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (empty($driverName))   $errors[] = 'Driver name is required.';
     if (empty($vehiclePlate)) $errors[] = 'Vehicle plate number is required.';
     if (empty($fuelType) || !in_array($fuelType, ['Gasoline', 'Diesel'])) $errors[] = 'Invalid fuel type.';
-    if ($quantity <= 0)       $errors[] = 'Quantity must be greater than 0.';
+    if ($quantityMode !== 'full' && $quantity <= 0) $errors[] = 'Quantity must be greater than 0.';
     if (empty($unit))         $errors[] = 'Unit is required.';
     if (empty($fundSource))   $errors[] = 'Fund source is required.';
     if (empty($purpose))      $errors[] = 'Purpose is required.';
@@ -348,22 +355,58 @@ require_once INCLUDES_PATH . '/header.php';
                                     <option value="Diesel" <?= ($d?->fuel_type ?? 'Diesel') === 'Diesel' ? 'selected' : '' ?>>Diesel</option>
                                 </select>
                             </div>
-                            <div class="col-md-4">
+                            <div class="col-md-8">
                                 <label class="form-label fw-semibold">Quantity <span class="text-danger">*</span></label>
-                                <input type="number" name="quantity" class="form-control"
-                                       step="0.01" min="0.01"
-                                       placeholder="e.g., 50"
-                                       value="<?= e($d?->quantity ?? '') ?>" required>
-                            </div>
-                            <div class="col-md-4">
-                                <label class="form-label fw-semibold">Unit <span class="text-danger">*</span></label>
-                                <input type="text" name="unit" class="form-control"
-                                       list="unitList" placeholder="Liters"
-                                       value="<?= e($d?->unit ?? 'Liters') ?>" required>
-                                <datalist id="unitList">
-                                    <option value="Liters">
-                                    <option value="FULL TANK">
-                                </datalist>
+                                <?php
+                                    // Determine initial mode from existing data
+                                    $initMode = 'liters';
+                                    $initQty  = 20;
+                                    if ($d) {
+                                        if ($d->unit === 'FULL TANK' || $d->quantity == 0) {
+                                            $initMode = 'full';
+                                        } else {
+                                            $initQty = $d->quantity ? (float)$d->quantity : 20;
+                                        }
+                                    }
+                                ?>
+                                <!-- Hidden mode field -->
+                                <input type="hidden" name="quantity_mode" id="quantityMode" value="<?= $initMode ?>">
+                                <input type="hidden" name="unit" id="unitHidden" value="<?= $initMode === 'full' ? 'FULL TANK' : 'Liters' ?>">
+
+                                <!-- Toggle buttons -->
+                                <div class="btn-group w-100 mb-2" role="group" id="qtyToggleGroup">
+                                    <button type="button" id="btnFullTank"
+                                            class="btn <?= $initMode === 'full' ? 'btn-warning' : 'btn-outline-warning' ?> fw-semibold"
+                                            onclick="setQtyMode('full')">
+                                        <i class="bi bi-fuel-pump-fill me-1"></i>Full Tank
+                                    </button>
+                                    <button type="button" id="btnLiters"
+                                            class="btn <?= $initMode === 'liters' ? 'btn-primary' : 'btn-outline-primary' ?> fw-semibold"
+                                            onclick="setQtyMode('liters')">
+                                        <i class="bi bi-123 me-1"></i>Specify Liters
+                                    </button>
+                                </div>
+
+                                <!-- Numeric input (shown only in 'liters' mode) -->
+                                <div id="litersInputWrap" style="<?= $initMode === 'full' ? 'display:none;' : '' ?>">
+                                    <div class="input-group">
+                                        <input type="number" name="quantity" id="quantityInput"
+                                               class="form-control"
+                                               step="0.01" min="0.01"
+                                               placeholder="20"
+                                               value="<?= e($initMode === 'liters' ? $initQty : 20) ?>">
+                                        <span class="input-group-text">liters</span>
+                                    </div>
+                                    <div class="form-text">Default: 20 liters. Enter the exact amount needed.</div>
+                                </div>
+
+                                <!-- Full Tank indicator (shown only in 'full' mode) -->
+                                <div id="fullTankIndicator" style="<?= $initMode === 'full' ? '' : 'display:none;' ?>">
+                                    <div class="alert alert-warning py-2 mb-0 d-flex align-items-center gap-2">
+                                        <i class="bi bi-fuel-pump-fill fs-5"></i>
+                                        <span><strong>Full Tank</strong> — Fill the vehicle to full capacity.</span>
+                                    </div>
+                                </div>
                             </div>
                             <div class="col-12 mt-3">
                                 <hr>
@@ -448,5 +491,44 @@ require_once INCLUDES_PATH . '/header.php';
         </div>
     </div>
 </div>
+
+<script>
+function setQtyMode(mode) {
+    var modeInput     = document.getElementById('quantityMode');
+    var unitInput     = document.getElementById('unitHidden');
+    var wrap          = document.getElementById('litersInputWrap');
+    var fullIndicator = document.getElementById('fullTankIndicator');
+    var qtyInput      = document.getElementById('quantityInput');
+    var btnFull       = document.getElementById('btnFullTank');
+    var btnLiters     = document.getElementById('btnLiters');
+
+    if (mode === 'full') {
+        modeInput.value = 'full';
+        unitInput.value = 'FULL TANK';
+        wrap.style.display          = 'none';
+        fullIndicator.style.display = '';
+        qtyInput.removeAttribute('required');
+        // Toggle button styles
+        btnFull.classList.remove('btn-outline-warning');
+        btnFull.classList.add('btn-warning');
+        btnLiters.classList.remove('btn-primary');
+        btnLiters.classList.add('btn-outline-primary');
+    } else {
+        modeInput.value = 'liters';
+        unitInput.value = 'Liters';
+        wrap.style.display          = '';
+        fullIndicator.style.display = 'none';
+        if (!qtyInput.value || parseFloat(qtyInput.value) <= 0) {
+            qtyInput.value = '20';
+        }
+        qtyInput.setAttribute('required', 'required');
+        // Toggle button styles
+        btnFull.classList.remove('btn-warning');
+        btnFull.classList.add('btn-outline-warning');
+        btnLiters.classList.remove('btn-outline-primary');
+        btnLiters.classList.add('btn-primary');
+    }
+}
+</script>
 
 <?php require_once INCLUDES_PATH . '/footer.php'; ?>
