@@ -103,10 +103,23 @@ export const notificationsApi = {
   count: () => apiClient.get('/notifications/count'),
 }
 
+// Requests API
+export const requestsApi = {
+  list: (params) => apiClient.get('/requests', { params }),
+  get: (id) => apiClient.get(`/requests`, { params: { action: 'get', id } }),
+  create: (data) => apiClient.post('/requests', data),
+  update: (id, data) => apiClient.put(`/requests/${id}`, data),
+  delete: (id) => apiClient.delete(`/requests/${id}`),
+  cancel: (id) => apiClient.post('/requests', { action: 'cancel_request', id }),
+  updateMileage: (id, data) => apiClient.post('/requests', { action: 'update_mileage', id, ...data }),
+  updateDocuments: (id, data) => apiClient.post('/requests', { action: 'update_documents', id, ...data }),
+}
+
 export default {
   auth: authApi,
   users: usersApi,
   vehicles: vehiclesApi,
+  requests: requestsApi,
   trips: tripsApi,
   bookings: bookingsApi,
   drivers: driversApi,
