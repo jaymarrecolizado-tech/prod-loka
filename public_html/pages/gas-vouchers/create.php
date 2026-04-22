@@ -39,7 +39,7 @@ if ($isEdit) {
     if ($voucher->status === 'draft') {
         if ($voucher->requested_by_user_id == userId() || isAdmin()) $canEdit = true;
     } elseif (in_array($voucher->status, ['pending_review', 'pending_approval'])) {
-        if (isApprover() || isMotorpool() || isAdmin()) $canEdit = true;
+        if (isApprover() || isMotorpool() || isAdmin() || isChiefAdminFinance()) $canEdit = true;
     }
 
     if (!$canEdit) {
