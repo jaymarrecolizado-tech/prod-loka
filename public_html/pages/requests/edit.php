@@ -459,7 +459,7 @@ require_once INCLUDES_PATH . '/header.php';
                                 <label for="purpose" class="form-label">Purpose <span
                                         class="text-danger">*</span></label>
                                 <textarea class="form-control" id="purpose" name="purpose" rows="3"
-                                    required><?= e(post('purpose', $request->purpose)) ?></textarea>
+                                    required maxlength="1000"><?= e(post('purpose', $request->purpose)) ?></textarea>
                             </div>
 
                             <div class="col-12">
@@ -618,7 +618,7 @@ require_once INCLUDES_PATH . '/header.php';
                         <div class="mt-3">
                             <label for="notes" class="form-label">Additional Notes</label>
                             <textarea class="form-control" id="notes" name="notes"
-                                rows="2" placeholder="Any special requirements or notes..."><?= e(post('notes', $request->notes)) ?></textarea>
+                                rows="2" placeholder="Any special requirements or notes..." maxlength="500"><?= e(post('notes', $request->notes)) ?></textarea>
                         </div>
 
                         <hr class="my-4">

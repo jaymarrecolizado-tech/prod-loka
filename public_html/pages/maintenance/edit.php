@@ -261,7 +261,7 @@ require_once INCLUDES_PATH . '/header.php';
                             <div class="col-12">
                                 <label class="form-label">Resolution Notes</label>
                                 <textarea class="form-control" name="resolution_notes" rows="2"
-                                          placeholder="Notes about the repair or resolution..."><?= e($maintenance->resolution_notes ?? '') ?></textarea>
+                                          placeholder="Notes about the repair or resolution..." maxlength="500"><?= e($maintenance->resolution_notes ?? '') ?></textarea>
                             </div>
                         </div>
                         
@@ -329,7 +329,7 @@ require_once INCLUDES_PATH . '/header.php';
                             
                             <div class="col-12">
                                 <label class="form-label">Description</label>
-                                <textarea class="form-control" name="description" rows="3"><?= e(post('description', $maintenance->description)) ?></textarea>
+                                <textarea class="form-control" name="description" rows="3" maxlength="500"><?= e(post('description', $maintenance->description)) ?></textarea>
                             </div>
                             
                             <div class="col-md-6">

@@ -661,7 +661,7 @@ if (!defined('BASE_PATH'))
                             <td><input type="time" value="<?= date('H:i', strtotime($t->end_date)) ?>"></td>
                             <td><input class="left" type="text" value="Tuguegarao City" placeholder="Origin"></td>
                             <td><input class="left" type="text" value="<?= e($t->destination) ?>" placeholder="Destination"></td>
-                            <td><textarea class="left" rows="2" placeholder="Purpose"><?= e($t->purpose) ?></textarea></td>
+                            <td><textarea class="left" rows="2" placeholder="Purpose" maxlength="500"><?= e($t->purpose) ?></textarea></td>
                             <td><input type="text" placeholder="Name"></td>
                         </tr>
                     <?php endforeach; ?>
@@ -676,7 +676,7 @@ if (!defined('BASE_PATH'))
                             <td><input type="time"></td>
                             <td><input class="left" type="text" placeholder="Origin"></td>
                             <td><input class="left" type="text" placeholder="Destination"></td>
-                            <td><textarea class="left" rows="2" placeholder="Purpose of trip"></textarea></td>
+                            <td><textarea class="left" rows="2" placeholder="Purpose of trip" maxlength="500"></textarea></td>
                             <td><input type="text" placeholder="Approved By"></td>
                         </tr>
                     <?php endfor; ?>
@@ -768,7 +768,7 @@ if (!defined('BASE_PATH'))
             Remarks / Observations
         </div>
         <div class="remarks">
-            <textarea id="remarks" placeholder="Any special remarks, incidents, or observations during the trip..."></textarea>
+            <textarea id="remarks" placeholder="Any special remarks, incidents, or observations during the trip..." maxlength="500"></textarea>
         </div>
 
         <!-- SECTION VII: SIGNATURES -->

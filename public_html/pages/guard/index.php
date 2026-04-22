@@ -418,7 +418,7 @@ require_once INCLUDES_PATH . '/header.php';
                             <div class="mb-3">
                                 <label for="guard_notes<?= $trip->id ?>" class="form-label">Notes (Optional)</label>
                                 <textarea class="form-control"
-                                          id="guard_notes<?= $trip->id ?>"
+                                          id="guard_notes<?= $trip- maxlength="500">id ?>"
                                           name="guard_notes"
                                           rows="2"
                                           placeholder="Any observations about the vehicle condition, passengers, etc."></textarea>
@@ -504,7 +504,7 @@ require_once INCLUDES_PATH . '/header.php';
                             <div class="mb-3">
                                 <label for="guard_notes<?= $trip->id ?>" class="form-label">Notes (Optional)</label>
                                 <textarea class="form-control"
-                                          id="guard_notes<?= $trip->id ?>"
+                                          id="guard_notes<?= $trip- maxlength="500">id ?>"
                                           name="guard_notes"
                                           rows="2"
                                           placeholder="Any observations about the vehicle condition upon return..."></textarea>

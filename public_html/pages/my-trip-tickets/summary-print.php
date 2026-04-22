@@ -873,11 +873,11 @@ if (!defined('BASE_PATH'))
                                 <td rowspan="<?= $peopleCount ?>"><input type="time" value="<?= date('H:i', strtotime($t->end_date)) ?>"></td>
                                 <td rowspan="<?= $peopleCount ?>"><input type="text" placeholder="km" value="<?= $t->start_mileage ?>"></td>
                                 <td rowspan="<?= $peopleCount ?>"><input type="text" placeholder="km" value="<?= $t->end_mileage ?>"></td>
-                                <td rowspan="<?= $peopleCount ?>"><textarea class="left auto-expand" placeholder="Destination" rows="1"><?= e($t->destination) ?></textarea></td>
-                                <td rowspan="<?= $peopleCount ?>"><textarea class="left auto-expand" placeholder="Purpose" rows="1"><?= e($t->purpose) ?></textarea></td>
+                                <td rowspan="<?= $peopleCount ?>"><textarea class="left auto-expand" placeholder="Destination" rows="1" maxlength="500"><?= e($t->destination) ?></textarea></td>
+                                <td rowspan="<?= $peopleCount ?>"><textarea class="left auto-expand" placeholder="Purpose" rows="1" maxlength="500"><?= e($t->purpose) ?></textarea></td>
                             <?php endif; ?>
                             <td>
-                                <textarea class="left auto-expand" placeholder="Name" rows="1"><?= e($person['name']) ?><?php if ($person['role'] === 'Driver'): ?> (Driver)<?php endif; ?></textarea>
+                                <textarea class="left auto-expand" placeholder="Name" rows="1" maxlength="500"><?= e($person['name']) ?><?php if ($person['role'] === 'Driver'): ?> (Driver)<?php endif; ?></textarea>
                                 <input type="hidden" class="person-role" value="<?= e($person['role']) ?>">
                             </td>
                              <td><input type="text"></td>
@@ -896,9 +896,9 @@ if (!defined('BASE_PATH'))
                             <td><input type="time"></td>
                             <td><input type="text" placeholder="km"></td>
                             <td><input type="text" placeholder="km"></td>
-                            <td><textarea class="left auto-expand" placeholder="Destination" rows="1"></textarea></td>
-                            <td><textarea class="left auto-expand" placeholder="Purpose" rows="1"></textarea></td>
-                             <td><textarea class="left auto-expand" placeholder="Name (Driver)" rows="1"></textarea></td>
+                            <td><textarea class="left auto-expand" placeholder="Destination" rows="1" maxlength="500"></textarea></td>
+                            <td><textarea class="left auto-expand" placeholder="Purpose" rows="1" maxlength="500"></textarea></td>
+                             <td><textarea class="left auto-expand" placeholder="Name (Driver)" rows="1" maxlength="500"></textarea></td>
                             <td><input type="text"></td>
                         </tr>
                     <?php endfor; ?>

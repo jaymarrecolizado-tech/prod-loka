@@ -165,7 +165,7 @@ require_once INCLUDES_PATH . '/header.php';
                             <div class="col-12">
                                 <label class="form-label">Notes</label>
                                 <textarea class="form-control" name="notes"
-                                    rows="2"><?= e(post('notes', $driver->notes)) ?></textarea>
+                                    rows="2" maxlength="500"><?= e(post('notes', $driver->notes)) ?></textarea>
                             </div>
                         </div>
                         <hr class="my-4">

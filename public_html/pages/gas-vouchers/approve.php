@@ -415,7 +415,7 @@ require_once INCLUDES_PATH . '/header.php';
                         <div class="mb-4">
                             <label class="form-label fw-semibold">Notes / Comments</label>
                             <textarea name="notes" class="form-control" rows="3"
-                                      placeholder="Optional notes. Required if rejecting."></textarea>
+                                      placeholder="Optional notes. Required if rejecting." maxlength="500"></textarea>
                         </div>
 
                         <div class="d-flex gap-3 flex-wrap">

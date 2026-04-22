@@ -747,7 +747,7 @@ require_once INCLUDES_PATH . '/header.php';
                         </div>
                         <div class="col-md-6">
                             <label class="form-label">Purpose</label>
-                            <textarea class="form-control" name="purpose" rows="2" placeholder="Purpose of this trip..."></textarea>
+                            <textarea class="form-control" name="purpose" rows="2" placeholder="Purpose of this trip..." maxlength="1000"></textarea>
                         </div>
                     </div>
 
@@ -816,7 +816,7 @@ require_once INCLUDES_PATH . '/header.php';
                         <div class="row">
                             <div class="col-md-6">
                                 <label class="form-label">Issues Description</label>
-                                <textarea class="form-control" name="issues_description" rows="2" placeholder="Describe any issues..."></textarea>
+                                <textarea class="form-control" name="issues_description" rows="2" placeholder="Describe any issues..." maxlength="500"></textarea>
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">Resolved?</label>
@@ -828,14 +828,14 @@ require_once INCLUDES_PATH . '/header.php';
                         </div>
                         <div class="mt-2">
                             <label class="form-label">Resolution Notes</label>
-                            <textarea class="form-control" name="resolution_notes" rows="2" placeholder="How was it resolved?"></textarea>
+                            <textarea class="form-control" name="resolution_notes" rows="2" placeholder="How was it resolved?" maxlength="500"></textarea>
                         </div>
                     </div>
 
                     <!-- Guard Notes -->
                     <div class="mb-3">
                         <label class="form-label">Additional Notes</label>
-                        <textarea class="form-control" name="guard_notes" rows="3" placeholder="Any additional observations..."></textarea>
+                        <textarea class="form-control" name="guard_notes" rows="3" placeholder="Any additional observations..." maxlength="500"></textarea>
                     </div>
 
                     <div class="alert alert-info">

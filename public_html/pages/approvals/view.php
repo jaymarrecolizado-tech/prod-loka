@@ -854,7 +854,7 @@ require_once INCLUDES_PATH . '/header.php';
                             <span class="text-muted small" id="commentsOptional">(Optional for approval)</span>
                         </label>
                         <textarea class="form-control" id="comments" name="comments" rows="3"
-                            placeholder="Enter your comments or remarks..."></textarea>
+                            placeholder="Enter your comments or remarks..." maxlength="500"></textarea>
                         <div class="invalid-feedback" id="commentsFeedback">Comments are required when rejecting or requesting revision.</div>
                     </div>
 

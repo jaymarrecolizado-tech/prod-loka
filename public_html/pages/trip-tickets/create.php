@@ -479,7 +479,7 @@ require_once INCLUDES_PATH . '/header.php';
                     </div>
                     <div class="col-md-6">
                         <label class="form-label">Purpose</label>
-                        <textarea class="form-control" name="purpose" rows="2" placeholder="Detailed purpose of the trip..."><?= e($purposeValue) ?></textarea>
+                        <textarea class="form-control" name="purpose" rows="2" placeholder="Detailed purpose of the trip..." maxlength="1000"><?= e($purposeValue) ?></textarea>
                         <small class="text-muted">Original: <?= truncate($tripPurpose, 40) ?></small>
                     </div>
                 </div>
@@ -603,7 +603,7 @@ require_once INCLUDES_PATH . '/header.php';
                         <div class="row">
                             <div class="col-md-6">
                                 <label class="form-label">Issues Description</label>
-                                <textarea class="form-control" name="issues_description" rows="3" placeholder="Describe any issues, incidents, or concerns..."><?= e($issuesDescriptionValue) ?></textarea>
+                                <textarea class="form-control" name="issues_description" rows="3" placeholder="Describe any issues, incidents, or concerns..." maxlength="500"><?= e($issuesDescriptionValue) ?></textarea>
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">Resolved?</label>
@@ -615,7 +615,7 @@ require_once INCLUDES_PATH . '/header.php';
                         </div>
                         <div class="mt-2">
                             <label class="form-label">Resolution Notes</label>
-                            <textarea class="form-control" name="resolution_notes" rows="2" placeholder="How were the issues resolved? (if applicable)"><?= e($resolutionNotesValue) ?></textarea>
+                            <textarea class="form-control" name="resolution_notes" rows="2" placeholder="How were the issues resolved? (if applicable)" maxlength="500"><?= e($resolutionNotesValue) ?></textarea>
                         </div>
                     </div>
                 </div>
@@ -625,7 +625,7 @@ require_once INCLUDES_PATH . '/header.php';
                 <!-- Guard Notes -->
                 <div class="mb-4">
                     <label class="form-label">Guard Notes</label>
-                    <textarea class="form-control" name="guard_notes" rows="3" placeholder="Any additional observations, comments, or notes..."><?= e($guardNotesValue) ?></textarea>
+                    <textarea class="form-control" name="guard_notes" rows="3" placeholder="Any additional observations, comments, or notes..." maxlength="500"><?= e($guardNotesValue) ?></textarea>
                     <small class="text-muted">Include any special circumstances or relevant information</small>
                 </div>
 

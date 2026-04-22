@@ -347,7 +347,7 @@ require_once INCLUDES_PATH . '/header.php';
                                 <span class="text-danger">*</span>
                             </label>
                             <textarea class="form-control" id="reason" name="reason" rows="3" required
-                                placeholder="Please provide a reason for cancelling this request..."></textarea>
+                                placeholder="Please provide a reason for cancelling this request..." maxlength="500"></textarea>
                             <small class="text-muted">This field is required</small>
                         </div>
 

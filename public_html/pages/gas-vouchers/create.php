@@ -462,7 +462,7 @@ require_once INCLUDES_PATH . '/header.php';
                                 <label class="form-label fw-semibold">Purpose <span class="text-danger">*</span></label>
                                 <textarea name="purpose" class="form-control" rows="3"
                                           placeholder="Describe the purpose of this fuel request..."
-                                          required><?= e($d?->purpose ?? '') ?></textarea>
+                                          required maxlength="1000"><?= e($d?->purpose ?? '') ?></textarea>
                             </div>
                         </div>
                     </div>

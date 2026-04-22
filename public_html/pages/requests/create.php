@@ -421,7 +421,7 @@ require_once INCLUDES_PATH . '/header.php';
                             <div class="col-12">
                                 <label for="purpose" class="form-label">Purpose <span class="text-danger">*</span></label>
                                 <textarea class="form-control" id="purpose" name="purpose" rows="3" 
-                                          placeholder="Describe the purpose of this trip..." required><?= e(post('purpose', '')) ?></textarea>
+                                          placeholder="Describe the purpose of this trip..." required maxlength="1000"><?= e(post('purpose', '')) ?></textarea>
                                 <div class="invalid-feedback">Please enter the purpose</div>
                             </div>
                             
@@ -513,7 +513,7 @@ require_once INCLUDES_PATH . '/header.php';
                             <div class="col-md-6">
                                 <label for="notes" class="form-label">Additional Notes</label>
                                 <textarea class="form-control" id="notes" name="notes" rows="2" 
-                                          placeholder="Any special requirements or notes..."><?= e(post('notes', '')) ?></textarea>
+                                          placeholder="Any special requirements or notes..." maxlength="500"><?= e(post('notes', '')) ?></textarea>
                             </div>
 
                             <!-- Requested Driver -->

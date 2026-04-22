@@ -171,7 +171,7 @@ require_once INCLUDES_PATH . '/header.php';
                             <div class="col-12">
                                 <label class="form-label">Description <span class="text-danger">*</span></label>
                                 <textarea class="form-control" name="description" rows="4" 
-                                          placeholder="Detailed description of the maintenance needed..." required><?= e(post('description', '')) ?></textarea>
+                                          placeholder="Detailed description of the maintenance needed..." required maxlength="500"><?= e(post('description', '')) ?></textarea>
                             </div>
                             
                             <div class="col-md-4">

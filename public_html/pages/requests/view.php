@@ -752,7 +752,7 @@ require_once INCLUDES_PATH . '/header.php';
                             <div class="col-12">
                                 <label class="form-label">Override Reason <span class="text-danger">*</span></label>
                                 <textarea class="form-control" name="override_reason" rows="2" 
-                                          placeholder="Explain why you are overriding the vehicle/driver assignment..." required></textarea>
+                                          placeholder="Explain why you are overriding the vehicle/driver assignment..." required maxlength="500"></textarea>
                             </div>
                         </div>
                     </div>
@@ -803,7 +803,7 @@ require_once INCLUDES_PATH . '/header.php';
                         <div class="mb-3">
                             <label for="completion_notes" class="form-label">Completion Notes (Optional)</label>
                             <textarea class="form-control" id="completion_notes" name="completion_notes" rows="2"
-                                placeholder="Any notes about the trip..."></textarea>
+                                placeholder="Any notes about the trip..." maxlength="500"></textarea>
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -883,7 +883,7 @@ require_once INCLUDES_PATH . '/header.php';
                             <span class="text-danger">*</span>
                         </label>
                         <textarea class="form-control" id="cancel_reason" name="reason" rows="2" required
-                            placeholder="Please provide a reason for cancelling this request..."></textarea>
+                            placeholder="Please provide a reason for cancelling this request..." maxlength="500"></textarea>
                         <small class="text-muted">This field is required</small>
                     </div>
                 </div>

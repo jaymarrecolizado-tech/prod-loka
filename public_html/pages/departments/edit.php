@@ -67,7 +67,7 @@ require_once INCLUDES_PATH . '/header.php';
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Description</label>
-                            <textarea class="form-control" name="description" rows="3"><?= e(post('description', $dept->description)) ?></textarea>
+                            <textarea class="form-control" name="description" rows="3" maxlength="500"><?= e(post('description', $dept->description)) ?></textarea>
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Department Head</label>
