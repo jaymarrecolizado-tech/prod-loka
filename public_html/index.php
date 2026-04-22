@@ -127,7 +127,7 @@ $page = get('page', 'dashboard');
 $action = get('action', 'index');
 
 // Public pages (no auth required)
-$publicPages = ['login', 'logout', 'forgot-password', 'reset-password'];
+$publicPages = ['login', 'logout', 'forgot-password', 'reset-password', 'qr', 'verify-voucher'];
 
 // Route handling
 if (!in_array($page, $publicPages)) {
@@ -155,6 +155,14 @@ switch ($page) {
 
     case 'reset-password':
         require_once PAGES_PATH . '/auth/reset-password.php';
+        break;
+
+    case 'qr':
+        require_once PAGES_PATH . '/public/qr.php';
+        break;
+
+    case 'verify-voucher':
+        require_once PAGES_PATH . '/public/verify-voucher.php';
         break;
 
     case 'dashboard':

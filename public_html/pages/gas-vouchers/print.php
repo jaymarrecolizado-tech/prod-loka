@@ -34,6 +34,10 @@ if ($voucher->status !== 'approved') {
 if ($voucher->requested_by_user_id != userId() && !isAdmin() && !isApprover() && !isMotorpool() && !isChiefAdminFinance()) {
     redirectWith('/?page=gas-vouchers', 'danger', 'Access denied.');
 }
+
+// QR Verification Code Logic
+$verifyHash = hash_hmac('sha256', $voucher->id . '-' . $voucher->voucher_no, getenv('APP_KEY') ?: 'LOKA_SECRET');
+$verifyUrl = SITE_URL . '/?page=verify-voucher&id=' . $voucher->id . '&hash=' . $verifyHash;
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -306,6 +310,11 @@ if ($voucher->requested_by_user_id != userId() && !isAdmin() && !isApprover() &&
         1) Original copy for gas station attached to charge invoice &nbsp;&nbsp;&nbsp;&nbsp; 
         2) Control file copy &nbsp;&nbsp;&nbsp;&nbsp;
         3) Accounting unit copy for reconciliation
+    </div>
+
+    <div style="text-align: right; margin-top: 15px;">
+        <img src="<?= APP_URL ?>/?page=qr&data=<?= urlencode($verifyUrl) ?>" style="width: 90px; height: 90px; mix-blend-mode: multiply; margin-right: 5px;">
+        <div style="font-size: 7.5pt; margin-top: 2px; color: #333; font-weight: bold;">Scan to Verify</div>
     </div>
 
 </div>
