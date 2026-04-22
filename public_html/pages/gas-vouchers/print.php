@@ -196,8 +196,20 @@ $verifyUrl = SITE_URL . '/?page=verify-voucher&id=' . $voucher->id . '&hash=' . 
         }
 
         @media print {
-            body { background: #fff; }
+            @page { size: portrait; margin: 5mm; }
+            body { background: #fff; margin: 0; padding: 0; }
+            .page { padding: 2mm !important; min-height: auto !important; margin: 0 auto !important; width: 100% !important; }
             .no-print { display: none !important; }
+            .grid-header { margin-bottom: 5px !important; }
+            .header-logo { width: 85px !important; }
+            .header-title { margin: 5px 0 5px !important; font-size: 15pt !important; }
+            .voucher-grid td, .voucher-grid th { padding: 4px 6px !important; font-size: 10pt !important; }
+            .auth-row { padding: 6px !important; }
+            .signatures-grid td { padding: 6px !important; }
+            .sig-label { margin-bottom: 15px !important; }
+            .distribution { margin-top: 5px !important; font-size: 8pt !important; }
+            img[src*="qr"] { width: 75px !important; height: 75px !important; }
+            .qr-container { margin-top: 5px !important; }
         }
     </style>
 </head>
@@ -211,7 +223,12 @@ $verifyUrl = SITE_URL . '/?page=verify-voucher&id=' . $voucher->id . '&hash=' . 
     <a href="javascript:history.back()" style="margin-left:15px;color:#666;text-decoration:none;">← Back to App</a>
 </div>
 
-<div class="page">
+<?php for ($copy = 1; $copy <= 2; $copy++): ?>
+<div class="page" style="border-bottom: <?= $copy == 1 ? '1px dashed #ccc' : 'none' ?>; padding-bottom: <?= $copy == 1 ? '10px' : '0' ?>; margin-bottom: <?= $copy == 1 ? '10px' : '0' ?>;">
+
+    <?php if ($copy == 1): ?>
+        <div class="no-print" style="position: absolute; bottom: 0; left: 0; width: 100%; text-align: center; font-size: 10px; color: #999;">✂️ - - - - - Cut Here - - - - - ✂️</div>
+    <?php endif; ?>
 
     <!-- Formal Header -->
     <div class="grid-header">
@@ -305,19 +322,26 @@ $verifyUrl = SITE_URL . '/?page=verify-voucher&id=' . $voucher->id . '&hash=' . 
         </tr>
     </table>
 
-    <div class="distribution">
+    
+    <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-top: 10px;">
+        <div class="distribution" style="margin-top: 0;">
+            
         <strong>Distribution:</strong> Prepare three (3) copies.<br>
         1) Original copy for gas station attached to charge invoice &nbsp;&nbsp;&nbsp;&nbsp; 
         2) Control file copy &nbsp;&nbsp;&nbsp;&nbsp;
         3) Accounting unit copy for reconciliation
-    </div>
-
-    <div style="text-align: right; margin-top: 15px;">
+    
+        </div>
+        <div class="qr-container" style="text-align: right;">
+            
         <img src="<?= APP_URL ?>/?page=qr&data=<?= urlencode($verifyUrl) ?>" style="width: 90px; height: 90px; mix-blend-mode: multiply; margin-right: 5px;">
-        <div style="font-size: 7.5pt; margin-top: 2px; color: #333; font-weight: bold;">Scan to Verify</div>
+        <div style="font-size: 7.5pt; margin-top: 2px; color: #333; font-weight: bold;">Scan to Verify
+        </div>
+    </div>
     </div>
 
 </div>
+<?php endfor; ?>
 
 </body>
 </html>
