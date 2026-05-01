@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gas Vouchers - Select Station</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .container {
+            text-align: center;
+        }
+        h1 {
+            color: white;
+            font-size: 36px;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+        .subtitle {
+            color: rgba(255,255,255,0.9);
+            font-size: 18px;
+            margin-bottom: 50px;
+        }
+        .voucher-cards {
+            display: flex;
+            gap: 40px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .card {
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+            width: 300px;
+            cursor: pointer;
+            transition: transform 0.3s, box-shadow 0.3s;
+            border: 3px solid transparent;
+        }
+        .card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 30px 50px rgba(0,0,0,0.4);
+        }
+        .card.petromar {
+            border-color: #1e40af;
+        }
+        .card.petromar:hover {
+            border-color: #1e3a8a;
+        }
+        .card.petromar .icon {
+            color: #1e40af;
+            font-size: 60px;
+        }
+        .card.queensforth {
+            border-color: #059669;
+        }
+        .card.queensforth:hover {
+            border-color: #047857;
+        }
+        .card.queensforth .icon {
+            color: #059669;
+            font-size: 60px;
+        }
+        .card .icon {
+            margin-bottom: 20px;
+        }
+        .card h2 {
+            font-size: 20px;
+            color: #1f2937;
+            margin-bottom: 10px;
+        }
+        .card p {
+            color: #6b7280;
+            font-size: 14px;
+            margin-bottom: 25px;
+        }
+        .card .btn {
+            display: block;
+            width: 100%;
+            padding: 12px 24px;
+            background: #1f2937;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: bold;
+            transition: background 0.3s;
+        }
+        .card.petromar .btn {
+            background: #1e40af;
+        }
+        .card.petromar .btn:hover {
+            background: #1e3a8a;
+        }
+        .card.queensforth .btn {
+            background: #059669;
+        }
+        .card.queensforth .btn:hover {
+            background: #047857;
+        }
+        .footer {
+            color: white;
+            margin-top: 40px;
+            font-size: 14px;
+            opacity: 0.9;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>⛽ Gas Voucher System</h1>
+        <p class="subtitle">Select your gas station to generate a voucher</p>
+
+        <div class="voucher-cards">
+            <a href="PetromarTrade_voucher.html" class="card petromar">
+                <div class="icon">🛢</div>
+                <h2>Petromar Trade & Service Center</h2>
+                <p>Your trusted fuel partner for quality gasoline and diesel</p>
+                <span class="btn">Generate Voucher →</span>
+            </a>
+
+            <a href="Queensforth_voucher.html" class="card queensforth">
+                <div class="icon">🔶</div>
+                <h2>Queensforth Corporation</h2>
+                <p>Fuel excellence since 1985 with reliable service</p>
+                <span class="btn">Generate Voucher →</span>
+            </a>
+        </div>
+
+        <div class="footer">
+            © 2024 Gas Voucher System | All rights reserved
+        </div>
+    </div>
+</body>
+</html>

@@ -103,6 +103,14 @@ $verifyUrl = SITE_URL . '/?page=verify-voucher&id=' . $voucher->id . '&hash=' . 
             font-family: 'Arial', sans-serif;
         }
 
+        .gas-station-title {
+            font-size: 16pt;
+            margin-bottom: 10px;
+            margin-left: 5px;
+            font-family: 'Arial', sans-serif;
+            text-align: left;
+        }
+
         /* Form Grid Table */
         .voucher-grid {
             width: 100%;
@@ -173,7 +181,7 @@ $verifyUrl = SITE_URL . '/?page=verify-voucher&id=' . $voucher->id . '&hash=' . 
         .sig-label {
             font-size: 9pt;
             color: #333;
-            margin-bottom: 25px;
+            margin-bottom: 40px;
             text-align: left;
         }
 
@@ -196,20 +204,21 @@ $verifyUrl = SITE_URL . '/?page=verify-voucher&id=' . $voucher->id . '&hash=' . 
         }
 
         @media print {
-            @page { size: portrait; margin: 5mm; }
+            @page { size: 8.5in 13in; margin: 5mm; }
             body { background: #fff; margin: 0; padding: 0; }
-            .page { padding: 2mm !important; min-height: auto !important; margin: 0 auto !important; width: 100% !important; }
+            .page { padding: 0 !important; min-height: auto !important; margin: 0 auto !important; width: 100% !important; }
             .no-print { display: none !important; }
             .grid-header { margin-bottom: 5px !important; }
-            .header-logo { width: 85px !important; }
-            .header-title { margin: 5px 0 5px !important; font-size: 15pt !important; }
-            .voucher-grid td, .voucher-grid th { padding: 4px 6px !important; font-size: 10pt !important; }
-            .auth-row { padding: 6px !important; }
-            .signatures-grid td { padding: 6px !important; }
-            .sig-label { margin-bottom: 15px !important; }
+            .header-logo { width: 80px !important; }
+            .header-title { margin: 5px 0 15px !important; font-size: 15pt !important; }
+            .gas-station-title { font-size: 14pt !important; margin-bottom: 5px !important; margin-left: 5px !important; }
+            .voucher-grid td, .voucher-grid th { padding: 3px 5px !important; font-size: 9.5pt !important; }
+            .auth-row { padding: 4px !important; font-size: 10pt !important; }
+            .signatures-grid td { padding: 4px !important; }
+            .sig-label { margin-bottom: 25px !important; }
             .distribution { margin-top: 5px !important; font-size: 8pt !important; }
-            img[src*="qr"] { width: 75px !important; height: 75px !important; }
-            .qr-container { margin-top: 5px !important; }
+            img[src*="qr"] { width: 70px !important; height: 70px !important; }
+            .qr-container { margin-top: 0 !important; }
         }
     </style>
 </head>
@@ -224,10 +233,20 @@ $verifyUrl = SITE_URL . '/?page=verify-voucher&id=' . $voucher->id . '&hash=' . 
 </div>
 
 <?php for ($copy = 1; $copy <= 2; $copy++): ?>
-<div class="page" style="border-bottom: <?= $copy == 1 ? '1px dashed #ccc' : 'none' ?>; padding-bottom: <?= $copy == 1 ? '10px' : '0' ?>; margin-bottom: <?= $copy == 1 ? '10px' : '0' ?>;">
+<div class="page">
 
-    <?php if ($copy == 1): ?>
-        <div class="no-print" style="position: absolute; bottom: 0; left: 0; width: 100%; text-align: center; font-size: 10px; color: #999;">✂️ - - - - - Cut Here - - - - - ✂️</div>
+    <?php if ($copy == 2): ?>
+    <!-- Cut Line Separator (between copy 1 and copy 2) -->
+    <div class="cut-line-separator" style="
+        text-align: center;
+        padding: 6px 0;
+        margin-bottom: 4px;
+        border-top: 1px dashed #999;
+        border-bottom: 1px dashed #999;
+        font-size: 9.5pt;
+        color: #666;
+        letter-spacing: 2px;
+    ">✂&nbsp;&nbsp;- - - - - - - - - - CUT HERE - - - - - - - - - - &nbsp;✂</div>
     <?php endif; ?>
 
     <!-- Formal Header -->
@@ -242,9 +261,17 @@ $verifyUrl = SITE_URL . '/?page=verify-voucher&id=' . $voucher->id . '&hash=' . 
     </div>
 
     <div class="header-title">G A S &nbsp; V O U C H E R</div>
+    <div class="gas-station-title">To <strong><?= e($voucher->gas_station ?? '_________________________') ?></strong></div>
 
     <!-- Main Spreadsheet Grid -->
     <table class="voucher-grid">
+        <!-- Authorization Row -->
+        <tr>
+            <td colspan="4" class="auth-row" style="text-align: left; padding-left: 20px !important;">
+                This is to authorize the bearer <strong><?= e(strtoupper($voucher->driver_name)) ?></strong> to withdraw and secure the following products and/or services charge to the Account of <strong style="font-style:normal;text-decoration:underline;">DICT Region 02</strong>.
+            </td>
+        </tr>
+
         <tr>
             <td class="label-cell">Date:</td>
             <td class="value-cell"><?= e(date('F j, Y', strtotime($voucher->request_date))) ?></td>
@@ -256,13 +283,6 @@ $verifyUrl = SITE_URL . '/?page=verify-voucher&id=' . $voucher->id . '&hash=' . 
             <td class="value-cell"><?= e(strtoupper($voucher->driver_name)) ?></td>
             <td class="label-cell">Vehicle Plate No.:</td>
             <td class="value-cell"><?= e(strtoupper($voucher->vehicle_plate)) ?></td>
-        </tr>
-        
-        <!-- Authorization Row -->
-        <tr>
-            <td colspan="4" class="auth-row" style="text-align: left; padding-left: 20px !important;">
-                This is to authorize the bearer <strong><?= e(strtoupper($voucher->driver_name)) ?></strong> to withdraw and secure the following products and/or services charge to the Account of <strong style="font-style:normal;text-decoration:underline;">DICT Region 02</strong>.
-            </td>
         </tr>
 
         <!-- Articles Headers -->

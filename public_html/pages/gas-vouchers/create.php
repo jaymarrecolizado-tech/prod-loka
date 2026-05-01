@@ -5,6 +5,7 @@
 
 requireAnyRole([ROLE_REQUESTER, ROLE_APPROVER, ROLE_MOTORPOOL, ROLE_ADMIN, ROLE_CHIEF_ADMIN_FINANCE]);
 
+
 $isEdit  = (get('action') === 'edit');
 $voucherId = (int) get('id', 0);
 $voucher = null;
@@ -79,6 +80,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $action       = post('form_action', 'save_draft');
     $driverName   = postSafe('driver_name', '', 100);
     $vehiclePlate = postSafe('vehicle_plate', '', 30);
+    $gasStation   = postSafe('gas_station', '', 150);
     $fuelType     = post('fuel_type', 'Diesel');
     $quantityMode = post('quantity_mode', 'liters'); // 'full' or 'liters'
     if ($quantityMode === 'full') {
@@ -102,9 +104,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $requestedReviewerId = (int) post('requested_reviewer_id', 0) ?: null;
     $requestedApproverId = (int) post('requested_approver_id', 0) ?: null;
 
+    $allowedStations = ['Petromar Trade and Service Center', 'Queensforth Corporation'];
+
     // Validation
     if (empty($driverName))   $errors[] = 'Driver name is required.';
     if (empty($vehiclePlate)) $errors[] = 'Vehicle plate number is required.';
+    if (empty($gasStation) || !in_array($gasStation, $allowedStations)) $errors[] = 'Please select a valid gas station.';
     if (empty($fuelType) || !in_array($fuelType, ['Gasoline', 'Diesel'])) $errors[] = 'Invalid fuel type.';
     if ($quantityMode !== 'full' && $quantity <= 0) $errors[] = 'Quantity must be greater than 0.';
     if (empty($unit))         $errors[] = 'Unit is required.';
@@ -127,6 +132,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'driver_name'        => $driverName,
             'vehicle_plate'      => strtoupper($vehiclePlate),
             'vehicle_id'         => $vehicleId,
+            'gas_station'        => $gasStation,
             'fuel_type'          => $fuelType,
             'quantity'           => $quantity,
             'unit'               => $unit,
@@ -279,8 +285,22 @@ require_once INCLUDES_PATH . '/header.php';
                                 <input type="date" name="request_date" class="form-control"
                                        value="<?= e($d ? $d->request_date : $defaultDate) ?>" required>
                             </div>
+                            <div class="col-md-<?= $isEdit ? '12' : '8' ?>">
+                                <label class="form-label fw-semibold">Gas Station <span class="text-danger">*</span></label>
+                                <select name="gas_station" class="form-select" required>
+                                    <option value="">-- Select Gas Station --</option>
+                                    <?php
+                                    $stations = ['Petromar Trade and Service Center', 'Queensforth Corporation'];
+                                    $currentStation = $d?->gas_station ?? '';
+                                    foreach ($stations as $st):
+                                    ?>
+                                    <option value="<?= e($st) ?>" <?= $currentStation === $st ? 'selected' : '' ?>><?= e($st) ?></option>
+                                    <?php endforeach; ?>
+                                </select>
+                                <div class="form-text">Select the gas station where the voucher will be used.</div>
+                            </div>
                             <?php if (!$isEdit): ?>
-                            <div class="col-md-4">
+                            <div class="col-md-6">
                                 <label class="form-label fw-semibold">Motorpool Head</label>
                                 <select name="requested_reviewer_id" class="form-select">
                                     <option value="">-- Auto-assign --</option>
@@ -290,7 +310,7 @@ require_once INCLUDES_PATH . '/header.php';
                                 </select>
                                 <div class="form-text">Select a preferred reviewer (optional)</div>
                             </div>
-                            <div class="col-md-4">
+                            <div class="col-md-6">
                                 <label class="form-label fw-semibold">Chief Admin & Finance</label>
                                 <select name="requested_approver_id" class="form-select">
                                     <option value="">-- Auto-assign --</option>
