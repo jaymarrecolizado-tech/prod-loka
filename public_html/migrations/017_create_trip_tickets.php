@@ -89,8 +89,8 @@ try {
         resolution_notes TEXT COMMENT 'Notes on resolution',
 
         -- Guard Verification
-        dispatch_guard_id INT UNSIGNED NOT NULL COMMENT 'Guard who dispatched',
-        arrival_guard_id INT UNSIGNED NOT NULL COMMENT 'Guard who verified arrival',
+        dispatch_guard_id INT UNSIGNED DEFAULT NULL COMMENT 'Guard who dispatched',
+        arrival_guard_id INT UNSIGNED DEFAULT NULL COMMENT 'Guard who verified arrival',
         guard_notes TEXT COMMENT 'Additional notes from guard',
 
         -- Status
