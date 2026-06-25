@@ -318,7 +318,7 @@ require_once INCLUDES_PATH . '/header.php';
             </div>
             <?php else: ?>
             <div class="table-responsive">
-                <table class="table table-hover data-table">
+                <table class="loka-table data-table">
                     <thead>
                         <tr>
                             <th>ID</th>

@@ -661,14 +661,8 @@ body {
 }
 
 /* ===== DATATABLE CUSTOMIZATION ===== */
-.dataTables_wrapper .dataTables_length,
-.dataTables_wrapper .dataTables_filter {
-    margin-bottom: 1rem;
-}
-
-.dataTables_wrapper .dataTables_info,
-.dataTables_wrapper .dataTables_paginate {
-    margin-top: 1rem;
+.dataTables-wrapper .flex.py-3 {
+    margin-bottom: 0.5rem;
 }
 
 /* ===== PRINT ===== */
@@ -676,9 +670,7 @@ body {
     .loka-sidebar,
     .navbar,
     .btn,
-    .dataTables_length,
-    .dataTables_filter,
-    .dataTables_paginate {
+    .dataTables-wrapper .flex {
         display: none !important;
     }
     

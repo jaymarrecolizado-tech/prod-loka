@@ -129,65 +129,208 @@ function initSidebar() {
 }
 
 /**
- * Initialize DataTables
+ * Initialize Tables — vanilla JS (replaces jQuery DataTables)
  */
 function initDataTables() {
-  const tables = document.querySelectorAll('.data-table')
-  tables.forEach(table => {
-    if (!$.fn.DataTable.isDataTable(table)) {
-      $(table).DataTable({
-        pageLength: 15,
-        lengthMenu: [
-          [10, 15, 25, 50, -1],
-          [10, 15, 25, 50, 'All'],
-        ],
-        language: {
-          search: '_INPUT_',
-          searchPlaceholder: 'Search...',
-          lengthMenu: 'Show _MENU_ entries',
-          info: 'Showing _START_ to _END_ of _TOTAL_ entries',
-          infoEmpty: 'No entries found',
-          emptyTable: 'No data available',
-          paginate: {
-            first: '<i class="bi bi-chevron-double-left"></i>',
-            previous: '<i class="bi bi-chevron-left"></i>',
-            next: '<i class="bi bi-chevron-right"></i>',
-            last: '<i class="bi bi-chevron-double-right"></i>',
-          },
-        },
-        dom:
-          '<"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"f>>' +
-          '<"row"<"col-sm-12"tr>>' +
-          '<"row"<"col-sm-12 col-md-5"i><"col-sm-12 col-md-7"p>>',
-        order: [[0, 'desc']],
-        responsive: {
-          details: {
-            type: 'column',
-            renderer: function (api, rowIdx, columns) {
-              var data = columns
-                .map(function (col) {
-                  return col.hidden
-                    ? '<li data-dt-row="' +
-                        col.rowIndex +
-                        '" data-dt-column="' +
-                        col.columnIndex +
-                        '">' +
-                        '<span class="dt-bold">' +
-                        col.title +
-                        ':</span> ' +
-                        col.data +
-                        '</li>'
-                    : ''
-                })
-                .join('')
-
-              return data ? $('<ul data-dt-row="' + rowIdx + '"/>').append(data) : false
-            },
-          },
-        },
-      })
-    }
+  document.querySelectorAll('.data-table').forEach(table => {
+    if (table._vanillaDT) return
+    table._vanillaDT = true
+    vanillaDataTable(table)
   })
+}
+
+function vanillaDataTable(table) {
+  const PAGE_LENGTH = 15
+  const tbody = table.querySelector('tbody')
+  const thead = table.querySelector('thead')
+  if (!tbody || !thead) return
+
+  const originalRows = Array.from(tbody.querySelectorAll('tr'))
+  const allRows = [...originalRows]
+
+  // --- state ---
+  let filteredRows = [...allRows]
+  let sortCol = -1
+  let sortDir = 'asc'
+  let currentPage = 1
+  let perPage = PAGE_LENGTH
+
+  // --- wrapper ---
+  const wrapper = document.createElement('div')
+  wrapper.className = 'dataTables-wrapper'
+  table.parentNode.insertBefore(wrapper, table)
+  wrapper.appendChild(table)
+
+  // --- controls bar ---
+  const controls = document.createElement('div')
+  controls.className = 'flex flex-wrap items-center justify-between gap-3 py-3'
+  wrapper.insertBefore(controls, table)
+
+  // Length selector
+  const lengthWrap = document.createElement('div')
+  lengthWrap.className = 'flex items-center gap-2 text-sm'
+  lengthWrap.innerHTML = '<span class="text-base-content/60">Show</span>'
+  const lengthSelect = document.createElement('select')
+  lengthSelect.className = 'select select-bordered select-sm'
+  ;[10, 15, 25, 50].forEach(n => {
+    const o = document.createElement('option')
+    o.value = n
+    o.textContent = n
+    if (n === perPage) o.selected = true
+    lengthSelect.appendChild(o)
+  })
+  const allOpt = document.createElement('option')
+  allOpt.value = -1
+  allOpt.textContent = 'All'
+  lengthSelect.appendChild(allOpt)
+  lengthSelect.addEventListener('change', () => {
+    perPage = parseInt(lengthSelect.value)
+    currentPage = 1
+    render()
+  })
+  lengthWrap.appendChild(lengthSelect)
+  lengthWrap.insertAdjacentText('beforeend', ' entries')
+  controls.appendChild(lengthWrap)
+
+  // Search
+  const searchWrap = document.createElement('div')
+  searchWrap.className = 'form-control'
+  const searchInput = document.createElement('input')
+  searchInput.type = 'text'
+  searchInput.placeholder = 'Search...'
+  searchInput.className = 'input input-bordered input-sm w-full max-w-xs'
+  searchInput.addEventListener('input', () => {
+    const q = searchInput.value.toLowerCase()
+    filteredRows = allRows.filter(row => row.textContent.toLowerCase().includes(q))
+    currentPage = 1
+    render()
+  })
+  searchWrap.appendChild(searchInput)
+  controls.appendChild(searchWrap)
+
+  // --- info + pagination footer ---
+  const footer = document.createElement('div')
+  footer.className = 'flex flex-wrap items-center justify-between gap-3 py-3'
+  wrapper.appendChild(footer)
+
+  const infoText = document.createElement('div')
+  infoText.className = 'text-sm text-base-content/60'
+  footer.appendChild(infoText)
+
+  const pagNav = document.createElement('div')
+  pagNav.className = 'join'
+  footer.appendChild(pagNav)
+
+  // --- sorting ---
+  const headers = thead.querySelectorAll('th')
+  headers.forEach((th, idx) => {
+    th.classList.add('cursor-pointer', 'select-none', 'hover:bg-base-200', 'transition-colors')
+    th.addEventListener('click', () => {
+      if (sortCol === idx) {
+        sortDir = sortDir === 'asc' ? 'desc' : 'asc'
+      } else {
+        sortCol = idx
+        sortDir = 'asc'
+      }
+      headers.forEach(h => h.classList.remove('bg-base-200'))
+      th.classList.add('bg-base-200')
+      render()
+    })
+  })
+
+  // --- render ---
+  function sortRows(rows) {
+    if (sortCol < 0) return rows
+    return [...rows].sort((a, b) => {
+      const aVal = (a.children[sortCol]?.textContent || '').trim()
+      const bVal = (b.children[sortCol]?.textContent || '').trim()
+      const aNum = parseFloat(aVal.replace(/[^0-9.]/g, ''))
+      const bNum = parseFloat(bVal.replace(/[^0-9.]/g, ''))
+      if (!isNaN(aNum) && !isNaN(bNum)) {
+        return sortDir === 'asc' ? aNum - bNum : bNum - aNum
+      }
+      return sortDir === 'asc' ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal)
+    })
+  }
+
+  function render() {
+    const sorted = sortRows(filteredRows)
+    const total = sorted.length
+    const totalPages = perPage < 0 ? 1 : Math.ceil(total / perPage)
+    if (currentPage > totalPages) currentPage = totalPages
+    const start = perPage < 0 ? 0 : (currentPage - 1) * perPage
+    const end = perPage < 0 ? total : start + perPage
+    const pageRows = sorted.slice(start, end)
+
+    // re-render tbody
+    tbody.innerHTML = ''
+    if (pageRows.length === 0) {
+      const tr = document.createElement('tr')
+      const td = document.createElement('td')
+      td.colSpan = headers.length
+      td.className = 'py-8 text-center text-base-content/50'
+      td.textContent = 'No data available'
+      tr.appendChild(td)
+      tbody.appendChild(tr)
+    } else {
+      pageRows.forEach(row => tbody.appendChild(row))
+    }
+
+    // info text
+    if (total === 0) {
+      infoText.textContent = 'No entries found'
+    } else {
+      infoText.textContent = `Showing ${start + 1} to ${Math.min(end, total)} of ${total} entries`
+    }
+
+    // pagination
+    pagNav.innerHTML = ''
+    if (totalPages > 1) {
+      const addPageBtn = (label, page, disabled, active) => {
+        const btn = document.createElement('button')
+        btn.className = `join-item btn btn-sm ${active ? 'btn-active' : ''}`
+        btn.innerHTML = label
+        btn.disabled = disabled
+        if (!disabled && !active)
+          btn.addEventListener('click', () => {
+            currentPage = page
+            render()
+          })
+        pagNav.appendChild(btn)
+      }
+      addPageBtn('&laquo;', 1, currentPage === 1, false)
+      addPageBtn('&lsaquo;', currentPage - 1, currentPage === 1, false)
+      const maxVisible = 5
+      let startP = Math.max(1, currentPage - Math.floor(maxVisible / 2))
+      let endP = Math.min(totalPages, startP + maxVisible - 1)
+      if (endP - startP + 1 < maxVisible) startP = Math.max(1, endP - maxVisible + 1)
+      if (startP > 1) {
+        addPageBtn('1', 1, false, false)
+        if (startP > 2) {
+          const dots = document.createElement('span')
+          dots.className = 'join-item btn btn-sm btn-disabled'
+          dots.textContent = '...'
+          pagNav.appendChild(dots)
+        }
+      }
+      for (let i = startP; i <= endP; i++) {
+        addPageBtn(String(i), i, false, i === currentPage)
+      }
+      if (endP < totalPages) {
+        if (endP < totalPages - 1) {
+          const dots = document.createElement('span')
+          dots.className = 'join-item btn btn-sm btn-disabled'
+          dots.textContent = '...'
+          pagNav.appendChild(dots)
+        }
+        addPageBtn(String(totalPages), totalPages, false, false)
+      }
+      addPageBtn('&rsaquo;', currentPage + 1, currentPage === totalPages, false)
+      addPageBtn('&raquo;', totalPages, currentPage === totalPages, false)
+    }
+  }
+
+  render()
 }
 
 /**

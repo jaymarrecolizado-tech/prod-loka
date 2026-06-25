@@ -36,7 +36,7 @@ require_once INCLUDES_PATH . '/header.php';
             <div class="empty-state"><i class="bi bi-building"></i><h5>No departments found</h5></div>
             <?php else: ?>
             <div class="table-responsive">
-                <table class="table table-hover data-table">
+                <table class="loka-table data-table">
                     <thead><tr><th>Name</th><th>Description</th><th>Head</th><th>Users</th><th>Status</th><th>Actions</th></tr></thead>
                     <tbody>
                         <?php foreach ($departments as $dept): ?>

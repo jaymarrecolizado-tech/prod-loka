@@ -86,7 +86,7 @@ require_once INCLUDES_PATH . '/header.php';
     <div class="card table-card">
         <div class="card-body">
             <div class="table-responsive">
-                <table class="table table-hover data-table">
+                <table class="loka-table data-table">
                     <thead>
                         <tr><th>Date/Time</th><th>User</th><th>Action</th><th>Entity</th><th>IP Address</th></tr>
                     </thead>
