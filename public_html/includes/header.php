@@ -34,23 +34,23 @@
 </head>
 <body>
     <!-- Top Navigation -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary fixed-top">
+    <nav class="navbar navbar-dark bg-primary fixed-top">
         <div class="container-fluid">
-            <!-- Sidebar Toggle -->
-            <button class="btn btn-primary me-2" type="button" id="sidebarToggle" aria-label="Toggle navigation menu">
-                <i class="bi bi-list"></i>
+            <!-- Sidebar Toggle (single hamburger for main nav) -->
+            <button class="btn btn-outline-light me-2" type="button" id="sidebarToggle" aria-label="Toggle navigation menu">
+                <i class="bi bi-list fs-5"></i>
             </button>
             
             <!-- Brand -->
-            <a class="navbar-brand" href="<?= APP_URL ?>">
+            <a class="navbar-brand me-auto" href="<?= APP_URL ?>">
                 <i class="bi bi-truck me-2"></i><?= APP_NAME ?>
             </a>
             
-            <!-- Right Side -->
-            <div class="ms-auto d-flex align-items-center">
+            <!-- Right Side (always visible) -->
+            <div class="d-flex align-items-center">
                 <!-- Notifications -->
                 <div class="dropdown me-3">
-                    <a class="nav-link text-white" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false" id="notificationDropdown">
+                    <a class="nav-link text-white p-1" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false" id="notificationDropdown">
                         <div class="position-relative d-inline-block">
                             <i class="bi bi-bell fs-5"></i>
                             <?php $unreadCount = unreadNotificationCount(); ?>
@@ -88,11 +88,11 @@
                 
                 <!-- User Dropdown -->
                 <div class="dropdown">
-                    <a class="nav-link dropdown-toggle text-white d-flex align-items-center" href="#" data-bs-toggle="dropdown">
-                        <div class="avatar-circle me-2">
+                    <a class="nav-link dropdown-toggle text-white d-flex align-items-center p-1" href="#" data-bs-toggle="dropdown">
+                        <div class="avatar-circle">
                             <?= strtoupper(substr(currentUser()->name ?? 'U', 0, 1)) ?>
                         </div>
-                        <span class="d-none d-md-inline"><?= e(currentUser()->name ?? 'User') ?></span>
+                        <span class="d-none d-md-inline ms-2"><?= e(currentUser()->name ?? 'User') ?></span>
                     </a>
                     <ul class="dropdown-menu dropdown-menu-end">
                         <li><h6 class="dropdown-header"><?= e(currentUser()->email ?? '') ?></h6></li>
