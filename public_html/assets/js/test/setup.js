@@ -3,10 +3,10 @@ import { config } from '@vue/test-utils'
 
 // Global test setup
 config.global.mocks = {
-  $t: (key) => key,
+  $t: key => key,
   $tc: (key, count) => `${key} (${count})`,
-  $d: (date) => date,
-  $n: (num) => num,
+  $d: date => date,
+  $n: num => num,
 }
 
 // Mock window.location

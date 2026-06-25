@@ -6,13 +6,13 @@ const apiClient = axios.create({
   timeout: 30000,
   headers: {
     'Content-Type': 'application/json',
-    'Accept': 'application/json',
+    Accept: 'application/json',
   },
 })
 
 // Request interceptor
 apiClient.interceptors.request.use(
-  (config) => {
+  config => {
     // Add auth token if available
     const token = localStorage.getItem('auth_token')
     if (token) {
@@ -29,17 +29,17 @@ apiClient.interceptors.request.use(
 
     return config
   },
-  (error) => {
+  error => {
     return Promise.reject(error)
   }
 )
 
 // Response interceptor
 apiClient.interceptors.response.use(
-  (response) => {
+  response => {
     return response.data
   },
-  (error) => {
+  error => {
     // Handle common errors
     if (error.response) {
       const { status, data } = error.response

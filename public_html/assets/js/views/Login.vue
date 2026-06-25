@@ -1,6 +1,6 @@
 <template>
-  <div class="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-    <div class="max-w-md w-full space-y-8">
+  <div class="flex min-h-screen items-center justify-center bg-gray-50 px-4 py-12 sm:px-6 lg:px-8">
+    <div class="w-full max-w-md space-y-8">
       <div>
         <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
           Sign in to your account
@@ -10,7 +10,7 @@
         <div v-if="error" class="rounded-md bg-red-50 p-4">
           <p class="text-sm text-red-800">{{ error }}</p>
         </div>
-        <div class="rounded-md shadow-sm -space-y-px">
+        <div class="-space-y-px rounded-md shadow-sm">
           <div>
             <label for="email" class="sr-only">Email address</label>
             <input
@@ -19,7 +19,7 @@
               name="email"
               type="email"
               required
-              class="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-primary-500 focus:border-primary-500 focus:z-10 sm:text-sm"
+              class="relative block w-full appearance-none rounded-none rounded-t-md border border-gray-300 px-3 py-2 text-gray-900 placeholder-gray-500 focus:z-10 focus:border-primary-500 focus:outline-none focus:ring-primary-500 sm:text-sm"
               placeholder="Email address"
             />
           </div>
@@ -31,7 +31,7 @@
               name="password"
               type="password"
               required
-              class="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-primary-500 focus:border-primary-500 focus:z-10 sm:text-sm"
+              class="relative block w-full appearance-none rounded-none rounded-b-md border border-gray-300 px-3 py-2 text-gray-900 placeholder-gray-500 focus:z-10 focus:border-primary-500 focus:outline-none focus:ring-primary-500 sm:text-sm"
               placeholder="Password"
             />
           </div>
@@ -41,7 +41,7 @@
           <button
             type="submit"
             :disabled="isLoading"
-            class="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 disabled:opacity-50 disabled:cursor-not-allowed"
+            class="group relative flex w-full justify-center rounded-md border border-transparent bg-primary-600 px-4 py-2 text-sm font-medium text-white hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
           >
             <span v-if="!isLoading">Sign in</span>
             <span v-else>Signing in...</span>

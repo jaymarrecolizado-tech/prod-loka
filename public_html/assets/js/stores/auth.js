@@ -16,7 +16,7 @@ export const useAuthStore = defineStore('auth', () => {
   const userEmail = computed(() => user.value?.email || '')
 
   // Actions
-  const login = async (credentials) => {
+  const login = async credentials => {
     isLoading.value = true
     error.value = null
     try {
@@ -61,17 +61,17 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
-  const hasPermission = (permission) => {
+  const hasPermission = permission => {
     if (!user.value?.permissions) return false
     return user.value.permissions.includes(permission)
   }
 
-  const hasRole = (role) => {
+  const hasRole = role => {
     if (!user.value?.role) return false
     return user.value.role === role
   }
 
-  const hasAnyRole = (roles) => {
+  const hasAnyRole = roles => {
     if (!user.value?.role) return false
     return roles.includes(user.value.role)
   }

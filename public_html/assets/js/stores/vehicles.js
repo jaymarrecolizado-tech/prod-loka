@@ -21,8 +21,8 @@ export const useVehiclesStore = defineStore('vehicles', () => {
   })
 
   // Computed
-  const activeVehicles = computed(() => vehicles.value.filter((v) => v.status === 'active'))
-  const inactiveVehicles = computed(() => vehicles.value.filter((v) => v.status !== 'active'))
+  const activeVehicles = computed(() => vehicles.value.filter(v => v.status === 'active'))
+  const inactiveVehicles = computed(() => vehicles.value.filter(v => v.status !== 'active'))
   const vehicleCount = computed(() => pagination.value.total)
 
   // Actions
@@ -52,7 +52,7 @@ export const useVehiclesStore = defineStore('vehicles', () => {
     }
   }
 
-  const fetchVehicle = async (id) => {
+  const fetchVehicle = async id => {
     isLoading.value = true
     error.value = null
     try {
@@ -66,7 +66,7 @@ export const useVehiclesStore = defineStore('vehicles', () => {
     }
   }
 
-  const createVehicle = async (data) => {
+  const createVehicle = async data => {
     isLoading.value = true
     error.value = null
     try {
@@ -86,7 +86,7 @@ export const useVehiclesStore = defineStore('vehicles', () => {
     error.value = null
     try {
       const vehicle = await vehiclesApi.update(id, data)
-      const index = vehicles.value.findIndex((v) => v.id === id)
+      const index = vehicles.value.findIndex(v => v.id === id)
       if (index !== -1) {
         vehicles.value[index] = vehicle
       }
@@ -102,12 +102,12 @@ export const useVehiclesStore = defineStore('vehicles', () => {
     }
   }
 
-  const deleteVehicle = async (id) => {
+  const deleteVehicle = async id => {
     isLoading.value = true
     error.value = null
     try {
       await vehiclesApi.delete(id)
-      vehicles.value = vehicles.value.filter((v) => v.id !== id)
+      vehicles.value = vehicles.value.filter(v => v.id !== id)
       if (currentVehicle.value?.id === id) {
         currentVehicle.value = null
       }
@@ -124,7 +124,7 @@ export const useVehiclesStore = defineStore('vehicles', () => {
     error.value = null
     try {
       const vehicle = await vehiclesApi.updateStatus(id, status)
-      const index = vehicles.value.findIndex((v) => v.id === id)
+      const index = vehicles.value.findIndex(v => v.id === id)
       if (index !== -1) {
         vehicles.value[index] = vehicle
       }
@@ -137,16 +137,16 @@ export const useVehiclesStore = defineStore('vehicles', () => {
     }
   }
 
-  const setFilters = (newFilters) => {
+  const setFilters = newFilters => {
     filters.value = { ...filters.value, ...newFilters }
     pagination.value.page = 1
   }
 
-  const setPage = (page) => {
+  const setPage = page => {
     pagination.value.page = page
   }
 
-  const setPerPage = (perPage) => {
+  const setPerPage = perPage => {
     pagination.value.perPage = perPage
     pagination.value.page = 1
   }

@@ -3,6 +3,7 @@ import pluginVue from 'eslint-plugin-vue'
 import * as parserVue from 'vue-eslint-parser'
 import configPrettier from 'eslint-config-prettier'
 import pluginPrettier from 'eslint-plugin-prettier'
+import globals from 'globals'
 
 export default [
   {
@@ -12,7 +13,15 @@ export default [
 
   {
     name: 'app/files-to-ignore',
-    ignores: ['**/dist/**', '**/dist-ssr/**', '**/coverage/**', 'node_modules/**'],
+    ignores: [
+      '**/dist/**',
+      '**/dist-ssr/**',
+      '**/coverage/**',
+      'node_modules/**',
+      'vendor/**',
+      'assets/dist/**',
+      'assets/js/all.min.js',
+    ],
   },
 
   js.configs.recommended,
@@ -20,6 +29,23 @@ export default [
   configPrettier,
 
   {
+    name: 'app/node-configs',
+    files: ['**/*.config.js', 'test/**/*.js', 'assets/js/test/**/*.js', 'cron/**/*.js'],
+    languageOptions: {
+      globals: {
+        ...globals.node,
+      },
+    },
+    plugins: {
+      prettier: pluginPrettier,
+    },
+    rules: {
+      'prettier/prettier': 'warn',
+    },
+  },
+
+  {
+    name: 'app/source-files',
     plugins: {
       prettier: pluginPrettier,
     },
@@ -29,6 +55,13 @@ export default [
       'no-debugger': process.env.NODE_ENV === 'production' ? 'error' : 'off',
       'vue/multi-word-component-names': 'off',
       'vue/no-v-html': 'warn',
+      'no-unused-vars': [
+        'warn',
+        {
+          varsIgnorePattern:
+            '^(fetchApi|formatCurrency|formatDate|formatDateTime|copyToClipboard|printElement|exportTableToCSV|api|viewAll)$',
+        },
+      ],
     },
     languageOptions: {
       parser: parserVue,
@@ -47,6 +80,11 @@ export default [
         fetch: 'readonly',
         URL: 'readonly',
         FormData: 'readonly',
+        // Legacy globals (loaded via script tags)
+        $: 'readonly',
+        jQuery: 'readonly',
+        flatpickr: 'readonly',
+        bootstrap: 'readonly',
         // Custom globals
         LOKA: 'readonly',
         API_BASE: 'readonly',

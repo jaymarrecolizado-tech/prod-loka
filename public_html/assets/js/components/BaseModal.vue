@@ -16,7 +16,7 @@
         aria-modal="true"
       >
         <div
-          class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0"
+          class="flex min-h-screen items-end justify-center px-4 pb-20 pt-4 text-center sm:block sm:p-0"
         >
           <!-- Background overlay -->
           <Transition
@@ -35,7 +35,7 @@
           </Transition>
 
           <!-- Center modal -->
-          <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">
+          <span class="hidden sm:inline-block sm:h-screen sm:align-middle" aria-hidden="true">
             &#8203;
           </span>
 
@@ -49,14 +49,14 @@
           >
             <div
               v-if="isOpen"
-              class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full"
+              class="inline-block transform overflow-hidden rounded-lg bg-white text-left align-bottom shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg sm:align-middle"
             >
               <!-- Header -->
-              <div v-if="$slots.header || title" class="bg-gray-50 px-4 py-3 sm:px-6 border-b">
+              <div v-if="$slots.header || title" class="border-b bg-gray-50 px-4 py-3 sm:px-6">
                 <div class="flex items-center justify-between">
                   <h3
                     v-if="title"
-                    class="text-lg leading-6 font-medium text-gray-900"
+                    class="text-lg font-medium leading-6 text-gray-900"
                     id="modal-title"
                   >
                     {{ title }}
@@ -87,7 +87,7 @@
               <!-- Footer -->
               <div
                 v-if="$slots.footer"
-                class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse border-t"
+                class="border-t bg-gray-50 px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6"
               >
                 <slot name="footer" />
               </div>
@@ -129,20 +129,23 @@ const close = () => {
   }
 }
 
-const handleEsc = (event) => {
+const handleEsc = event => {
   if (props.isOpen && props.closeOnEsc && event.key === 'Escape') {
     emit('close')
   }
 }
 
-watch(() => props.isOpen, (newValue) => {
-  if (newValue) {
-    emit('open')
-    document.body.style.overflow = 'hidden'
-  } else {
-    document.body.style.overflow = ''
+watch(
+  () => props.isOpen,
+  newValue => {
+    if (newValue) {
+      emit('open')
+      document.body.style.overflow = 'hidden'
+    } else {
+      document.body.style.overflow = ''
+    }
   }
-})
+)
 
 onMounted(() => {
   document.addEventListener('keydown', handleEsc)

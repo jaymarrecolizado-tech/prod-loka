@@ -4,7 +4,7 @@ export function useDebounce(value, delay = 300) {
   const debouncedValue = ref(value.value)
   let timeout
 
-  watch(value, (newValue) => {
+  watch(value, newValue => {
     clearTimeout(timeout)
     timeout = setTimeout(() => {
       debouncedValue.value = newValue

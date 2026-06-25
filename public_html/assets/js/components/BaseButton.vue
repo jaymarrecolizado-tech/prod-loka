@@ -7,19 +7,12 @@
   >
     <svg
       v-if="isLoading"
-      class="animate-spin -ml-1 mr-2 h-4 w-4"
+      class="-ml-1 mr-2 h-4 w-4 animate-spin"
       xmlns="http://www.w3.org/2000/svg"
       fill="none"
       viewBox="0 0 24 24"
     >
-      <circle
-        class="opacity-25"
-        cx="12"
-        cy="12"
-        r="10"
-        stroke="currentColor"
-        stroke-width="4"
-      />
+      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
       <path
         class="opacity-75"
         fill="currentColor"
@@ -37,17 +30,17 @@ const props = defineProps({
   type: {
     type: String,
     default: 'button',
-    validator: (value) => ['button', 'submit', 'reset'].includes(value),
+    validator: value => ['button', 'submit', 'reset'].includes(value),
   },
   variant: {
     type: String,
     default: 'primary',
-    validator: (value) => ['primary', 'secondary', 'danger', 'success', 'ghost'].includes(value),
+    validator: value => ['primary', 'secondary', 'danger', 'success', 'ghost'].includes(value),
   },
   size: {
     type: String,
     default: 'md',
-    validator: (value) => ['sm', 'md', 'lg'].includes(value),
+    validator: value => ['sm', 'md', 'lg'].includes(value),
   },
   isLoading: Boolean,
   disabled: Boolean,
@@ -57,7 +50,8 @@ const props = defineProps({
 const emit = defineEmits(['click'])
 
 const buttonClasses = computed(() => {
-  const base = 'inline-flex items-center justify-center font-medium rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 transition-colors duration-200'
+  const base =
+    'inline-flex items-center justify-center font-medium rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 transition-colors duration-200'
 
   const variants = {
     primary:
@@ -86,7 +80,7 @@ const buttonClasses = computed(() => {
   ].join(' ')
 })
 
-const handleClick = (event) => {
+const handleClick = event => {
   if (!props.isLoading && !props.disabled) {
     emit('click', event)
   }

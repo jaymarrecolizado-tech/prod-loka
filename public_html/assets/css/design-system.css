@@ -1,0 +1,143 @@
+/**
+ * LOKA - Modern Design System Extensions
+ * Complements Tailwind CSS + DaisyUI for the LOKA UI refresh.
+ */
+
+@layer components {
+  /* Page container with responsive padding */
+  .loka-page {
+    @apply w-full px-4 py-4 sm:px-6 lg:px-8;
+  }
+
+  /* Elevated card surface */
+  .loka-card {
+    @apply rounded-2xl border border-base-200 bg-white shadow-card transition-shadow duration-200;
+  }
+
+  .loka-card:hover {
+    @apply shadow-elevated;
+  }
+
+  /* Glassmorphism panel */
+  .loka-glass {
+    @apply bg-white/80 backdrop-blur-xl;
+  }
+
+  /* Modern KPI stat card */
+  .loka-stat-card {
+    @apply loka-card p-5 sm:p-6;
+  }
+
+  .loka-stat-card .loka-stat-value {
+    @apply text-3xl font-bold tracking-tight text-base-content sm:text-4xl;
+  }
+
+  .loka-stat-card .loka-stat-label {
+    @apply mt-1 text-sm font-medium text-base-content/60;
+  }
+
+  .loka-stat-card .loka-stat-icon {
+    @apply flex h-12 w-12 items-center justify-center rounded-xl text-xl;
+  }
+
+  /* Empty state block */
+  .loka-empty {
+    @apply flex flex-col items-center justify-center py-10 text-center text-base-content/50;
+  }
+
+  .loka-empty i {
+    @apply mb-3 text-4xl opacity-60;
+  }
+
+  /* Page header */
+  .loka-page-header {
+    @apply mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between;
+  }
+
+  .loka-page-header h1 {
+    @apply text-2xl font-bold tracking-tight text-base-content;
+  }
+
+  .loka-page-header p {
+    @apply text-sm text-base-content/60;
+  }
+
+  /* Icon button */
+  .loka-btn-icon {
+    @apply inline-flex h-10 w-10 items-center justify-center rounded-xl transition-colors;
+  }
+
+  .loka-btn-icon:hover {
+    @apply bg-base-200;
+  }
+
+  /* Avatar */
+  .loka-avatar {
+    @apply flex h-9 w-9 items-center justify-center rounded-full text-sm font-semibold text-white shadow-sm;
+  }
+
+  /* Section label */
+  .loka-section-label {
+    @apply px-4 py-2 text-xs font-bold uppercase tracking-wider text-base-content/40;
+  }
+
+  /* Modern nav link (used inside sidebar) */
+  .loka-nav-link {
+    @apply relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-base-content/70 transition-all duration-200;
+  }
+
+  .loka-nav-link:hover {
+    @apply bg-base-200 text-base-content;
+  }
+
+  .loka-nav-link.active {
+    @apply bg-primary/10 text-primary;
+  }
+
+  .loka-nav-link.active::before {
+    content: '';
+    @apply absolute left-0 top-1/2 h-6 w-1 -translate-y-1/2 rounded-r-full bg-primary;
+  }
+
+  /* Table card wrapper */
+  .loka-table-card {
+    @apply loka-card overflow-hidden;
+  }
+
+  .loka-table-card .loka-table-header {
+    @apply flex items-center justify-between border-b border-base-200 px-5 py-4;
+  }
+
+  .loka-table-card .loka-table-header h5 {
+    @apply font-semibold text-base-content;
+  }
+
+  /* Modern badge (no conflict with Bootstrap) */
+  .loka-badge {
+    @apply inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold;
+  }
+}
+
+@layer utilities {
+  /* Text balance for headings */
+  .loka-text-balance {
+    text-wrap: balance;
+  }
+
+  /* Hide scrollbar but keep functionality */
+  .loka-scrollbar-none {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .loka-scrollbar-none::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Smooth width transitions */
+  .loka-transition-width {
+    transition-property: width, margin-left, margin-right;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    transition-duration: 200ms;
+  }
+}

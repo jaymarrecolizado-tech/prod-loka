@@ -50,23 +50,23 @@ export default {
         mono: ['JetBrains Mono', 'Consolas', 'monospace'],
       },
       spacing: {
-        '18': '4.5rem',
-        '88': '22rem',
-        '128': '32rem',
-        'navbar': '3.5rem',
-        'sidebar': '16rem',
+        18: '4.5rem',
+        88: '22rem',
+        128: '32rem',
+        navbar: '3.5rem',
+        sidebar: '16rem',
       },
       borderRadius: {
         '2xl': '1rem',
         '3xl': '1.5rem',
       },
       boxShadow: {
-        'soft': '0 2px 15px -3px rgba(0, 0, 0, 0.07), 0 10px 20px -2px rgba(0, 0, 0, 0.04)',
-        'card': '0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05)',
-        'elevated': '0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -4px rgba(0, 0, 0, 0.05)',
+        soft: '0 2px 15px -3px rgba(0, 0, 0, 0.07), 0 10px 20px -2px rgba(0, 0, 0, 0.04)',
+        card: '0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05)',
+        elevated: '0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -4px rgba(0, 0, 0, 0.05)',
       },
       transitionTimingFunction: {
-        'soft': 'cubic-bezier(0.4, 0, 0.2, 1)',
+        soft: 'cubic-bezier(0.4, 0, 0.2, 1)',
       },
       animation: {
         'fade-in': 'fadeIn 0.3s ease-in-out',
@@ -91,11 +91,7 @@ export default {
       },
     },
   },
-  plugins: [
-    require('@tailwindcss/forms'),
-    require('@tailwindcss/typography'),
-    require('daisyui'),
-  ],
+  plugins: [require('@tailwindcss/forms'), require('@tailwindcss/typography'), require('daisyui')],
 
   daisyui: {
     themes: ['light', 'dark'],

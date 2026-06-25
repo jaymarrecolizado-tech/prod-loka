@@ -20,10 +20,10 @@ export function useNotification() {
     }
   }
 
-  const markAsRead = async (id) => {
+  const markAsRead = async id => {
     try {
       await notificationsApi.markAsRead(id)
-      const notification = notifications.value.find((n) => n.id === id)
+      const notification = notifications.value.find(n => n.id === id)
       if (notification) {
         notification.read_at = new Date().toISOString()
       }
@@ -36,7 +36,7 @@ export function useNotification() {
   const markAllAsRead = async () => {
     try {
       await notificationsApi.markAllAsRead()
-      notifications.value.forEach((n) => {
+      notifications.value.forEach(n => {
         if (!n.read_at) {
           n.read_at = new Date().toISOString()
         }

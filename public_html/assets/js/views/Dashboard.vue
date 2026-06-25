@@ -6,26 +6,26 @@
     </div>
 
     <!-- Stats Cards -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+    <div class="mb-8 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
       <div
         v-for="stat in stats"
         :key="stat.label"
-        class="bg-white rounded-lg shadow p-6 border-l-4"
+        class="rounded-lg border-l-4 bg-white p-6 shadow"
         :class="stat.borderColor"
       >
         <div class="flex items-center justify-between">
           <div>
             <p class="text-sm text-gray-600">{{ stat.label }}</p>
-            <p class="text-2xl font-bold mt-1" :class="stat.textColor">{{ stat.value }}</p>
+            <p class="mt-1 text-2xl font-bold" :class="stat.textColor">{{ stat.value }}</p>
           </div>
-          <component :is="stat.icon" class="w-8 h-8" :class="stat.iconColor" />
+          <component :is="stat.icon" class="h-8 w-8" :class="stat.iconColor" />
         </div>
       </div>
     </div>
 
     <!-- Recent Activity -->
-    <div class="bg-white rounded-lg shadow p-6">
-      <h2 class="text-lg font-semibold text-gray-900 mb-4">Recent Activity</h2>
+    <div class="rounded-lg bg-white p-6 shadow">
+      <h2 class="mb-4 text-lg font-semibold text-gray-900">Recent Activity</h2>
       <p class="text-gray-500">Loading recent activity...</p>
     </div>
   </div>
@@ -47,7 +47,7 @@ const stats = ref([
     borderColor: 'border-blue-500',
   },
   {
-    label: 'Today\'s Trips',
+    label: "Today's Trips",
     value: '12',
     icon: 'MapIcon',
     textColor: 'text-green-600',

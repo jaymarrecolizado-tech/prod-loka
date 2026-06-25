@@ -7,8 +7,8 @@
             v-for="column in columns"
             :key="column.key"
             :class="[
-              'px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider',
-              column.sortable ? 'cursor-pointer hover:bg-gray-100' : ''
+              'px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500',
+              column.sortable ? 'cursor-pointer hover:bg-gray-100' : '',
             ]"
             @click="column.sortable ? sortBy(column.key) : null"
           >
@@ -17,7 +17,7 @@
               <span v-if="column.sortable && sortKey === column.key">
                 <svg
                   v-if="sortDirection === 'asc'"
-                  class="w-4 h-4"
+                  class="h-4 w-4"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -29,7 +29,7 @@
                     d="M5 15l7-7 7 7"
                   />
                 </svg>
-                <svg v-else class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg v-else class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path
                     stroke-linecap="round"
                     stroke-linejoin="round"
@@ -40,31 +40,40 @@
               </span>
             </div>
           </th>
-          <th v-if="$slots.actions" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+          <th
+            v-if="$slots.actions"
+            class="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500"
+          >
             Actions
           </th>
         </tr>
       </thead>
-      <tbody class="bg-white divide-y divide-gray-200">
+      <tbody class="divide-y divide-gray-200 bg-white">
         <tr v-if="isLoading">
-          <td :colspan="columns.length + ($slots.actions ? 1 : 0)" class="px-6 py-4 text-center text-gray-500">
+          <td
+            :colspan="columns.length + ($slots.actions ? 1 : 0)"
+            class="px-6 py-4 text-center text-gray-500"
+          >
             Loading...
           </td>
         </tr>
         <tr v-else-if="!data.length">
-          <td :colspan="columns.length + ($slots.actions ? 1 : 0)" class="px-6 py-4 text-center text-gray-500">
+          <td
+            :colspan="columns.length + ($slots.actions ? 1 : 0)"
+            class="px-6 py-4 text-center text-gray-500"
+          >
             {{ emptyMessage }}
           </td>
         </tr>
         <tr
           v-for="(item, index) in paginatedData"
           :key="item.id || index"
-          class="hover:bg-gray-50 transition-colors"
+          class="transition-colors hover:bg-gray-50"
         >
           <td
             v-for="column in columns"
             :key="column.key"
-            class="px-6 py-4 whitespace-nowrap text-sm text-gray-900"
+            class="whitespace-nowrap px-6 py-4 text-sm text-gray-900"
           >
             <slot
               v-if="$slots[`cell-${column.key}`]"
@@ -74,7 +83,10 @@
             />
             <span v-else>{{ formatValue(getItemValue(item, column.key), column) }}</span>
           </td>
-          <td v-if="$slots.actions" class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+          <td
+            v-if="$slots.actions"
+            class="whitespace-nowrap px-6 py-4 text-right text-sm font-medium"
+          >
             <slot name="actions" :record="item" />
           </td>
         </tr>
@@ -82,24 +94,27 @@
     </table>
 
     <!-- Pagination -->
-    <div v-if="showPagination && totalPages > 1" class="bg-white px-4 py-3 border-t flex items-center justify-between">
-      <div class="flex-1 flex justify-between sm:hidden">
+    <div
+      v-if="showPagination && totalPages > 1"
+      class="flex items-center justify-between border-t bg-white px-4 py-3"
+    >
+      <div class="flex flex-1 justify-between sm:hidden">
         <button
           :disabled="currentPage === 1"
           @click="currentPage--"
-          class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+          class="relative inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
         >
           Previous
         </button>
         <button
           :disabled="currentPage === totalPages"
           @click="currentPage++"
-          class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+          class="relative ml-3 inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
         >
           Next
         </button>
       </div>
-      <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+      <div class="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
         <div>
           <p class="text-sm text-gray-700">
             Showing
@@ -112,11 +127,11 @@
           </p>
         </div>
         <div>
-          <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px">
+          <nav class="relative z-0 inline-flex -space-x-px rounded-md shadow-sm">
             <button
               :disabled="currentPage === 1"
               @click="currentPage--"
-              class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+              class="relative inline-flex items-center rounded-l-md border border-gray-300 bg-white px-2 py-2 text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
             >
               Previous
             </button>
@@ -125,17 +140,17 @@
                 v-if="typeof page === 'number'"
                 @click="currentPage = page"
                 :class="[
-                  'relative inline-flex items-center px-4 py-2 border text-sm font-medium',
+                  'relative inline-flex items-center border px-4 py-2 text-sm font-medium',
                   currentPage === page
-                    ? 'z-10 bg-primary-50 border-primary-500 text-primary-600'
-                    : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50'
+                    ? 'z-10 border-primary-500 bg-primary-50 text-primary-600'
+                    : 'border-gray-300 bg-white text-gray-500 hover:bg-gray-50',
                 ]"
               >
                 {{ page }}
               </button>
               <span
                 v-else
-                class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700"
+                class="relative inline-flex items-center border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700"
               >
                 {{ page }}
               </span>
@@ -143,7 +158,7 @@
             <button
               :disabled="currentPage === totalPages"
               @click="currentPage++"
-              class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+              class="relative inline-flex items-center rounded-r-md border border-gray-300 bg-white px-2 py-2 text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
             >
               Next
             </button>
@@ -243,7 +258,7 @@ const visiblePages = computed(() => {
   return pages
 })
 
-const sortBy = (key) => {
+const sortBy = key => {
   if (!props.sortable) return
 
   if (sortKey.value === key) {
@@ -268,7 +283,10 @@ const formatValue = (value, column) => {
 }
 
 // Reset to page 1 when data changes
-watch(() => props.data.length, () => {
-  currentPage.value = 1
-})
+watch(
+  () => props.data.length,
+  () => {
+    currentPage.value = 1
+  }
+)
 </script>

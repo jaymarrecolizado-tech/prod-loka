@@ -55,6 +55,7 @@ out/
 .vuepress/dist/
 assets/dist/
 deploy-package/
+bararak_deploy/
 
 # Dependencies
 node_modules/
@@ -73,6 +74,10 @@ metrics/
 composer.lock
 composer.phar
 phpunit.xml.dist
+.phpunit.result.cache
+
+# Diagnostic
+diag_test.php
 
 # Database
 *.sql

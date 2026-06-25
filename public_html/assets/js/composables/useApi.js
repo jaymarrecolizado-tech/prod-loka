@@ -79,12 +79,12 @@ export function usePaginatedApi(apiFunction) {
     }
   }
 
-  const goToPage = (page) => {
+  const goToPage = page => {
     pagination.value.page = page
     return fetch()
   }
 
-  const setPerPage = (perPage) => {
+  const setPerPage = perPage => {
     pagination.value.perPage = perPage
     pagination.value.page = 1
     return fetch()

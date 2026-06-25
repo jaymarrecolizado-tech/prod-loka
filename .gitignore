@@ -38,3 +38,15 @@ nul
 
 # Node modules
 node_modules/
+
+# Build output
+public_html/assets/dist/
+
+# Deployment copies
+public_html/bararak_deploy/
+
+# Environment Variables
+public_html/.env
+public_html/.env.local
+public_html/.env.*
+!public_html/.env.example
