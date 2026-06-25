@@ -216,88 +216,72 @@ if ($showCharts) {
 }
 ?>
 
-<div class="container-fluid py-4">
+<div class="loka-page">
     <!-- Page Header -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="loka-page-header mb-6">
         <div>
-            <h4 class="mb-1">Dashboard</h4>
-            <p class="text-muted mb-0">Welcome back, <?= e(currentUser()->name) ?>!</p>
+            <h4 class="mb-1 text-xl font-bold text-base-content">Dashboard</h4>
+            <p class="text-sm text-base-content/60 mb-0">Welcome back, <?= e(currentUser()->name) ?>!</p>
         </div>
         <div>
-            <a href="<?= APP_URL ?>/?page=requests&action=create" class="btn btn-primary">
-                <i class="bi bi-plus-lg me-1"></i>New Request
+            <a href="<?= APP_URL ?>/?page=requests&action=create" class="loka-btn-primary">
+                <i class="bi bi-plus-lg mr-1"></i>New Request
             </a>
         </div>
     </div>
     
     <!-- Statistics Cards -->
-    <div class="row g-4 mb-4 stats-row">
+    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 mb-6">
         <!-- My Requests -->
-        <div class="col-12 col-md-6 col-xl-3">
-            <div class="card stat-card h-100">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-start">
-                        <div>
-                            <div class="stat-value text-primary"><?= $myRequestsCount ?></div>
-                            <div class="stat-label">My Requests</div>
-                        </div>
-                        <div class="stat-icon bg-primary bg-opacity-10 text-primary">
-                            <i class="bi bi-file-earmark-text"></i>
-                        </div>
-                    </div>
+        <div class="loka-stat-card">
+            <div class="flex justify-between items-start">
+                <div>
+                    <div class="loka-stat-value text-primary"><?= $myRequestsCount ?></div>
+                    <div class="loka-stat-label">My Requests</div>
+                </div>
+                <div class="loka-stat-icon bg-primary/10 text-primary">
+                    <i class="bi bi-file-earmark-text"></i>
                 </div>
             </div>
         </div>
         
         <?php if (isApprover()): ?>
         <!-- Pending Approvals -->
-        <div class="col-12 col-md-6 col-xl-3">
-            <div class="card stat-card h-100">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-start">
-                        <div>
-                            <div class="stat-value text-warning"><?= $pendingApprovalsCount ?></div>
-                            <div class="stat-label">Pending Approvals</div>
-                        </div>
-                        <div class="stat-icon bg-warning bg-opacity-10 text-warning">
-                            <i class="bi bi-hourglass-split"></i>
-                        </div>
-                    </div>
+        <div class="loka-stat-card">
+            <div class="flex justify-between items-start">
+                <div>
+                    <div class="loka-stat-value text-warning"><?= $pendingApprovalsCount ?></div>
+                    <div class="loka-stat-label">Pending Approvals</div>
+                </div>
+                <div class="loka-stat-icon bg-warning/10 text-warning">
+                    <i class="bi bi-hourglass-split"></i>
                 </div>
             </div>
         </div>
         <?php endif; ?>
         
         <!-- Available Vehicles -->
-        <div class="col-12 col-md-6 col-xl-3">
-            <div class="card stat-card h-100">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-start">
-                        <div>
-                            <div class="stat-value text-success"><?= $availableVehiclesCount ?></div>
-                            <div class="stat-label">Available Vehicles</div>
-                        </div>
-                        <div class="stat-icon bg-success bg-opacity-10 text-success">
-                            <i class="bi bi-car-front"></i>
-                        </div>
-                    </div>
+        <div class="loka-stat-card">
+            <div class="flex justify-between items-start">
+                <div>
+                    <div class="loka-stat-value text-success"><?= $availableVehiclesCount ?></div>
+                    <div class="loka-stat-label">Available Vehicles</div>
+                </div>
+                <div class="loka-stat-icon bg-success/10 text-success">
+                    <i class="bi bi-car-front"></i>
                 </div>
             </div>
         </div>
         
         <!-- Active Drivers -->
-        <div class="col-12 col-xl-3 col-md-6">
-            <div class="card stat-card h-100">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-start">
-                        <div>
-                            <div class="stat-value text-info"><?= $activeDriversCount ?></div>
-                            <div class="stat-label">Available Drivers</div>
-                        </div>
-                        <div class="stat-icon bg-info bg-opacity-10 text-info">
-                            <i class="bi bi-person-badge"></i>
-                        </div>
-                    </div>
+        <div class="loka-stat-card">
+            <div class="flex justify-between items-start">
+                <div>
+                    <div class="loka-stat-value text-info"><?= $activeDriversCount ?></div>
+                    <div class="loka-stat-label">Available Drivers</div>
+                </div>
+                <div class="loka-stat-icon bg-info/10 text-info">
+                    <i class="bi bi-person-badge"></i>
                 </div>
             </div>
         </div>
@@ -305,15 +289,15 @@ if ($showCharts) {
 
     <?php if ($showCharts && $analyticsData): ?>
     <!-- Analytics Charts -->
-    <div class="row g-4 mb-4 charts-row">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6">
         <!-- Daily Trips Chart -->
-        <div class="col-12 col-lg-8">
-            <div class="card">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0"><i class="bi bi-graph-up me-2"></i>Trips (Last 7 Days)</h5>
+        <div class="lg:col-span-2">
+            <div class="loka-card">
+                <div class="flex items-center justify-between border-b border-base-200 px-5 py-4">
+                    <h5 class="font-semibold text-base-content mb-0"><i class="bi bi-graph-up mr-2"></i>Trips (Last 7 Days)</h5>
                 </div>
-                <div class="card-body">
-                    <div class="chart-container">
+                <div class="px-5 py-4">
+                    <div class="loka-chart-container">
                         <canvas id="dailyTripsChart"></canvas>
                     </div>
                 </div>
@@ -321,13 +305,13 @@ if ($showCharts) {
         </div>
 
         <!-- Status Distribution -->
-        <div class="col-12 col-lg-4">
-            <div class="card">
-                <div class="card-header">
-                    <h5 class="mb-0"><i class="bi bi-pie-chart me-2"></i>Status Distribution</h5>
+        <div class="col-span-1">
+            <div class="loka-card">
+                <div class="border-b border-base-200 px-5 py-4">
+                    <h5 class="font-semibold text-base-content mb-0"><i class="bi bi-pie-chart mr-2"></i>Status Distribution</h5>
                 </div>
-                <div class="card-body">
-                    <div class="chart-container-sm">
+                <div class="px-5 py-4">
+                    <div class="loka-chart-container-sm">
                         <canvas id="statusChart"></canvas>
                     </div>
                 </div>
@@ -335,15 +319,15 @@ if ($showCharts) {
         </div>
     </div>
 
-    <div class="row g-4 mb-4 charts-row">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
         <!-- Department Trips -->
-        <div class="col-12 col-lg-6">
-            <div class="card">
-                <div class="card-header">
-                    <h5 class="mb-0"><i class="bi bi-building me-2"></i>Trips by Department</h5>
+        <div class="col-span-1">
+            <div class="loka-card">
+                <div class="border-b border-base-200 px-5 py-4">
+                    <h5 class="font-semibold text-base-content mb-0"><i class="bi bi-building mr-2"></i>Trips by Department</h5>
                 </div>
-                <div class="card-body">
-                    <div class="chart-container">
+                <div class="px-5 py-4">
+                    <div class="loka-chart-container">
                         <canvas id="departmentChart"></canvas>
                     </div>
                 </div>
@@ -351,13 +335,13 @@ if ($showCharts) {
         </div>
 
         <!-- Peak Hours -->
-        <div class="col-12 col-lg-6">
-            <div class="card">
-                <div class="card-header">
-                    <h5 class="mb-0"><i class="bi bi-clock me-2"></i>Peak Hours (Last 30 Days)</h5>
+        <div class="col-span-1">
+            <div class="loka-card">
+                <div class="border-b border-base-200 px-5 py-4">
+                    <h5 class="font-semibold text-base-content mb-0"><i class="bi bi-clock mr-2"></i>Peak Hours (Last 30 Days)</h5>
                 </div>
-                <div class="card-body">
-                    <div class="chart-container">
+                <div class="px-5 py-4">
+                    <div class="loka-chart-container">
                         <canvas id="peakHoursChart"></canvas>
                     </div>
                 </div>
@@ -366,207 +350,28 @@ if ($showCharts) {
     </div>
 
     <script>
-        // Chart data from PHP
-        const analyticsData = <?= json_encode($analyticsData) ?>;
-
-        // Detect mobile for chart adjustments
-        const isMobile = window.innerWidth < 768;
-        const isSmallMobile = window.innerWidth < 576;
-
-        // Common chart options with mobile adjustments
-        const commonOptions = {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: {
-                    position: 'bottom',
-                    labels: {
-                        font: {
-                            size: isSmallMobile ? 10 : (isMobile ? 11 : 12),
-                            family: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
-                        },
-                        boxWidth: isSmallMobile ? 12 : (isMobile ? 14 : 16),
-                        padding: isSmallMobile ? 8 : 12
-                    }
-                },
-                tooltip: {
-                    titleFont: {
-                        size: isSmallMobile ? 11 : 12
-                    },
-                    bodyFont: {
-                        size: isSmallMobile ? 10 : 11
-                    },
-                    padding: isSmallMobile ? 6 : 8
-                }
-            },
-            scales: {
-                x: {
-                    ticks: {
-                        font: {
-                            size: isSmallMobile ? 9 : (isMobile ? 10 : 11)
-                        },
-                        maxRotation: isMobile ? 45 : 0,
-                        minRotation: isMobile ? 45 : 0
-                    },
-                    grid: {
-                        display: !isSmallMobile
-                    }
-                },
-                y: {
-                    ticks: {
-                        font: {
-                            size: isSmallMobile ? 9 : (isMobile ? 10 : 11)
-                        },
-                        stepSize: 1
-                    },
-                    grid: {
-                        display: !isSmallMobile
-                    }
-                }
-            }
-        };
-
-        // Daily Trips Chart
-        const dailyTripsCtx = document.getElementById('dailyTripsChart');
-        if (dailyTripsCtx) {
-            new Chart(dailyTripsCtx, {
-                type: 'line',
-                data: {
-                    labels: analyticsData.dailyTrips.map(d => d.date),
-                    datasets: [{
-                        label: 'Number of Trips',
-                        data: analyticsData.dailyTrips.map(d => d.count),
-                        borderColor: '#0d6efd',
-                        backgroundColor: 'rgba(13, 110, 253, 0.1)',
-                        fill: true,
-                        tension: 0.4
-                    }]
-                },
-                options: {
-                    ...commonOptions,
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            ticks: { stepSize: 1 }
-                        }
-                    }
-                }
-            });
-        }
-
-        // Status Distribution Chart
-        const statusCtx = document.getElementById('statusChart');
-        if (statusCtx) {
-            const statusLabels = {
-                'approved': 'Approved',
-                'pending': 'Pending',
-                'pending_motorpool': 'Motorpool',
-                'completed': 'Completed',
-                'cancelled': 'Cancelled',
-                'rejected': 'Rejected',
-                'revision': 'Revision'
-            };
-            const statusColors = {
-                'approved': '#198754',
-                'pending': '#ffc107',
-                'pending_motorpool': '#0dcaf0',
-                'completed': '#20c997',
-                'cancelled': '#6c757d',
-                'rejected': '#dc3545',
-                'revision': '#fd7e14'
-            };
-
-            new Chart(statusCtx, {
-                type: 'doughnut',
-                data: {
-                    labels: analyticsData.statusDistribution.map(s => statusLabels[s->status] || s->status),
-                    datasets: [{
-                        data: analyticsData.statusDistribution.map(s => s->count),
-                        backgroundColor: analyticsData.statusDistribution.map(s => statusColors[s->status] || '#6c757d')
-                    }]
-                },
-                options: commonOptions
-            });
-        }
-
-        // Department Trips Chart
-        const deptCtx = document.getElementById('departmentChart');
-        if (deptCtx) {
-            new Chart(deptCtx, {
-                type: 'bar',
-                data: {
-                    labels: analyticsData.departmentStats.map(d => d->department),
-                    datasets: [{
-                        label: 'Trips',
-                        data: analyticsData.departmentStats.map(d => d->count),
-                        backgroundColor: [
-                            '#0d6efd', '#6610f2', '#d63384', '#dc3545',
-                            '#fd7e14', '#ffc107', '#198754', '#20c997'
-                        ]
-                    }]
-                },
-                options: {
-                    ...commonOptions,
-                    indexAxis: 'y',
-                    scales: {
-                        x: {
-                            beginAtZero: true,
-                            ticks: { stepSize: 1 }
-                        }
-                    }
-                }
-            });
-        }
-
-        // Peak Hours Chart
-        const peakCtx = document.getElementById('peakHoursChart');
-        if (peakCtx) {
-            const hourLabels = Array.from({length: 24}, (_, i) => i + ':00');
-            new Chart(peakCtx, {
-                type: 'bar',
-                data: {
-                    labels: hourLabels,
-                    datasets: [{
-                        label: 'Trips',
-                        data: analyticsData.peakHours,
-                        backgroundColor: 'rgba(13, 110, 253, 0.7)',
-                        borderColor: '#0d6efd',
-                        borderWidth: 1
-                    }]
-                },
-                options: {
-                    ...commonOptions,
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            ticks: { stepSize: 1 }
-                        }
-                    },
-                    plugins: {
-                        legend: { display: false }
-                    }
-                }
-            });
-        }
+        // Pass analytics data to external chart module
+        window.dashboardAnalytics = <?= json_encode($analyticsData) ?>;
     </script>
+    <script src="<?= ASSETS_PATH ?>/js/charts/dashboard.js" defer></script>
     <?php endif; ?>
 
-    <div class="row g-4">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
         <!-- Upcoming Trips -->
-        <div class="col-12 col-lg-6">
-            <div class="card table-card h-100">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <h5><i class="bi bi-calendar-event me-2"></i>Upcoming Trips</h5>
-                    <a href="<?= APP_URL ?>/?page=requests" class="btn btn-sm btn-outline-primary">View All</a>
+        <div class="col-span-1">
+            <div class="loka-card h-full">
+                <div class="flex items-center justify-between border-b border-base-200 px-5 py-4">
+                    <h5 class="font-semibold text-base-content"><i class="bi bi-calendar-event mr-2"></i>Upcoming Trips</h5>
+                    <a href="<?= APP_URL ?>/?page=requests" class="loka-btn-secondary text-xs">View All</a>
                 </div>
-                <div class="card-body p-0">
+                <div>
                     <?php if (empty($upcomingTrips)): ?>
-                    <div class="empty-state py-4">
+                    <div class="loka-empty py-4">
                         <i class="bi bi-calendar-x"></i>
                         <p class="mb-0">No upcoming trips</p>
                     </div>
                     <?php else: ?>
-                    <div class="table-responsive">
+                    <div class="loka-table-responsive">
                         <table class="table table-hover mb-0">
                             <thead>
                                 <tr>
@@ -579,14 +384,14 @@ if ($showCharts) {
                                 <?php foreach ($upcomingTrips as $trip): ?>
                                 <tr>
                                     <td>
-                                        <div class="fw-medium"><?= formatDateTime($trip->start_datetime) ?></div>
+                                        <div class="font-medium"><?= formatDateTime($trip->start_datetime) ?></div>
                                     </td>
                                     <td><?= e($trip->requester_name) ?></td>
                                     <td>
                                         <?php if ($trip->plate_number): ?>
-                                        <span class="badge bg-light text-dark"><?= e($trip->plate_number) ?></span>
+                                        <span class="loka-badge bg-base-200 text-base-content"><?= e($trip->plate_number) ?></span>
                                         <?php else: ?>
-                                        <span class="text-muted">-</span>
+                                        <span class="text-base-content/40">-</span>
                                         <?php endif; ?>
                                     </td>
                                 </tr>
@@ -600,15 +405,15 @@ if ($showCharts) {
         </div>
         
         <!-- Recent Activity / My Requests -->
-        <div class="col-12 col-lg-6">
-            <div class="card table-card h-100">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <h5><i class="bi bi-clock-history me-2"></i><?= isAdmin() ? 'Recent Activity' : 'My Requests' ?></h5>
-                    <small class="text-muted"><?= $totalActivity ?> total</small>
+        <div class="col-span-1">
+            <div class="loka-card h-full">
+                <div class="flex items-center justify-between border-b border-base-200 px-5 py-4">
+                    <h5 class="font-semibold text-base-content"><i class="bi bi-clock-history mr-2"></i><?= isAdmin() ? 'Recent Activity' : 'My Requests' ?></h5>
+                    <span class="text-xs text-base-content/50"><?= $totalActivity ?> total</span>
                 </div>
-                <div class="card-body p-0">
+                <div>
                     <?php if (empty($recentActivity)): ?>
-                    <div class="empty-state py-4">
+                    <div class="loka-empty py-4">
                         <i class="bi bi-inbox"></i>
                         <p class="mb-0">No requests found</p>
                     </div>
@@ -616,18 +421,18 @@ if ($showCharts) {
                     <ul class="activity-feed px-3">
                         <?php foreach ($recentActivity as $activity): ?>
                         <li>
-                            <div class="d-flex justify-content-between align-items-start">
+                            <div class="flex justify-between items-start">
                                 <div>
-                                    <div class="fw-medium">
-                                        <a href="<?= APP_URL ?>/?page=requests&action=view&id=<?= $activity->id ?>" class="text-decoration-none">
+                                    <div class="font-medium">
+                                        <a href="<?= APP_URL ?>/?page=requests&action=view&id=<?= $activity->id ?>" class="no-underline text-primary hover:underline">
                                             <?= truncate($activity->purpose, 40) ?>
                                         </a>
                                     </div>
-                                    <small class="text-muted">
+                                    <span class="text-xs text-base-content/50">
                                         <?= e($activity->requester_name) ?> • <?= e($activity->department_name) ?>
-                                    </small>
+                                    </span>
                                 </div>
-                                <div class="text-end">
+                                <div class="text-right">
                                     <?= requestStatusBadge($activity->status) ?>
                                     <div class="activity-time"><?= formatDateTime($activity->updated_at) ?></div>
                                 </div>
@@ -637,12 +442,12 @@ if ($showCharts) {
                     </ul>
                     
                     <?php if ($totalPages > 1): ?>
-                    <div class="card-footer bg-transparent border-top">
+                    <div class="border-t border-base-200 px-5 py-3 bg-transparent">
                         <nav aria-label="Activity pagination">
-                            <ul class="pagination pagination-sm justify-content-center mb-0">
+                            <ul class="flex justify-center gap-1 list-none p-0 m-0">
                                 <!-- Previous -->
-                                <li class="page-item <?= $currentPage <= 1 ? 'disabled' : '' ?>">
-                                    <a class="page-link" href="<?= APP_URL ?>/?page=dashboard&p=<?= $currentPage - 1 ?>">&laquo;</a>
+                                <li class="<?= $currentPage <= 1 ? 'opacity-50 pointer-events-none' : '' ?>">
+                                    <a class="px-3 py-1.5 text-sm rounded-lg hover:bg-base-200 text-base-content no-underline" href="<?= APP_URL ?>/?page=dashboard&p=<?= $currentPage - 1 ?>">&laquo;</a>
                                 </li>
                                 
                                 <?php
@@ -650,33 +455,33 @@ if ($showCharts) {
                                 $end = min($totalPages, $currentPage + 2);
                                 
                                 if ($start > 1): ?>
-                                <li class="page-item"><a class="page-link" href="<?= APP_URL ?>/?page=dashboard&p=1">1</a></li>
+                                <li><a class="px-3 py-1.5 text-sm rounded-lg hover:bg-base-200 text-base-content no-underline" href="<?= APP_URL ?>/?page=dashboard&p=1">1</a></li>
                                 <?php if ($start > 2): ?>
-                                <li class="page-item disabled"><span class="page-link">...</span></li>
+                                <li class="opacity-50 pointer-events-none"><span class="px-3 py-1.5 text-sm">...</span></li>
                                 <?php endif; ?>
                                 <?php endif; ?>
                                 
                                 <?php for ($i = $start; $i <= $end; $i++): ?>
-                                <li class="page-item <?= $i === $currentPage ? 'active' : '' ?>">
-                                    <a class="page-link" href="<?= APP_URL ?>/?page=dashboard&p=<?= $i ?>"><?= $i ?></a>
+                                <li>
+                                    <a class="px-3 py-1.5 text-sm rounded-lg no-underline <?= $i === $currentPage ? 'bg-primary text-primary-content' : 'hover:bg-base-200 text-base-content' ?>" href="<?= APP_URL ?>/?page=dashboard&p=<?= $i ?>"><?= $i ?></a>
                                 </li>
                                 <?php endfor; ?>
                                 
                                 <?php if ($end < $totalPages): ?>
                                 <?php if ($end < $totalPages - 1): ?>
-                                <li class="page-item disabled"><span class="page-link">...</span></li>
+                                <li class="opacity-50 pointer-events-none"><span class="px-3 py-1.5 text-sm">...</span></li>
                                 <?php endif; ?>
-                                <li class="page-item"><a class="page-link" href="<?= APP_URL ?>/?page=dashboard&p=<?= $totalPages ?>"><?= $totalPages ?></a></li>
+                                <li><a class="px-3 py-1.5 text-sm rounded-lg hover:bg-base-200 text-base-content no-underline" href="<?= APP_URL ?>/?page=dashboard&p=<?= $totalPages ?>"><?= $totalPages ?></a></li>
                                 <?php endif; ?>
                                 
                                 <!-- Next -->
-                                <li class="page-item <?= $currentPage >= $totalPages ? 'disabled' : '' ?>">
-                                    <a class="page-link" href="<?= APP_URL ?>/?page=dashboard&p=<?= $currentPage + 1 ?>">&raquo;</a>
+                                <li class="<?= $currentPage >= $totalPages ? 'opacity-50 pointer-events-none' : '' ?>">
+                                    <a class="px-3 py-1.5 text-sm rounded-lg hover:bg-base-200 text-base-content no-underline" href="<?= APP_URL ?>/?page=dashboard&p=<?= $currentPage + 1 ?>">&raquo;</a>
                                 </li>
                             </ul>
                         </nav>
                         <div class="text-center mt-2">
-                            <small class="text-muted">Page <?= $currentPage ?> of <?= $totalPages ?></small>
+                            <span class="text-xs text-base-content/50">Page <?= $currentPage ?> of <?= $totalPages ?></span>
                         </div>
                     </div>
                     <?php endif; ?>
@@ -688,20 +493,18 @@ if ($showCharts) {
     
     <?php if (isMotorpool() && !empty($vehicleStats)): ?>
     <!-- Vehicle Status Overview -->
-    <div class="row g-4 mt-2">
-        <div class="col-12">
-            <div class="card table-card">
-                <div class="card-header">
-                    <h5><i class="bi bi-pie-chart me-2"></i>Vehicle Status Overview</h5>
+    <div class="grid grid-cols-1 gap-4 mt-6">
+        <div class="col-span-1">
+            <div class="loka-card">
+                <div class="border-b border-base-200 px-5 py-4">
+                    <h5 class="font-semibold text-base-content"><i class="bi bi-pie-chart mr-2"></i>Vehicle Status Overview</h5>
                 </div>
-                <div class="card-body">
-                    <div class="row text-center">
+                <div class="px-5 py-4">
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
                         <?php foreach ($vehicleStats as $stat): ?>
-                        <div class="col-md-3 col-6 mb-3">
-                            <div class="py-3">
-                                <div class="h3 mb-1"><?= $stat->count ?></div>
-                                <div><?= vehicleStatusBadge($stat->status) ?></div>
-                            </div>
+                        <div class="py-3">
+                            <div class="text-3xl font-bold mb-1"><?= $stat->count ?></div>
+                            <div><?= vehicleStatusBadge($stat->status) ?></div>
                         </div>
                         <?php endforeach; ?>
                     </div>

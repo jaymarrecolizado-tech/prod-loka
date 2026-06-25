@@ -393,41 +393,43 @@ if ($request->status === STATUS_REVISION) {
 require_once INCLUDES_PATH . '/header.php';
 ?>
 
-<div class="container-fluid py-4">
-    <div class="mb-4">
-        <h4 class="mb-1">Edit Request #<?= $requestId ?>
+<div class="max-w-6xl mx-auto px-4 py-6">
+    <!-- Header -->
+    <div class="mb-6">
+        <h1 class="text-2xl font-bold">Edit Request #<?= $requestId ?>
             <?php if ($request->status === STATUS_REVISION): ?>
-                <span class="badge bg-warning text-dark ms-2"><i class="bi bi-arrow-repeat me-1"></i>Revision Requested</span>
+                <span class="badge badge-warning ml-2"><i class="bi bi-arrow-repeat mr-1"></i>Revision Requested</span>
             <?php endif; ?>
-        </h4>
-        <nav aria-label="breadcrumb">
-            <ol class="breadcrumb mb-0">
-                <li class="breadcrumb-item"><a href="<?= APP_URL ?>">Dashboard</a></li>
-                <li class="breadcrumb-item"><a href="<?= APP_URL ?>/?page=requests">Requests</a></li>
-                <li class="breadcrumb-item active">Edit</li>
-            </ol>
-        </nav>
+        </h1>
+        <div class="text-sm breadcrumbs mt-1">
+            <ul>
+                <li><a href="<?= APP_URL ?>">Dashboard</a></li>
+                <li><a href="<?= APP_URL ?>/?page=requests">Requests</a></li>
+                <li>Edit</li>
+            </ul>
+        </div>
     </div>
 
     <?php if ($request->status === STATUS_REVISION && $revisionComments): ?>
-    <div class="alert alert-warning border-start border-warning border-4 mb-4">
-        <h6 class="alert-heading mb-2"><i class="bi bi-exclamation-triangle me-2"></i>Revision Requested by <?= e($revisionBy) ?></h6>
+    <div class="alert alert-warning border-l-4 border-warning mb-6">
+        <h6 class="font-semibold mb-2"><i class="bi bi-exclamation-triangle mr-2"></i>Revision Requested by <?= e($revisionBy) ?></h6>
         <p class="mb-0"><strong>Reason:</strong> <?= nl2br(e($revisionComments)) ?></p>
-        <hr class="my-2">
-        <small class="text-muted">Please address the feedback above and resubmit your request for approval.</small>
+        <hr class="my-2 border-warning/30">
+        <small class="text-base-content/50">Please address the feedback above and resubmit your request for approval.</small>
     </div>
     <?php endif; ?>
 
-    <div class="row">
-        <div class="col-lg-8">
-            <div class="card">
-                <div class="card-header">
-                    <h5 class="mb-0"><i class="bi bi-pencil me-2"></i>Edit Details</h5>
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Main Form -->
+        <div class="lg:col-span-2">
+            <div class="loka-card">
+                <div class="p-4 border-b border-base-200">
+                    <h2 class="text-lg font-semibold"><i class="bi bi-pencil mr-2"></i>Edit Details</h2>
                 </div>
-                <div class="card-body">
+                <div class="p-6">
                     <?php if (!empty($errors)): ?>
-                        <div class="alert alert-danger">
-                            <ul class="mb-0">
+                        <div class="alert alert-error mb-4">
+                            <ul class="list-disc pl-4">
                                 <?php foreach ($errors as $error): ?>
                                     <li><?= e($error) ?></li>
                                 <?php endforeach; ?>
@@ -435,38 +437,42 @@ require_once INCLUDES_PATH . '/header.php';
                         </div>
                     <?php endif; ?>
 
-                    <form method="POST">
+                    <form method="POST" id="requestForm">
                         <?= csrfField() ?>
 
-                        <div class="row g-3">
-                            <div class="col-md-6">
-                                <label for="start_datetime" class="form-label">Start Date/Time <span
-                                        class="text-danger">*</span></label>
-                                <input type="text" class="form-control datetimepicker" id="start_datetime"
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label for="start_datetime" class="label">
+                                    <span class="label-text font-medium">Start Date/Time <span class="text-error">*</span></span>
+                                </label>
+                                <input type="text" class="input input-bordered w-full datetimepicker" id="start_datetime"
                                     name="start_datetime"
                                     value="<?= e(post('start_datetime', $request->start_datetime)) ?>" required>
                             </div>
 
-                            <div class="col-md-6">
-                                <label for="end_datetime" class="form-label">End Date/Time <span
-                                        class="text-danger">*</span></label>
-                                <input type="text" class="form-control datetimepicker" id="end_datetime"
+                            <div>
+                                <label for="end_datetime" class="label">
+                                    <span class="label-text font-medium">End Date/Time <span class="text-error">*</span></span>
+                                </label>
+                                <input type="text" class="input input-bordered w-full datetimepicker" id="end_datetime"
                                     name="end_datetime" value="<?= e(post('end_datetime', $request->end_datetime)) ?>"
                                     required>
                             </div>
 
-                            <div class="col-12">
-                                <label for="purpose" class="form-label">Purpose <span
-                                        class="text-danger">*</span></label>
-                                <textarea class="form-control" id="purpose" name="purpose" rows="3"
+                            <div class="md:col-span-2">
+                                <label for="purpose" class="label">
+                                    <span class="label-text font-medium">Purpose <span class="text-error">*</span></span>
+                                </label>
+                                <textarea class="textarea textarea-bordered w-full" id="purpose" name="purpose" rows="3"
                                     required maxlength="1000"><?= e(post('purpose', $request->purpose)) ?></textarea>
                             </div>
 
-                            <div class="col-12">
-                                <label for="destination" class="form-label">Destination <span
-                                        class="text-danger">*</span></label>
-                                <div class="alert alert-info py-2 mb-2">
-                                    <i class="bi bi-info-circle me-1"></i>
+                            <div class="md:col-span-2">
+                                <label for="destination" class="label">
+                                    <span class="label-text font-medium">Destination <span class="text-error">*</span></span>
+                                </label>
+                                <div class="alert alert-info text-sm py-2 mb-2">
+                                    <i class="bi bi-info-circle mr-1"></i>
                                     <strong>Note:</strong> Add locations in sequential order (first stop to last stop).
                                 </div>
                                 <div id="destinationsContainer">
@@ -482,17 +488,17 @@ require_once INCLUDES_PATH . '/header.php';
                                     foreach ($destinations as $index => $dest): 
                                     ?>
                                     <div class="destination-row mb-2">
-                                        <div class="input-group">
-                                            <span class="input-group-text bg-primary text-white" style="min-width: 45px;">
+                                        <div class="join w-full">
+                                            <span class="join-item badge badge-primary min-w-[45px]">
                                                 <i class="bi bi-geo-alt"></i> <?= $index + 1 ?>
                                             </span>
-                                            <input type="text" class="form-control destination-input" 
+                                            <input type="text" class="input input-bordered join-item flex-1 destination-input" 
                                                    name="destinations[]" 
                                                    value="<?= e($dest) ?>" 
                                                    placeholder="Enter location address..."
                                                    <?= $index === 0 ? 'required' : '' ?>>
                                             <?php if ($index > 0): ?>
-                                            <button type="button" class="btn btn-outline-danger remove-destination" title="Remove location">
+                                            <button type="button" class="btn btn-outline btn-error join-item remove-destination" title="Remove location">
                                                 <i class="bi bi-trash"></i>
                                             </button>
                                             <?php endif; ?>
@@ -500,34 +506,37 @@ require_once INCLUDES_PATH . '/header.php';
                                     </div>
                                     <?php endforeach; ?>
                                 </div>
-                                <button type="button" class="btn btn-outline-primary btn-sm mt-1" id="addDestinationBtn">
-                                    <i class="bi bi-plus-circle me-1"></i>Add Another Location
+                                <button type="button" class="btn btn-outline btn-primary btn-sm mt-2" id="addDestinationBtn">
+                                    <i class="bi bi-plus-circle mr-1"></i>Add Another Location
                                 </button>
                                 <input type="hidden" name="destination" id="destinationCombined">
                             </div>
 
                             <!-- Passengers Summary & Modal Trigger -->
-                            <div class="col-12 mt-4">
-                                <div class="card border-primary border-opacity-25 bg-primary bg-opacity-10">
-                                    <div class="card-body d-flex justify-content-between align-items-center py-2">
+                            <div class="md:col-span-2 mt-4">
+                                <div class="border border-primary/25 bg-primary/10 rounded-xl p-4">
+                                    <div class="flex items-center justify-between">
                                         <div>
-                                            <h6 class="mb-0"><i class="bi bi-people-fill me-2 text-primary"></i>Passengers</h6>
+                                            <h6 class="font-semibold"><i class="bi bi-people-fill mr-2 text-primary"></i>Passengers</h6>
                                             <div id="passengerCountText" class="mt-1">
-                                                <span class="badge bg-primary rounded-pill"><?= $request->passenger_count ?></span>
-                                                <span class="small text-muted ms-1">Passengers (Requester Included)</span>
+                                                <span class="badge badge-primary"><?= $request->passenger_count ?></span>
+                                                <span class="text-sm text-base-content/60 ml-1">Passengers (Requester Included)</span>
                                             </div>
                                         </div>
-                                        <button type="button" class="btn btn-primary btn-sm rounded-pill px-3" data-bs-toggle="modal" data-bs-target="#passengerModal">
-                                            <i class="bi bi-person-plus me-1"></i>Manage Passengers
+                                        <button type="button" class="btn btn-primary btn-sm rounded-full px-4"
+                                                onclick="document.getElementById('passengerModal').showModal()">
+                                            <i class="bi bi-person-plus mr-1"></i>Manage Passengers
                                         </button>
                                     </div>
                                 </div>
                             </div>
 
                             <!-- Vehicle Selection -->
-                            <div class="col-md-6 mt-3">
-                                <label for="vehicle_id" class="form-label">Select Vehicle</label>
-                                <select class="form-select" id="vehicle_id" name="vehicle_id">
+                            <div class="mt-3">
+                                <label for="vehicle_id" class="label">
+                                    <span class="label-text font-medium">Select Vehicle</span>
+                                </label>
+                                <select class="select select-bordered w-full" id="vehicle_id" name="vehicle_id">
                                     <option value="">Choose a vehicle...</option>
                                     <?php foreach ($availableVehicles as $vehicle): 
                                         $vehicle = (object) $vehicle;
@@ -542,17 +551,21 @@ require_once INCLUDES_PATH . '/header.php';
                                     </option>
                                     <?php endforeach; ?>
                                 </select>
-                                <small class="text-muted">Select the vehicle you need for this trip</small>
-                                <div id="vehicleCapacityAlert" class="alert alert-warning mt-2 small py-2 d-none">
-                                    <i class="bi bi-exclamation-triangle me-1"></i>
+                                <label class="label">
+                                    <span class="label-text-alt text-base-content/50">Select the vehicle you need for this trip</span>
+                                </label>
+                                <div id="vehicleCapacityAlert" class="alert alert-warning text-sm py-2 mt-2 hidden">
+                                    <i class="bi bi-exclamation-triangle mr-1"></i>
                                     <span class="message"></span>
                                 </div>
                             </div>
 
                             <!-- Requested Driver -->
-                            <div class="col-md-6 mt-3">
-                                <label for="requested_driver_id" class="form-label">Requested Driver (Optional)</label>
-                                <select class="form-select" id="requested_driver_id" name="requested_driver_id">
+                            <div class="mt-3">
+                                <label for="requested_driver_id" class="label">
+                                    <span class="label-text font-medium">Requested Driver (Optional)</span>
+                                </label>
+                                <select class="select select-bordered w-full" id="requested_driver_id" name="requested_driver_id">
                                     <option value="">No preference</option>
                                     <?php foreach ($allDrivers as $driver): 
                                         $driver = (object) $driver;
@@ -562,23 +575,25 @@ require_once INCLUDES_PATH . '/header.php';
                                     </option>
                                     <?php endforeach; ?>
                                 </select>
-                                <small class="text-muted">You can request a specific driver. Motorpool will confirm availability.</small>
+                                <label class="label">
+                                    <span class="label-text-alt text-base-content/50">You can request a specific driver. Motorpool will confirm availability.</span>
+                                </label>
                             </div>
                         </div>
 
                         <!-- Approval Workflow Section -->
-                        <div class="card bg-light mt-4">
-                            <div class="card-header bg-primary bg-opacity-10">
-                                <h6 class="mb-0"><i class="bi bi-diagram-3 me-2"></i>Approval Workflow</h6>
+                        <div class="bg-base-200/50 rounded-xl mt-6">
+                            <div class="p-4 border-b border-base-200 bg-primary/10">
+                                <h6 class="font-semibold"><i class="bi bi-diagram-3 mr-2"></i>Approval Workflow</h6>
                             </div>
-                            <div class="card-body">
-                                <div class="row g-3">
+                            <div class="p-4">
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <!-- Department Approver -->
-                                    <div class="col-md-6">
-                                        <label for="approver_id" class="form-label">
-                                            Department Approver <span class="text-danger">*</span>
+                                    <div>
+                                        <label for="approver_id" class="label">
+                                            <span class="label-text font-medium">Department Approver <span class="text-error">*</span></span>
                                         </label>
-                                        <select class="form-select" id="approver_id" name="approver_id" required>
+                                        <select class="select select-bordered w-full" id="approver_id" name="approver_id" required>
                                             <option value="">Select approver...</option>
                                             <?php foreach ($approvers as $app): 
                                                 $app = (object) $app;
@@ -589,15 +604,17 @@ require_once INCLUDES_PATH . '/header.php';
                                             </option>
                                             <?php endforeach; ?>
                                         </select>
-                                        <small class="text-muted">First level approval</small>
+                                        <label class="label">
+                                            <span class="label-text-alt text-base-content/50">First level approval</span>
+                                        </label>
                                     </div>
                                     
                                     <!-- Motorpool Head -->
-                                    <div class="col-md-6">
-                                        <label for="motorpool_head_id" class="form-label">
-                                            Motorpool Head <span class="text-danger">*</span>
+                                    <div>
+                                        <label for="motorpool_head_id" class="label">
+                                            <span class="label-text font-medium">Motorpool Head <span class="text-error">*</span></span>
                                         </label>
-                                        <select class="form-select" id="motorpool_head_id" name="motorpool_head_id" required>
+                                        <select class="select select-bordered w-full" id="motorpool_head_id" name="motorpool_head_id" required>
                                             <option value="">Select motorpool head...</option>
                                             <?php foreach ($motorpoolHeads as $mp): 
                                                 $mp = (object) $mp;
@@ -608,127 +625,63 @@ require_once INCLUDES_PATH . '/header.php';
                                             </option>
                                             <?php endforeach; ?>
                                         </select>
-                                        <small class="text-muted">Final approval & vehicle assignment</small>
+                                        <label class="label">
+                                            <span class="label-text-alt text-base-content/50">Final approval & vehicle assignment</span>
+                                        </label>
                                     </div>
                                 </div>
                             </div>
                         </div>
 
                         <!-- Notes -->
-                        <div class="mt-3">
-                            <label for="notes" class="form-label">Additional Notes</label>
-                            <textarea class="form-control" id="notes" name="notes"
+                        <div class="mt-4">
+                            <label for="notes" class="label">
+                                <span class="label-text font-medium">Additional Notes</span>
+                            </label>
+                            <textarea class="textarea textarea-bordered w-full" id="notes" name="notes"
                                 rows="2" placeholder="Any special requirements or notes..." maxlength="500"><?= e(post('notes', $request->notes)) ?></textarea>
                         </div>
 
-                        <hr class="my-4">
+                        <hr class="my-6 border-base-200">
 
-                        <div class="d-flex gap-2">
+                        <div class="flex gap-3">
                             <button type="submit" class="btn btn-primary">
-                                <i class="bi bi-check-lg me-1"></i>Save Changes
+                                <i class="bi bi-check-lg mr-1"></i>Save Changes
                             </button>
                             <a href="<?= APP_URL ?>/?page=requests&action=view&id=<?= $requestId ?>"
-                                class="btn btn-outline-secondary">Cancel</a>
+                                class="btn btn-outline">Cancel</a>
                         </div>
                     </form>
                 </div>
             </div>
         </div>
-    </div>
 
-    <!-- Passenger Management Modal -->
-    <div class="modal fade" id="passengerModal" tabindex="-1" aria-labelledby="passengerModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content border-0 shadow-lg">
-                <div class="modal-header bg-primary text-white border-0">
-                    <h5 class="modal-title" id="passengerModalLabel"><i class="bi bi-people me-2"></i>Manage Passengers</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body p-4">
-                    <div class="mb-4">
-                        <label for="passengers" class="form-label d-flex justify-content-between">
-                            <span class="fw-bold">Search Employees / Guests</span>
-                            <span class="x-small text-primary"><i class="bi bi-keyboard me-1"></i>Enter guest names</span>
-                        </label>
-                        <select class="form-select border-primary" id="passengers" name="passengers[]" multiple>
-                            <?php foreach ($employees as $emp): 
-                                $emp = (object) $emp;
-                            ?>
-                            <option value="<?= $emp->id ?>" 
-                                    data-email="<?= e($emp->email ?? '') ?>"
-                                    data-department="<?= e($emp->department_name ?? 'No Dept') ?>"
-                                    <?= in_array($emp->id, post('passengers', $currentPassengerIds)) ? 'selected' : '' ?>>
-                                <?= e($emp->name) ?> <?= !empty($emp->department_name) ? '(' . e($emp->department_name) . ')' : '' ?>
-                            </option>
-                            <?php endforeach; ?>
-
-                            <?php
-                            // Handle both initial load and post-error persistence
-                            $selectedValues = post('passengers', $currentPassengerIds);
-                            
-                            foreach ($currentPassengers as $p) {
-                                if ($p->guest_name && (empty($selectedValues) || in_array($p->guest_name, $selectedValues))) {
-                                    echo '<option value="' . e($p->guest_name) . '" selected>' . e($p->guest_name) . '</option>';
-                                }
-                            }
-                            
-                            // If form error, add newly typed guests that weren't in db yet
-                            if (!empty($selectedValues)) {
-                                foreach ($selectedValues as $val) {
-                                    if (!is_numeric($val) && !in_array($val, array_column($currentPassengers, 'guest_name'))) {
-                                        echo '<option value="' . e($val) . '" selected>' . e($val) . '</option>';
-                                    }
-                                }
-                            }
-                            ?>
-                        </select>
-                    </div>
-                    
-                    <div>
-                        <h6 class="small fw-bold text-uppercase text-muted border-bottom pb-2 mb-3">
-                            <i class="bi bi-list-check me-1"></i>Selected List
-                        </h6>
-                        <ul class="list-unstyled mb-0" id="modalPassengerList" style="max-height: 300px; overflow-y: auto;">
-                            <!-- Populated by JS -->
-                        </ul>
-                    </div>
-                </div>
-                <div class="modal-footer border-0 p-4 pt-0">
-                    <button type="button" class="btn btn-primary w-100 py-2 rounded-3" data-bs-dismiss="modal">
-                        Confirm Selection
-                    </button>
+        <!-- Sidebar -->
+        <div class="lg:col-span-1">
+            <div class="loka-card bg-base-200/50">
+                <div class="p-4">
+                    <h6 class="font-semibold"><i class="bi bi-info-circle mr-2"></i>Edit Request</h6>
+                    <p class="text-sm text-base-content/60">
+                        You are modifying an existing vehicle request. Ensure all details are correct before saving. 
+                        Passengers will be notified of any significant changes.
+                    </p>
                 </div>
             </div>
-        </div>
-    </div>
-    </div>
-
-    <!-- Sidebar -->
-    <div class="col-lg-4">
-        <div class="card bg-light border-0">
-            <div class="card-body">
-                <h6><i class="bi bi-info-circle me-2"></i>Edit Request</h6>
-                <p class="small text-muted mb-0">
-                    You are modifying an existing vehicle request. Ensure all details are correct before saving. 
-                    Passengers will be notified of any significant changes.
-                </p>
-            </div>
-        </div>
 
             <!-- Selected Passengers Preview -->
-            <div class="card mt-3" id="passengerPreview">
-                <div class="card-header bg-white">
-                    <h6 class="mb-0 small fw-bold text-uppercase"><i class="bi bi-people me-2 text-primary"></i>Passenger List</h6>
+            <div class="loka-card mt-4" id="passengerPreview">
+                <div class="p-4 border-b border-base-200">
+                    <h6 class="font-semibold text-sm"><i class="bi bi-people mr-2 text-primary"></i>Passenger List</h6>
                 </div>
-                <div class="card-body py-2">
-                    <ul class="list-unstyled mb-0" id="passengerList">
-                        <li class="mb-2 d-flex align-items-center">
-                            <div class="bg-primary bg-opacity-10 p-2 rounded-circle me-3">
+                <div class="p-4">
+                    <ul class="space-y-3" id="passengerList">
+                        <li class="flex items-center">
+                            <div class="bg-primary/10 p-2 rounded-full mr-3">
                                 <i class="bi bi-person-fill text-primary"></i>
                             </div>
                             <div>
-                                <div class="fw-bold small"><?= e(currentUser()->name) ?></div>
-                                <div class="x-small text-primary fw-medium">Requester</div>
+                                <div class="font-semibold text-sm"><?= e(currentUser()->name) ?></div>
+                                <div class="text-xs text-primary font-medium">Requester</div>
                             </div>
                         </li>
                         <?php
@@ -748,13 +701,13 @@ require_once INCLUDES_PATH . '/header.php';
                             $iconBg = $p->name ? 'bg-secondary' : 'bg-success';
                             $iconColor = $p->name ? 'text-secondary' : 'text-success';
                             
-                            echo '<li class="mb-2 d-flex align-items-center">
-                                <div class="'.$iconBg.' bg-opacity-10 p-2 rounded-circle me-3">
+                            echo '<li class="flex items-center">
+                                <div class="'.$iconBg.' bg-opacity-10 p-2 rounded-full mr-3">
                                     <i class="bi '.$icon.' '.$iconColor.'"></i>
                                 </div>
                                 <div>
-                                    <div class="fw-bold small">'.e($name).'</div>
-                                    <div class="x-small text-muted">'.e($dept).'</div>
+                                    <div class="font-semibold text-sm">'.e($name).'</div>
+                                    <div class="text-xs text-base-content/50">'.e($dept).'</div>
                                 </div>
                             </li>';
                         }
@@ -764,6 +717,72 @@ require_once INCLUDES_PATH . '/header.php';
             </div>
         </div>
     </div>
+</div>
+
+<!-- Passenger Management Modal (DaisyUI dialog) -->
+<dialog id="passengerModal" class="modal">
+    <div class="modal-box max-w-lg">
+        <h3 class="font-bold text-lg"><i class="bi bi-people mr-2"></i>Manage Passengers</h3>
+        <div class="py-4">
+            <div class="mb-4">
+                <label for="passengers" class="label">
+                    <span class="label-text font-semibold">Search Employees / Guests</span>
+                    <span class="label-text-alt text-primary"><i class="bi bi-keyboard mr-1"></i>Enter guest names</span>
+                </label>
+                <select class="select select-bordered select-primary w-full" id="passengers" name="passengers[]" multiple>
+                    <?php foreach ($employees as $emp): 
+                        $emp = (object) $emp;
+                    ?>
+                    <option value="<?= $emp->id ?>" 
+                            data-email="<?= e($emp->email ?? '') ?>"
+                            data-department="<?= e($emp->department_name ?? 'No Dept') ?>"
+                            <?= in_array($emp->id, post('passengers', $currentPassengerIds)) ? 'selected' : '' ?>>
+                        <?= e($emp->name) ?> <?= !empty($emp->department_name) ? '(' . e($emp->department_name) . ')' : '' ?>
+                    </option>
+                    <?php endforeach; ?>
+
+                    <?php
+                    // Handle both initial load and post-error persistence
+                    $selectedValues = post('passengers', $currentPassengerIds);
+                    
+                    foreach ($currentPassengers as $p) {
+                        if ($p->guest_name && (empty($selectedValues) || in_array($p->guest_name, $selectedValues))) {
+                            echo '<option value="' . e($p->guest_name) . '" selected>' . e($p->guest_name) . '</option>';
+                        }
+                    }
+                    
+                    // If form error, add newly typed guests that weren't in db yet
+                    if (!empty($selectedValues)) {
+                        foreach ($selectedValues as $val) {
+                            if (!is_numeric($val) && !in_array($val, array_column($currentPassengers, 'guest_name'))) {
+                                echo '<option value="' . e($val) . '" selected>' . e($val) . '</option>';
+                            }
+                        }
+                    }
+                    ?>
+                </select>
+            </div>
+            
+            <div>
+                <h6 class="text-xs font-bold uppercase text-base-content/50 border-b border-base-200 pb-2 mb-3">
+                    <i class="bi bi-list-check mr-1"></i>Selected List
+                </h6>
+                <ul class="space-y-2 max-h-[300px] overflow-y-auto" id="modalPassengerList">
+                    <!-- Populated by JS -->
+                </ul>
+            </div>
+        </div>
+        <div class="modal-action">
+            <button type="button" class="btn btn-primary w-full py-2 rounded-xl"
+                    onclick="document.getElementById('passengerModal').close()">
+                Confirm Selection
+            </button>
+        </div>
+    </div>
+    <form method="dialog" class="modal-backdrop">
+        <button>close</button>
+    </form>
+</dialog>
 
 <?php ob_start(); ?>
 <script>
@@ -791,24 +810,24 @@ require_once INCLUDES_PATH . '/header.php';
 
             if (passengerCountText) {
                 const label = count === 1 ? 'Passenger (You)' : 'Passengers (Including You)';
-                passengerCountText.innerHTML = '<span class="badge bg-primary rounded-pill">' + count + '</span>' +
-                                             '<span class="small text-muted ms-1">' + label + '</span>';
+                passengerCountText.innerHTML = '<span class="badge badge-primary">' + count + '</span>' +
+                                             '<span class="text-sm text-base-content/60 ml-1">' + label + '</span>';
             }
             
-            let previewHtml = '<li class="mb-2 d-flex align-items-center">' +
-                '<div class="bg-primary bg-opacity-10 p-2 rounded-circle me-3">' +
+            let previewHtml = '<li class="flex items-center">' +
+                '<div class="bg-primary/10 p-2 rounded-full mr-3">' +
                     '<i class="bi bi-person-fill text-primary"></i>' +
                 '</div>' +
                 '<div>' +
-                    '<div class="fw-bold small"><?= e(currentUser()->name) ?></div>' +
-                    '<div class="x-small text-primary fw-medium">Requester</div>' +
+                    '<div class="font-semibold text-sm"><?= e(currentUser()->name) ?></div>' +
+                    '<div class="text-xs text-primary font-medium">Requester</div>' +
                 '</div>' +
             '</li>';
 
-            let modalHtml = '<li class="mb-2 py-2 px-3 bg-light rounded d-flex align-items-center animate__animated animate__fadeIn">' +
-                '<i class="bi bi-person-badge-fill me-2 text-primary"></i>' +
-                '<div class="small fw-bold text-primary"><?= e(currentUser()->name) ?> (You - Requester)</div>' +
-                '<span class="badge bg-primary ms-auto" style="font-size: 0.6rem;">REQUIRED</span>' +
+            let modalHtml = '<li class="py-2 px-3 bg-base-200 rounded-lg flex items-center">' +
+                '<i class="bi bi-person-badge-fill mr-2 text-primary"></i>' +
+                '<div class="text-sm font-semibold text-primary"><?= e(currentUser()->name) ?> (You - Requester)</div>' +
+                '<span class="badge badge-primary ml-auto text-[0.6rem]">REQUIRED</span>' +
             '</li>';
             
             if (items.length > 0) {
@@ -820,27 +839,27 @@ require_once INCLUDES_PATH . '/header.php';
                         const iconColor = opt.department ? 'text-secondary' : 'text-success';
                         const iconBg = opt.department ? 'bg-secondary' : 'bg-success';
                         
-                        previewHtml += '<li class="mb-2 d-flex align-items-center animate__animated animate__fadeIn">' +
-                            '<div class="' + iconBg + ' bg-opacity-10 p-2 rounded-circle me-3">' +
+                        previewHtml += '<li class="flex items-center">' +
+                            '<div class="' + iconBg + ' bg-opacity-10 p-2 rounded-full mr-3">' +
                                 '<i class="bi ' + icon + ' ' + iconColor + '"></i>' +
                             '</div>' +
                             '<div>' +
-                                '<div class="fw-bold small">' + opt.text.replace(' (Guest)', '') + '</div>' +
-                                '<div class="x-small text-muted">' + dept + '</div>' +
+                                '<div class="font-semibold text-sm">' + opt.text.replace(' (Guest)', '') + '</div>' +
+                                '<div class="text-xs text-base-content/50">' + dept + '</div>' +
                             '</div>' +
                         '</li>';
 
-                        modalHtml += '<li class="mb-2 py-2 px-3 bg-white border border-light rounded d-flex justify-content-between align-items-center shadow-sm animate__animated animate__fadeIn">' +
-                            '<div class="d-flex align-items-center">' +
-                                '<div class="' + iconBg + ' bg-opacity-10 p-1 rounded-circle me-2" style="width: 28px; height: 28px; display: flex; align-items: center; justify-content: center;">' +
+                        modalHtml += '<li class="py-2 px-3 bg-white border border-base-200 rounded-lg flex justify-between items-center shadow-sm">' +
+                            '<div class="flex items-center">' +
+                                '<div class="' + iconBg + ' bg-opacity-10 p-1 rounded-full mr-2 w-7 h-7 flex items-center justify-center">' +
                                     '<i class="bi ' + icon + ' ' + iconColor + '" style="font-size: 0.8rem;"></i>' +
                                 '</div>' +
                                 '<div>' +
-                                    '<div class="small fw-bold">' + opt.text.replace(' (Guest)', '') + '</div>' +
-                                    '<div class="x-small text-muted">' + dept + '</div>' +
+                                    '<div class="text-sm font-semibold">' + opt.text.replace(' (Guest)', '') + '</div>' +
+                                    '<div class="text-xs text-base-content/50">' + dept + '</div>' +
                                 '</div>' +
                             '</div>' +
-                            '<button type="button" class="btn btn-sm btn-link text-danger p-0" onclick="removePassenger(\'' + value + '\')">' +
+                            '<button type="button" class="btn btn-ghost btn-xs text-error p-0" onclick="removePassenger(\'' + value + '\')">' +
                                 '<i class="bi bi-x-circle-fill"></i>' +
                             '</button>' +
                         '</li>';
@@ -876,22 +895,22 @@ require_once INCLUDES_PATH . '/header.php';
                 render: {
                     option: function (data, escape) {
                         if (data.$isAdd) {
-                            return '<div class="py-2 px-2"><i class="bi bi-plus-circle me-1 text-success"></i>Add guest "<strong>' + escape(data.text) + '</strong>"</div>';
+                            return '<div class="py-2 px-2"><i class="bi bi-plus-circle mr-1 text-success"></i>Add guest "<strong>' + escape(data.text) + '</strong>"</div>';
                         }
                         return '<div class="py-2 px-2">' +
-                            '<div class="fw-medium">' + escape(data.text) + '</div>' +
-                            '<div class="small text-muted">' + escape(data.department || '') + '</div>' +
+                            '<div class="font-medium">' + escape(data.text) + '</div>' +
+                            '<div class="text-sm text-base-content/50">' + escape(data.department || '') + '</div>' +
                             '</div>';
                     },
                     item: function (data, escape) {
                         const icon = data.department ? 'bi-person-fill' : 'bi-person-plus';
-                        return '<div class="d-flex align-items-center">' +
-                            '<i class="bi ' + icon + ' me-1"></i>' +
+                        return '<div class="flex items-center">' +
+                            '<i class="bi ' + icon + ' mr-1"></i>' +
                             '<span>' + escape(data.text.replace(' (Guest)', '')) + '</span>' +
                             '</div>';
                     },
                     no_results: function(data, escape) {
-                        return '<div class="py-2 px-2 text-muted">No employees found. Type a name to add as guest.</div>';
+                        return '<div class="py-2 px-2 text-base-content/50">No employees found. Type a name to add as guest.</div>';
                     }
                 },
                 onInitialize: function () {
@@ -909,12 +928,6 @@ require_once INCLUDES_PATH . '/header.php';
             });
             
             console.log('TomSelect initialized successfully for passengers');
-
-            // Handle focus when modal opens
-            const modalEl = document.getElementById('passengerModal');
-            modalEl.addEventListener('shown.bs.modal', function () {
-                passengerSelect.focus();
-            });
         } catch (error) {
             console.error('Error initializing passenger select:', error);
             // Fallback: ensure the select still works as a regular multi-select
@@ -943,14 +956,14 @@ require_once INCLUDES_PATH . '/header.php';
             const row = document.createElement('div');
             row.className = 'destination-row mb-2';
             row.innerHTML = `
-                <div class="input-group">
-                    <span class="input-group-text bg-primary text-white" style="min-width: 45px;">
+                <div class="join w-full">
+                    <span class="join-item badge badge-primary min-w-[45px]">
                         <i class="bi bi-geo-alt"></i> ${index + 1}
                     </span>
-                    <input type="text" class="form-control destination-input" 
+                    <input type="text" class="input input-bordered join-item flex-1 destination-input" 
                            name="destinations[]" 
                            placeholder="Enter location address...">
-                    <button type="button" class="btn btn-outline-danger remove-destination" title="Remove location">
+                    <button type="button" class="btn btn-outline btn-error join-item remove-destination" title="Remove location">
                         <i class="bi bi-trash"></i>
                     </button>
                 </div>
@@ -978,7 +991,7 @@ require_once INCLUDES_PATH . '/header.php';
         function updateNumbers() {
             const rows = container.querySelectorAll('.destination-row');
             rows.forEach((row, index) => {
-                const badge = row.querySelector('.input-group-text');
+                const badge = row.querySelector('.badge');
                 if (badge) {
                     badge.innerHTML = '<i class="bi bi-geo-alt"></i> ' + (index + 1);
                 }

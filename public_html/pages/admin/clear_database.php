@@ -148,9 +148,9 @@ function isAdmin() {
                     </div>
 
                     <?php if ($message): ?>
-                        <div class="alert alert-<?= $messageType === 'success' ? 'success' : 'danger' ?> alert-dismissible fade show" role="alert">
+                        <div class="alert alert-<?= $messageType === 'success' ? 'success' : 'danger' ?> alert-dismissible" role="alert">
                             <?= htmlspecialchars($message) ?>
-                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            <button type="button" class="btn-close" onclick="this.closest('.alert').remove()"></button>
                         </div>
                     <?php endif; ?>
 

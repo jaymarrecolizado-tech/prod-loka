@@ -99,16 +99,16 @@ require_once INCLUDES_PATH . '/header.php';
     </div>
 
     <?php foreach ($messages as $msg): ?>
-    <div class="alert alert-success alert-dismissible fade show">
+    <div class="alert alert-success alert-dismissible">
         <?= $msg ?>
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        <button type="button" class="btn-close" onclick="this.closest('.alert').remove()"></button>
     </div>
     <?php endforeach; ?>
 
     <?php foreach ($errors as $err): ?>
-    <div class="alert alert-danger alert-dismissible fade show">
+    <div class="alert alert-danger alert-dismissible">
         <?= $err ?>
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        <button type="button" class="btn-close" onclick="this.closest('.alert').remove()"></button>
     </div>
     <?php endforeach; ?>
 

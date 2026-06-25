@@ -90,88 +90,95 @@ $pageTitle = 'Edit Driver';
 require_once INCLUDES_PATH . '/header.php';
 ?>
 
-<div class="container-fluid py-4">
+<div class="loka-page">
     <div class="mb-4">
-        <h4 class="mb-1">Edit Driver: <?= e($driver->driver_name) ?></h4>
-        <nav aria-label="breadcrumb">
-            <ol class="breadcrumb mb-0">
-                <li class="breadcrumb-item"><a href="<?= APP_URL ?>">Dashboard</a></li>
-                <li class="breadcrumb-item"><a href="<?= APP_URL ?>/?page=drivers">Drivers</a></li>
-                <li class="breadcrumb-item active">Edit</li>
-            </ol>
-        </nav>
+        <h2 class="text-xl font-semibold mb-1">Edit Driver: <?= e($driver->driver_name) ?></h2>
+        <div class="text-sm text-base-content/60">
+            <a href="<?= APP_URL ?>" class="hover:text-primary">Dashboard</a>
+            <span class="mx-1">/</span>
+            <a href="<?= APP_URL ?>/?page=drivers" class="hover:text-primary">Drivers</a>
+            <span class="mx-1">/</span>
+            <span>Edit</span>
+        </div>
     </div>
 
-    <div class="row">
-        <div class="col-lg-8">
-            <div class="card">
-                <div class="card-header">
-                    <h5 class="mb-0"><i class="bi bi-pencil me-2"></i>Edit Driver</h5>
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div class="lg:col-span-2">
+            <div class="loka-card">
+                <div class="p-4 border-b border-base-200">
+                    <h3 class="text-base font-semibold flex items-center gap-2">
+                        <i class="bi bi-pencil"></i>Edit Driver
+                    </h3>
                 </div>
-                <div class="card-body">
+                <div class="p-4">
                     <?php if (!empty($errors)): ?>
-                        <div class="alert alert-danger">
-                            <ul class="mb-0"><?php foreach ($errors as $e): ?>
-                                    <li><?= e($e) ?></li><?php endforeach; ?>
-                            </ul>
-                        </div><?php endif; ?>
+                    <div class="alert alert-error mb-4">
+                        <ul class="list-disc list-inside">
+                            <?php foreach ($errors as $err): ?>
+                            <li><?= e($err) ?></li>
+                            <?php endforeach; ?>
+                        </ul>
+                    </div>
+                    <?php endif; ?>
 
                     <form method="POST">
                         <?= csrfField() ?>
-                        <div class="row g-3">
-                            <div class="col-md-6">
-                                <label class="form-label">User</label>
-                                <input type="text" class="form-control"
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="loka-form-label">User</label>
+                                <input type="text" class="input input-bordered w-full"
                                     value="<?= e($driver->driver_name) ?> (<?= e($driver->email) ?>)" disabled>
                             </div>
-                            <div class="col-md-6">
-                                <label class="form-label">License Number <span class="text-danger">*</span></label>
-                                <input type="text" class="form-control" name="license_number"
+                            <div>
+                                <label class="loka-form-label">License Number <span class="text-error">*</span></label>
+                                <input type="text" class="input input-bordered w-full" name="license_number"
                                     value="<?= e(post('license_number', $driver->license_number)) ?>" required>
                             </div>
-                            <div class="col-md-4">
-                                <label class="form-label">License Expiry <span class="text-danger">*</span></label>
-                                <input type="text" class="form-control datepicker" name="license_expiry"
+                            <div>
+                                <label class="loka-form-label">License Expiry <span class="text-error">*</span></label>
+                                <input type="text" class="input input-bordered w-full datepicker" name="license_expiry"
                                     value="<?= e(post('license_expiry', $driver->license_expiry)) ?>" required>
                             </div>
-                            <div class="col-md-4">
-                                <label class="form-label">License Class</label>
-                                <input type="text" class="form-control" name="license_class"
+                            <div>
+                                <label class="loka-form-label">License Class</label>
+                                <input type="text" class="input input-bordered w-full" name="license_class"
                                     value="<?= e(post('license_class', $driver->license_class)) ?>">
                             </div>
-                            <div class="col-md-4">
-                                <label class="form-label">Status</label>
-                                <select class="form-select" name="status">
+                            <div>
+                                <label class="loka-form-label">Status</label>
+                                <select class="select select-bordered w-full" name="status">
                                     <?php foreach (DRIVER_STATUS_LABELS as $key => $info): ?>
-                                        <option value="<?= $key ?>" <?= post('status', $driver->status) === $key ? 'selected' : '' ?>><?= e($info['label']) ?></option>
+                                    <option value="<?= $key ?>" <?= post('status', $driver->status) === $key ? 'selected' : '' ?>><?= e($info['label']) ?></option>
                                     <?php endforeach; ?>
                                 </select>
                             </div>
-                            <div class="col-md-4">
-                                <label class="form-label">Years Experience</label>
-                                <input type="number" class="form-control" name="years_experience"
+                            <div>
+                                <label class="loka-form-label">Years Experience</label>
+                                <input type="number" class="input input-bordered w-full" name="years_experience"
                                     value="<?= e(post('years_experience', $driver->years_experience)) ?>" min="0">
                             </div>
-                            <div class="col-md-4">
-                                <label class="form-label">Emergency Contact Name</label>
-                                <input type="text" class="form-control" name="emergency_contact_name"
+                            <div>
+                                <label class="loka-form-label">Emergency Contact Name</label>
+                                <input type="text" class="input input-bordered w-full" name="emergency_contact_name"
                                     value="<?= e(post('emergency_contact_name', $driver->emergency_contact_name)) ?>">
                             </div>
-                            <div class="col-md-4">
-                                <label class="form-label">Emergency Contact Phone</label>
-                                <input type="text" class="form-control" name="emergency_contact_phone"
+                            <div>
+                                <label class="loka-form-label">Emergency Contact Phone</label>
+                                <input type="text" class="input input-bordered w-full" name="emergency_contact_phone"
                                     value="<?= e(post('emergency_contact_phone', $driver->emergency_contact_phone)) ?>">
                             </div>
-                            <div class="col-12">
-                                <label class="form-label">Notes</label>
-                                <textarea class="form-control" name="notes"
+                            <div class="md:col-span-2">
+                                <label class="loka-form-label">Notes</label>
+                                <textarea class="textarea textarea-bordered w-full" name="notes"
                                     rows="2" maxlength="500"><?= e(post('notes', $driver->notes)) ?></textarea>
                             </div>
                         </div>
-                        <hr class="my-4">
-                        <button type="submit" class="btn btn-primary"><i class="bi bi-check-lg me-1"></i>Save
-                            Changes</button>
-                        <a href="<?= APP_URL ?>/?page=drivers" class="btn btn-outline-secondary">Cancel</a>
+                        <div class="border-t border-base-200 mt-4 pt-4 flex gap-2">
+                            <button type="submit" class="loka-btn-primary">
+                                <i class="bi bi-check-lg mr-1"></i>Save Changes
+                            </button>
+                            <a href="<?= APP_URL ?>/?page=drivers" class="loka-btn-secondary">Cancel</a>
+                        </div>
                     </form>
                 </div>
             </div>

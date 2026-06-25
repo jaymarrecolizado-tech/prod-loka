@@ -1,282 +1,302 @@
 <?php
-/**
- * LOKA - Requests List Page
- */
+$pageTitle = 'Requests';
+$currentPage = 'requests';
 
-$pageTitle = 'My Requests';
+requireRoles([ROLE_REQUESTER, ROLE_APPROVER, ROLE_MOTORPOOL_HEAD, ROLE_ADMIN]);
 
-// Get filter parameters
-$statusFilter = get('status', '');
-$searchFilter = get('search', '');
+$db = Database::getInstance();
 
-// Build query based on role
+// Pagination settings
+$perPage = 15;
+$page = max(1, (int)($_GET['p'] ?? 1));
+$offset = ($page - 1) * $perPage;
+
+// Filters
+$statusFilter = sanitizeInput($_GET['status'] ?? '');
+$dateFrom = sanitizeInput($_GET['date_from'] ?? '');
+$dateTo = sanitizeInput($_GET['date_to'] ?? '');
+$searchQuery = sanitizeInput($_GET['q'] ?? '');
+
+// Build query conditions
+$where = [];
 $params = [];
-$whereClause = 'r.deleted_at IS NULL';
 
-if (!isAdmin()) {
-    $whereClause .= ' AND r.user_id = ?';
+// Role-based filtering
+if (hasRole(ROLE_REQUESTER) && !hasRole(ROLE_APPROVER)) {
+    $where[] = "r.requester_id = ?";
     $params[] = userId();
 }
 
 if ($statusFilter) {
-    $whereClause .= ' AND r.status = ?';
+    $where[] = "r.status = ?";
     $params[] = $statusFilter;
 }
 
-if ($searchFilter) {
-    $whereClause .= ' AND (r.purpose LIKE ? OR r.destination LIKE ?)';
-    $params[] = "%{$searchFilter}%";
-    $params[] = "%{$searchFilter}%";
+if ($dateFrom) {
+    $where[] = "r.created_at >= ?";
+    $params[] = $dateFrom . ' 00:00:00';
 }
 
-$requests = db()->fetchAll(
-    "SELECT r.*, u.name as requester_name, d.name as department_name,
-            v.plate_number, v.make, v.model as vehicle_model,
-            dr.license_number as driver_license,
-            dr_u.name as driver_name,
-            appr.name as approver_name,
-            mph.name as motorpool_name
-     FROM requests r
-     JOIN users u ON r.user_id = u.id
-     JOIN departments d ON r.department_id = d.id
-     LEFT JOIN vehicles v ON r.vehicle_id = v.id AND v.deleted_at IS NULL
-     LEFT JOIN drivers dr ON r.driver_id = dr.id AND dr.deleted_at IS NULL
-     LEFT JOIN users dr_u ON dr.user_id = dr_u.id
-     LEFT JOIN users appr ON r.approver_id = appr.id
-     LEFT JOIN users mph ON r.motorpool_head_id = mph.id
-     WHERE {$whereClause}
-     ORDER BY r.created_at DESC",
-    $params
-);
-
-// Fetch notification counts separately (eliminates N+1 query)
-$notificationCounts = [];
-if (!empty($requests) && !isAdmin()) {
-    $requestIds = array_map(fn($r) => $r->id, $requests);
-    if (!empty($requestIds)) {
-        $placeholders = implode(',', array_fill(0, count($requestIds), '?'));
-        $linkConditions = array_map(fn($id) => "n.link LIKE ?", $requestIds);
-        $notifications = db()->fetchAll(
-            "SELECT n.link, COUNT(*) as count
-             FROM notifications n
-             WHERE n.user_id = ?
-             AND n.is_read = 0
-             AND n.deleted_at IS NULL
-             AND n.link LIKE '%page=requests%action=view%'
-             AND (" . implode(' OR ', $linkConditions) . ")
-             GROUP BY n.link",
-            array_merge([userId()], array_map(fn($id) => "%id={$id}%", $requestIds)),
-            'link'
-        );
-
-        // Match notification counts to requests
-        foreach ($requests as $request) {
-            $linkPattern = "id={$request->id}";
-            $count = 0;
-            foreach ($notifications as $link => $data) {
-                if (strpos($link, $linkPattern) !== false) {
-                    $count = $data['count'];
-                    break;
-                }
-            }
-            $request->unread_notifications = $count;
-        }
-    }
-} else {
-    // Admin doesn't have unread notifications on requests
-    foreach ($requests as $request) {
-        $request->unread_notifications = 0;
-    }
+if ($dateTo) {
+    $where[] = "r.created_at <= ?";
+    $params[] = $dateTo . ' 23:59:59';
 }
+
+if ($searchQuery) {
+    $where[] = "(r.purpose LIKE ? OR u.first_name LIKE ? OR u.last_name LIKE ?)";
+    $searchParam = "%{$searchQuery}%";
+    $params[] = $searchParam;
+    $params[] = $searchParam;
+    $params[] = $searchParam;
+}
+
+$whereClause = !empty($where) ? 'WHERE ' . implode(' AND ', $where) : '';
+
+// Get total count
+$countSql = "SELECT COUNT(*) FROM requests r
+             LEFT JOIN users u ON r.requester_id = u.id
+             {$whereClause}";
+$totalItems = $db->fetch($countSql, $params)['COUNT(*)'] ?? 0;
+$totalPages = max(1, ceil($totalItems / $perPage));
+
+// Fetch requests
+$sql = "SELECT r.*,
+        u.first_name, u.last_name, u.email,
+        v.plate_number, v.brand, v.model,
+        d.first_name as driver_first, d.last_name as driver_last
+        FROM requests r
+        LEFT JOIN users u ON r.requester_id = u.id
+        LEFT JOIN vehicles v ON r.vehicle_id = v.id
+        LEFT JOIN drivers dr ON r.driver_id = dr.id
+        LEFT JOIN users d ON dr.user_id = d.id
+        {$whereClause}
+        ORDER BY r.created_at DESC
+        LIMIT ? OFFSET ?";
+$params[] = $perPage;
+$params[] = $offset;
+
+$requests = $db->fetchAll($sql, $params);
+
+// Status counts for badges
+$statusCounts = $db->fetchAll("
+    SELECT status, COUNT(*) as count
+    FROM requests
+    " . (hasRole(ROLE_REQUESTER) && !hasRole(ROLE_APPROVER) ? "WHERE requester_id = " . userId() : "") . "
+    GROUP BY status
+");
+$statusMap = array_column($statusCounts, 'count', 'status');
 
 require_once INCLUDES_PATH . '/header.php';
 ?>
 
-<div class="container-fluid py-4">
-    <?php 
-    // Check for revision requests that need attention
-    $revisionRequests = [];
-    if (!isAdmin()) {
-        $revisionRequests = db()->fetchAll(
-            "SELECT id, purpose, destination, start_datetime 
-             FROM requests 
-             WHERE user_id = ? AND status = ? AND deleted_at IS NULL 
-             ORDER BY updated_at DESC",
-            [userId(), STATUS_REVISION]
-        );
-    }
-    
-    if (!empty($revisionRequests)): 
-    ?>
-    <div class="alert alert-warning alert-dismissible fade show mb-4">
-        <h5 class="alert-heading"><i class="bi bi-pencil-square me-2"></i>Requests Needing Revision</h5>
-        <p class="mb-2">The following requests have been sent back for revision. Please review and resubmit:</p>
-        <ul class="mb-3">
-            <?php foreach ($revisionRequests as $rev): ?>
-            <li>
-                <a href="<?= APP_URL ?>/?page=requests&action=edit&id=<?= $rev->id ?>" class="alert-link">
-                    Request #<?= $rev->id ?>
-                </a> - 
-                <?= e(truncate($rev->purpose, 40)) ?> 
-                (<?= formatDate($rev->start_datetime) ?>)
-            </li>
-            <?php endforeach; ?>
-        </ul>
+<div class="loka-page">
+    <div class="loka-page-header">
         <div>
-            <?php foreach ($revisionRequests as $rev): ?>
-            <a href="<?= APP_URL ?>/?page=requests&action=edit&id=<?= $rev->id ?>" class="btn btn-warning btn-sm me-2">
-                <i class="bi bi-pencil me-1"></i>Edit Request #<?= $rev->id ?>
-            </a>
-            <?php endforeach; ?>
+            <h1 class="text-2xl font-bold text-base-content">Requests</h1>
+            <p class="text-sm text-base-content/60">Manage your vehicle requests</p>
         </div>
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-    </div>
-    <?php endif; ?>
-    
-    <!-- Page Header -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <h4 class="mb-1">My Requests</h4>
-            <nav aria-label="breadcrumb">
-                <ol class="breadcrumb mb-0">
-                    <li class="breadcrumb-item"><a href="<?= APP_URL ?>">Dashboard</a></li>
-                    <li class="breadcrumb-item active">Requests</li>
-                </ol>
-            </nav>
-        </div>
-        <a href="<?= APP_URL ?>/?page=requests&action=create" class="btn btn-primary">
-            <i class="bi bi-plus-lg me-1"></i>New Request
+        <a href="?page=requests&action=create" class="loka-btn-primary">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+            New Request
         </a>
     </div>
-    
-    <!-- Filters -->
-    <div class="card table-card mb-4">
-        <div class="card-body">
-            <form method="GET" class="row g-3 align-items-end">
-                <input type="hidden" name="page" value="requests">
-                
-                <div class="col-12 col-md-3">
-                    <label class="form-label">Status</label>
-                    <select name="status" class="form-select">
-                        <option value="">All Statuses</option>
-                        <?php foreach (STATUS_LABELS as $key => $info): ?>
-                        <option value="<?= $key ?>" <?= $statusFilter === $key ? 'selected' : '' ?>>
-                            <?= e($info['label']) ?>
-                        </option>
-                        <?php endforeach; ?>
-                    </select>
-                </div>
-                
-                <div class="col-12 col-md-4">
-                    <label class="form-label">Search</label>
-                    <input type="text" name="search" class="form-control" 
-                           placeholder="Search purpose or destination..." 
-                           value="<?= e($searchFilter) ?>">
-                </div>
-                
-                <div class="col-12 col-md-3">
-                    <button type="submit" class="btn btn-outline-primary me-2">
-                        <i class="bi bi-search me-1"></i>Filter
-                    </button>
-                    <a href="<?= APP_URL ?>/?page=requests" class="btn btn-outline-secondary">Reset</a>
-                </div>
-            </form>
-        </div>
+
+    <!-- Status Tabs -->
+    <div class="flex gap-2 mb-6 flex-wrap">
+        <a href="?page=requests" class="loka-badge <?= !$statusFilter ? 'bg-primary text-primary-content' : 'bg-base-200 text-base-content hover:bg-base-300' ?> transition-colors">
+            All (<?= $totalItems ?>)
+        </a>
+        <?php
+        $statuses = ['pending' => 'Pending', 'approved' => 'Approved', 'rejected' => 'Rejected', 'cancelled' => 'Cancelled'];
+        foreach ($statuses as $s => $label):
+            $count = $statusMap[$s] ?? 0;
+            $colors = [
+                'pending' => 'bg-warning/20 text-warning',
+                'approved' => 'bg-success/20 text-success',
+                'rejected' => 'bg-error/20 text-error',
+                'cancelled' => 'bg-base-200 text-base-content/60',
+            ];
+        ?>
+        <a href="?page=requests&status=<?= $s ?>" class="loka-badge <?= $statusFilter === $s ? $colors[$s] . ' ring-2 ring-current' : 'bg-base-200 text-base-content hover:bg-base-300' ?> transition-colors">
+            <?= $label ?> (<?= $count ?>)
+        </a>
+        <?php endforeach; ?>
     </div>
-    
+
+    <!-- Filters -->
+    <div class="loka-card mb-6">
+        <form method="GET" class="flex flex-wrap items-end gap-3">
+            <input type="hidden" name="page" value="requests">
+            <div class="form-control flex-1 min-w-[200px]">
+                <label class="label">
+                    <span class="label-text text-xs font-semibold text-base-content/70 uppercase tracking-wide">Search</span>
+                </label>
+                <input type="text" name="q" value="<?= e($searchQuery) ?>" placeholder="Purpose, requester..." class="input input-bordered input-sm w-full bg-base-100">
+            </div>
+            <div class="form-control min-w-[130px]">
+                <label class="label">
+                    <span class="label-text text-xs font-semibold text-base-content/70 uppercase tracking-wide">Status</span>
+                </label>
+                <select name="status" class="select select-bordered select-sm bg-base-100">
+                    <option value="">All Status</option>
+                    <?php foreach ($statuses as $s => $label): ?>
+                    <option value="<?= $s ?>" <?= $statusFilter === $s ? 'selected' : '' ?>><?= $label ?></option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+            <div class="form-control min-w-[140px]">
+                <label class="label">
+                    <span class="label-text text-xs font-semibold text-base-content/70 uppercase tracking-wide">From</span>
+                </label>
+                <input type="date" name="date_from" value="<?= e($dateFrom) ?>" class="input input-bordered input-sm bg-base-100">
+            </div>
+            <div class="form-control min-w-[140px]">
+                <label class="label">
+                    <span class="label-text text-xs font-semibold text-base-content/70 uppercase tracking-wide">To</span>
+                </label>
+                <input type="date" name="date_to" value="<?= e($dateTo) ?>" class="input input-bordered input-sm bg-base-100">
+            </div>
+            <div class="flex gap-2">
+                <button type="submit" class="loka-btn-primary loka-btn-sm">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                    Filter
+                </button>
+                <a href="?page=requests" class="loka-btn-secondary loka-btn-sm">Clear</a>
+            </div>
+        </form>
+    </div>
+
     <!-- Requests Table -->
-    <div class="card table-card">
-        <div class="card-body">
-            <?php if (empty($requests)): ?>
-            <div class="empty-state">
-                <i class="bi bi-file-earmark-x"></i>
-                <h5>No requests found</h5>
-                <p class="text-muted">Create your first vehicle request to get started.</p>
-            </div>
-            <?php else: ?>
-            <div class="table-responsive">
-                <table class="table table-hover data-table">
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Date/Time</th>
-                            <th>Purpose</th>
-                            <th>Destination</th>
-                            <th>Vehicle</th>
-                            <th>Status</th>
-                            <th>Stage</th>
-                            <th>Created</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php foreach ($requests as $request): ?>
-                        <tr>
-                            <td><strong>#<?= $request->id ?></strong></td>
-                            <td>
-                                <div><?= formatDateTime($request->start_datetime) ?></div>
-                                <small class="text-muted">to <?= formatDateTime($request->end_datetime) ?></small>
-                            </td>
-                            <td><?= truncate($request->purpose, 30) ?></td>
-                            <td><?= truncate($request->destination, 25) ?></td>
-                            <td>
-                                <?php if ($request->plate_number): ?>
-                                <span class="badge bg-light text-dark"><?= e($request->plate_number) ?></span>
-                                <small class="d-block text-muted"><?= e($request->make . ' ' . $request->vehicle_model) ?></small>
-                                <?php else: ?>
-                                <span class="text-muted">Not assigned</span>
+    <div class="loka-card">
+        <div class="loka-table-responsive">
+            <table class="loka-table">
+                <thead>
+                    <tr>
+                        <th>Control No.</th>
+                        <th>Purpose</th>
+                        <th>Requester</th>
+                        <th>Date Needed</th>
+                        <th>Route</th>
+                        <th>Passengers</th>
+                        <th>Status</th>
+                        <th>Created</th>
+                        <th class="text-center w-20">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php if (empty($requests)): ?>
+                    <tr>
+                        <td colspan="9">
+                            <div class="loka-empty">
+                                <svg class="mx-auto w-12 h-12 text-base-content/30" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                                </svg>
+                                <p class="mt-2 text-base-content/60">No requests found</p>
+                            </div>
+                        </td>
+                    </tr>
+                    <?php else: ?>
+                    <?php foreach ($requests as $req): ?>
+                    <tr>
+                        <td>
+                            <span class="font-mono text-xs font-semibold text-primary"><?= e($req['control_no'] ?? 'N/A') ?></span>
+                        </td>
+                        <td>
+                            <div class="max-w-[200px]">
+                                <p class="font-medium text-sm text-base-content truncate" title="<?= e($req['purpose']) ?>"><?= e($req['purpose']) ?></p>
+                                <?php if (!empty($req['vehicle_type_name'])): ?>
+                                <span class="loka-badge loka-badge-sm bg-base-200 text-base-content/70 mt-1"><?= e($req['vehicle_type_name']) ?></span>
                                 <?php endif; ?>
-                            </td>
-                            <td>
-                                <?= requestStatusBadge($request->status) ?>
-                                <?php if ($request->status === STATUS_REVISION): ?>
-                                <span class="badge bg-warning text-dark ms-1"><i class="bi bi-pencil-square me-1"></i>Needs Revision</span>
-                                <?php elseif (in_array($request->status, [STATUS_PENDING, STATUS_PENDING_MOTORPOOL]) && $request->unread_notifications > 0): ?>
-                                <span class="badge bg-danger ms-1" title="New updates">New</span>
-                                <?php endif; ?>
-                            </td>
-                            <td>
-                                <?php
-                                if ($request->status === STATUS_PENDING) {
-                                    $who = $request->approver_name ?: 'Dept Approver';
-                                    echo '<span class="badge bg-warning text-dark">Waiting on ' . e($who) . '</span>';
-                                } elseif ($request->status === STATUS_PENDING_MOTORPOOL) {
-                                    $who = $request->motorpool_name ?: 'Motorpool Head';
-                                    echo '<span class="badge bg-info text-dark">Waiting on ' . e($who) . '</span>';
-                                } else {
-                                    echo '<span class="text-muted">—</span>';
-                                }
-                                ?>
-                            </td>
-                            <td><?= formatDate($request->created_at) ?></td>
-                            <td>
-                                <div class="btn-group">
-                                    <a href="<?= APP_URL ?>/?page=requests&action=view&id=<?= $request->id ?>" 
-                                       class="btn btn-sm btn-outline-primary" title="View">
-                                        <i class="bi bi-eye"></i>
-                                    </a>
-                                    <?php if (in_array($request->status, [STATUS_PENDING, STATUS_DRAFT, STATUS_REVISION])): ?>
-                                    <a href="<?= APP_URL ?>/?page=requests&action=edit&id=<?= $request->id ?>" 
-                                       class="btn btn-sm btn-outline-secondary" title="Edit">
-                                        <i class="bi bi-pencil"></i>
-                                    </a>
-                                    <?php if ($request->status !== STATUS_REVISION): ?>
-                                    <a href="<?= APP_URL ?>/?page=requests&action=cancel&id=<?= $request->id ?>" 
-                                       class="btn btn-sm btn-outline-danger" title="Cancel"
-                                       data-confirm="Are you sure you want to cancel this request?">
-                                        <i class="bi bi-x-lg"></i>
-                                    </a>
-                                    <?php endif; ?>
-                                    <?php endif; ?>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="flex items-center gap-2">
+                                <div class="loka-avatar loka-avatar-sm">
+                                    <?= strtoupper(substr($req['first_name'], 0, 1) . substr($req['last_name'], 0, 1)) ?>
                                 </div>
-                            </td>
-                        </tr>
-                        <?php endforeach; ?>
-                    </tbody>
-                </table>
-            </div>
-            <?php endif; ?>
+                                <div>
+                                    <p class="text-sm font-medium text-base-content"><?= e($req['first_name'] . ' ' . $req['last_name']) ?></p>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <?php if ($req['date_needed']): ?>
+                            <p class="text-sm text-base-content"><?= date('M d, Y', strtotime($req['date_needed'])) ?></p>
+                            <p class="text-xs text-base-content/60"><?= date('h:i A', strtotime($req['date_needed'])) ?></p>
+                            <?php else: ?>
+                            <span class="text-sm text-base-content/40">—</span>
+                            <?php endif; ?>
+                        </td>
+                        <td>
+                            <div class="max-w-[180px]">
+                                <p class="text-sm text-base-content truncate" title="<?= e($req['origin'] ?? '') ?> → <?= e($req['destination'] ?? '') ?>"><?= e($req['origin'] ?? 'N/A') ?> → <?= e($req['destination'] ?? 'N/A') ?></p>
+                            </div>
+                        </td>
+                        <td class="text-center">
+                            <span class="loka-badge loka-badge-sm bg-base-200 text-base-content"><?= (int)($req['passengers'] ?? 1) ?></span>
+                        </td>
+                        <td>
+                            <?php
+                            $statusClasses = [
+                                'pending' => 'bg-warning/20 text-warning',
+                                'approved' => 'bg-success/20 text-success',
+                                'rejected' => 'bg-error/20 text-error',
+                                'cancelled' => 'bg-base-200 text-base-content/60',
+                                'completed' => 'bg-info/20 text-info',
+                            ];
+                            $statusLabels = [
+                                'pending' => 'Pending',
+                                'approved' => 'Approved',
+                                'rejected' => 'Rejected',
+                                'cancelled' => 'Cancelled',
+                                'completed' => 'Completed',
+                            ];
+                            $cls = $statusClasses[$req['status']] ?? 'bg-base-200 text-base-content';
+                            $lbl = $statusLabels[$req['status'] ?? 'pending'] ?? ucfirst($req['status']);
+                            ?>
+                            <span class="loka-badge <?= $cls ?>"><?= $lbl ?></span>
+                        </td>
+                        <td>
+                            <p class="text-sm text-base-content"><?= date('M d', strtotime($req['created_at'])) ?></p>
+                            <p class="text-xs text-base-content/60"><?= date('h:i A', strtotime($req['created_at'])) ?></p>
+                        </td>
+                        <td class="text-center">
+                            <a href="?page=requests&action=view&id=<?= $req['id'] ?>" class="loka-btn-icon text-primary hover:bg-primary/10" title="View">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                            </a>
+                        </td>
+                    </tr>
+                    <?php endforeach; ?>
+                    <?php endif; ?>
+                </tbody>
+            </table>
         </div>
+
+        <!-- Pagination -->
+        <?php if ($totalPages > 1): ?>
+        <div class="flex items-center justify-between mt-4 px-4 pb-4">
+            <p class="text-sm text-base-content/60">
+                Showing <?= $offset + 1 ?>–<?= min($offset + $perPage, $totalItems) ?> of <?= $totalItems ?>
+            </p>
+            <div class="join">
+                <?php if ($page > 1): ?>
+                <a href="?page=requests&p=<?= $page - 1 ?>&status=<?= e($statusFilter) ?>" class="join-item btn btn-sm">«</a>
+                <?php endif; ?>
+
+                <?php
+                $start = max(1, $page - 2);
+                $end = min($totalPages, $page + 2);
+                for ($i = $start; $i <= $end; $i++):
+                ?>
+                <a href="?page=requests&p=<?= $i ?>&status=<?= e($statusFilter) ?>" class="join-item btn btn-sm <?= $i === $page ? 'btn-primary' : '' ?>"><?= $i ?></a>
+                <?php endfor; ?>
+
+                <?php if ($page < $totalPages): ?>
+                <a href="?page=requests&p=<?= $page + 1 ?>&status=<?= e($statusFilter) ?>" class="join-item btn btn-sm">»</a>
+                <?php endif; ?>
+            </div>
+        </div>
+        <?php endif; ?>
     </div>
 </div>
 

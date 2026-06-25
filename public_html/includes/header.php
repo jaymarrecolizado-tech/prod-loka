@@ -6,23 +6,24 @@
     <meta name="description" content="LOKA Fleet Management System">
     <title><?= e($pageTitle ?? 'Dashboard') ?> - <?= APP_NAME ?></title>
     
-    <!-- Bootstrap 5.3 CSS -->
+    <!-- Bootstrap 5.3 CSS (conditionally loaded) -->
+    <?php if (!UI_MODERN_ENABLED): ?>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <?php endif; ?>
     
     <!-- Bootstrap Icons -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.2/font/bootstrap-icons.css" rel="stylesheet">
     
     <!-- DataTables CSS -->
+    <?php if (!UI_MODERN_ENABLED): ?>
     <link href="https://cdn.datatables.net/1.13.7/css/dataTables.bootstrap5.min.css" rel="stylesheet">
+    <?php endif; ?>
     
     <!-- Flatpickr CSS -->
     <link href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" rel="stylesheet">
     
     <!-- Tom Select CSS -->
     <link href="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/css/tom-select.bootstrap5.min.css" rel="stylesheet">
-
-    <!-- Chart.js for Analytics -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
 
     <!-- Custom CSS -->
     <link href="<?= ASSETS_PATH ?>/css/style.css" rel="stylesheet">
@@ -34,91 +35,97 @@
 </head>
 <body>
     <!-- Top Navigation -->
-    <nav class="navbar navbar-dark bg-primary fixed-top">
-        <div class="container-fluid">
-            <!-- Sidebar Toggle (single hamburger for main nav) -->
-            <button class="btn btn-outline-light me-2" type="button" id="sidebarToggle" aria-label="Toggle navigation menu">
-                <i class="bi bi-list fs-5"></i>
-            </button>
-            
-            <!-- Brand -->
-            <a class="navbar-brand me-auto" href="<?= APP_URL ?>">
-                <i class="bi bi-truck me-2"></i><?= APP_NAME ?>
-            </a>
-            
-            <!-- Right Side (always visible) -->
-            <div class="d-flex align-items-center">
-                <!-- Notifications -->
-                <div class="dropdown me-3">
-                    <a class="nav-link text-white p-1" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false" id="notificationDropdown">
-                        <div class="position-relative d-inline-block">
-                            <i class="bi bi-bell fs-5"></i>
-                            <?php $unreadCount = unreadNotificationCount(); ?>
-                            <?php if ($unreadCount > 0): ?>
-                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.65rem; padding: 0.35em 0.5em;">
-                                <?= $unreadCount > 9 ? '9+' : $unreadCount ?>
-                            </span>
-                            <?php endif; ?>
-                        </div>
-                    </a>
-                    <ul class="dropdown-menu dropdown-menu-end notification-dropdown" id="notificationDropdownList" aria-labelledby="notificationDropdown">
-                        <li><h6 class="dropdown-header">Notifications</h6></li>
-                        <?php
-                        $notifications = db()->fetchAll(
-                            "SELECT * FROM notifications WHERE user_id = ? AND is_read = 0 AND is_archived = 0 AND deleted_at IS NULL ORDER BY created_at DESC LIMIT 5",
-                            [userId()]
-                        );
-                        if (empty($notifications)):
-                        ?>
-                        <li><span class="dropdown-item-text text-muted">No notifications</span></li>
-                        <?php else: ?>
-                        <?php foreach ($notifications as $notif): ?>
-                        <li>
-                            <a class="dropdown-item <?= $notif->is_read ? '' : 'fw-bold' ?>" href="<?= APP_URL ?>/?page=notifications&action=read&id=<?= $notif->id ?>">
-                                <small class="text-muted"><?= formatDateTime($notif->created_at) ?></small><br>
-                                <?= e($notif->title) ?>
-                            </a>
-                        </li>
-                        <?php endforeach; ?>
-                        <?php endif; ?>
-                        <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item text-center" href="<?= APP_URL ?>/?page=notifications">View All</a></li>
-                    </ul>
+    <nav class="loka-navbar">
+        <!-- Sidebar Toggle -->
+        <button class="loka-navbar-toggle" type="button" id="sidebarToggle" aria-label="Toggle navigation menu">
+            <i class="bi bi-list text-xl"></i>
+        </button>
+
+        <!-- Brand -->
+        <a class="loka-navbar-brand" href="<?= APP_URL ?>">
+            <i class="bi bi-truck"></i><?= APP_NAME ?>
+        </a>
+
+        <!-- Right Side -->
+        <div class="loka-navbar-actions">
+            <!-- Notifications (DaisyUI dropdown) -->
+            <div class="dropdown dropdown-end">
+                <div tabindex="0" role="button" class="loka-navbar-notification" id="notificationDropdown">
+                    <i class="bi bi-bell text-lg"></i>
+                    <?php $unreadCount = unreadNotificationCount(); ?>
+                    <?php if ($unreadCount > 0): ?>
+                    <span class="loka-navbar-notification-badge">
+                        <?= $unreadCount > 9 ? '9+' : $unreadCount ?>
+                    </span>
+                    <?php endif; ?>
                 </div>
-                
-                <!-- User Dropdown -->
-                <div class="dropdown">
-                    <a class="nav-link dropdown-toggle text-white d-flex align-items-center p-1" href="#" data-bs-toggle="dropdown">
-                        <div class="avatar-circle">
-                            <?= strtoupper(substr(currentUser()->name ?? 'U', 0, 1)) ?>
-                        </div>
-                        <span class="d-none d-md-inline ms-2"><?= e(currentUser()->name ?? 'User') ?></span>
-                    </a>
-                    <ul class="dropdown-menu dropdown-menu-end">
-                        <li><h6 class="dropdown-header"><?= e(currentUser()->email ?? '') ?></h6></li>
-                        <li><span class="dropdown-item-text"><?= roleBadge(userRole()) ?></span></li>
-                        <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item" href="<?= APP_URL ?>/?page=profile"><i class="bi bi-person me-2"></i>Profile</a></li>
-                        <li><a class="dropdown-item text-danger" href="<?= APP_URL ?>/?page=logout"><i class="bi bi-box-arrow-right me-2"></i>Logout</a></li>
-                    </ul>
+                <ul tabindex="0" class="dropdown-content menu bg-base-100 rounded-box z-[1] w-80 p-2 shadow-lg">
+                    <li class="menu-title">Notifications</li>
+                    <?php
+                    $notifications = db()->fetchAll(
+                        "SELECT * FROM notifications WHERE user_id = ? AND is_read = 0 AND is_archived = 0 AND deleted_at IS NULL ORDER BY created_at DESC LIMIT 5",
+                        [userId()]
+                    );
+                    if (empty($notifications)):
+                    ?>
+                    <li class="text-base-content/50 text-sm py-2">No notifications</li>
+                    <?php else: ?>
+                    <?php foreach ($notifications as $notif): ?>
+                    <li>
+                        <a href="<?= APP_URL ?>/?page=notifications&action=read&id=<?= $notif->id ?>" class="flex flex-col items-start py-2 <?= $notif->is_read ? '' : 'font-bold' ?>">
+                            <small class="text-base-content/50"><?= formatDateTime($notif->created_at) ?></small>
+                            <span><?= e($notif->title) ?></span>
+                        </a>
+                    </li>
+                    <?php endforeach; ?>
+                    <?php endif; ?>
+                    <li class="border-t border-base-200 mt-1 pt-1">
+                        <a href="<?= APP_URL ?>/?page=notifications" class="text-center text-sm">View All</a>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- User Dropdown (DaisyUI dropdown) -->
+            <div class="dropdown dropdown-end">
+                <div tabindex="0" role="button" class="loka-navbar-notification flex items-center gap-2">
+                    <div class="loka-avatar bg-white/20">
+                        <?= strtoupper(substr(currentUser()->name ?? 'U', 0, 1)) ?>
+                    </div>
+                    <span class="hidden md:inline text-sm text-white"><?= e(currentUser()->name ?? 'User') ?></span>
                 </div>
+                <ul tabindex="0" class="dropdown-content menu bg-base-100 rounded-box z-[1] w-56 p-2 shadow-lg">
+                    <li class="menu-title">
+                        <span class="text-sm"><?= e(currentUser()->email ?? '') ?></span>
+                    </li>
+                    <li class="text-xs px-4 py-1"><?= roleBadge(userRole()) ?></li>
+                    <li class="border-t border-base-200 mt-1 pt-1">
+                        <a href="<?= APP_URL ?>/?page=profile"><i class="bi bi-person me-2"></i>Profile</a>
+                    </li>
+                    <li>
+                        <a href="<?= APP_URL ?>/?page=logout" class="text-error"><i class="bi bi-box-arrow-right me-2"></i>Logout</a>
+                    </li>
+                </ul>
             </div>
         </div>
     </nav>
-    
+
     <!-- Main Wrapper -->
     <div class="wrapper">
         <?php require_once INCLUDES_PATH . '/sidebar.php'; ?>
-        
+
         <!-- Toast Container -->
-        <div id="toast-container" class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 1100;"></div>
-        
+        <div id="toast-container" class="fixed top-0 right-0 z-[1100] flex flex-col gap-2 p-3"></div>
+
         <!-- Main Content -->
         <main class="main-content" id="main-content">
             <!-- Flash Messages -->
             <?php if ($flash = getFlash()): ?>
-            <div class="alert alert-<?= e($flash['type']) ?> alert-dismissible fade show m-3" role="alert">
+            <?php
+            $flashTypeMap = ['success' => 'loka-alert-success', 'danger' => 'loka-alert-danger', 'warning' => 'loka-alert-warning', 'info' => 'loka-alert-info'];
+            $lokaFlashClass = $flashTypeMap[$flash['type']] ?? 'loka-alert-info';
+            ?>
+            <div class="loka-alert <?= $lokaFlashClass ?> m-3" role="alert">
                 <?= e($flash['message']) ?>
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                <button type="button" class="btn-close" onclick="this.parentElement.remove()"></button>
             </div>
             <?php endif; ?>

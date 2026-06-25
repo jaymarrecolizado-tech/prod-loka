@@ -1,7 +1,7 @@
 <?php
 /**
  * LOKA - Guard Dashboard
- * 
+ *
  * Guards can view today's scheduled trips and record:
  * - Dispatch time (when vehicle leaves)
  * - Arrival time (when vehicle returns)
@@ -38,21 +38,17 @@ $params = [];
 
 switch ($filter) {
     case 'pending_dispatch':
-        // Approved requests that haven't departed yet
         $sql .= " AND r.status = 'approved' AND r.actual_dispatch_datetime IS NULL";
         break;
     case 'pending_arrival':
-        // Dispatched but haven't returned yet
-        $sql .= " AND r.status = 'approved' AND r.actual_dispatch_datetime IS NOT NULL 
+        $sql .= " AND r.status = 'approved' AND r.actual_dispatch_datetime IS NOT NULL
                   AND r.actual_arrival_datetime IS NULL";
         break;
     case 'completed':
-        // Trips that have been completed (returned)
         $sql .= " AND r.status = 'approved' AND r.actual_arrival_datetime IS NOT NULL";
         break;
     case 'today':
     default:
-        // Show all approved requests for today
         $sql .= " AND r.status = 'approved' AND DATE(r.start_datetime) = ?";
         $params[] = $today;
         break;
@@ -62,7 +58,7 @@ $sql .= " ORDER BY r.start_datetime ASC";
 
 $trips = db()->fetchAll($sql, $params);
 
-// Get statistics for today (for the stat cards)
+// Get statistics for today
 $statsToday = db()->fetch(
     "SELECT
         COUNT(*) as total_scheduled,
@@ -76,7 +72,7 @@ $statsToday = db()->fetch(
     [$today]
 );
 
-// Get tab counts that reflect what each filter actually shows
+// Get tab counts
 $tabCounts = db()->fetch(
     "SELECT
         COUNT(*) as all_scheduled,
@@ -92,131 +88,103 @@ $pageTitle = 'Guard Dashboard';
 require_once INCLUDES_PATH . '/header.php';
 ?>
 
-<div class="container-fluid py-4">
+<div class="loka-page">
     <!-- Page Header -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="loka-page-header">
         <div>
-            <h4 class="mb-1"><i class="bi bi-shield-check me-2"></i>Guard Dashboard</h4>
-            <p class="text-muted mb-0">Track vehicle dispatch and arrival times</p>
+            <h1 class="text-2xl font-bold text-base-content flex items-center gap-2">
+                <svg class="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+                Guard Dashboard
+            </h1>
+            <p class="text-sm text-base-content/60">Track vehicle dispatch and arrival times</p>
         </div>
         <div>
-            <span class="badge bg-light text-dark border">
-                <i class="bi bi-calendar3 me-1"></i><?= formatDate($today) ?>
+            <span class="loka-badge bg-base-200 text-base-content">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                <?= formatDate($today) ?>
             </span>
         </div>
     </div>
 
     <!-- Statistics Cards -->
-    <div class="row g-3 mb-4">
-        <div class="col-md-3">
-            <div class="card border-0 shadow-sm">
-                <div class="card-body">
-                    <div class="d-flex align-items-center">
-                        <div class="flex-shrink-0">
-                            <div class="bg-primary bg-opacity-10 rounded p-3">
-                                <i class="bi bi-calendar-check text-primary fs-4"></i>
-                            </div>
-                        </div>
-                        <div class="flex-grow-1 ms-3">
-                            <h6 class="text-muted mb-1">Scheduled Today</h6>
-                            <h3 class="mb-0"><?= $statsToday->total_scheduled ?? 0 ?></h3>
-                        </div>
-                    </div>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+        <div class="loka-stat-card">
+            <div class="flex items-center gap-3">
+                <div class="p-3 rounded-lg bg-primary/10">
+                    <svg class="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                </div>
+                <div>
+                    <p class="text-xs text-base-content/60 uppercase tracking-wide">Scheduled Today</p>
+                    <p class="text-2xl font-bold text-base-content"><?= $statsToday->total_scheduled ?? 0 ?></p>
                 </div>
             </div>
         </div>
-        <div class="col-md-3">
-            <div class="card border-0 shadow-sm">
-                <div class="card-body">
-                    <div class="d-flex align-items-center">
-                        <div class="flex-shrink-0">
-                            <div class="bg-warning bg-opacity-10 rounded p-3">
-                                <i class="bi bi-car-front text-warning fs-4"></i>
-                            </div>
-                        </div>
-                        <div class="flex-grow-1 ms-3">
-                            <h6 class="text-muted mb-1">Pending Dispatch</h6>
-                            <h3 class="mb-0"><?= $tabCounts->all_pending_dispatch ?? 0 ?></h3>
-                        </div>
-                    </div>
+        <div class="loka-stat-card">
+            <div class="flex items-center gap-3">
+                <div class="p-3 rounded-lg bg-warning/10">
+                    <svg class="w-6 h-6 text-warning" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/></svg>
+                </div>
+                <div>
+                    <p class="text-xs text-base-content/60 uppercase tracking-wide">Pending Dispatch</p>
+                    <p class="text-2xl font-bold text-base-content"><?= $tabCounts->all_pending_dispatch ?? 0 ?></p>
                 </div>
             </div>
         </div>
-        <div class="col-md-3">
-            <div class="card border-0 shadow-sm">
-                <div class="card-body">
-                    <div class="d-flex align-items-center">
-                        <div class="flex-shrink-0">
-                            <div class="bg-info bg-opacity-10 rounded p-3">
-                                <i class="bi bi-arrow-return-left text-info fs-4"></i>
-                            </div>
-                        </div>
-                        <div class="flex-grow-1 ms-3">
-                            <h6 class="text-muted mb-1">On Trip</h6>
-                            <h3 class="mb-0"><?= $tabCounts->all_on_trip ?? 0 ?></h3>
-                        </div>
-                    </div>
+        <div class="loka-stat-card">
+            <div class="flex items-center gap-3">
+                <div class="p-3 rounded-lg bg-info/10">
+                    <svg class="w-6 h-6 text-info" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
+                </div>
+                <div>
+                    <p class="text-xs text-base-content/60 uppercase tracking-wide">On Trip</p>
+                    <p class="text-2xl font-bold text-base-content"><?= $tabCounts->all_on_trip ?? 0 ?></p>
                 </div>
             </div>
         </div>
-        <div class="col-md-3">
-            <div class="card border-0 shadow-sm">
-                <div class="card-body">
-                    <div class="d-flex align-items-center">
-                        <div class="flex-shrink-0">
-                            <div class="bg-success bg-opacity-10 rounded p-3">
-                                <i class="bi bi-check-circle text-success fs-4"></i>
-                            </div>
-                        </div>
-                        <div class="flex-grow-1 ms-3">
-                            <h6 class="text-muted mb-1">Completed</h6>
-                            <h3 class="mb-0"><?= $tabCounts->all_completed ?? 0 ?></h3>
-                        </div>
-                    </div>
+        <div class="loka-stat-card">
+            <div class="flex items-center gap-3">
+                <div class="p-3 rounded-lg bg-success/10">
+                    <svg class="w-6 h-6 text-success" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                </div>
+                <div>
+                    <p class="text-xs text-base-content/60 uppercase tracking-wide">Completed</p>
+                    <p class="text-2xl font-bold text-base-content"><?= $tabCounts->all_completed ?? 0 ?></p>
                 </div>
             </div>
         </div>
     </div>
 
     <!-- Filter Tabs -->
-    <div class="card mb-4">
-        <div class="card-header bg-white">
-            <ul class="nav nav-tabs card-header-tabs">
-                <li class="nav-item">
-                    <a class="nav-link <?= $filter === 'today' ? 'active' : '' ?>"
-                       href="<?= APP_URL ?>/?page=guard">
-                        <i class="bi bi-calendar-day me-1"></i>Today's Trips
-                        <span class="badge bg-primary ms-1"><?= $statsToday->total_scheduled ?? 0 ?></span>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link <?= $filter === 'pending_dispatch' ? 'active' : '' ?>"
-                       href="<?= APP_URL ?>/?page=guard&filter=pending_dispatch">
-                        <i class="bi bi-clock me-1"></i>Pending Dispatch
-                        <span class="badge bg-warning ms-1"><?= $tabCounts->all_pending_dispatch ?? 0 ?></span>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link <?= $filter === 'pending_arrival' ? 'active' : '' ?>"
-                       href="<?= APP_URL ?>/?page=guard&filter=pending_arrival">
-                        <i class="bi bi-arrow-return-left me-1"></i>On Trip
-                        <span class="badge bg-info ms-1"><?= $tabCounts->all_on_trip ?? 0 ?></span>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link <?= $filter === 'completed' ? 'active' : '' ?>"
-                       href="<?= APP_URL ?>/?page=guard&filter=completed">
-                        <i class="bi bi-check-circle me-1"></i>Completed
-                        <span class="badge bg-success ms-1"><?= $tabCounts->all_completed ?? 0 ?></span>
-                    </a>
-                </li>
-            </ul>
+    <div class="loka-card">
+        <div class="border-b border-base-200">
+            <div class="flex gap-0 overflow-x-auto">
+                <?php
+                $tabs = [
+                    'today' => ['label' => "Today's Trips", 'icon' => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>', 'count' => $statsToday->total_scheduled ?? 0],
+                    'pending_dispatch' => ['label' => 'Pending Dispatch', 'icon' => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>', 'count' => $tabCounts->all_pending_dispatch ?? 0],
+                    'pending_arrival' => ['label' => 'On Trip', 'icon' => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/>', 'count' => $tabCounts->all_on_trip ?? 0],
+                    'completed' => ['label' => 'Completed', 'icon' => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>', 'count' => $tabCounts->all_completed ?? 0],
+                ];
+                foreach ($tabs as $key => $tab):
+                    $href = $key === 'today' ? APP_URL . '/?page=guard' : APP_URL . "/?page=guard&filter={$key}";
+                ?>
+                <a href="<?= $href ?>"
+                   class="flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 transition-colors whitespace-nowrap <?= $filter === $key ? 'border-primary text-primary' : 'border-transparent text-base-content/60 hover:text-base-content hover:border-base-300' ?>">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><?= $tab['icon'] ?></svg>
+                    <?= $tab['label'] ?>
+                    <span class="loka-badge loka-badge-sm <?= $filter === $key ? 'bg-primary/20 text-primary' : 'bg-base-200 text-base-content/60' ?>"><?= $tab['count'] ?></span>
+                </a>
+                <?php endforeach; ?>
+            </div>
         </div>
-        <div class="card-body">
+
+        <div class="p-4">
             <?php if (empty($trips)): ?>
-                <div class="text-center py-5">
-                    <i class="bi bi-calendar-x fs-1 text-muted"></i>
-                    <p class="text-muted mt-3">
+                <div class="loka-empty">
+                    <svg class="mx-auto w-12 h-12 text-base-content/30" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                    </svg>
+                    <p class="mt-2 text-base-content/60">
                         <?php if ($filter === 'today'): ?>
                             No approved trips scheduled for today.
                         <?php elseif ($filter === 'pending_dispatch'): ?>
@@ -231,8 +199,8 @@ require_once INCLUDES_PATH . '/header.php';
                     </p>
                 </div>
             <?php else: ?>
-                <div class="table-responsive">
-                    <table class="table table-hover align-middle">
+                <div class="loka-table-responsive">
+                    <table class="loka-table">
                         <thead>
                             <tr>
                                 <th>Request #</th>
@@ -243,99 +211,95 @@ require_once INCLUDES_PATH . '/header.php';
                                 <th>Status</th>
                                 <th>Dispatch</th>
                                 <th>Arrival</th>
-                                <th>Actions</th>
+                                <th class="text-center w-28">Actions</th>
                             </tr>
                         </thead>
                         <tbody>
                             <?php foreach ($trips as $trip): ?>
                                 <tr>
                                     <td>
-                                        <strong>#<?= $trip->id ?></strong><br>
-                                        <small class="text-muted"><?= e($trip->requester_name) ?></small>
+                                        <span class="font-mono text-xs font-semibold text-primary">#<?= $trip->id ?></span>
+                                        <p class="text-xs text-base-content/60"><?= e($trip->requester_name) ?></p>
                                     </td>
                                     <td>
-                                        <div class="small">
-                                            <i class="bi bi-box-arrow-right text-success me-1"></i>
+                                        <p class="text-sm text-base-content flex items-center gap-1">
+                                            <svg class="w-3.5 h-3.5 text-success" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
                                             <?= formatDateTime($trip->start_datetime) ?>
-                                        </div>
-                                        <div class="small">
-                                            <i class="bi bi-box-arrow-in-left text-danger me-1"></i>
+                                        </p>
+                                        <p class="text-sm text-base-content flex items-center gap-1">
+                                            <svg class="w-3.5 h-3.5 text-error" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16l-4-4m0 0l4-4m-4 4h18"/></svg>
                                             <?= formatDateTime($trip->end_datetime) ?>
-                                        </div>
+                                        </p>
                                     </td>
                                     <td>
                                         <?php if ($trip->plate_number): ?>
-                                            <div class="fw-medium"><?= e($trip->plate_number) ?></div>
-                                            <small class="text-muted"><?= e($trip->make . ' ' . $trip->vehicle_model) ?></small>
+                                            <p class="text-sm font-medium text-base-content"><?= e($trip->plate_number) ?></p>
+                                            <p class="text-xs text-base-content/60"><?= e($trip->make . ' ' . $trip->vehicle_model) ?></p>
                                         <?php else: ?>
-                                            <span class="text-muted">Not assigned</span>
+                                            <span class="text-sm text-base-content/40">Not assigned</span>
                                         <?php endif; ?>
                                     </td>
                                     <td>
                                         <?php if ($trip->driver_name): ?>
-                                            <div class="fw-medium"><?= e($trip->driver_name) ?></div>
-                                            <small class="text-muted"><?= e($trip->driver_phone) ?></small>
+                                            <p class="text-sm font-medium text-base-content"><?= e($trip->driver_name) ?></p>
+                                            <p class="text-xs text-base-content/60"><?= e($trip->driver_phone) ?></p>
                                         <?php else: ?>
-                                            <span class="text-muted">Not assigned</span>
+                                            <span class="text-sm text-base-content/40">Not assigned</span>
                                         <?php endif; ?>
                                     </td>
-                                    <td>
-                                        <?= e($trip->destination) ?>
-                                    </td>
+                                    <td class="text-sm text-base-content"><?= e($trip->destination) ?></td>
                                     <td>
                                         <?php if ($trip->actual_arrival_datetime): ?>
-                                            <span class="badge bg-success">Completed</span>
+                                            <span class="loka-badge bg-success/20 text-success">Completed</span>
                                         <?php elseif ($trip->actual_dispatch_datetime): ?>
-                                            <span class="badge bg-primary">On Trip</span>
+                                            <span class="loka-badge bg-primary/20 text-primary">On Trip</span>
                                         <?php else: ?>
-                                            <span class="badge bg-warning">Pending</span>
+                                            <span class="loka-badge bg-warning/20 text-warning">Pending</span>
                                         <?php endif; ?>
                                     </td>
                                     <td>
                                         <?php if ($trip->actual_dispatch_datetime): ?>
-                                            <div class="text-success">
-                                                <i class="bi bi-check-circle me-1"></i>
+                                            <p class="text-sm text-success flex items-center gap-1">
+                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
                                                 <?= formatDateTime($trip->actual_dispatch_datetime) ?>
-                                            </div>
-                                            <small class="text-muted">by <?= e($trip->dispatch_guard_name ?? 'Unknown') ?></small>
+                                            </p>
+                                            <p class="text-xs text-base-content/60">by <?= e($trip->dispatch_guard_name ?? 'Unknown') ?></p>
                                         <?php else: ?>
-                                            <span class="text-muted">-</span>
+                                            <span class="text-sm text-base-content/40">—</span>
                                         <?php endif; ?>
                                     </td>
                                     <td>
                                         <?php if ($trip->actual_arrival_datetime): ?>
-                                            <div class="text-success">
-                                                <i class="bi bi-check-circle me-1"></i>
+                                            <p class="text-sm text-success flex items-center gap-1">
+                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
                                                 <?= formatDateTime($trip->actual_arrival_datetime) ?>
-                                            </div>
-                                            <small class="text-muted">by <?= e($trip->arrival_guard_name ?? 'Unknown') ?></small>
+                                            </p>
+                                            <p class="text-xs text-base-content/60">by <?= e($trip->arrival_guard_name ?? 'Unknown') ?></p>
                                         <?php else: ?>
-                                            <span class="text-muted">-</span>
+                                            <span class="text-sm text-base-content/40">—</span>
                                         <?php endif; ?>
                                     </td>
                                     <td>
-                                        <div class="btn-group">
+                                        <div class="flex items-center justify-center gap-1">
                                             <?php if (!$trip->actual_dispatch_datetime): ?>
-                                                <button type="button" class="btn btn-sm btn-success" 
-                                                        data-bs-toggle="modal" 
-                                                        data-bs-target="#dispatchModal<?= $trip->id ?>">
-                                                    <i class="bi bi-box-arrow-right me-1"></i>Dispatch
+                                                <button type="button" class="loka-btn-sm bg-success text-success-content hover:bg-success/90"
+                                                        onclick="document.getElementById('dispatchModal<?= $trip->id ?>').showModal()">
+                                                    Dispatch
                                                 </button>
                                             <?php elseif (!$trip->actual_arrival_datetime): ?>
-                                                <button type="button" class="btn btn-sm btn-primary" 
-                                                        data-bs-toggle="modal" 
-                                                        data-bs-target="#arrivalModal<?= $trip->id ?>">
-                                                    <i class="bi bi-box-arrow-in-left me-1"></i>Arrival
+                                                <button type="button" class="loka-btn-sm bg-primary text-primary-content hover:bg-primary/90"
+                                                        onclick="document.getElementById('arrivalModal<?= $trip->id ?>').showModal()">
+                                                    Arrival
                                                 </button>
                                             <?php else: ?>
-                                                <button type="button" class="btn btn-sm btn-outline-secondary" disabled>
-                                                    <i class="bi bi-check-all me-1"></i>Done
+                                                <button type="button" class="loka-btn-sm bg-base-200 text-base-content/60" disabled>
+                                                    Done
                                                 </button>
                                             <?php endif; ?>
-                                            
-                                            <a href="<?= APP_URL ?>/?page=requests&action=view&id=<?= $trip->id ?>" 
-                                               class="btn btn-sm btn-outline-primary" target="_blank">
-                                                <i class="bi bi-eye"></i>
+
+                                            <a href="<?= APP_URL ?>/?page=requests&action=view&id=<?= $trip->id ?>"
+                                               class="loka-btn-icon text-primary hover:bg-primary/10" target="_blank" title="View">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
                                             </a>
                                         </div>
                                     </td>
@@ -352,175 +316,185 @@ require_once INCLUDES_PATH . '/header.php';
 <!-- Dispatch Modals -->
 <?php foreach ($trips as $trip): ?>
     <?php if (!$trip->actual_dispatch_datetime): ?>
-        <div class="modal fade" id="dispatchModal<?= $trip->id ?>" tabindex="-1">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <form method="POST" action="<?= APP_URL ?>/?page=guard&action=record_dispatch">
-                        <?= csrfField() ?>
-                        <input type="hidden" name="request_id" value="<?= $trip->id ?>">
-                        
-                        <div class="modal-header">
-                            <h5 class="modal-title">
-                                <i class="bi bi-box-arrow-right text-success me-2"></i>Record Dispatch
-                            </h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                        </div>
-                        
-                        <div class="modal-body">
-                            <div class="alert alert-info">
-                                <strong>Request #<?= $trip->id ?></strong><br>
-                                <?= e($trip->requester_name) ?> - <?= e($trip->destination) ?>
-                            </div>
-                            
-                            <div class="mb-3">
-                                <label class="form-label">Vehicle</label>
-                                <div class="fw-medium"><?= e($trip->plate_number ?? 'Not assigned') ?></div>
-                                <small class="text-muted"><?= e($trip->make . ' ' . $trip->vehicle_model) ?></small>
-                            </div>
-                            
-                            <div class="mb-3">
-                                <label class="form-label">Driver</label>
-                                <div class="fw-medium"><?= e($trip->driver_name ?? 'Not assigned') ?></div>
-                            </div>
-                            
-                            <div class="mb-3">
-                                <label for="dispatch_time<?= $trip->id ?>" class="form-label">Dispatch Time <span class="text-danger">*</span></label>
-                                <input type="datetime-local"
-                                       class="form-control"
-                                       id="dispatch_time<?= $trip->id ?>"
-                                       name="dispatch_time"
-                                       value="<?= date('Y-m-d\TH:i') ?>"
-                                       required>
-                                <small class="text-muted">Current time is pre-filled. Adjust if needed.</small>
-                            </div>
+        <dialog id="dispatchModal<?= $trip->id ?>" class="modal">
+            <div class="modal-box bg-base-100 p-0 max-w-lg">
+                <form method="POST" action="<?= APP_URL ?>/?page=guard&action=record_dispatch">
+                    <?= csrfField() ?>
+                    <input type="hidden" name="request_id" value="<?= $trip->id ?>">
 
-                            <!-- Travel Documents -->
-                            <div class="mb-3">
-                                <label class="form-label">Travel Documents (Optional)</label>
-                                <div class="card card-body bg-light">
-                                    <div class="form-check mb-2">
-                                        <input class="form-check-input" type="checkbox" name="has_travel_order" id="has_travel_order<?= $trip->id ?>" value="1" onchange="toggleTravelOrderInput(<?= $trip->id ?>)">
-                                        <label class="form-check-label" for="has_travel_order<?= $trip->id ?>">
-                                            <i class="bi bi-file-earmark-text me-1"></i>Travel Order Present
-                                        </label>
-                                        <input type="text" name="travel_order_number" id="travel_order_number<?= $trip->id ?>" class="form-control form-control-sm mt-2" placeholder="Travel Order No. (Required if checked)" style="display:none;">
-                                    </div>
-                                    <div class="form-check">
-                                        <input class="form-check-input" type="checkbox" name="has_official_business_slip" id="has_ob_slip<?= $trip->id ?>" value="1" onchange="toggleObSlipInput(<?= $trip->id ?>)">
-                                        <label class="form-check-label" for="has_ob_slip<?= $trip->id ?>">
-                                            <i class="bi bi-file-earmark me-1"></i>Official Business Slip Present
-                                        </label>
-                                        <input type="text" name="ob_slip_number" id="ob_slip_number<?= $trip->id ?>" class="form-control form-control-sm mt-2" placeholder="OB Slip No. (Required if checked)" style="display:none;">
-                                    </div>
-                                </div>
-                            </div>
+                    <div class="p-6 border-b border-base-200">
+                        <h5 class="text-base-content font-semibold flex items-center gap-2">
+                            <svg class="w-5 h-5 text-success" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
+                            Record Dispatch
+                        </h5>
+                    </div>
 
-                            <div class="mb-3">
-                                <label for="guard_notes<?= $trip->id ?>" class="form-label">Notes (Optional)</label>
-                                <textarea class="form-control"
-                                          id="guard_notes<?= $trip- maxlength="500">id ?>"
-                                          name="guard_notes"
-                                          rows="2"
-                                          placeholder="Any observations about the vehicle condition, passengers, etc."></textarea>
+                    <div class="p-6 space-y-4">
+                        <div class="loka-alert loka-alert-info">
+                            <strong>Request #<?= $trip->id ?></strong><br>
+                            <?= e($trip->requester_name) ?> — <?= e($trip->destination) ?>
+                        </div>
+
+                        <div>
+                            <label class="label-text text-xs font-semibold text-base-content/70 uppercase tracking-wide">Vehicle</label>
+                            <p class="text-sm font-medium text-base-content"><?= e($trip->plate_number ?? 'Not assigned') ?></p>
+                            <p class="text-xs text-base-content/60"><?= e($trip->make . ' ' . $trip->vehicle_model) ?></p>
+                        </div>
+
+                        <div>
+                            <label class="label-text text-xs font-semibold text-base-content/70 uppercase tracking-wide">Driver</label>
+                            <p class="text-sm font-medium text-base-content"><?= e($trip->driver_name ?? 'Not assigned') ?></p>
+                        </div>
+
+                        <div class="form-control">
+                            <label class="label">
+                                <span class="label-text text-xs font-semibold text-base-content/70 uppercase tracking-wide">Dispatch Time <span class="text-error">*</span></span>
+                            </label>
+                            <input type="datetime-local"
+                                   class="input input-bordered input-sm bg-base-100"
+                                   id="dispatch_time<?= $trip->id ?>"
+                                   name="dispatch_time"
+                                   value="<?= date('Y-m-d\TH:i') ?>"
+                                   required>
+                            <label class="label">
+                                <span class="label-text-alt text-xs text-base-content/50">Current time is pre-filled. Adjust if needed.</span>
+                            </label>
+                        </div>
+
+                        <!-- Travel Documents -->
+                        <div>
+                            <label class="label-text text-xs font-semibold text-base-content/70 uppercase tracking-wide">Travel Documents (Optional)</label>
+                            <div class="bg-base-200/50 rounded-lg p-3 space-y-2 mt-1">
+                                <label class="flex items-center gap-2 cursor-pointer">
+                                    <input type="checkbox" name="has_travel_order" id="has_travel_order<?= $trip->id ?>" value="1" onchange="toggleTravelOrderInput(<?= $trip->id ?>)" class="checkbox checkbox-sm checkbox-primary">
+                                    <span class="text-sm text-base-content">Travel Order Present</span>
+                                </label>
+                                <input type="text" name="travel_order_number" id="travel_order_number<?= $trip->id ?>" class="input input-bordered input-sm bg-base-100 w-full" placeholder="Travel Order No. (Required if checked)" style="display:none;">
+
+                                <label class="flex items-center gap-2 cursor-pointer">
+                                    <input type="checkbox" name="has_official_business_slip" id="has_ob_slip<?= $trip->id ?>" value="1" onchange="toggleObSlipInput(<?= $trip->id ?>)" class="checkbox checkbox-sm checkbox-primary">
+                                    <span class="text-sm text-base-content">Official Business Slip Present</span>
+                                </label>
+                                <input type="text" name="ob_slip_number" id="ob_slip_number<?= $trip->id ?>" class="input input-bordered input-sm bg-base-100 w-full" placeholder="OB Slip No. (Required if checked)" style="display:none;">
                             </div>
                         </div>
-                        
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                            <button type="submit" class="btn btn-success">
-                                <i class="bi bi-check-lg me-1"></i>Confirm Dispatch
-                            </button>
+
+                        <div class="form-control">
+                            <label class="label">
+                                <span class="label-text text-xs font-semibold text-base-content/70 uppercase tracking-wide">Notes (Optional)</span>
+                            </label>
+                            <textarea class="textarea textarea-bordered textarea-sm bg-base-100 h-20"
+                                      name="guard_notes"
+                                      placeholder="Any observations about the vehicle condition, passengers, etc."></textarea>
                         </div>
-                    </form>
-                </div>
+                    </div>
+
+                    <div class="p-6 border-t border-base-200 flex justify-end gap-2">
+                        <form method="dialog">
+                            <button type="submit" class="btn btn-sm">Cancel</button>
+                        </form>
+                        <button type="submit" class="btn btn-sm bg-success text-success-content hover:bg-success/90">
+                            Confirm Dispatch
+                        </button>
+                    </div>
+                </form>
             </div>
-        </div>
+            <form method="dialog" class="modal-backdrop">
+                <button type="submit">close</button>
+            </form>
+        </dialog>
     <?php endif; ?>
-    
+
     <?php if ($trip->actual_dispatch_datetime && !$trip->actual_arrival_datetime): ?>
-        <div class="modal fade" id="arrivalModal<?= $trip->id ?>" tabindex="-1">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <form method="POST" action="<?= APP_URL ?>/?page=guard&action=record_arrival">
-                        <?= csrfField() ?>
-                        <input type="hidden" name="request_id" value="<?= $trip->id ?>">
-                        
-                        <div class="modal-header">
-                            <h5 class="modal-title">
-                                <i class="bi bi-box-arrow-in-left text-primary me-2"></i>Record Arrival
-                            </h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                        </div>
-                        
-                        <div class="modal-body">
-                            <div class="alert alert-info">
-                                <strong>Request #<?= $trip->id ?></strong><br>
-                                <?= e($trip->requester_name) ?> - <?= e($trip->destination) ?>
-                            </div>
-                            
-                            <div class="mb-3">
-                                <label class="form-label">Vehicle</label>
-                                <div class="fw-medium"><?= e($trip->plate_number ?? 'Not assigned') ?></div>
-                            </div>
-                            
-                            <div class="mb-3">
-                                <label class="form-label">Driver</label>
-                                <div class="fw-medium"><?= e($trip->driver_name ?? 'Not assigned') ?></div>
-                            </div>
-                            
-                            <div class="mb-3">
-                                <label class="form-label">Dispatched At</label>
-                                <div class="text-success">
-                                    <i class="bi bi-check-circle me-1"></i>
-                                    <?= formatDateTime($trip->actual_dispatch_datetime) ?>
-                                </div>
-                            </div>
-                            
-                            <div class="mb-3">
-                                <label for="arrival_time<?= $trip->id ?>" class="form-label">Arrival Time <span class="text-danger">*</span></label>
-                                <input type="datetime-local"
-                                       class="form-control"
-                                       id="arrival_time<?= $trip->id ?>"
-                                       name="arrival_time"
-                                       value="<?= date('Y-m-d\TH:i') ?>"
-                                       required>
-                                <small class="text-muted">Current time is pre-filled. Adjust if needed.</small>
-                            </div>
+        <dialog id="arrivalModal<?= $trip->id ?>" class="modal">
+            <div class="modal-box bg-base-100 p-0 max-w-lg">
+                <form method="POST" action="<?= APP_URL ?>/?page=guard&action=record_arrival">
+                    <?= csrfField() ?>
+                    <input type="hidden" name="request_id" value="<?= $trip->id ?>">
 
-                            <!-- Ending Mileage (Optional) -->
-                            <?php if ($trip->mileage_start): ?>
-                            <div class="mb-3">
-                                <label for="mileage_end<?= $trip->id ?>" class="form-label">Ending Mileage (Optional)</label>
-                                <input type="number" class="form-control" id="mileage_end<?= $trip->id ?>" name="mileage_end"
-                                       min="<?= $trip->mileage_start ?>" placeholder="Current odometer reading">
-                                <small class="text-muted">
-                                    <i class="bi bi-info-circle me-1"></i>
-                                    Starting mileage was <strong><?= $trip->mileage_start ?> km</strong>.
-                                    If entered, system will calculate actual trip distance.
-                                </small>
-                            </div>
-                            <?php endif; ?>
+                    <div class="p-6 border-b border-base-200">
+                        <h5 class="text-base-content font-semibold flex items-center gap-2">
+                            <svg class="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16l-4-4m0 0l4-4m-4 4h18"/></svg>
+                            Record Arrival
+                        </h5>
+                    </div>
 
-                            <div class="mb-3">
-                                <label for="guard_notes<?= $trip->id ?>" class="form-label">Notes (Optional)</label>
-                                <textarea class="form-control"
-                                          id="guard_notes<?= $trip- maxlength="500">id ?>"
-                                          name="guard_notes"
-                                          rows="2"
-                                          placeholder="Any observations about the vehicle condition upon return..."></textarea>
-                            </div>
+                    <div class="p-6 space-y-4">
+                        <div class="loka-alert loka-alert-info">
+                            <strong>Request #<?= $trip->id ?></strong><br>
+                            <?= e($trip->requester_name) ?> — <?= e($trip->destination) ?>
                         </div>
-                        
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                            <button type="submit" class="btn btn-primary">
-                                <i class="bi bi-check-lg me-1"></i>Confirm Arrival
-                            </button>
+
+                        <div>
+                            <label class="label-text text-xs font-semibold text-base-content/70 uppercase tracking-wide">Vehicle</label>
+                            <p class="text-sm font-medium text-base-content"><?= e($trip->plate_number ?? 'Not assigned') ?></p>
                         </div>
-                    </form>
-                </div>
+
+                        <div>
+                            <label class="label-text text-xs font-semibold text-base-content/70 uppercase tracking-wide">Driver</label>
+                            <p class="text-sm font-medium text-base-content"><?= e($trip->driver_name ?? 'Not assigned') ?></p>
+                        </div>
+
+                        <div>
+                            <label class="label-text text-xs font-semibold text-base-content/70 uppercase tracking-wide">Dispatched At</label>
+                            <p class="text-sm text-success flex items-center gap-1">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                                <?= formatDateTime($trip->actual_dispatch_datetime) ?>
+                            </p>
+                        </div>
+
+                        <div class="form-control">
+                            <label class="label">
+                                <span class="label-text text-xs font-semibold text-base-content/70 uppercase tracking-wide">Arrival Time <span class="text-error">*</span></span>
+                            </label>
+                            <input type="datetime-local"
+                                   class="input input-bordered input-sm bg-base-100"
+                                   id="arrival_time<?= $trip->id ?>"
+                                   name="arrival_time"
+                                   value="<?= date('Y-m-d\TH:i') ?>"
+                                   required>
+                            <label class="label">
+                                <span class="label-text-alt text-xs text-base-content/50">Current time is pre-filled. Adjust if needed.</span>
+                            </label>
+                        </div>
+
+                        <?php if ($trip->mileage_start): ?>
+                        <div class="form-control">
+                            <label class="label">
+                                <span class="label-text text-xs font-semibold text-base-content/70 uppercase tracking-wide">Ending Mileage (Optional)</span>
+                            </label>
+                            <input type="number" class="input input-bordered input-sm bg-base-100" name="mileage_end"
+                                   min="<?= $trip->mileage_start ?>" placeholder="Current odometer reading">
+                            <label class="label">
+                                <span class="label-text-alt text-xs text-base-content/50">Starting mileage was <strong><?= $trip->mileage_start ?> km</strong>. If entered, system will calculate actual trip distance.</span>
+                            </label>
+                        </div>
+                        <?php endif; ?>
+
+                        <div class="form-control">
+                            <label class="label">
+                                <span class="label-text text-xs font-semibold text-base-content/70 uppercase tracking-wide">Notes (Optional)</span>
+                            </label>
+                            <textarea class="textarea textarea-bordered textarea-sm bg-base-100 h-20"
+                                      name="guard_notes"
+                                      placeholder="Any observations about the vehicle condition upon return..."></textarea>
+                        </div>
+                    </div>
+
+                    <div class="p-6 border-t border-base-200 flex justify-end gap-2">
+                        <form method="dialog">
+                            <button type="submit" class="btn btn-sm">Cancel</button>
+                        </form>
+                        <button type="submit" class="btn btn-sm bg-primary text-primary-content hover:bg-primary/90">
+                            Confirm Arrival
+                        </button>
+                    </div>
+                </form>
             </div>
-        </div>
+            <form method="dialog" class="modal-backdrop">
+                <button type="submit">close</button>
+            </form>
+        </dialog>
     <?php endif; ?>
 <?php endforeach; ?>
 
@@ -541,58 +515,6 @@ function toggleObSlipInput(id) {
         input.style.display = checkbox.checked ? 'block' : 'none';
         input.required = checkbox.checked;
     }
-}
-
-function exportCompletedTrips() {
-    // Collect data from visible table rows
-    const rows = document.querySelectorAll('tbody tr');
-    const data = [['ID', 'Requester', 'Department', 'Date', 'Time', 'Vehicle', 'Driver', 'Destination', 'Dispatch Time', 'Arrival Time', 'Mileage Start', 'Mileage End', 'Mileage Actual', 'Travel Order', 'OB Slip']];
-
-    rows.forEach(row => {
-        const cells = row.querySelectorAll('td');
-        if (cells.length > 0) {
-            const id = cells[0].textContent.trim().replace('#', '');
-            const requester = cells[1].textContent.trim();
-            const dateTime = cells[2].textContent.trim();
-            const vehicle = cells[3].textContent.trim();
-            const driver = cells[4].textContent.trim();
-            const destination = cells[5].textContent.trim();
-            const status = cells[6].textContent.trim();
-            const dispatchTime = cells[7].textContent.trim();
-            const arrivalTime = cells[8] ? cells[8].textContent.trim() : '';
-
-            // Parse date and time from the datetime cells
-            const dateParts = dateTime.match(/(\d{2}\/\d{2}\/\d{4})/g);
-            const tripDate = dateParts ? dateParts[0] : '';
-
-            const startTime = dateTime.includes('→') ? dateTime.split('→')[0].trim() : '';
-            const endTime = dateTime.includes('→') ? dateTime.split('→')[1].trim() : '';
-
-            data.push([
-                id,
-                requester,
-                '',
-                tripDate,
-                startTime + ' - ' + endTime,
-                vehicle,
-                driver,
-                destination,
-                dispatchTime,
-                arrivalTime,
-                '', '', '', '', ''
-            ]);
-        }
-    });
-
-    // Convert to CSV
-    let csv = data.map(row => row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(',')).join('\n');
-
-    // Create download link
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement('a');
-    link.href = URL.createObjectURL(blob);
-    link.download = 'completed_trips_' + new Date().toISOString().slice(0, 10) + '.csv';
-    link.click();
 }
 </script>
 

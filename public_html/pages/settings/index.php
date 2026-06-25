@@ -53,9 +53,9 @@ require_once INCLUDES_PATH . '/header.php';
     </div>
     
     <?php if ($success): ?>
-    <div class="alert alert-success alert-dismissible fade show">
+    <div class="alert alert-success alert-dismissible">
         Settings saved successfully.
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        <button type="button" class="btn-close" onclick="this.closest('.alert').remove()"></button>
     </div>
     <?php endif; ?>
     

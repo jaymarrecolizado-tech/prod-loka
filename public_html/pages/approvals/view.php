@@ -176,17 +176,17 @@ $pageTitle = 'Review Request #' . $requestId;
 require_once INCLUDES_PATH . '/header.php';
 ?>
 
-<div class="container-fluid py-4">
+<div class="px-4 py-6 sm:px-6 lg:px-8 max-w-[1600px] mx-auto">
     <!-- Page Header with Context-Aware Status -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-            <h4 class="mb-1">Review Request #<?= $requestId ?></h4>
-            <nav aria-label="breadcrumb">
-                <ol class="breadcrumb mb-0">
-                    <li class="breadcrumb-item"><a href="<?= APP_URL ?>">Dashboard</a></li>
-                    <li class="breadcrumb-item"><a href="<?= APP_URL ?>/?page=approvals">Approvals</a></li>
-                    <li class="breadcrumb-item active">Review</li>
-                </ol>
+            <h1 class="text-2xl font-bold">Review Request #<?= $requestId ?></h1>
+            <nav class="mt-1 text-sm text-base-content/60">
+                <a href="<?= APP_URL ?>" class="hover:underline">Dashboard</a>
+                <span class="mx-1">/</span>
+                <a href="<?= APP_URL ?>/?page=approvals" class="hover:underline">Approvals</a>
+                <span class="mx-1">/</span>
+                <span>Review</span>
             </nav>
         </div>
         <div>
@@ -195,21 +195,21 @@ require_once INCLUDES_PATH . '/header.php';
             $statusHtml = '';
             
             if ($request->status === STATUS_PENDING && $isCurrentUserApprover && $canApprove) {
-                $statusHtml = '<span class="badge bg-warning fs-6"><i class="bi bi-hourglass-split me-1"></i>Pending Your Approval</span>';
+                $statusHtml = '<span class="badge badge-warning gap-1 text-sm"><i class="bi bi-hourglass-split"></i>Pending Your Approval</span>';
             } elseif ($request->status === STATUS_PENDING_MOTORPOOL && $isCurrentUserMotorpool && $canApprove) {
-                $statusHtml = '<span class="badge bg-warning fs-6"><i class="bi bi-hourglass-split me-1"></i>Awaiting Your Approval</span>';
+                $statusHtml = '<span class="badge badge-warning gap-1 text-sm"><i class="bi bi-hourglass-split"></i>Awaiting Your Approval</span>';
             } elseif ($request->status === STATUS_PENDING) {
-                $statusHtml = '<span class="badge bg-info fs-6"><i class="bi bi-clock-history me-1"></i>Awaiting Department Approval</span>';
+                $statusHtml = '<span class="badge badge-info gap-1 text-sm"><i class="bi bi-clock-history"></i>Awaiting Department Approval</span>';
             } elseif ($request->status === STATUS_PENDING_MOTORPOOL) {
-                $statusHtml = '<span class="badge bg-primary fs-6"><i class="bi bi-truck-front me-1"></i>Awaiting Motorpool Assignment</span>';
+                $statusHtml = '<span class="badge badge-primary gap-1 text-sm"><i class="bi bi-truck-front"></i>Awaiting Motorpool Assignment</span>';
             } elseif ($request->status === STATUS_APPROVED) {
-                $statusHtml = '<span class="badge bg-success fs-6"><i class="bi bi-check-circle me-1"></i>Fully Approved</span>';
+                $statusHtml = '<span class="badge badge-success gap-1 text-sm"><i class="bi bi-check-circle"></i>Fully Approved</span>';
             } elseif ($request->status === STATUS_REJECTED) {
-                $statusHtml = '<span class="badge bg-danger fs-6"><i class="bi bi-x-circle me-1"></i>Rejected</span>';
+                $statusHtml = '<span class="badge badge-error gap-1 text-sm"><i class="bi bi-x-circle"></i>Rejected</span>';
             } elseif ($request->status === STATUS_REVISION) {
-                $statusHtml = '<span class="badge bg-warning fs-6"><i class="bi bi-arrow-repeat me-1"></i>Under Revision</span>';
+                $statusHtml = '<span class="badge badge-warning gap-1 text-sm"><i class="bi bi-arrow-repeat"></i>Under Revision</span>';
             } elseif ($request->status === STATUS_CANCELLED) {
-                $statusHtml = '<span class="badge bg-secondary fs-6"><i class="bi bi-slash-circle me-1"></i>Cancelled</span>';
+                $statusHtml = '<span class="badge badge-ghost gap-1 text-sm"><i class="bi bi-slash-circle"></i>Cancelled</span>';
             } else {
                 $statusHtml = requestStatusBadge($request->status);
             }
@@ -220,83 +220,79 @@ require_once INCLUDES_PATH . '/header.php';
     </div>
 
     <!-- Approval Workflow Progress Tracker -->
-    <div class="card mb-4">
-        <div class="card-header">
-            <h5 class="mb-0"><i class="bi bi-diagram-3 me-2"></i>Approval Workflow Status</h5>
+    <div class="loka-card mb-6">
+        <div class="border-b border-base-200 px-5 py-4">
+            <h5 class="font-semibold"><i class="bi bi-diagram-3 mr-2"></i>Approval Workflow Status</h5>
         </div>
-        <div class="card-body">
-            <div class="row g-4">
+        <div class="p-5">
+            <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
                 <!-- Department Approval Stage -->
-                <div class="col-md-6">
-                    <div class="border rounded p-3 <?= $departmentApproval && $departmentApproval->status === 'approved' ? 'bg-success bg-opacity-10 border-success' : ($departmentApproval && $departmentApproval->status === 'rejected' ? 'bg-danger bg-opacity-10 border-danger' : ($departmentApproval && $departmentApproval->status === 'revision' ? 'bg-warning bg-opacity-10 border-warning' : 'bg-light')) ?>">
-                        <div class="d-flex align-items-center mb-2">
-                            <span class="badge bg-<?= $departmentApproval ? ($departmentApproval->status === 'approved' ? 'success' : ($departmentApproval->status === 'rejected' ? 'danger' : 'warning')) : 'secondary' ?> me-2">
-                                <i class="bi bi-<?= $departmentApproval ? ($departmentApproval->status === 'approved' ? 'check-circle' : ($departmentApproval->status === 'rejected' ? 'x-circle' : 'arrow-repeat')) : 'clock' ?>"></i>
-                            </span>
-                            <strong>Department Approval</strong>
-                        </div>
-                        <div class="small">
-                            <?php if ($departmentApproval): ?>
-                                <div><strong>Status:</strong> 
-                                    <span class="text-<?= $departmentApproval->status === 'approved' ? 'success' : ($departmentApproval->status === 'rejected' ? 'danger' : 'warning') ?>">
-                                        <?= ucfirst($departmentApproval->status) ?>
-                                    </span>
-                                </div>
-                                <div><strong>By:</strong> <?= e($departmentApproval->approver_name) ?></div>
-                                <div><strong>Date:</strong> <?= formatDateTime($departmentApproval->created_at) ?></div>
-                                <?php if ($departmentApproval->comments): ?>
-                                    <div class="mt-2 fst-italic">"<?= e($departmentApproval->comments) ?>"</div>
-                                <?php endif; ?>
-                            <?php else: ?>
-                                <span class="text-muted">Pending - Waiting for department approval</span>
+                <div class="rounded-xl border p-4 <?= $departmentApproval && $departmentApproval->status === 'approved' ? 'border-success bg-success/10' : ($departmentApproval && $departmentApproval->status === 'rejected' ? 'border-error bg-error/10' : ($departmentApproval && $departmentApproval->status === 'revision' ? 'border-warning bg-warning/10' : 'bg-base-200/50')) ?>">
+                    <div class="mb-2 flex items-center gap-2">
+                        <span class="badge <?= $departmentApproval ? ($departmentApproval->status === 'approved' ? 'badge-success' : ($departmentApproval->status === 'rejected' ? 'badge-error' : 'badge-warning')) : 'badge-ghost' ?> badge-sm rounded-full p-2">
+                            <i class="bi bi-<?= $departmentApproval ? ($departmentApproval->status === 'approved' ? 'check-circle' : ($departmentApproval->status === 'rejected' ? 'x-circle' : 'arrow-repeat')) : 'clock' ?>"></i>
+                        </span>
+                        <strong class="text-sm">Department Approval</strong>
+                    </div>
+                    <div class="space-y-1 text-sm">
+                        <?php if ($departmentApproval): ?>
+                            <div><strong>Status:</strong> 
+                                <span class="<?= $departmentApproval->status === 'approved' ? 'text-success' : ($departmentApproval->status === 'rejected' ? 'text-error' : 'text-warning') ?>">
+                                    <?= ucfirst($departmentApproval->status) ?>
+                                </span>
+                            </div>
+                            <div><strong>By:</strong> <?= e($departmentApproval->approver_name) ?></div>
+                            <div><strong>Date:</strong> <?= formatDateTime($departmentApproval->created_at) ?></div>
+                            <?php if ($departmentApproval->comments): ?>
+                                <div class="mt-1 italic text-base-content/60">"<?= e($departmentApproval->comments) ?>"</div>
                             <?php endif; ?>
-                        </div>
+                        <?php else: ?>
+                            <span class="text-base-content/60">Pending - Waiting for department approval</span>
+                        <?php endif; ?>
                     </div>
                 </div>
                 
                 <!-- Motorpool Approval Stage -->
-                <div class="col-md-6">
-                    <div class="border rounded p-3 <?= $motorpoolApproval && $motorpoolApproval->status === 'approved' ? 'bg-success bg-opacity-10 border-success' : ($motorpoolApproval && $motorpoolApproval->status === 'rejected' ? 'bg-danger bg-opacity-10 border-danger' : ($motorpoolApproval && $motorpoolApproval->status === 'revision' ? 'bg-warning bg-opacity-10 border-warning' : 'bg-light')) ?>">
-                        <div class="d-flex align-items-center mb-2">
-                            <span class="badge bg-<?= $motorpoolApproval ? ($motorpoolApproval->status === 'approved' ? 'success' : ($motorpoolApproval->status === 'rejected' ? 'danger' : 'warning')) : 'secondary' ?> me-2">
-                                <i class="bi bi-<?= $motorpoolApproval ? ($motorpoolApproval->status === 'approved' ? 'check-circle' : ($motorpoolApproval->status === 'rejected' ? 'x-circle' : 'arrow-repeat')) : 'clock' ?>"></i>
-                            </span>
-                            <strong>Motorpool Approval</strong>
-                        </div>
-                        <div class="small">
-                            <?php if ($motorpoolApproval): ?>
-                                <div><strong>Status:</strong> 
-                                    <span class="text-<?= $motorpoolApproval->status === 'approved' ? 'success' : ($motorpoolApproval->status === 'rejected' ? 'danger' : 'warning') ?>">
-                                        <?= ucfirst($motorpoolApproval->status) ?>
-                                    </span>
-                                </div>
-                                <div><strong>By:</strong> <?= e($motorpoolApproval->approver_name) ?></div>
-                                <div><strong>Date:</strong> <?= formatDateTime($motorpoolApproval->created_at) ?></div>
-                                <?php if ($motorpoolApproval->comments): ?>
-                                    <div class="mt-2 fst-italic">"<?= e($motorpoolApproval->comments) ?>"</div>
-                                <?php endif; ?>
-                            <?php else: ?>
-                                <span class="text-muted"><?= $departmentApproval ? 'Waiting for motorpool approval' : 'Waiting for department approval first' ?></span>
+                <div class="rounded-xl border p-4 <?= $motorpoolApproval && $motorpoolApproval->status === 'approved' ? 'border-success bg-success/10' : ($motorpoolApproval && $motorpoolApproval->status === 'rejected' ? 'border-error bg-error/10' : ($motorpoolApproval && $motorpoolApproval->status === 'revision' ? 'border-warning bg-warning/10' : 'bg-base-200/50')) ?>">
+                    <div class="mb-2 flex items-center gap-2">
+                        <span class="badge <?= $motorpoolApproval ? ($motorpoolApproval->status === 'approved' ? 'badge-success' : ($motorpoolApproval->status === 'rejected' ? 'badge-error' : 'badge-warning')) : 'badge-ghost' ?> badge-sm rounded-full p-2">
+                            <i class="bi bi-<?= $motorpoolApproval ? ($motorpoolApproval->status === 'approved' ? 'check-circle' : ($motorpoolApproval->status === 'rejected' ? 'x-circle' : 'arrow-repeat')) : 'clock' ?>"></i>
+                        </span>
+                        <strong class="text-sm">Motorpool Approval</strong>
+                    </div>
+                    <div class="space-y-1 text-sm">
+                        <?php if ($motorpoolApproval): ?>
+                            <div><strong>Status:</strong> 
+                                <span class="<?= $motorpoolApproval->status === 'approved' ? 'text-success' : ($motorpoolApproval->status === 'rejected' ? 'text-error' : 'text-warning') ?>">
+                                    <?= ucfirst($motorpoolApproval->status) ?>
+                                </span>
+                            </div>
+                            <div><strong>By:</strong> <?= e($motorpoolApproval->approver_name) ?></div>
+                            <div><strong>Date:</strong> <?= formatDateTime($motorpoolApproval->created_at) ?></div>
+                            <?php if ($motorpoolApproval->comments): ?>
+                                <div class="mt-1 italic text-base-content/60">"<?= e($motorpoolApproval->comments) ?>"</div>
                             <?php endif; ?>
-                        </div>
+                        <?php else: ?>
+                            <span class="text-base-content/60"><?= $departmentApproval ? 'Waiting for motorpool approval' : 'Waiting for department approval first' ?></span>
+                        <?php endif; ?>
                     </div>
                 </div>
             </div>
             
             <!-- Vehicle/Driver Assignment (if approved) -->
             <?php if ($request->status === STATUS_APPROVED && ($request->vehicle_id || $request->driver_id)): ?>
-                <div class="mt-3 p-3 bg-success bg-opacity-10 border border-success rounded">
-                    <strong><i class="bi bi-check-square me-1"></i>Final Assignment:</strong>
+                <div class="mt-4 rounded-xl border border-success bg-success/10 p-4">
+                    <strong class="text-sm"><i class="bi bi-check-square mr-1"></i>Final Assignment:</strong>
                     <?php
                     $vehicle = $request->vehicle_id ? db()->fetch("SELECT plate_number, make, model FROM vehicles WHERE id = ?", [$request->vehicle_id]) : null;
                     $driver = $request->driver_id ? db()->fetch("SELECT d.*, u.name FROM drivers d JOIN users u ON d.user_id = u.id WHERE d.id = ?", [$request->driver_id]) : null;
                     ?>
-                    <div class="small mt-1">
+                    <div class="mt-1 text-sm">
                         <?php if ($vehicle): ?>
-                            <span class="me-3"><i class="bi bi-car-front me-1"></i>Vehicle: <strong><?= e($vehicle->plate_number) ?> - <?= e($vehicle->make) ?> <?= e($vehicle->model) ?></strong></span>
+                            <span class="mr-3"><i class="bi bi-car-front mr-1"></i>Vehicle: <strong><?= e($vehicle->plate_number) ?> - <?= e($vehicle->make) ?> <?= e($vehicle->model) ?></strong></span>
                         <?php endif; ?>
                         <?php if ($driver): ?>
-                            <span><i class="bi bi-person-badge me-1"></i>Driver: <strong><?= e($driver->name) ?></strong></span>
+                            <span><i class="bi bi-person-badge mr-1"></i>Driver: <strong><?= e($driver->name) ?></strong></span>
                         <?php endif; ?>
                     </div>
                 </div>
@@ -304,43 +300,43 @@ require_once INCLUDES_PATH . '/header.php';
         </div>
     </div>
 
-    <div class="row g-4">
+    <div class="grid grid-cols-1 gap-6 lg:grid-cols-12">
         <!-- Request Details -->
-        <div class="col-lg-8">
-            <div class="card mb-4">
-                <div class="card-header">
-                    <h5 class="mb-0"><i class="bi bi-file-earmark-text me-2"></i>Request Details</h5>
+        <div class="lg:col-span-8">
+            <div class="loka-card mb-6">
+                <div class="border-b border-base-200 px-5 py-4">
+                    <h5 class="font-semibold"><i class="bi bi-file-earmark-text mr-2"></i>Request Details</h5>
                 </div>
-                <div class="card-body">
-                    <div class="row g-3">
-                        <div class="col-md-6">
-                            <label class="text-muted small">Requester</label>
-                            <div class="fw-bold"><?= e($request->requester_name) ?></div>
-                            <small class="text-muted"><?= e($request->requester_email) ?></small>
+                <div class="p-5">
+                    <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+                        <div>
+                            <label class="text-sm text-base-content/60">Requester</label>
+                            <div class="font-bold"><?= e($request->requester_name) ?></div>
+                            <div class="text-sm text-base-content/60"><?= e($request->requester_email) ?></div>
                         </div>
-                        <div class="col-md-6">
-                            <label class="text-muted small">Department</label>
-                            <div class="fw-bold"><?= e($request->department_name) ?></div>
+                        <div>
+                            <label class="text-sm text-base-content/60">Department</label>
+                            <div class="font-bold"><?= e($request->department_name) ?></div>
                         </div>
-                        <div class="col-md-6">
-                            <label class="text-muted small">Start Date/Time</label>
-                            <div class="fw-medium"><?= formatDateTime($request->start_datetime) ?></div>
+                        <div>
+                            <label class="text-sm text-base-content/60">Start Date/Time</label>
+                            <div class="font-medium"><?= formatDateTime($request->start_datetime) ?></div>
                         </div>
-                        <div class="col-md-6">
-                            <label class="text-muted small">End Date/Time</label>
-                            <div class="fw-medium"><?= formatDateTime($request->end_datetime) ?></div>
+                        <div>
+                            <label class="text-sm text-base-content/60">End Date/Time</label>
+                            <div class="font-medium"><?= formatDateTime($request->end_datetime) ?></div>
                         </div>
-                        <div class="col-12">
-                            <label class="text-muted small">Purpose</label>
-                            <div class="fw-medium"><?= nl2br(e($request->purpose)) ?></div>
+                        <div class="md:col-span-2">
+                            <label class="text-sm text-base-content/60">Purpose</label>
+                            <div class="font-medium"><?= nl2br(e($request->purpose)) ?></div>
                         </div>
-                        <div class="col-md-8">
-                            <label class="text-muted small">Destination</label>
-                            <div class="fw-medium"><?= e($request->destination) ?></div>
+                        <div>
+                            <label class="text-sm text-base-content/60">Destination</label>
+                            <div class="font-medium"><?= e($request->destination) ?></div>
                         </div>
-                        <div class="col-md-4">
-                            <label class="text-muted small">Passenger Count</label>
-                            <div class="fw-medium"><?= $request->passenger_count ?></div>
+                        <div>
+                            <label class="text-sm text-base-content/60">Passenger Count</label>
+                            <div class="font-medium"><?= $request->passenger_count ?></div>
                         </div>
                         <!-- Passengers List -->
                         <?php
@@ -357,53 +353,53 @@ require_once INCLUDES_PATH . '/header.php';
                         );
                         ?>
                         <?php if (!empty($passengers)): ?>
-                            <div class="col-12 mt-3">
-                                <label class="text-muted small mb-2 d-block">
-                                    <i class="bi bi-people-fill me-1"></i>Passengers List
+                            <div class="col-span-1 mt-3">
+                                <label class="mb-2 block text-sm text-base-content/60">
+                                    <i class="bi bi-people-fill mr-1"></i>Passengers List
                                 </label>
-                                <div class="border rounded p-3 bg-light">
-                                    <div class="row g-2">
+                                <div class="rounded-xl border border-base-300 bg-base-200/50 p-4">
+                                    <div class="grid grid-cols-1 gap-2 sm:grid-cols-2">
                                         <!-- Requester (always first) -->
-                                        <div class="col-12 col-md-6 mb-2">
-                                            <div class="d-flex align-items-center p-2 bg-white rounded border">
-                                                <div class="bg-primary bg-opacity-10 p-2 rounded-circle me-2">
+                                        <div class="mb-2">
+                                            <div class="flex items-center rounded-xl border border-base-300 bg-base-100 p-3">
+                                                <div class="mr-3 flex h-9 w-9 items-center justify-center rounded-full bg-primary/10">
                                                     <i class="bi bi-person-fill text-primary"></i>
                                                 </div>
-                                                <div class="flex-grow-1">
-                                                    <div class="fw-bold small"><?= e($request->requester_name) ?></div>
-                                                    <div class="x-small text-primary fw-medium">Requester</div>
+                                                <div class="flex-1">
+                                                    <div class="text-sm font-bold"><?= e($request->requester_name) ?></div>
+                                                    <div class="text-xs font-medium text-primary">Requester</div>
                                                 </div>
                                             </div>
                                         </div>
                                         
                                         <!-- Other Passengers -->
                                         <?php foreach ($passengers as $passenger): ?>
-                                            <div class="col-12 col-md-6 mb-2">
-                                                <div class="d-flex align-items-center p-2 bg-white rounded border">
+                                            <div class="mb-2">
+                                                <div class="flex items-center rounded-xl border border-base-300 bg-base-100 p-3">
                                                     <?php if ($passenger->user_id): ?>
                                                         <!-- System User -->
-                                                        <div class="bg-secondary bg-opacity-10 p-2 rounded-circle me-2">
+                                                        <div class="mr-3 flex h-9 w-9 items-center justify-center rounded-full bg-secondary/10">
                                                             <i class="bi bi-person text-secondary"></i>
                                                         </div>
-                                                        <div class="flex-grow-1">
-                                                            <div class="fw-bold small"><?= e($passenger->user_name) ?></div>
-                                                            <div class="x-small text-muted">
+                                                        <div class="flex-1">
+                                                            <div class="text-sm font-bold"><?= e($passenger->user_name) ?></div>
+                                                            <div class="text-xs text-base-content/60">
                                                                 <?= e($passenger->department_name ?: 'No Department') ?>
                                                             </div>
                                                             <?php if ($passenger->user_email): ?>
-                                                                <div class="x-small text-muted">
-                                                                    <i class="bi bi-envelope me-1"></i><?= e($passenger->user_email) ?>
+                                                                <div class="text-xs text-base-content/60">
+                                                                    <i class="bi bi-envelope mr-1"></i><?= e($passenger->user_email) ?>
                                                                 </div>
                                                             <?php endif; ?>
                                                         </div>
                                                     <?php else: ?>
                                                         <!-- Guest -->
-                                                        <div class="bg-success bg-opacity-10 p-2 rounded-circle me-2">
+                                                        <div class="mr-3 flex h-9 w-9 items-center justify-center rounded-full bg-success/10">
                                                             <i class="bi bi-person-plus text-success"></i>
                                                         </div>
-                                                        <div class="flex-grow-1">
-                                                            <div class="fw-bold small"><?= e($passenger->guest_name) ?></div>
-                                                            <div class="x-small text-success fw-medium">External Guest</div>
+                                                        <div class="flex-1">
+                                                            <div class="text-sm font-bold"><?= e($passenger->guest_name) ?></div>
+                                                            <div class="text-xs font-medium text-success">External Guest</div>
                                                         </div>
                                                     <?php endif; ?>
                                                 </div>
@@ -414,20 +410,20 @@ require_once INCLUDES_PATH . '/header.php';
                             </div>
                         <?php endif; ?>
                         <?php if ($requestedDriver): ?>
-                            <div class="col-12 mt-2">
-                                <label class="text-muted small">Requested Driver</label>
-                                <div class="d-flex align-items-center">
-                                    <span class="fw-bold text-primary"><i
-                                            class="bi bi-person-badge me-1"></i><?= e($requestedDriver->name) ?></span>
-                                    <div id="requestedDriverConflict" class="ms-3 small text-danger d-none">
-                                        <i class="bi bi-exclamation-circle me-1"></i>Conflict detected!
+                            <div class="col-span-1 mt-2">
+                                <label class="text-sm text-base-content/60">Requested Driver</label>
+                                <div class="flex items-center">
+                                    <span class="font-bold text-primary"><i
+                                            class="bi bi-person-badge mr-1"></i><?= e($requestedDriver->name) ?></span>
+                                    <div id="requestedDriverConflict" class="ml-3 hidden text-sm text-error">
+                                        <i class="bi bi-exclamation-circle mr-1"></i>Conflict detected!
                                     </div>
                                 </div>
                             </div>
                         <?php endif; ?>
                         <?php if ($request->notes): ?>
-                            <div class="col-12">
-                                <label class="text-muted small">Additional Notes</label>
+                            <div class="col-span-1">
+                                <label class="text-sm text-base-content/60">Additional Notes</label>
                                 <div><?= nl2br(e($request->notes)) ?></div>
                             </div>
                         <?php endif; ?>
@@ -437,54 +433,54 @@ require_once INCLUDES_PATH . '/header.php';
 
             <!-- Vehicle Information -->
             <?php if ($request->vehicle_plate || $approvalType === 'motorpool'): ?>
-                <div class="card mb-4">
-                    <div class="card-header">
-                        <h5 class="mb-0"><i class="bi bi-car-front me-2"></i>Vehicle Information</h5>
+                <div class="loka-card mb-6">
+                    <div class="border-b border-base-200 px-5 py-4">
+                        <h5 class="font-semibold"><i class="bi bi-car-front mr-2"></i>Vehicle Information</h5>
                     </div>
-                    <div class="card-body">
+                    <div class="p-5">
                         <?php if ($request->vehicle_plate): ?>
-                            <div class="row g-3">
-                                <div class="col-md-6">
-                                    <label class="text-muted small">Plate Number</label>
-                                    <div class="fw-bold fs-5"><?= e($request->vehicle_plate) ?></div>
+                            <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
+                                <div>
+                                    <label class="text-sm text-base-content/60">Plate Number</label>
+                                    <div class="text-xl font-bold"><?= e($request->vehicle_plate) ?></div>
                                 </div>
-                                <div class="col-md-6">
-                                    <label class="text-muted small">Make & Model</label>
-                                    <div class="fw-bold">
+                                <div>
+                                    <label class="text-sm text-base-content/60">Make & Model</label>
+                                    <div class="font-bold">
                                         <?= e($request->vehicle_make) ?> <?= e($request->vehicle_model) ?>
                                     </div>
                                 </div>
-                                <div class="col-md-4">
-                                    <label class="text-muted small">Vehicle Type</label>
+                                <div>
+                                    <label class="text-sm text-base-content/60">Vehicle Type</label>
                                     <div><?= e($request->vehicle_type ?: 'N/A') ?></div>
                                 </div>
-                                <div class="col-md-4">
-                                    <label class="text-muted small">Year</label>
+                                <div>
+                                    <label class="text-sm text-base-content/60">Year</label>
                                     <div><?= $request->vehicle_year ?: 'N/A' ?></div>
                                 </div>
-                                <div class="col-md-4">
-                                    <label class="text-muted small">Color</label>
+                                <div>
+                                    <label class="text-sm text-base-content/60">Color</label>
                                     <div><?= e($request->vehicle_color ?: 'N/A') ?></div>
                                 </div>
-                                <div class="col-md-6">
-                                    <label class="text-muted small">Passenger Capacity</label>
+                                <div>
+                                    <label class="text-sm text-base-content/60">Passenger Capacity</label>
                                     <div>
-                                        <i class="bi bi-people me-1"></i>
+                                        <i class="bi bi-people mr-1"></i>
                                         <?= $request->vehicle_capacity ?: 'N/A' ?> seats
                                     </div>
                                 </div>
-                                <div class="col-md-6">
-                                    <label class="text-muted small">Current Mileage</label>
+                                <div>
+                                    <label class="text-sm text-base-content/60">Current Mileage</label>
                                     <div>
-                                        <i class="bi bi-speedometer2 me-1"></i>
+                                        <i class="bi bi-speedometer2 mr-1"></i>
                                         <?= number_format($request->vehicle_mileage ?? 0) ?> km
                                     </div>
                                 </div>
                             </div>
                         <?php else: ?>
-                            <div class="text-center py-3">
-                                <i class="bi bi-car-front text-muted fs-4"></i>
-                                <p class="text-muted mb-0 mt-2">
+                            <div class="py-8 text-center">
+                                <i class="bi bi-car-front text-4xl text-base-content/40"></i>
+                                <p class="mt-2 text-sm text-base-content/60">
                                     Vehicle will be assigned by Motorpool Head during approval.
                                 </p>
                             </div>
@@ -495,22 +491,22 @@ require_once INCLUDES_PATH . '/header.php';
 
             <!-- Driver Information (if assigned) -->
             <?php if ($request->driver_name): ?>
-                <div class="card mb-4">
-                    <div class="card-header">
-                        <h5 class="mb-0"><i class="bi bi-person-badge me-2"></i>Driver Information</h5>
+                <div class="loka-card mb-6">
+                    <div class="border-b border-base-200 px-5 py-4">
+                        <h5 class="font-semibold"><i class="bi bi-person-badge mr-2"></i>Driver Information</h5>
                     </div>
-                    <div class="card-body">
-                        <div class="row g-3">
-                            <div class="col-md-6">
-                                <label class="text-muted small">Driver Name</label>
-                                <div class="fw-bold"><?= e($request->driver_name) ?></div>
+                    <div class="p-5">
+                        <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
+                            <div>
+                                <label class="text-sm text-base-content/60">Driver Name</label>
+                                <div class="font-bold"><?= e($request->driver_name) ?></div>
                             </div>
-                            <div class="col-md-6">
-                                <label class="text-muted small">Phone</label>
+                            <div>
+                                <label class="text-sm text-base-content/60">Phone</label>
                                 <div><?= e($request->driver_phone) ?></div>
                             </div>
-                            <div class="col-md-6">
-                                <label class="text-muted small">License Number</label>
+                            <div>
+                                <label class="text-sm text-base-content/60">License Number</label>
                                 <div><?= e($request->driver_license) ?></div>
                             </div>
                         </div>
@@ -520,30 +516,30 @@ require_once INCLUDES_PATH . '/header.php';
 
             <!-- Approval History -->
             <?php if (!empty($approvals)): ?>
-                <div class="card mb-4">
-                    <div class="card-header">
-                        <h5 class="mb-0"><i class="bi bi-clock-history me-2"></i>Approval History</h5>
+                <div class="loka-card mb-6">
+                    <div class="border-b border-base-200 px-5 py-4">
+                        <h5 class="font-semibold"><i class="bi bi-clock-history mr-2"></i>Approval History</h5>
                     </div>
-                    <div class="card-body">
+                    <div class="p-5">
                         <?php foreach ($approvals as $approval): ?>
-                            <div class="d-flex mb-3">
-                                <div class="me-3">
+                            <div class="mb-3 flex gap-3">
+                                <div>
                                     <span
-                                        class="badge bg-<?= $approval->status === 'approved' ? 'success' : 'danger' ?> rounded-circle p-2">
+                                        class="badge <?= $approval->status === 'approved' ? 'badge-success' : 'badge-error' ?> rounded-full p-2">
                                         <i class="bi bi-<?= $approval->status === 'approved' ? 'check' : 'x' ?>-lg"></i>
                                     </span>
                                 </div>
                                 <div>
-                                    <div class="fw-medium">
+                                    <div class="font-medium">
                                         <?= e($approval->approver_name) ?>
-                                        <span class="text-<?= $approval->status === 'approved' ? 'success' : 'danger' ?>">
+                                        <span class="<?= $approval->status === 'approved' ? 'text-success' : 'text-error' ?>">
                                             <?= ucfirst($approval->status) ?>
                                         </span>
                                         (<?= ucfirst($approval->approval_type) ?>)
                                     </div>
-                                    <small class="text-muted"><?= formatDateTime($approval->created_at) ?></small>
+                                    <div class="text-sm text-base-content/60"><?= formatDateTime($approval->created_at) ?></div>
                                     <?php if ($approval->comments): ?>
-                                        <div class="mt-1 fst-italic">"<?= e($approval->comments) ?>"</div>
+                                        <div class="mt-1 italic">"<?= e($approval->comments) ?>"</div>
                                     <?php endif; ?>
                                 </div>
                             </div>
@@ -554,11 +550,11 @@ require_once INCLUDES_PATH . '/header.php';
 
             <!-- Approval Action Form -->
             <?php if ($canApprove): ?>
-                <div class="card border-primary">
-                    <div class="card-header bg-primary text-white">
-                        <h5 class="mb-0"><i class="bi bi-check-circle me-2"></i>Take Action</h5>
+                <div class="loka-card mb-6 border border-primary/30">
+                    <div class="border-b border-primary/20 bg-primary/5 px-5 py-4">
+                        <h5 class="font-semibold text-primary"><i class="bi bi-check-circle mr-2"></i>Take Action</h5>
                     </div>
-                    <div class="card-body">
+                    <div class="p-5">
                         <form method="POST" id="approvalForm" action="<?= APP_URL ?>/?page=approvals&action=process">
                             <?= csrfField() ?>
                             <input type="hidden" name="request_id" value="<?= $requestId ?>">
@@ -585,95 +581,95 @@ require_once INCLUDES_PATH . '/header.php';
                                     ?>
                                     
                                     <?php if ($hasRequestedDriver || $hasRequestedVehicle || $recommendedVehicle): ?>
-                                        <div class="alert alert-info mb-4">
-                                            <h6 class="alert-heading mb-2">
-                                                <i class="bi bi-info-circle me-1"></i>Requested Preferences
+                                        <div class="mb-4 rounded-xl border border-info bg-info/10 p-4">
+                                            <h6 class="mb-2 font-semibold">
+                                                <i class="bi bi-info-circle mr-1"></i>Requested Preferences
                                             </h6>
 
                                             <?php if ($hasRequestedVehicle): ?>
                                                 <div class="mb-2">
                                                     <strong>Requested Vehicle:</strong>
-                                                    <span class="badge bg-primary ms-1">
-                                                        <i class="bi bi-car-front me-1"></i><?= e($requestedVehicle->plate_number) ?> - <?= e($requestedVehicle->make . ' ' . $requestedVehicle->model) ?>
+                                                    <span class="badge badge-primary ml-1">
+                                                        <i class="bi bi-car-front mr-1"></i><?= e($requestedVehicle->plate_number) ?> - <?= e($requestedVehicle->make . ' ' . $requestedVehicle->model) ?>
                                                     </span>
-                                                    <small class="text-muted">(will be auto-selected)</small>
+                                                    <span class="text-sm text-base-content/60">(will be auto-selected)</span>
                                                 </div>
                                             <?php endif; ?>
 
                                             <?php if ($hasRequestedDriver): ?>
                                                 <div class="mb-2">
                                                     <strong>Requested Driver:</strong>
-                                                    <span class="badge bg-primary ms-1">
-                                                        <i class="bi bi-person-badge me-1"></i><?= e($requestedDriver->name) ?>
+                                                    <span class="badge badge-primary ml-1">
+                                                        <i class="bi bi-person-badge mr-1"></i><?= e($requestedDriver->name) ?>
                                                     </span>
-                                                    <small class="text-muted">(will be auto-selected)</small>
+                                                    <span class="text-sm text-base-content/60">(will be auto-selected)</span>
                                                 </div>
                                             <?php endif; ?>
 
                                             <?php if ($recommendedVehicle): ?>
                                                 <div>
                                                     <strong>Recommended Vehicle:</strong>
-                                                    <span class="badge bg-success ms-1">
-                                                        <i class="bi bi-truck me-1"></i><?= $recommendedVehicle ?>
+                                                    <span class="badge badge-success ml-1">
+                                                        <i class="bi bi-truck mr-1"></i><?= $recommendedVehicle ?>
                                                     </span>
-                                                    <small class="text-muted">(for <?= $request->passenger_count ?> passenger<?= $request->passenger_count > 1 ? 's' : '' ?>)</small>
+                                                    <span class="text-sm text-base-content/60">(for <?= $request->passenger_count ?> passenger<?= $request->passenger_count > 1 ? 's' : '' ?>)</span>
                                                 </div>
                                             <?php endif; ?>
                                         </div>
                                     <?php endif; ?>
 
                                     <!-- Conflict Status Dashboard -->
-                                    <div id="conflictDashboard" class="card border-<?= $hasConflicts ? 'warning' : 'success' ?> mb-4">
-                                        <div class="card-header bg-<?= $hasConflicts ? 'warning' : 'success' ?> d-flex justify-content-between align-items-center">
-                                            <h6 class="mb-0">
-                                                <i class="bi bi-<?= $hasConflicts ? 'exclamation-triangle' : 'check-circle' ?> me-1"></i>
+                                    <div id="conflictDashboard" class="mb-6 rounded-xl border <?= $hasConflicts ? 'border-warning' : 'border-success' ?>">
+                                        <div class="flex items-center justify-between <?= $hasConflicts ? 'bg-warning text-white' : 'bg-success text-white' ?> rounded-t-xl px-5 py-3">
+                                            <h6 class="font-semibold">
+                                                <i class="bi bi-<?= $hasConflicts ? 'exclamation-triangle' : 'check-circle' ?> mr-1"></i>
                                                 Conflict Status
                                             </h6>
                                             <?php if ($hasConflicts): ?>
-                                                <span class="badge bg-dark" id="conflictCountBadge">
+                                                <span class="badge badge-dark rounded-full" id="conflictCountBadge">
                                                     <?= $totalConflicts ?> conflict<?= $totalConflicts > 1 ? 's' : '' ?>
                                                 </span>
                                             <?php endif; ?>
                                         </div>
 
-                                        <div class="card-body">
+                                        <div class="bg-base-100 p-5">
                                             <!-- Status Badges Row -->
-                                            <div class="row g-3 mb-3">
+                                            <div class="mb-4 grid grid-cols-1 gap-4 md:grid-cols-2">
                                                 <!-- Vehicle Status -->
-                                                <div class="col-md-6">
-                                                    <div class="d-flex align-items-center p-3 rounded bg-light border">
-                                                        <div class="me-3">
-                                                            <span class="badge bg-<?= $vehicleConflictSeverity === 'none' ? 'success' : ($vehicleConflictSeverity === 'minor' ? 'warning' : 'danger') ?> rounded-circle p-2 fs-5" id="vehicleStatusBadge">
+                                                <div>
+                                                    <div class="flex items-center rounded-xl border border-base-300 bg-base-200/50 p-3">
+                                                        <div class="mr-3">
+                                                            <span class="badge <?= $vehicleConflictSeverity === 'none' ? 'badge-success' : ($vehicleConflictSeverity === 'minor' ? 'badge-warning' : 'badge-error') ?> rounded-full p-2 text-xl" id="vehicleStatusBadge">
                                                                 <i class="bi bi-<?= $vehicleConflictSeverity === 'none' ? 'check-lg' : 'exclamation-lg' ?>"></i>
                                                             </span>
                                                         </div>
                                                         <div>
-                                                            <div class="small text-muted">Vehicle Assignment</div>
-                                                            <div class="fw-bold">
+                                                            <div class="text-sm text-base-content/60">Vehicle Assignment</div>
+                                                            <div class="font-bold">
                                                                 <?= $vehicleConflictSeverity === 'none' ? 'Available (no conflicts)' : ($vehicleConflictSeverity === 'minor' ? 'Minor Conflict' : 'Major Conflict') ?>
                                                             </div>
                                                             <?php if ($vehicleConflictSeverity !== 'none'): ?>
-                                                                <small class="text-danger"><?= $vehicleConflicts ?> overlapping trip<?= $vehicleConflicts > 1 ? 's' : '' ?></small>
+                                                                <div class="text-sm text-error"><?= $vehicleConflicts ?> overlapping trip<?= $vehicleConflicts > 1 ? 's' : '' ?></div>
                                                             <?php endif; ?>
                                                         </div>
                                                     </div>
                                                 </div>
 
                                                 <!-- Driver Status -->
-                                                <div class="col-md-6">
-                                                    <div class="d-flex align-items-center p-3 rounded bg-light border">
-                                                        <div class="me-3">
-                                                            <span class="badge bg-<?= $driverConflictSeverity === 'none' ? 'success' : ($driverConflictSeverity === 'minor' ? 'warning' : 'danger') ?> rounded-circle p-2 fs-5" id="driverStatusBadge">
+                                                <div>
+                                                    <div class="flex items-center rounded-xl border border-base-300 bg-base-200/50 p-3">
+                                                        <div class="mr-3">
+                                                            <span class="badge <?= $driverConflictSeverity === 'none' ? 'badge-success' : ($driverConflictSeverity === 'minor' ? 'badge-warning' : 'badge-error') ?> rounded-full p-2 text-xl" id="driverStatusBadge">
                                                                 <i class="bi bi-<?= $driverConflictSeverity === 'none' ? 'check-lg' : 'exclamation-lg' ?>"></i>
                                                             </span>
                                                         </div>
                                                         <div>
-                                                            <div class="small text-muted">Driver Assignment</div>
-                                                            <div class="fw-bold">
+                                                            <div class="text-sm text-base-content/60">Driver Assignment</div>
+                                                            <div class="font-bold">
                                                                 <?= $driverConflictSeverity === 'none' ? 'Available (no conflicts)' : ($driverConflictSeverity === 'minor' ? 'Minor Conflict' : 'Major Conflict') ?>
                                                             </div>
                                                             <?php if ($driverConflictSeverity !== 'none'): ?>
-                                                                <small class="text-danger"><?= $driverConflicts ?> overlapping trip<?= $driverConflicts > 1 ? 's' : '' ?></small>
+                                                                <div class="text-sm text-error"><?= $driverConflicts ?> overlapping trip<?= $driverConflicts > 1 ? 's' : '' ?></div>
                                                             <?php endif; ?>
                                                         </div>
                                                     </div>
@@ -682,84 +678,78 @@ require_once INCLUDES_PATH . '/header.php';
 
                                             <!-- Conflict Details (Collapsible) -->
                                             <?php if ($hasConflicts): ?>
-                                                <div class="accordion" id="conflictAccordion">
-                                                    <div class="accordion-item">
-                                                        <h2 class="accordion-header">
-                                                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#conflictDetails">
-                                                                <i class="bi bi-chevron-down me-2"></i>
-                                                                View Conflict Details
-                                                            </button>
-                                                        </h2>
-                                                        <div id="conflictDetails" class="accordion-collapse collapse">
-                                                            <div class="accordion-body">
-                                                                <!-- Vehicle Conflicts -->
-                                                                <?php if (!empty($vehicleConflictsList)): ?>
-                                                                    <h6 class="text-warning"><i class="bi bi-car-front me-1"></i>Vehicle Conflicts</h6>
-                                                                    <?php foreach ($vehicleConflictsList as $conflict): ?>
-                                                                        <div class="alert alert-warning mb-2">
-                                                                            <strong>Request #<?= $conflict['id'] ?></strong>
-                                                                            <div class="small">
-                                                                                <i class="bi bi-person me-1"></i><?= e($conflict['requester_name']) ?>
-                                                                                <i class="bi bi-geo-alt ms-2 me-1"></i><?= e($conflict['destination']) ?>
-                                                                            </div>
-                                                                            <div class="small">
-                                                                                <i class="bi bi-clock me-1"></i>
-                                                                                <?= formatDateTime($conflict['start_datetime']) ?> - <?= formatDateTime($conflict['end_datetime']) ?>
-                                                                            </div>
-                                                                            <div class="small text-danger">
-                                                                                <i class="bi bi-exclamation-triangle me-1"></i>
-                                                                                Overlap: <?= calculateOverlapMinutes($conflict, $request->start_datetime, $request->end_datetime) ?> minutes
-                                                                            </div>
-                                                                            <a href="<?= APP_URL ?>/?page=approvals&action=view&id=<?= $conflict['id'] ?>"
-                                                                               class="btn btn-sm btn-outline-primary mt-2" target="_blank">
-                                                                                <i class="bi bi-arrow-up-right-square me-1"></i>View Request #<?= $conflict['id'] ?>
-                                                                            </a>
-                                                                        </div>
-                                                                    <?php endforeach; ?>
-                                                                <?php endif; ?>
+                                                <details class="rounded-xl border border-base-300">
+                                                    <summary class="cursor-pointer px-5 py-3 font-medium hover:bg-base-200">
+                                                        <i class="bi bi-chevron-down mr-2"></i>
+                                                        View Conflict Details
+                                                    </summary>
+                                                    <div class="border-t border-base-200 p-5">
+                                                        <!-- Vehicle Conflicts -->
+                                                        <?php if (!empty($vehicleConflictsList)): ?>
+                                                            <h6 class="mt-0 font-semibold text-warning"><i class="bi bi-car-front mr-1"></i>Vehicle Conflicts</h6>
+                                                            <?php foreach ($vehicleConflictsList as $conflict): ?>
+                                                                <div class="mb-2 rounded-xl border border-warning bg-warning/10 p-3">
+                                                                    <strong>Request #<?= $conflict['id'] ?></strong>
+                                                                    <div class="text-sm">
+                                                                        <i class="bi bi-person mr-1"></i><?= e($conflict['requester_name']) ?>
+                                                                        <i class="bi bi-geo-alt ml-2 mr-1"></i><?= e($conflict['destination']) ?>
+                                                                    </div>
+                                                                    <div class="text-sm">
+                                                                        <i class="bi bi-clock mr-1"></i>
+                                                                        <?= formatDateTime($conflict['start_datetime']) ?> - <?= formatDateTime($conflict['end_datetime']) ?>
+                                                                    </div>
+                                                                    <div class="text-sm text-error">
+                                                                        <i class="bi bi-exclamation-triangle mr-1"></i>
+                                                                        Overlap: <?= calculateOverlapMinutes($conflict, $request->start_datetime, $request->end_datetime) ?> minutes
+                                                                    </div>
+                                                                    <a href="<?= APP_URL ?>/?page=approvals&action=view&id=<?= $conflict['id'] ?>"
+                                                                       class="btn btn-outline btn-primary btn-sm mt-2" target="_blank">
+                                                                        <i class="bi bi-arrow-up-right-square mr-1"></i>View Request #<?= $conflict['id'] ?>
+                                                                    </a>
+                                                                </div>
+                                                            <?php endforeach; ?>
+                                                        <?php endif; ?>
 
-                                                                <!-- Driver Conflicts -->
-                                                                <?php if (!empty($driverConflictsList)): ?>
-                                                                    <h6 class="text-warning mt-3"><i class="bi bi-person-badge me-1"></i>Driver Conflicts</h6>
-                                                                    <?php foreach ($driverConflictsList as $conflict): ?>
-                                                                        <div class="alert alert-warning mb-2">
-                                                                            <strong>Request #<?= $conflict['id'] ?></strong>
-                                                                            <div class="small">
-                                                                                <i class="bi bi-person me-1"></i><?= e($conflict['requester_name']) ?>
-                                                                                <i class="bi bi-geo-alt ms-2 me-1"></i><?= e($conflict['destination']) ?>
-                                                                            </div>
-                                                                            <div class="small">
-                                                                                <i class="bi bi-clock me-1"></i>
-                                                                                <?= formatDateTime($conflict['start_datetime']) ?> - <?= formatDateTime($conflict['end_datetime']) ?>
-                                                                            </div>
-                                                                            <div class="small text-danger">
-                                                                                <i class="bi bi-exclamation-triangle me-1"></i>
-                                                                                Overlap: <?= calculateOverlapMinutes($conflict, $request->start_datetime, $request->end_datetime) ?> minutes
-                                                                            </div>
-                                                                            <a href="<?= APP_URL ?>/?page=approvals&action=view&id=<?= $conflict['id'] ?>"
-                                                                               class="btn btn-sm btn-outline-primary mt-2" target="_blank">
-                                                                                <i class="bi bi-arrow-up-right-square me-1"></i>View Request #<?= $conflict['id'] ?>
-                                                                            </a>
-                                                                        </div>
-                                                                    <?php endforeach; ?>
-                                                                <?php endif; ?>
-                                                            </div>
-                                                        </div>
+                                                        <!-- Driver Conflicts -->
+                                                        <?php if (!empty($driverConflictsList)): ?>
+                                                            <h6 class="mt-3 font-semibold text-warning"><i class="bi bi-person-badge mr-1"></i>Driver Conflicts</h6>
+                                                            <?php foreach ($driverConflictsList as $conflict): ?>
+                                                                <div class="mb-2 rounded-xl border border-warning bg-warning/10 p-3">
+                                                                    <strong>Request #<?= $conflict['id'] ?></strong>
+                                                                    <div class="text-sm">
+                                                                        <i class="bi bi-person mr-1"></i><?= e($conflict['requester_name']) ?>
+                                                                        <i class="bi bi-geo-alt ml-2 mr-1"></i><?= e($conflict['destination']) ?>
+                                                                    </div>
+                                                                    <div class="text-sm">
+                                                                        <i class="bi bi-clock mr-1"></i>
+                                                                        <?= formatDateTime($conflict['start_datetime']) ?> - <?= formatDateTime($conflict['end_datetime']) ?>
+                                                                    </div>
+                                                                    <div class="text-sm text-error">
+                                                                        <i class="bi bi-exclamation-triangle mr-1"></i>
+                                                                        Overlap: <?= calculateOverlapMinutes($conflict, $request->start_datetime, $request->end_datetime) ?> minutes
+                                                                    </div>
+                                                                    <a href="<?= APP_URL ?>/?page=approvals&action=view&id=<?= $conflict['id'] ?>"
+                                                                       class="btn btn-outline btn-primary btn-sm mt-2" target="_blank">
+                                                                        <i class="bi bi-arrow-up-right-square mr-1"></i>View Request #<?= $conflict['id'] ?>
+                                                                    </a>
+                                                                </div>
+                                                            <?php endforeach; ?>
+                                                        <?php endif; ?>
                                                     </div>
-                                                </div>
+                                                </details>
 
                                                 <!-- Override Confirmation -->
-                                                <div id="overrideConfirmation" class="alert alert-danger mt-3">
-                                                    <h6 class="alert-heading mb-2">
-                                                        <i class="bi bi-exclamation-octagon me-1"></i>Override Confirmation Required
+                                                <div id="overrideConfirmation" class="mt-3 rounded-xl border border-error bg-error/10 p-4">
+                                                    <h6 class="mb-2 font-semibold">
+                                                        <i class="bi bi-exclamation-octagon mr-1"></i>Override Confirmation Required
                                                     </h6>
-                                                    <div class="form-check mb-2">
-                                                        <input class="form-check-input" type="checkbox" id="confirmOverride" name="override_conflict" value="1">
-                                                        <label class="form-check-label fw-bold" for="confirmOverride">
+                                                    <div class="mb-2 flex items-center gap-2">
+                                                        <input type="checkbox" class="checkbox checkbox-error checkbox-sm" id="confirmOverride" name="override_conflict" value="1">
+                                                        <label class="font-bold" for="confirmOverride">
                                                             I want to proceed with these conflicts:
                                                         </label>
                                                     </div>
-                                                    <ul class="mb-0 ms-4">
+                                                    <ul class="mb-0 ml-6 list-decimal">
                                                         <?php foreach ($allConflictsList as $conflict): ?>
                                                             <li>
                                                                 <strong>Request #<?= $conflict['id'] ?></strong>:
@@ -775,9 +765,10 @@ require_once INCLUDES_PATH . '/header.php';
 
                                     <!-- Vehicle Selection -->
                                     <div class="mb-3">
-                                        <label for="vehicle_id" class="form-label">Assign Vehicle <span
-                                                class="text-danger">*</span></label>
-                                        <select class="form-select" id="vehicle_id" name="vehicle_id">
+                                        <label for="vehicle_id" class="mb-1 text-sm font-medium">
+                                            Assign Vehicle <span class="text-error">*</span>
+                                        </label>
+                                        <select class="select select-bordered w-full" id="vehicle_id" name="vehicle_id">
                                             <option value="">Select a vehicle...</option>
                                             <?php foreach ($availableVehicles as $vehicle): ?>
                                                 <option value="<?= $vehicle->id ?>"
@@ -786,36 +777,37 @@ require_once INCLUDES_PATH . '/header.php';
                                                     <?= e($vehicle->plate_number) ?> - <?= e($vehicle->make . ' ' . $vehicle->model) ?>
                                                     (<?= e($vehicle->type_name) ?>, <?= $vehicle->passenger_capacity ?> seats)
                                                     <?= $vehicle->status !== 'available' ? '[' . strtoupper($vehicle->status) . ']' : '' ?>
-                                                    <?= $hasRequestedVehicle && $vehicle->id == $request->vehicle_id ? ' <i class="bi bi-check-circle-fill text-success ms-1"></i> (Requested)' : '' ?>
+                                                    <?= $hasRequestedVehicle && $vehicle->id == $request->vehicle_id ? ' <i class="bi bi-check-circle-fill text-success ml-1"></i> (Requested)' : '' ?>
                                                 </option>
                                             <?php endforeach; ?>
                                         </select>
-                                        <div id="vehicleConflictAlert" class="alert alert-warning mt-2 small py-2 d-none">
-                                            <i class="bi bi-exclamation-triangle me-1"></i>
+                                        <div id="vehicleConflictAlert" class="mt-2 rounded-xl border border-warning bg-warning/10 p-2 text-sm d-none">
+                                            <i class="bi bi-exclamation-triangle mr-1"></i>
                                             <span class="message"></span>
                                         </div>
                                         <?php if (empty($availableVehicles)): ?>
-                                            <small class="text-danger">No vehicles available</small>
+                                            <div class="mt-1 text-sm text-error">No vehicles available</div>
                                         <?php endif; ?>
                                     </div>
 
                                     <!-- Mileage Start (Optional) -->
                                     <div class="mb-3">
-                                        <label for="mileage_start" class="form-label">Starting Mileage (Optional)</label>
-                                        <input type="number" class="form-control" id="mileage_start" name="mileage_start"
+                                        <label for="mileage_start" class="mb-1 text-sm font-medium">Starting Mileage (Optional)</label>
+                                        <input type="number" class="input input-bordered w-full" id="mileage_start" name="mileage_start"
                                                min="0" placeholder="Current odometer reading (optional)">
-                                        <small class="text-muted">
-                                            <i class="bi bi-info-circle me-1"></i>
+                                        <div class="mt-1 text-xs text-base-content/60">
+                                            <i class="bi bi-info-circle mr-1"></i>
                                             Leave blank to skip mileage tracking. If entered, must be >= vehicle's current mileage.
                                             <span id="currentMileageDisplay"></span>
-                                        </small>
+                                        </div>
                                     </div>
 
                                     <!-- Driver Selection -->
                                     <div class="mb-3">
-                                        <label for="driver_id" class="form-label">Assign Driver <span
-                                                class="text-danger">*</span></label>
-                                        <select class="form-select" id="driver_id" name="driver_id">
+                                        <label for="driver_id" class="mb-1 text-sm font-medium">
+                                            Assign Driver <span class="text-error">*</span>
+                                        </label>
+                                        <select class="select select-bordered w-full" id="driver_id" name="driver_id">
                                             <option value="">Select a driver...</option>
                                             <?php foreach ($availableDrivers as $driver): ?>
                                                 <option value="<?= $driver->id ?>" 
@@ -823,109 +815,113 @@ require_once INCLUDES_PATH . '/header.php';
                                                     <?= e($driver->driver_name) ?> - <?= e($driver->license_number) ?>
                                                     (<?= $driver->years_experience ?> yrs exp)
                                                     <?= $driver->status !== 'available' ? '[' . strtoupper($driver->status) . ']' : '' ?>
-                                                    <?= $hasRequestedDriver && $driver->id == $request->requested_driver_id ? ' <i class="bi bi-check-circle-fill text-success ms-1"></i> (Requested)' : '' ?>
+                                                    <?= $hasRequestedDriver && $driver->id == $request->requested_driver_id ? ' <i class="bi bi-check-circle-fill text-success ml-1"></i> (Requested)' : '' ?>
                                                 </option>
                                             <?php endforeach; ?>
                                         </select>
-                                        <div id="driverConflictAlert" class="alert alert-warning mt-3 small py-2 d-none">
-                                            <i class="bi bi-exclamation-triangle me-1"></i>
+                                        <div id="driverConflictAlert" class="mt-2 rounded-xl border border-warning bg-warning/10 p-2 text-sm d-none">
+                                            <i class="bi bi-exclamation-triangle mr-1"></i>
                                             <span class="message"></span>
                                         </div>
                                     </div>
 
-                                    <div id="overrideConfirm" class="form-check mb-3 d-none">
-                                        <input class="form-check-input border-danger" type="checkbox" id="confirmOverride"
+                                    <div id="overrideConfirm" class="mb-3 flex items-center gap-2 d-none">
+                                        <input type="checkbox" class="checkbox checkbox-error checkbox-sm" id="confirmOverride"
                                             name="override_conflict" value="1">
-                                        <label class="form-check-label text-danger fw-bold" for="confirmOverride">
+                                        <label class="text-sm font-bold text-error" for="confirmOverride">
                                             I confirm this assignment despite schedule conflicts.
                                         </label>
                                     </div>
                                     <?php if (empty($availableDrivers)): ?>
-                                        <small class="text-danger">No drivers available</small>
+                                        <div class="text-sm text-error">No drivers available</div>
                                     <?php endif; ?>
                                 </div>
                             <?php endif; ?>
 
                     <!-- Comments -->
                     <div class="mb-4">
-                        <label for="comments" class="form-label">
+                        <label for="comments" class="mb-1 text-sm font-medium">
                             Comments 
-                            <span class="text-danger" id="commentsRequired">*</span>
-                            <span class="text-muted small" id="commentsOptional">(Optional for approval)</span>
+                            <span class="text-error" id="commentsRequired">*</span>
+                            <span class="text-xs text-base-content/60" id="commentsOptional">(Optional for approval)</span>
                         </label>
-                        <textarea class="form-control" id="comments" name="comments" rows="3"
+                        <textarea class="textarea textarea-bordered w-full" id="comments" name="comments" rows="3"
                             placeholder="Enter your comments or remarks..." maxlength="500"></textarea>
-                        <div class="invalid-feedback" id="commentsFeedback">Comments are required when rejecting or requesting revision.</div>
+                        <div class="mt-1 text-sm text-error d-none" id="commentsFeedback">Comments are required when rejecting or requesting revision.</div>
                     </div>
 
                     <!-- Action Buttons -->
-                    <div class="d-flex gap-2 flex-wrap">
+                    <div class="flex flex-wrap gap-2">
                             <input type="hidden" name="approval_action" id="approvalActionInput" value="">
                             <button type="button" id="approveBtn" class="btn btn-success" data-action="approve">
                             <span class="btn-text">
-                                <i class="bi bi-check-lg me-1"></i>Approve
+                                <i class="bi bi-check-lg mr-1"></i>Approve
                             </span>
                             <span class="btn-loading d-none">
-                                <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+                                <span class="loading loading-spinner loading-sm mr-1" role="status" aria-hidden="true"></span>
                                 Processing...
                             </span>
                         </button>
                             <button type="button" id="revisionBtn" class="btn btn-warning" data-action="revision">
                             <span class="btn-text">
-                                <i class="bi bi-arrow-repeat me-1"></i>Request Revision
+                                <i class="bi bi-arrow-repeat mr-1"></i>Request Revision
                             </span>
                             <span class="btn-loading d-none">
-                                <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+                                <span class="loading loading-spinner loading-sm mr-1" role="status" aria-hidden="true"></span>
                                 Processing...
                             </span>
                         </button>
-                            <button type="button" id="rejectBtn" class="btn btn-danger" data-action="reject">
+                            <button type="button" id="rejectBtn" class="btn btn-error" data-action="reject">
                             <span class="btn-text">
-                                <i class="bi bi-x-lg me-1"></i>Reject
+                                <i class="bi bi-x-lg mr-1"></i>Reject
                             </span>
                             <span class="btn-loading d-none">
-                                <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+                                <span class="loading loading-spinner loading-sm mr-1" role="status" aria-hidden="true"></span>
                                 Processing...
                             </span>
                         </button>
-                        <a href="<?= APP_URL ?>/?page=approvals" class="btn btn-outline-secondary">Cancel</a>
+                        <a href="<?= APP_URL ?>/?page=approvals" class="btn btn-outline">Cancel</a>
                     </div>
                     </form>
                 </div>
             </div>
         <?php else: ?>
-            <div class="alert alert-info">
-                <i class="bi bi-info-circle me-2"></i>
-                <?php if ($request->status === STATUS_APPROVED): ?>
-                    This request has already been fully approved.
-                <?php elseif ($request->status === STATUS_REJECTED): ?>
-                    This request has been rejected.
-                <?php elseif ($request->status === STATUS_CANCELLED): ?>
-                    This request was cancelled by the requester.
-                <?php else: ?>
-                    You cannot take action on this request at this time.
-                <?php endif; ?>
+            <div class="rounded-xl border border-info bg-info/10 p-4">
+                <div class="flex items-center gap-2">
+                    <i class="bi bi-info-circle text-lg"></i>
+                    <div>
+                        <?php if ($request->status === STATUS_APPROVED): ?>
+                            This request has already been fully approved.
+                        <?php elseif ($request->status === STATUS_REJECTED): ?>
+                            This request has been rejected.
+                        <?php elseif ($request->status === STATUS_CANCELLED): ?>
+                            This request was cancelled by the requester.
+                        <?php else: ?>
+                            You cannot take action on this request at this time.
+                        <?php endif; ?>
+                    </div>
+                </div>
             </div>
         <?php endif; ?>
     </div>
 
     <!-- Sidebar -->
-    <div class="col-lg-4">
-        <div class="card">
-            <div class="card-header">
-                <h6 class="mb-0"><i class="bi bi-info-circle me-2"></i>Quick Info</h6>
+    <div class="lg:col-span-4">
+        <div class="loka-card">
+            <div class="border-b border-base-200 px-5 py-4">
+                <h6 class="font-semibold"><i class="bi bi-info-circle mr-2"></i>Quick Info</h6>
             </div>
-            <div class="card-body">
+            <div class="p-5">
                 <div class="mb-3">
-                    <small class="text-muted">Request ID</small>
-                    <div class="fw-bold">#<?= $requestId ?></div>
+                    <div class="text-xs text-base-content/60">Request ID</div>
+                    <div class="font-bold">#<?= $requestId ?></div>
                 </div>
                 <div class="mb-3">
-                    <small class="text-muted">Submitted</small>
+                    <div class="text-xs text-base-content/60">Submitted</div>
                     <div><?= formatDateTime($request->created_at) ?></div>
                 </div>
                 <div class="mb-3">
-                    <small class="text-muted">Duration</small>
+                    <div class="text-xs text-base-content/60">Duration</div>
                     <div>
                         <?php
                         $start = new DateTime($request->start_datetime);
@@ -940,7 +936,7 @@ require_once INCLUDES_PATH . '/header.php';
                     </div>
                 </div>
                 <div>
-                    <small class="text-muted">Contact</small>
+                    <div class="text-xs text-base-content/60">Contact</div>
                     <div><?= e($request->requester_phone ?: 'N/A') ?></div>
                 </div>
             </div>
@@ -980,18 +976,18 @@ require_once INCLUDES_PATH . '/header.php';
                 .then(data => {
                     if (data.conflict && data.conflicts.length > 0) {
                         const conflict = data.conflicts[0];
-                        const overlapBadge = `<span class="badge bg-${getSeverityColor(data.severity)} ms-2">${data.severity.toUpperCase()} (${data.overlap_minutes}min)</span>`;
+                        const overlapBadge = `<span class="badge badge-${getSeverityColor(data.severity)} ml-2">${data.severity.toUpperCase()} (${data.overlap_minutes}min)</span>`;
 
                         alertEl.querySelector('.message').innerHTML = `
                             <strong>Conflict with Request #${conflict.id}</strong>${overlapBadge}<br>
-                            <small>${conflict.requester_name} → ${conflict.destination}</small>
+                            <small class="text-base-content/60">${conflict.requester_name} → ${conflict.destination}</small>
                             <br>
-                            <small>${data.start_datetime} - ${data.end_datetime}</small>
+                            <small class="text-base-content/60">${data.start_datetime} - ${data.end_datetime}</small>
                             <br>
                             <a href="<?= APP_URL ?>/?page=approvals&action=view&id=${conflict.id}"
                                target="_blank"
-                               class="small text-primary">
-                               <i class="bi bi-arrow-up-right-square me-1"></i>View Request
+                               class="text-sm text-primary">
+                               <i class="bi bi-arrow-up-right-square mr-1"></i>View Request
                             </a>
                         `;
                         alertEl.classList.remove('d-none');
@@ -1010,9 +1006,15 @@ require_once INCLUDES_PATH . '/header.php';
             switch(severity) {
                 case 'minor': return 'warning';
                 case 'moderate': return 'warning';
-                case 'severe': return 'danger';
-                default: return 'secondary';
+                case 'severe': return 'error';
+                default: return 'base-300';
             }
+        }
+
+        function getStatusTextEl(badgeEl) {
+            // Badge is inside a flex container; navigate to sibling div > .font-bold
+            const container = badgeEl.closest('.flex.items-center');
+            return container ? container.querySelector('.font-bold') : null;
         }
 
         function updateConflictDashboardItem(type, data) {
@@ -1021,49 +1023,47 @@ require_once INCLUDES_PATH . '/header.php';
 
             if (type === 'vehicle' && vehicleBadge) {
                 if (data.conflict) {
-                    const badgeClass = getSeverityColor(data.severity);
-                    vehicleBadge.className = `badge bg-${badgeClass} rounded-circle p-2 fs-5`;
+                    vehicleBadge.className = `badge badge-${getSeverityColor(data.severity)} rounded-full p-2 text-lg`;
                     vehicleBadge.innerHTML = '<i class="bi bi-exclamation-lg"></i>';
-                    const vehicleStatusText = vehicleBadge.parentElement.nextElementSibling.querySelector('.fw-bold');
+                    const vehicleStatusText = getStatusTextEl(vehicleBadge);
                     if (vehicleStatusText) {
                         vehicleStatusText.textContent = data.severity === 'minor' ? 'Minor Conflict' : 'Major Conflict';
-                        vehicleStatusText.className = 'text-danger fw-bold';
+                        vehicleStatusText.className = 'font-bold text-error';
                     }
                 } else {
-                    vehicleBadge.className = 'badge bg-success rounded-circle p-2 fs-5';
+                    vehicleBadge.className = 'badge badge-success rounded-full p-2 text-lg';
                     vehicleBadge.innerHTML = '<i class="bi bi-check-lg"></i>';
-                    const vehicleStatusText = vehicleBadge.parentElement.nextElementSibling.querySelector('.fw-bold');
+                    const vehicleStatusText = getStatusTextEl(vehicleBadge);
                     if (vehicleStatusText) {
                         vehicleStatusText.textContent = 'Available (no conflicts)';
-                        vehicleStatusText.className = 'fw-bold';
+                        vehicleStatusText.className = 'font-bold';
                     }
                 }
             }
 
             if (type === 'driver' && driverBadge) {
                 if (data.conflict) {
-                    const badgeClass = getSeverityColor(data.severity);
-                    driverBadge.className = `badge bg-${badgeClass} rounded-circle p-2 fs-5`;
+                    driverBadge.className = `badge badge-${getSeverityColor(data.severity)} rounded-full p-2 text-lg`;
                     driverBadge.innerHTML = '<i class="bi bi-exclamation-lg"></i>';
-                    const driverStatusText = driverBadge.parentElement.nextElementSibling.querySelector('.fw-bold');
+                    const driverStatusText = getStatusTextEl(driverBadge);
                     if (driverStatusText) {
                         driverStatusText.textContent = data.severity === 'minor' ? 'Minor Conflict' : 'Major Conflict';
-                        driverStatusText.className = 'text-danger fw-bold';
+                        driverStatusText.className = 'font-bold text-error';
                     }
                 } else {
-                    driverBadge.className = 'badge bg-success rounded-circle p-2 fs-5';
+                    driverBadge.className = 'badge badge-success rounded-full p-2 text-lg';
                     driverBadge.innerHTML = '<i class="bi bi-check-lg"></i>';
-                    const driverStatusText = driverBadge.parentElement.nextElementSibling.querySelector('.fw-bold');
+                    const driverStatusText = getStatusTextEl(driverBadge);
                     if (driverStatusText) {
                         driverStatusText.textContent = 'Available (no conflicts)';
-                        driverStatusText.className = 'fw-bold';
+                        driverStatusText.className = 'font-bold';
                     }
                 }
             }
 
             // Update conflict count
-            const vConflict = vehicleBadge && !vehicleBadge.classList.contains('bg-success');
-            const dConflict = driverBadge && !driverBadge.classList.contains('bg-success');
+            const vConflict = vehicleBadge && !vehicleBadge.classList.contains('badge-success');
+            const dConflict = driverBadge && !driverBadge.classList.contains('badge-success');
             const totalConflicts = (vConflict ? 1 : 0) + (dConflict ? 1 : 0);
 
             const countBadge = document.getElementById('conflictCountBadge');
@@ -1079,17 +1079,20 @@ require_once INCLUDES_PATH . '/header.php';
             // Toggle override confirmation
             const overrideSection = document.getElementById('overrideConfirmation');
             const conflictDashboard = document.getElementById('conflictDashboard');
+            const conflictHeader = conflictDashboard ? conflictDashboard.querySelector('div') : null;
             if (overrideSection && conflictDashboard) {
                 if (totalConflicts > 0) {
                     overrideSection.classList.remove('d-none');
-                    conflictDashboard.className = 'card border-warning mb-4';
-                    conflictDashboard.querySelector('.card-header').className = 'card-header bg-warning d-flex justify-content-between align-items-center';
-                    conflictDashboard.querySelector('.card-header h6').innerHTML = '<i class="bi bi-exclamation-triangle me-1"></i>Conflict Status';
+                    conflictDashboard.className = conflictDashboard.className.replace(/border-\w+/, 'border-warning');
+                    if (conflictHeader) {
+                        conflictHeader.className = conflictHeader.className.replace(/bg-\w+/, 'bg-warning');
+                    }
                 } else {
                     overrideSection.classList.add('d-none');
-                    conflictDashboard.className = 'card border-success mb-4';
-                    conflictDashboard.querySelector('.card-header').className = 'card-header bg-success d-flex justify-content-between align-items-center';
-                    conflictDashboard.querySelector('.card-header h6').innerHTML = '<i class="bi bi-check-circle me-1"></i>Conflict Status';
+                    conflictDashboard.className = conflictDashboard.className.replace(/border-\w+/, 'border-success');
+                    if (conflictHeader) {
+                        conflictHeader.className = conflictHeader.className.replace(/bg-\w+/, 'bg-success');
+                    }
                 }
             }
         }
@@ -1174,18 +1177,18 @@ require_once INCLUDES_PATH . '/header.php';
                     commentsField.placeholder = action === 'revision' 
                         ? 'Please explain what needs to be revised (required)...'
                         : 'Please provide a reason for rejection (required)...';
-                    commentsField.classList.remove('is-invalid');
+                    commentsField.classList.remove('input-error');
                 }
                 if (commentsRequired) commentsRequired.style.display = 'inline';
                 if (commentsOptional) commentsOptional.style.display = 'none';
                 // Remove required from vehicle/driver
                 if (vehicleSelect) {
                     vehicleSelect.removeAttribute('required');
-                    vehicleSelect.classList.remove('is-invalid');
+                    vehicleSelect.classList.remove('input-error');
                 }
                 if (driverSelect) {
                     driverSelect.removeAttribute('required');
-                    driverSelect.classList.remove('is-invalid');
+                    driverSelect.classList.remove('input-error');
                 }
             } else {
                 // Show assignment section for approval
@@ -1196,7 +1199,7 @@ require_once INCLUDES_PATH . '/header.php';
                 if (commentsField) {
                     commentsField.removeAttribute('required');
                     commentsField.placeholder = 'Optional comments...';
-                    commentsField.classList.remove('is-invalid');
+                    commentsField.classList.remove('input-error');
                 }
                 if (commentsRequired) commentsRequired.style.display = 'none';
                 if (commentsOptional) commentsOptional.style.display = 'inline';
@@ -1237,7 +1240,7 @@ require_once INCLUDES_PATH . '/header.php';
                     ? 'Please explain what needs to be revised.' 
                     : 'Please provide a reason for rejection.';
                 showToast(msg, 'warning');
-                document.getElementById('comments').classList.add('is-invalid');
+                document.getElementById('comments').classList.add('input-error');
                 document.getElementById('comments').focus();
                 return;
             }
@@ -1252,14 +1255,14 @@ require_once INCLUDES_PATH . '/header.php';
                 
                 if (!vehicleId || !driverId) {
                     showToast('Please select both a vehicle and driver for approval.', 'warning');
-                    if (!vehicleId && vehicleSelect) vehicleSelect.classList.add('is-invalid');
-                    if (!driverId && driverSelect) driverSelect.classList.add('is-invalid');
+                    if (!vehicleId && vehicleSelect) vehicleSelect.classList.add('input-error');
+                    if (!driverId && driverSelect) driverSelect.classList.add('input-error');
                     return;
                 }
             }
             
             // Clear validation classes
-            document.querySelectorAll('.is-invalid').forEach(el => el.classList.remove('is-invalid'));
+            document.querySelectorAll('.input-error').forEach(el => el.classList.remove('input-error'));
             
             // Disable buttons and show loading
             approveBtn.disabled = true;

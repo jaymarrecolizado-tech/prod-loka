@@ -267,48 +267,48 @@ $pageTitle = 'Cancel Request #' . $requestId;
 require_once INCLUDES_PATH . '/header.php';
 ?>
 
-<div class="container-fluid py-4">
-    <div class="row justify-content-center">
-        <div class="col-lg-6">
-            <div class="card">
-                <div class="card-header bg-danger text-white">
-                    <h5 class="mb-0"><i class="bi bi-x-circle me-2"></i>Cancel Request #<?= $requestId ?></h5>
+<div class="px-4 py-4">
+    <div class="flex justify-center">
+        <div class="w-full max-w-2xl">
+            <div class="bg-base-100 rounded-lg shadow-sm">
+                <div class="bg-error text-white p-4 rounded-t-lg">
+                    <h5 class="font-bold mb-0"><i class="bi bi-x-circle mr-2"></i>Cancel Request #<?= $requestId ?></h5>
                 </div>
-                <div class="card-body">
+                <div class="p-5">
                     <div class="text-center mb-4">
-                        <i class="bi bi-x-circle-fill text-danger" style="font-size: 5rem;"></i>
+                        <i class="bi bi-x-circle-fill text-error" style="font-size: 5rem;"></i>
                     </div>
 
                     <h4 class="text-center mb-4">Are you sure you want to cancel this request?</h4>
 
-                    <div class="card bg-light mb-4">
-                        <div class="card-body">
-                            <h6 class="text-muted mb-3">Request Details</h6>
-                            <div class="row g-3">
-                                <div class="col-sm-4">
-                                    <label class="small text-muted">Request #</label>
-                                    <div class="fw-bold"><?= $requestId ?></div>
+                    <div class="bg-base-200 rounded-lg mb-4">
+                        <div class="p-5">
+                            <h6 class="text-gray-500 mb-3">Request Details</h6>
+                            <div class="grid grid-cols-1 sm:grid-cols-12 gap-3">
+                                <div class="sm:col-span-4">
+                                    <label class="text-xs text-gray-500">Request #</label>
+                                    <div class="font-bold"><?= $requestId ?></div>
                                 </div>
-                                <div class="col-sm-8">
-                                    <label class="small text-muted">Purpose</label>
-                                    <div class="fw-bold"><?= e($request->purpose) ?></div>
+                                <div class="sm:col-span-8">
+                                    <label class="text-xs text-gray-500">Purpose</label>
+                                    <div class="font-bold"><?= e($request->purpose) ?></div>
                                 </div>
-                                <div class="col-sm-4">
-                                    <label class="small text-muted">Destination</label>
+                                <div class="sm:col-span-4">
+                                    <label class="text-xs text-gray-500">Destination</label>
                                     <div><?= e($request->destination) ?></div>
                                 </div>
-                                <div class="col-sm-8">
-                                    <label class="small text-muted">Date & Time</label>
+                                <div class="sm:col-span-8">
+                                    <label class="text-xs text-gray-500">Date & Time</label>
                                     <div><?= formatDateTime($request->start_datetime) ?></div>
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <div class="alert alert-danger d-flex align-items-start mb-4" role="alert">
-                        <i class="bi bi-exclamation-triangle-fill flex-shrink-0 me-3 fs-4"></i>
+                    <div class="alert alert-error mb-4 flex items-start">
+                        <i class="bi bi-exclamation-triangle-fill flex-shrink-0 mr-3 text-xl"></i>
                         <div>
-                            <strong class="d-block mb-2">This action cannot be undone!</strong>
+                            <strong class="block mb-2">This action cannot be undone!</strong>
                             <ul class="mb-0">
                                 <li>The request will be marked as cancelled</li>
                                 <li>Assigned vehicle and driver will be released</li>
@@ -319,7 +319,7 @@ require_once INCLUDES_PATH . '/header.php';
 
                     <?php if ($request->status === STATUS_APPROVED): ?>
                     <div class="alert alert-warning mb-4">
-                        <i class="bi bi-info-circle-fill me-2"></i>
+                        <i class="bi bi-info-circle-fill mr-2"></i>
                         <strong>Attention:</strong> This request has already been approved.
                         <?php if ($request->vehicle_plate): ?>
                         <div class="mt-2"><strong>Vehicle:</strong> <?= e($request->vehicle_plate) ?> - <?= e($request->vehicle_make) ?> <?= e($request->vehicle_model) ?></div>
@@ -332,7 +332,7 @@ require_once INCLUDES_PATH . '/header.php';
 
                     <?php if ($request->status === STATUS_REJECTED): ?>
                     <div class="alert alert-info mb-4">
-                        <i class="bi bi-info-circle-fill me-2"></i>
+                        <i class="bi bi-info-circle-fill mr-2"></i>
                         <strong>Note:</strong> This request was rejected. Cancelling will permanently close this request.
                     </div>
                     <?php endif; ?>
@@ -342,22 +342,22 @@ require_once INCLUDES_PATH . '/header.php';
                         <input type="hidden" name="confirm_cancel" value="1">
 
                         <div class="mb-4">
-                            <label for="reason" class="form-label fw-bold">
-                                <i class="bi bi-chat-left-text me-1"></i>Reason for cancellation
-                                <span class="text-danger">*</span>
+                            <label for="reason" class="label font-bold">
+                                <i class="bi bi-chat-left-text mr-1"></i>Reason for cancellation
+                                <span class="text-error">*</span>
                             </label>
-                            <textarea class="form-control" id="reason" name="reason" rows="3" required
+                            <textarea class="textarea textarea-bordered w-full" id="reason" name="reason" rows="3" required
                                 placeholder="Please provide a reason for cancelling this request..." maxlength="500"></textarea>
-                            <small class="text-muted">This field is required</small>
+                            <small class="text-gray-500">This field is required</small>
                         </div>
 
-                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <div class="flex flex-col md:flex-row gap-2 md:justify-end">
                             <a href="<?= APP_URL ?>/?page=requests&action=view&id=<?= $requestId ?>"
-                               class="btn btn-outline-secondary btn-lg">
-                                <i class="bi bi-x-lg me-1"></i>No, Go Back
+                               class="btn btn-outline btn-lg">
+                                <i class="bi bi-x-lg mr-1"></i>No, Go Back
                             </a>
-                            <button type="submit" class="btn btn-danger btn-lg">
-                                <i class="bi bi-check-lg me-1"></i>Yes, Cancel Request
+                            <button type="submit" class="btn btn-error btn-lg">
+                                <i class="bi bi-check-lg mr-1"></i>Yes, Cancel Request
                             </button>
                         </div>
                     </form>

@@ -110,58 +110,46 @@ if ($isPrint) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Test Travel Order Template</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
     <style>
         body { background: #f5f5f5; padding: 20px; }
-        .test-controls {
-            max-width: 600px;
-            margin: 0 auto 20px;
-        }
-        .preview-container {
-            max-width: 900px;
-            margin: 0 auto;
-        }
-        iframe {
-            width: 100%;
-            height: 800px;
-            border: 2px solid #ccc;
-            background: white;
-        }
     </style>
 </head>
 <body>
-    <div class="test-controls">
-        <div class="card shadow-sm">
-            <div class="card-header bg-primary text-white">
-                <h5 class="mb-0"><i class="bi bi-printer me-2"></i>Test Travel Order Template</h5>
-            </div>
+    <div class="max-w-[600px] mx-auto mb-5">
+        <div class="card bg-base-100 shadow-sm">
             <div class="card-body">
-                <p class="text-muted mb-3">This is a test page using sample data to preview the template.</p>
-                
-                <div class="mb-3">
-                    <label class="form-label">Select Template:</label>
-                    <div class="d-grid gap-2">
-                        <a href="?template=travelorder&print=1" target="_blank" class="btn btn-outline-primary">
-                            <i class="bi bi-file-text me-2"></i>Preview Travel Order Template
-                        </a>
-                        <a href="?template=vehicle&print=1" target="_blank" class="btn btn-outline-success">
-                            <i class="bi bi-car-front me-2"></i>Preview Vehicle Trip Ticket Template
-                        </a>
-                    </div>
+                <div class="bg-primary text-primary-content rounded-t-lg px-4 py-3">
+                    <h5 class="font-bold"><i class="bi bi-printer me-2"></i>Test Travel Order Template</h5>
                 </div>
+                <div class="p-4">
+                    <p class="text-base-content/60 mb-3">This is a test page using sample data to preview the template.</p>
+                    
+                    <div class="mb-3">
+                        <label class="label"><span class="label-text font-medium">Select Template:</span></label>
+                        <div class="grid grid-cols-1 gap-2">
+                            <a href="?template=travelorder&print=1" target="_blank" class="btn btn-outline btn-primary">
+                                <i class="bi bi-file-text me-2"></i>Preview Travel Order Template
+                            </a>
+                            <a href="?template=vehicle&print=1" target="_blank" class="btn btn-outline btn-success">
+                                <i class="bi bi-car-front me-2"></i>Preview Vehicle Trip Ticket Template
+                            </a>
+                        </div>
+                    </div>
 
-                <hr>
+                    <hr class="my-4 border-base-300">
 
-                <h6>Current Test Data:</h6>
-                <ul class="list-unstyled small text-muted">
-                    <li><strong>Vehicle:</strong> <?= $vInfo->plate_number ?> - <?= $vInfo->make ?> <?= $vInfo->model ?></li>
-                    <li><strong>Driver:</strong> <?= $generatorName ?></li>
-                    <li><strong>Date Range:</strong> <?= date('M d, Y', strtotime($dateFrom)) ?> - <?= date('M d, Y', strtotime($dateTo)) ?></li>
-                    <li><strong>Total Distance:</strong> <?= number_format($totalDist) ?> km</li>
-                    <li><strong>Total Fuel:</strong> <?= number_format($totalFuel, 2) ?> L</li>
-                    <li><strong>No. of Trips:</strong> <?= count($trips) ?></li>
-                </ul>
+                    <h6 class="font-semibold">Current Test Data:</h6>
+                    <ul class="text-sm text-base-content/60 space-y-1 mt-2">
+                        <li><strong>Vehicle:</strong> <?= $vInfo->plate_number ?> - <?= $vInfo->make ?> <?= $vInfo->model ?></li>
+                        <li><strong>Driver:</strong> <?= $generatorName ?></li>
+                        <li><strong>Date Range:</strong> <?= date('M d, Y', strtotime($dateFrom)) ?> - <?= date('M d, Y', strtotime($dateTo)) ?></li>
+                        <li><strong>Total Distance:</strong> <?= number_format($totalDist) ?> km</li>
+                        <li><strong>Total Fuel:</strong> <?= number_format($totalFuel, 2) ?> L</li>
+                        <li><strong>No. of Trips:</strong> <?= count($trips) ?></li>
+                    </ul>
+                </div>
             </div>
         </div>
     </div>

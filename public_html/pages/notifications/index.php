@@ -22,134 +22,131 @@ $notifications = db()->fetchAll(
 require_once INCLUDES_PATH . '/header.php';
 ?>
 
-<div class="container-fluid py-4">
-    <div class="row justify-content-center">
-        <div class="col-12 col-lg-8">
-            <div class="card shadow-sm">
-                <div class="card-header bg-white border-0 py-3">
-                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
-                        <h4 class="card-title mb-0">
-                            <i class="bi bi-bell me-2"></i>Notifications
-                        </h4>
-                        <div class="btn-group" role="group">
-                            <a href="<?= APP_URL ?>/?page=notifications&view=inbox" 
-                               class="btn btn-sm <?= $view === 'inbox' ? 'btn-primary' : 'btn-outline-primary' ?>">
-                                <i class="bi bi-inbox me-1"></i>Inbox
-                            </a>
-                            <a href="<?= APP_URL ?>/?page=notifications&view=all" 
-                               class="btn btn-sm <?= $view === 'all' ? 'btn-primary' : 'btn-outline-primary' ?>">
-                                <i class="bi bi-list-check me-1"></i>All
-                            </a>
-                            <a href="<?= APP_URL ?>/?page=notifications&view=archive" 
-                               class="btn btn-sm <?= $view === 'archive' ? 'btn-primary' : 'btn-outline-primary' ?>">
-                                <i class="bi bi-archive me-1"></i>Archive
-                            </a>
-                        </div>
+<div class="loka-page">
+    <div class="max-w-3xl mx-auto">
+        <div class="loka-card">
+            <div class="p-4 border-b border-base-200">
+                <div class="flex items-center justify-between flex-wrap gap-3">
+                    <h2 class="text-lg font-semibold flex items-center gap-2">
+                        <i class="bi bi-bell"></i>Notifications
+                    </h2>
+                    <div class="join">
+                        <a href="<?= APP_URL ?>/?page=notifications&view=inbox"
+                           class="btn btn-sm join-item <?= $view === 'inbox' ? 'btn-primary' : 'btn-outline btn-primary' ?>">
+                            <i class="bi bi-inbox mr-1"></i>Inbox
+                        </a>
+                        <a href="<?= APP_URL ?>/?page=notifications&view=all"
+                           class="btn btn-sm join-item <?= $view === 'all' ? 'btn-primary' : 'btn-outline btn-primary' ?>">
+                            <i class="bi bi-list-check mr-1"></i>All
+                        </a>
+                        <a href="<?= APP_URL ?>/?page=notifications&view=archive"
+                           class="btn btn-sm join-item <?= $view === 'archive' ? 'btn-primary' : 'btn-outline btn-primary' ?>">
+                            <i class="bi bi-archive mr-1"></i>Archive
+                        </a>
                     </div>
                 </div>
+            </div>
 
-                <div class="card-body p-0">
-                    <?php if (empty($notifications)): ?>
-                    <div class="empty-state py-5">
-                        <div class="text-center">
-                            <i class="bi bi-bell-slash display-4 text-muted mb-3 d-block"></i>
-                            <h5 class="text-muted">No notifications in <?= ucfirst($view) ?></h5>
-                            <p class="text-muted">You're all caught up!</p>
-                        </div>
+            <div>
+                <?php if (empty($notifications)): ?>
+                <div class="py-12">
+                    <div class="text-center text-muted">
+                        <i class="bi bi-bell-slash text-4xl mb-3 block"></i>
+                        <h5 class="text-base-content/60">No notifications in <?= ucfirst($view) ?></h5>
+                        <p class="text-sm text-base-content/40">You're all caught up!</p>
                     </div>
-                    <?php else: ?>
-                    <div class="list-group list-group-flush" id="notificationsList">
-                        <?php foreach ($notifications as $notif): ?>
-                        <div class="list-group-item list-group-item-action d-flex justify-content-between align-items-center <?= $notif->is_read ? '' : 'bg-light border-start border-primary border-4' ?>">
-                            <div class="d-flex align-items-start flex-grow-1">
-                                <div class="p-2 me-3 bg-opacity-10 rounded-circle <?= $notif->is_read ? 'bg-secondary' : 'bg-primary' ?>">
-                                    <i class="bi bi-bell <?= $notif->is_read ? 'text-secondary' : 'text-primary' ?>"></i>
-                                </div>
-                                <div class="flex-grow-1">
-                                    <div class="d-flex justify-content-between mb-1">
-                                        <h6 class="mb-0 <?= $notif->is_read ? '' : 'fw-bold' ?>">
-                                            <a href="<?= APP_URL ?>/?page=notifications&action=read&id=<?= $notif->id ?>" 
-                                               class="text-decoration-none text-dark">
-                                                <?= e($notif->title) ?>
-                                            </a>
-                                        </h6>
-                                        <span class="text-muted small"><?= formatDateTime($notif->created_at) ?></span>
-                                    </div>
-                                    <p class="mb-1 text-muted small"><?= e($notif->message) ?></p>
-                                    <div class="d-flex gap-3">
-                                        <?php if ($notif->link): ?>
-                                        <a href="<?= APP_URL ?>/?page=notifications&action=read&id=<?= $notif->id ?>" 
-                                           class="btn btn-link btn-sm p-0 text-decoration-none small">
-                                            <i class="bi bi-box-arrow-up-right me-1"></i>View Details
-                                        </a>
-                                        <?php endif; ?>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="ms-3 dropdown">
-                                <button class="btn btn-sm btn-light border" type="button" data-bs-toggle="dropdown">
-                                    <i class="bi bi-three-dots-vertical"></i>
-                                </button>
-                                <ul class="dropdown-menu dropdown-menu-end shadow-sm">
-                                    <li>
-                                        <a class="dropdown-item"
-                                           href="<?= APP_URL ?>/?page=notifications&action=archive&id=<?= $notif->id ?>&view=<?= $view ?>">
-                                            <i class="bi <?= $isArchive ? 'bi-inbox' : 'bi-archive' ?> me-2"></i>
-                                            <?= $isArchive ? 'Move to Inbox' : 'Archive' ?>
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <form method="POST" action="<?= APP_URL ?>/?page=notifications&action=delete&view=<?= $view ?>" style="display:inline;">
-                                            <?= csrfField() ?>
-                                            <input type="hidden" name="id" value="<?= $notif->id ?>">
-                                            <button type="submit" class="dropdown-item text-danger" onclick="return confirm('Delete this notification?')">
-                                                <i class="bi bi-trash me-2"></i>Delete
-                                            </button>
-                                        </form>
-                                    </li>
-                                </ul>
-                            </div>
-                        </div>
-                        <?php endforeach; ?>
-                    </div>
-                    <?php endif; ?>
                 </div>
+                <?php else: ?>
+                <div id="notificationsList">
+                    <?php foreach ($notifications as $notif): ?>
+                    <div class="flex items-start justify-between px-4 py-3 hover:bg-base-200/50 transition-colors <?= $notif->is_read ? '' : 'bg-primary/5 border-l-4 border-primary' ?>">
+                        <div class="flex items-start flex-grow-1">
+                            <div class="p-2 rounded-full <?= $notif->is_read ? 'bg-base-200' : 'bg-primary/10' ?>">
+                                <i class="bi bi-bell <?= $notif->is_read ? 'text-base-content/40' : 'text-primary' ?>"></i>
+                            </div>
+                            <div class="ml-3 flex-grow-1">
+                                <div class="flex items-center justify-between mb-1">
+                                    <h6 class="text-sm <?= $notif->is_read ? '' : 'font-semibold' ?>">
+                                        <a href="<?= APP_URL ?>/?page=notifications&action=read&id=<?= $notif->id ?>"
+                                           class="hover:text-primary transition-colors no-underline text-base-content">
+                                            <?= e($notif->title) ?>
+                                        </a>
+                                    </h6>
+                                    <span class="text-xs text-base-content/40 ml-2 shrink-0"><?= formatDateTime($notif->created_at) ?></span>
+                                </div>
+                                <p class="text-sm text-base-content/60 mb-1"><?= e($notif->message) ?></p>
+                                <div class="flex gap-3">
+                                    <?php if ($notif->link): ?>
+                                    <a href="<?= APP_URL ?>/?page=notifications&action=read&id=<?= $notif->id ?>"
+                                       class="text-xs text-primary hover:underline">
+                                        <i class="bi bi-box-arrow-up-right mr-1"></i>View Details
+                                    </a>
+                                    <?php endif; ?>
+                                </div>
+                            </div>
+                        </div>
 
-                <?php if (!empty($notifications)): ?>
-                <div class="card-footer bg-white border-0 py-3 d-flex justify-content-between">
-                    <small class="text-muted"><?= count($notifications) ?> notification(s) displayed</small>
-                    <div class="dropdown">
-                        <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                            Bulk Actions
-                        </button>
-                        <ul class="dropdown-menu">
-                            <?php if ($view === 'inbox'): ?>
-                            <li>
-                                <a href="<?= APP_URL ?>/?page=notifications&action=read-all&view=<?= $view ?>" 
-                                   class="dropdown-item">
-                                    <i class="bi bi-check2-all me-2"></i>Mark All as Read
-                                </a>
-                            </li>
-                            <?php endif; ?>
-                            <li>
-                                <a href="<?= APP_URL ?>/?page=notifications&action=archive-all&view=<?= $view ?>" 
-                                   class="dropdown-item">
-                                    <i class="bi bi-archive me-2"></i>Archive All
-                                </a>
-                            </li>
-                            <li>
-                                <a href="<?= APP_URL ?>/?page=notifications&action=delete-all&view=<?= $view ?>" 
-                                   class="dropdown-item text-danger"
-                                   onclick="return confirm('Delete all notifications in <?= $view ?>?')">
-                                    <i class="bi bi-trash me-2"></i>Clear All
-                                </a>
-                            </li>
-                        </ul>
+                        <!-- Per-notification dropdown (DaisyUI) -->
+                        <div class="ml-3 dropdown dropdown-end">
+                            <div tabindex="0" role="button" class="btn btn-sm btn-ghost btn-square">
+                                <i class="bi bi-three-dots-vertical"></i>
+                            </div>
+                            <ul tabindex="0" class="dropdown-content menu bg-base-100 rounded-box z-[1] w-44 p-2 shadow-lg">
+                                <li>
+                                    <a href="<?= APP_URL ?>/?page=notifications&action=archive&id=<?= $notif->id ?>&view=<?= $view ?>">
+                                        <i class="bi <?= $isArchive ? 'bi-inbox' : 'bi-archive' ?> mr-2"></i>
+                                        <?= $isArchive ? 'Move to Inbox' : 'Archive' ?>
+                                    </a>
+                                </li>
+                                <li>
+                                    <form method="POST" action="<?= APP_URL ?>/?page=notifications&action=delete&view=<?= $view ?>" style="display:inline;">
+                                        <?= csrfField() ?>
+                                        <input type="hidden" name="id" value="<?= $notif->id ?>">
+                                        <button type="submit" class="text-error" onclick="return confirm('Delete this notification?')">
+                                            <i class="bi bi-trash mr-2"></i>Delete
+                                        </button>
+                                    </form>
+                                </li>
+                            </ul>
+                        </div>
                     </div>
+                    <?php endforeach; ?>
                 </div>
                 <?php endif; ?>
             </div>
+
+            <?php if (!empty($notifications)): ?>
+            <div class="p-4 border-t border-base-200 flex items-center justify-between">
+                <small class="text-base-content/40"><?= count($notifications) ?> notification(s) displayed</small>
+                <!-- Bulk Actions (DaisyUI dropdown) -->
+                <div class="dropdown dropdown-end">
+                    <div tabindex="0" role="button" class="btn btn-sm btn-outline">
+                        Bulk Actions <i class="bi bi-chevron-down ml-1 text-xs"></i>
+                    </div>
+                    <ul tabindex="0" class="dropdown-content menu bg-base-100 rounded-box z-[1] w-52 p-2 shadow-lg">
+                        <?php if ($view === 'inbox'): ?>
+                        <li>
+                            <a href="<?= APP_URL ?>/?page=notifications&action=read-all&view=<?= $view ?>">
+                                <i class="bi bi-check2-all mr-2"></i>Mark All as Read
+                            </a>
+                        </li>
+                        <?php endif; ?>
+                        <li>
+                            <a href="<?= APP_URL ?>/?page=notifications&action=archive-all&view=<?= $view ?>">
+                                <i class="bi bi-archive mr-2"></i>Archive All
+                            </a>
+                        </li>
+                        <li>
+                            <a href="<?= APP_URL ?>/?page=notifications&action=delete-all&view=<?= $view ?>"
+                               class="text-error"
+                               onclick="return confirm('Delete all notifications in <?= $view ?>?')">
+                                <i class="bi bi-trash mr-2"></i>Clear All
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <?php endif; ?>
         </div>
     </div>
 </div>
@@ -174,13 +171,13 @@ document.addEventListener('DOMContentLoaded', function() {
                     notificationsList.innerHTML = data.html;
                 }
                 
-                const badge = document.querySelector('.badge.bg-danger');
+                const badge = document.querySelector('.loka-navbar-notification-badge');
                 if (badge && data.unread !== undefined) {
                     if (data.unread > 0) {
                         badge.textContent = data.unread > 9 ? '9+' : data.unread;
-                        badge.classList.remove('d-none');
+                        badge.classList.remove('hidden');
                     } else {
-                        badge.classList.add('d-none');
+                        badge.classList.add('hidden');
                     }
                 }
             }

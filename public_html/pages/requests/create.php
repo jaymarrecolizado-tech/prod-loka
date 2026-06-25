@@ -366,29 +366,31 @@ if ($startDatetime && $endDatetime) {
 require_once INCLUDES_PATH . '/header.php';
 ?>
 
-<div class="container-fluid py-4">
+<div class="loka-page">
     <!-- Page Header -->
-    <div class="mb-4">
-        <h4 class="mb-1">New Vehicle Request</h4>
+    <div class="mb-6">
+        <h4 class="mb-1 text-2xl font-bold text-base-content">New Vehicle Request</h4>
         <nav aria-label="breadcrumb">
-            <ol class="breadcrumb mb-0">
-                <li class="breadcrumb-item"><a href="<?= APP_URL ?>">Dashboard</a></li>
-                <li class="breadcrumb-item"><a href="<?= APP_URL ?>/?page=requests">Requests</a></li>
-                <li class="breadcrumb-item active">New Request</li>
+            <ol class="mb-0 flex items-center gap-1 text-sm text-base-content/60">
+                <li><a href="<?= APP_URL ?>" class="hover:text-primary">Dashboard</a></li>
+                <li><span class="mx-1">/</span></li>
+                <li><a href="<?= APP_URL ?>/?page=requests" class="hover:text-primary">Requests</a></li>
+                <li><span class="mx-1">/</span></li>
+                <li class="text-base-content font-medium">New Request</li>
             </ol>
         </nav>
     </div>
     
-    <div class="row">
-        <div class="col-lg-8">
-            <div class="card">
-                <div class="card-header">
-                    <h5 class="mb-0"><i class="bi bi-file-earmark-plus me-2"></i>Request Details</h5>
+    <div class="grid grid-cols-1 gap-6 lg:grid-cols-12">
+        <div class="lg:col-span-8">
+            <div class="loka-card">
+                <div class="border-b border-base-200 px-5 py-4">
+                    <h5 class="font-semibold text-base-content"><i class="bi bi-file-earmark-plus mr-2"></i>Request Details</h5>
                 </div>
-                <div class="card-body">
+                <div class="p-5">
                     <?php if (!empty($errors)): ?>
-                    <div class="alert alert-danger">
-                        <ul class="mb-0">
+                    <div class="mb-4 rounded-xl border border-error/20 bg-error/10 px-4 py-3 text-sm text-error">
+                        <ul class="mb-0 list-disc pl-4">
                             <?php foreach ($errors as $error): ?>
                             <li><?= e($error) ?></li>
                             <?php endforeach; ?>
@@ -396,43 +398,40 @@ require_once INCLUDES_PATH . '/header.php';
                     </div>
                     <?php endif; ?>
                     
-                    <form method="POST" class="needs-validation" novalidate id="requestForm">
+                    <form method="POST" novalidate id="requestForm" class="space-y-6">
                         <?= csrfField() ?>
                         <!-- Hidden input to store selected passengers for form submission -->
                         <input type="hidden" name="passengers_json" id="passengers_json" value="">
                         
-                        <div class="row g-3">
+                        <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
                             <!-- Date/Time -->
-                            <div class="col-md-6">
-                                <label for="start_datetime" class="form-label">Start Date/Time <span class="text-danger">*</span></label>
-                                <input type="text" class="form-control" id="start_datetime" 
+                            <div>
+                                <label for="start_datetime" class="loka-form-label">Start Date/Time <span class="text-error">*</span></label>
+                                <input type="text" class="loka-form-input" id="start_datetime" 
                                        name="start_datetime" value="<?= e(post('start_datetime', '')) ?>" required>
-                                <div class="invalid-feedback">Please select start date/time</div>
                             </div>
                             
-                            <div class="col-md-6">
-                                <label for="end_datetime" class="form-label">End Date/Time <span class="text-danger">*</span></label>
-                                <input type="text" class="form-control" id="end_datetime" 
+                            <div>
+                                <label for="end_datetime" class="loka-form-label">End Date/Time <span class="text-error">*</span></label>
+                                <input type="text" class="loka-form-input" id="end_datetime" 
                                        name="end_datetime" value="<?= e(post('end_datetime', '')) ?>" required>
-                                <div class="invalid-feedback">Please select end date/time</div>
                             </div>
                             
                             <!-- Purpose -->
-                            <div class="col-12">
-                                <label for="purpose" class="form-label">Purpose <span class="text-danger">*</span></label>
-                                <textarea class="form-control" id="purpose" name="purpose" rows="3" 
+                            <div class="md:col-span-2">
+                                <label for="purpose" class="loka-form-label">Purpose <span class="text-error">*</span></label>
+                                <textarea class="loka-form-input" id="purpose" name="purpose" rows="3" 
                                           placeholder="Describe the purpose of this trip..." required maxlength="1000"><?= e(post('purpose', '')) ?></textarea>
-                                <div class="invalid-feedback">Please enter the purpose</div>
                             </div>
                             
                             <!-- Destinations (Multiple) -->
-                             <div class="col-12">
-                                 <label class="form-label">Destinations <span class="text-danger">*</span></label>
-                                 <div class="alert alert-info py-2 mb-2">
-                                     <i class="bi bi-info-circle me-1"></i>
+                             <div class="md:col-span-2">
+                                 <label class="loka-form-label">Destinations <span class="text-error">*</span></label>
+                                 <div class="mb-2 rounded-lg border border-info/20 bg-info/10 px-3 py-2 text-sm text-info">
+                                     <i class="bi bi-info-circle mr-1"></i>
                                      <strong>Note:</strong> Add locations in sequential order (first stop to last stop).
                                  </div>
-                                 <div id="destinationsContainer">
+                                 <div id="destinationsContainer" class="space-y-2">
                                      <?php 
                                      $destinations = post('destinations', []);
                                      if (empty($destinations)) {
@@ -440,54 +439,51 @@ require_once INCLUDES_PATH . '/header.php';
                                      }
                                      foreach ($destinations as $index => $dest): 
                                      ?>
-                                     <div class="destination-row mb-2">
-                                         <div class="input-group">
-                                             <span class="input-group-text bg-primary text-white" style="min-width: 45px;">
-                                                 <i class="bi bi-geo-alt"></i> <?= $index + 1 ?>
-                                             </span>
-                                             <input type="text" class="form-control destination-input" 
-                                                    name="destinations[]" 
-                                                    value="<?= e($dest) ?>" 
-                                                    placeholder="Enter location address..."
-                                                    <?= $index === 0 ? 'required' : '' ?>>
-                                             <?php if ($index > 0): ?>
-                                             <button type="button" class="btn btn-outline-danger remove-destination" title="Remove location">
-                                                 <i class="bi bi-trash"></i>
-                                             </button>
-                                             <?php endif; ?>
-                                         </div>
+                                     <div class="destination-row flex items-center gap-2">
+                                         <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary text-xs font-bold text-white">
+                                             <i class="bi bi-geo-alt"></i> <?= $index + 1 ?>
+                                         </span>
+                                         <input type="text" class="loka-form-input flex-1 destination-input" 
+                                                name="destinations[]" 
+                                                value="<?= e($dest) ?>" 
+                                                placeholder="Enter location address..."
+                                                <?= $index === 0 ? 'required' : '' ?>>
+                                         <?php if ($index > 0): ?>
+                                         <button type="button" class="btn btn-outline btn-error btn-sm remove-destination" title="Remove location">
+                                             <i class="bi bi-trash"></i>
+                                         </button>
+                                         <?php endif; ?>
                                      </div>
                                      <?php endforeach; ?>
                                  </div>
-                                 <button type="button" class="btn btn-outline-primary btn-sm mt-1" id="addDestinationBtn">
-                                     <i class="bi bi-plus-circle me-1"></i>Add Another Location
+                                 <button type="button" class="btn btn-outline btn-primary btn-sm mt-2" id="addDestinationBtn">
+                                     <i class="bi bi-plus-circle mr-1"></i>Add Another Location
                                  </button>
                                  <input type="hidden" name="destination" id="destinationCombined">
-                                 <div class="invalid-feedback" id="destinationError">Please enter at least one destination</div>
                              </div>
                             
                             <!-- Passengers Summary & Modal Trigger -->
-                            <div class="col-12 mt-4">
-                                <div class="card border-primary border-opacity-25 bg-primary bg-opacity-10">
-                                    <div class="card-body d-flex justify-content-between align-items-center py-2">
+                            <div class="md:col-span-2 mt-2">
+                                <div class="rounded-xl border border-primary/25 bg-primary/10 p-4">
+                                    <div class="flex items-center justify-between">
                                         <div>
-                                            <h6 class="mb-0"><i class="bi bi-people-fill me-2"></i>Passengers</h6>
+                                            <h6 class="mb-0 font-semibold"><i class="bi bi-people-fill mr-2"></i>Passengers</h6>
                                             <div id="passengerCountText" class="mt-1">
-                                                <span class="badge bg-primary rounded-pill">1</span>
-                                                <span class="small text-muted ms-1">Passenger (Requester Included)</span>
+                                                <span class="badge badge-primary">1</span>
+                                                <span class="ml-1 text-sm text-base-content/60">Passenger (Requester Included)</span>
                                             </div>
                                         </div>
-                                        <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#passengerModal">
-                                            <i class="bi bi-person-plus me-1"></i>Add / Manage
+                                        <button type="button" class="btn btn-primary btn-sm" onclick="document.getElementById('passengerModal').showModal()">
+                                            <i class="bi bi-person-plus mr-1"></i>Add / Manage
                                         </button>
                                     </div>
                                 </div>
                             </div>
                             
                             <!-- Vehicle Selection -->
-                            <div class="col-md-6">
-                                <label for="vehicle_id" class="form-label">Select Vehicle <span class="text-danger">*</span></label>
-                                <select class="form-select" id="vehicle_id" name="vehicle_id" required>
+                            <div>
+                                <label for="vehicle_id" class="loka-form-label">Select Vehicle <span class="text-error">*</span></label>
+                                <select class="select select-bordered w-full" id="vehicle_id" name="vehicle_id" required>
                                     <option value="">Choose a vehicle...</option>
                                     <?php foreach ($availableVehicles as $vehicle): 
                                         $vehicle = (object) $vehicle;
@@ -502,24 +498,24 @@ require_once INCLUDES_PATH . '/header.php';
                                     </option>
                                     <?php endforeach; ?>
                                 </select>
-                                <small class="text-muted">Select the vehicle you need for this trip</small>
-                                <div id="vehicleCapacityAlert" class="alert alert-warning mt-2 small py-2 d-none">
-                                    <i class="bi bi-exclamation-triangle me-1"></i>
+                                <p class="mt-1 text-xs text-base-content/60">Select the vehicle you need for this trip</p>
+                                <div id="vehicleCapacityAlert" class="mt-2 hidden rounded-lg border border-warning/20 bg-warning/10 px-3 py-2 text-sm text-warning">
+                                    <i class="bi bi-exclamation-triangle mr-1"></i>
                                     <span class="message"></span>
                                 </div>
                             </div>
                             
                             <!-- Notes -->
-                            <div class="col-md-6">
-                                <label for="notes" class="form-label">Additional Notes</label>
-                                <textarea class="form-control" id="notes" name="notes" rows="2" 
+                            <div>
+                                <label for="notes" class="loka-form-label">Additional Notes</label>
+                                <textarea class="loka-form-input" id="notes" name="notes" rows="2" 
                                           placeholder="Any special requirements or notes..." maxlength="500"><?= e(post('notes', '')) ?></textarea>
                             </div>
 
                             <!-- Requested Driver -->
-                            <div class="col-md-6 mt-3">
-                                <label for="requested_driver_id" class="form-label">Requested Driver (Optional)</label>
-                                <select class="form-select" id="requested_driver_id" name="requested_driver_id">
+                            <div>
+                                <label for="requested_driver_id" class="loka-form-label">Requested Driver (Optional)</label>
+                                <select class="select select-bordered w-full" id="requested_driver_id" name="requested_driver_id">
                                     <option value="">No preference</option>
                                     <?php foreach ($allDrivers as $driver): 
                                         $driver = (object) $driver;
@@ -529,36 +525,36 @@ require_once INCLUDES_PATH . '/header.php';
                                     </option>
                                     <?php endforeach; ?>
                                 </select>
-                                <div id="driverConflictAlert" class="alert alert-warning mt-2 small py-2 d-none">
-                                    <i class="bi bi-exclamation-triangle me-1"></i>
+                                <div id="driverConflictAlert" class="mt-2 hidden rounded-lg border border-warning/20 bg-warning/10 px-3 py-2 text-sm text-warning">
+                                    <i class="bi bi-exclamation-triangle mr-1"></i>
                                     <span class="message"></span>
                                 </div>
-                                <small class="text-muted">You can request a specific driver. Motorpool will confirm availability.</small>
+                                <p class="mt-1 text-xs text-base-content/60">You can request a specific driver. Motorpool will confirm availability.</p>
                             </div>
                         </div>
                         
                         <!-- Approval Workflow Section -->
-                        <div class="card bg-light mt-4">
-                            <div class="card-header bg-primary bg-opacity-10 d-flex justify-content-between align-items-center">
-                                <h6 class="mb-0"><i class="bi bi-diagram-3 me-2"></i>Approval Workflow</h6>
+                        <div class="rounded-xl bg-base-200/50 p-5">
+                            <div class="mb-4 flex items-center justify-between rounded-lg bg-primary/10 px-4 py-3">
+                                <h6 class="font-semibold"><i class="bi bi-diagram-3 mr-2"></i>Approval Workflow</h6>
                                 <?php if (!empty($savedWorkflows)): ?>
-                                <div class="dropdown">
-                                    <button class="btn btn-sm btn-outline-primary dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                                        <i class="bi bi-bookmark me-1"></i>Load Saved
-                                    </button>
-                                    <ul class="dropdown-menu dropdown-menu-end">
+                                <div class="dropdown dropdown-end">
+                                    <div tabindex="0" role="button" class="btn btn-outline btn-primary btn-sm">
+                                        <i class="bi bi-bookmark mr-1"></i>Load Saved
+                                    </div>
+                                    <ul tabindex="0" class="dropdown-content menu z-[1] w-64 rounded-xl border border-base-200 bg-base-100 p-1 shadow-lg">
                                         <?php foreach ($savedWorkflows as $wf): 
                                             $wf = (object) $wf;
                                         ?>
                                         <li>
-                                            <a class="dropdown-item d-flex justify-content-between align-items-center workflow-load" 
+                                            <a class="flex items-center justify-between rounded-lg px-3 py-2 text-sm hover:bg-base-200 workflow-load" 
                                                href="#" 
                                                data-approver="<?= $wf->approver_id ?>" 
                                                data-motorpool="<?= $wf->motorpool_head_id ?>">
                                                 <span>
                                                     <?= e($wf->name) ?>
                                                     <?php if ($wf->is_default): ?>
-                                                    <span class="badge bg-success ms-1">Default</span>
+                                                    <span class="badge badge-success badge-sm ml-1">Default</span>
                                                     <?php endif; ?>
                                                 </span>
                                             </a>
@@ -568,85 +564,81 @@ require_once INCLUDES_PATH . '/header.php';
                                 </div>
                                 <?php endif; ?>
                             </div>
-                            <div class="card-body">
-                                <div class="row g-3">
-                                    <!-- Department Approver -->
-                                    <div class="col-md-6">
-                                        <label for="approver_id" class="form-label">
-                                            Department Approver <span class="text-danger">*</span>
-                                        </label>
-                                        <select class="form-select" id="approver_id" name="approver_id" required>
-                                            <option value="">Select approver...</option>
-                                            <?php foreach ($approvers as $app): 
-                                                $app = (object) $app;
-                                            ?>
-                                            <option value="<?= $app->id ?>" 
-                                                    <?= (post('approver_id') == $app->id || ($defaultWorkflow && $defaultWorkflow->approver_id == $app->id && !post('approver_id'))) ? 'selected' : '' ?>>
-                                                <?= e($app->name) ?> (<?= e($app->department_name ?? 'Admin') ?>)
-                                            </option>
-                                            <?php endforeach; ?>
-                                        </select>
-                                        <small class="text-muted">First level approval</small>
-                                    </div>
-                                    
-                                    <!-- Motorpool Head -->
-                                    <div class="col-md-6">
-                                        <label for="motorpool_head_id" class="form-label">
-                                            Motorpool Head <span class="text-danger">*</span>
-                                        </label>
-                                        <select class="form-select" id="motorpool_head_id" name="motorpool_head_id" required>
-                                            <option value="">Select motorpool head...</option>
-                                            <?php foreach ($motorpoolHeads as $mp): 
-                                                $mp = (object) $mp;
-                                            ?>
-                                            <option value="<?= $mp->id ?>" 
-                                                    <?= (post('motorpool_head_id') == $mp->id || ($defaultWorkflow && $defaultWorkflow->motorpool_head_id == $mp->id && !post('motorpool_head_id'))) ? 'selected' : '' ?>>
-                                                <?= e($mp->name) ?>
-                                            </option>
-                                            <?php endforeach; ?>
-                                        </select>
-                                        <small class="text-muted">Final approval & vehicle assignment</small>
-                                    </div>
+                            <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+                                <!-- Department Approver -->
+                                <div>
+                                    <label for="approver_id" class="loka-form-label">
+                                        Department Approver <span class="text-error">*</span>
+                                    </label>
+                                    <select class="select select-bordered w-full" id="approver_id" name="approver_id" required>
+                                        <option value="">Select approver...</option>
+                                        <?php foreach ($approvers as $app): 
+                                            $app = (object) $app;
+                                        ?>
+                                        <option value="<?= $app->id ?>" 
+                                                <?= (post('approver_id') == $app->id || ($defaultWorkflow && $defaultWorkflow->approver_id == $app->id && !post('approver_id'))) ? 'selected' : '' ?>>
+                                            <?= e($app->name) ?> (<?= e($app->department_name ?? 'Admin') ?>)
+                                        </option>
+                                        <?php endforeach; ?>
+                                    </select>
+                                    <p class="mt-1 text-xs text-base-content/60">First level approval</p>
                                 </div>
                                 
-                                <!-- Save Workflow Option -->
-                                <div class="mt-3 pt-3 border-top">
-                                    <div class="form-check">
-                                        <input class="form-check-input" type="checkbox" id="saveWorkflowCheck">
-                                        <label class="form-check-label" for="saveWorkflowCheck">
-                                            Save this workflow for future use
-                                        </label>
-                                    </div>
-                                    <div id="saveWorkflowFields" class="mt-2" style="display:none;">
-                                        <div class="row g-2">
-                                            <div class="col-md-6">
-                                                <input type="text" class="form-control form-control-sm" 
-                                                       id="workflow_name_input" placeholder="Workflow name (e.g., Default, Project X)">
-                                            </div>
-                                            <div class="col-md-4">
-                                                <div class="form-check mt-2">
-                                                    <input class="form-check-input" type="checkbox" id="set_default_input">
-                                                    <label class="form-check-label small" for="set_default_input">Set as default</label>
-                                                </div>
-                                            </div>
-                                            <div class="col-md-2">
-                                                <button type="button" class="btn btn-sm btn-outline-success w-100" id="saveWorkflowBtn">
-                                                    <i class="bi bi-save"></i> Save
-                                                </button>
-                                            </div>
+                                <!-- Motorpool Head -->
+                                <div>
+                                    <label for="motorpool_head_id" class="loka-form-label">
+                                        Motorpool Head <span class="text-error">*</span>
+                                    </label>
+                                    <select class="select select-bordered w-full" id="motorpool_head_id" name="motorpool_head_id" required>
+                                        <option value="">Select motorpool head...</option>
+                                        <?php foreach ($motorpoolHeads as $mp): 
+                                            $mp = (object) $mp;
+                                        ?>
+                                        <option value="<?= $mp->id ?>" 
+                                                <?= (post('motorpool_head_id') == $mp->id || ($defaultWorkflow && $defaultWorkflow->motorpool_head_id == $mp->id && !post('motorpool_head_id'))) ? 'selected' : '' ?>>
+                                            <?= e($mp->name) ?>
+                                        </option>
+                                        <?php endforeach; ?>
+                                    </select>
+                                    <p class="mt-1 text-xs text-base-content/60">Final approval & vehicle assignment</p>
+                                </div>
+                            </div>
+                            
+                            <!-- Save Workflow Option -->
+                            <div class="mt-4 border-t border-base-300 pt-4">
+                                <label class="flex cursor-pointer items-center gap-2 text-sm">
+                                    <input type="checkbox" class="checkbox checkbox-primary checkbox-sm" id="saveWorkflowCheck">
+                                    <span>Save this workflow for future use</span>
+                                </label>
+                                <div id="saveWorkflowFields" class="mt-2 hidden">
+                                    <div class="grid grid-cols-1 gap-2 md:grid-cols-12">
+                                        <div class="md:col-span-6">
+                                            <input type="text" class="loka-form-input" 
+                                                   id="workflow_name_input" placeholder="Workflow name (e.g., Default, Project X)">
+                                        </div>
+                                        <div class="md:col-span-4">
+                                            <label class="flex cursor-pointer items-center gap-2 mt-2 text-sm">
+                                                <input type="checkbox" class="checkbox checkbox-primary checkbox-sm" id="set_default_input">
+                                                <span>Set as default</span>
+                                            </label>
+                                        </div>
+                                        <div class="md:col-span-2">
+                                            <button type="button" class="btn btn-outline btn-success btn-sm w-full" id="saveWorkflowBtn">
+                                                <i class="bi bi-save"></i> Save
+                                            </button>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
                         
-                        <hr class="my-4">
+                        <hr class="my-4 border-base-300">
                         
-                        <div class="d-flex gap-2">
+                        <div class="flex gap-2">
                             <button type="submit" class="btn btn-primary">
-                                <i class="bi bi-send me-1"></i>Submit Request
+                                <i class="bi bi-send mr-1"></i>Submit Request
                             </button>
-                            <a href="<?= APP_URL ?>/?page=requests" class="btn btn-outline-secondary">Cancel</a>
+                            <a href="<?= APP_URL ?>/?page=requests" class="btn btn-outline">Cancel</a>
                         </div>
                     </form>
                 </div>
@@ -654,14 +646,14 @@ require_once INCLUDES_PATH . '/header.php';
         </div>
         
         <!-- Sidebar Info -->
-        <div class="col-lg-4">
-            <div class="card bg-light border-0">
-                <div class="card-body">
-                    <h6><i class="bi bi-info-circle me-2"></i>Approval Process</h6>
-                    <ol class="small text-muted ps-3 mb-0">
-                        <li class="mb-2">Submit your request with trip details</li>
-                        <li class="mb-2"><strong>Your selected approver</strong> reviews and approves</li>
-                        <li class="mb-2"><strong>Your selected motorpool head</strong> assigns vehicle and driver</li>
+        <div class="lg:col-span-4 space-y-4">
+            <div class="loka-card bg-base-200/50 border-0">
+                <div class="p-5">
+                    <h6 class="font-semibold"><i class="bi bi-info-circle mr-2"></i>Approval Process</h6>
+                    <ol class="mb-0 mt-2 space-y-2 pl-4 text-sm text-base-content/60">
+                        <li>Submit your request with trip details</li>
+                        <li><strong>Your selected approver</strong> reviews and approves</li>
+                        <li><strong>Your selected motorpool head</strong> assigns vehicle and driver</li>
                         <li>You receive notification when approved</li>
                     </ol>
                 </div>
@@ -669,34 +661,34 @@ require_once INCLUDES_PATH . '/header.php';
             
             <!-- Saved Workflows Management -->
             <?php if (!empty($savedWorkflows)): ?>
-            <div class="card mt-3">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <h6 class="mb-0"><i class="bi bi-bookmark me-2"></i>Saved Workflows</h6>
+            <div class="loka-card">
+                <div class="flex items-center justify-between border-b border-base-200 px-5 py-4">
+                    <h6 class="font-semibold"><i class="bi bi-bookmark mr-2"></i>Saved Workflows</h6>
                 </div>
-                <div class="list-group list-group-flush">
+                <div class="divide-y divide-base-200">
                     <?php foreach ($savedWorkflows as $wf): 
                         $wf = (object) $wf;
                     ?>
-                    <div class="list-group-item d-flex justify-content-between align-items-start">
-                        <div class="flex-grow-1">
-                            <div class="d-flex align-items-center">
-                                <strong><?= e($wf->name) ?></strong>
+                    <div class="flex items-start justify-between px-5 py-3">
+                        <div class="flex-1">
+                            <div class="flex items-center">
+                                <strong class="text-sm"><?= e($wf->name) ?></strong>
                                 <?php if ($wf->is_default): ?>
-                                <span class="badge bg-success ms-2">Default</span>
+                                <span class="badge badge-success badge-sm ml-2">Default</span>
                                 <?php endif; ?>
                             </div>
-                            <small class="text-muted d-block">
-                                <i class="bi bi-person-check me-1"></i><?= e($wf->approver_name) ?>
-                            </small>
-                            <small class="text-muted d-block">
-                                <i class="bi bi-car-front me-1"></i><?= e($wf->motorpool_name) ?>
-                            </small>
+                            <p class="mt-0.5 text-xs text-base-content/60">
+                                <i class="bi bi-person-check mr-1"></i><?= e($wf->approver_name) ?>
+                            </p>
+                            <p class="text-xs text-base-content/60">
+                                <i class="bi bi-car-front mr-1"></i><?= e($wf->motorpool_name) ?>
+                            </p>
                         </div>
-                        <form method="post" class="ms-2" onsubmit="return confirm('Delete this workflow?');">
+                        <form method="post" class="ml-2" onsubmit="return confirm('Delete this workflow?');">
                             <?= csrfField() ?>
                             <input type="hidden" name="action" value="delete_workflow">
                             <input type="hidden" name="workflow_id" value="<?= $wf->id ?>">
-                            <button type="submit" class="btn btn-sm btn-outline-danger">
+                            <button type="submit" class="btn btn-outline btn-error btn-sm">
                                 <i class="bi bi-trash"></i>
                             </button>
                         </form>
@@ -706,12 +698,12 @@ require_once INCLUDES_PATH . '/header.php';
             </div>
             <?php endif; ?>
             
-            <div class="card mt-3">
-                <div class="card-body">
-                    <h6><i class="bi bi-person me-2"></i>Requester Info</h6>
-                    <p class="mb-1"><strong><?= e(currentUser()->name) ?></strong></p>
-                    <p class="mb-1 text-muted small"><?= e(currentUser()->email) ?></p>
-                    <p class="mb-0">
+            <div class="loka-card">
+                <div class="p-5">
+                    <h6 class="font-semibold"><i class="bi bi-person mr-2"></i>Requester Info</h6>
+                    <p class="mb-1 text-sm font-medium"><?= e(currentUser()->name) ?></p>
+                    <p class="mb-1 text-xs text-base-content/60"><?= e(currentUser()->email) ?></p>
+                    <p class="mb-0 text-sm">
                         <?php 
                         $dept = db()->fetch("SELECT name FROM departments WHERE id = ?", [currentUser()->department_id]);
                         echo e($dept->name ?? 'No Department');
@@ -721,19 +713,19 @@ require_once INCLUDES_PATH . '/header.php';
             </div>
             
             <!-- Selected Passengers Preview -->
-            <div class="card mt-3" id="passengerPreview">
-                <div class="card-header bg-white">
-                    <h6 class="mb-0 small fw-bold text-uppercase"><i class="bi bi-people me-2 text-primary"></i>Passenger List</h6>
+            <div class="loka-card" id="passengerPreview">
+                <div class="border-b border-base-200 px-5 py-3">
+                    <h6 class="text-xs font-bold uppercase"><i class="bi bi-people mr-2 text-primary"></i>Passenger List</h6>
                 </div>
-                <div class="card-body py-2">
-                    <ul class="list-unstyled mb-0" id="passengerList">
-                        <li class="mb-2 d-flex align-items-center">
-                            <div class="bg-primary bg-opacity-10 p-2 rounded-circle me-3">
+                <div class="p-3">
+                    <ul class="mb-0 space-y-2" id="passengerList">
+                        <li class="flex items-center">
+                            <div class="mr-3 flex h-9 w-9 items-center justify-center rounded-full bg-primary/10">
                                 <i class="bi bi-person-fill text-primary"></i>
                             </div>
                             <div>
-                                <div class="fw-bold small"><?= e(currentUser()->name) ?></div>
-                                <div class="x-small text-primary fw-medium">Requester</div>
+                                <div class="text-sm font-bold"><?= e(currentUser()->name) ?></div>
+                                <div class="text-xs font-medium text-primary">Requester</div>
                             </div>
                         </li>
                     </ul>
@@ -743,107 +735,108 @@ require_once INCLUDES_PATH . '/header.php';
     </div>
     
     <!-- Passenger Management Modal -->
-    <div class="modal fade" id="passengerModal" tabindex="-1" aria-labelledby="passengerModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content border-0 shadow-lg">
-                <div class="modal-header bg-primary text-white border-0">
-                    <h5 class="modal-title" id="passengerModalLabel"><i class="bi bi-people me-2"></i>Manage Passengers</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+    <dialog id="passengerModal" class="modal">
+        <div class="modal-box bg-base-100 p-0 max-w-lg">
+            <div class="p-5 bg-primary text-white rounded-t-xl">
+                <h5 class="font-semibold flex items-center gap-2">
+                    <i class="bi bi-people mr-2"></i>Manage Passengers
+                </h5>
+            </div>
+            <div class="p-5 space-y-4">
+                <!-- Search Box -->
+                <div>
+                    <label for="passengerSearch" class="loka-form-label font-bold">
+                        <i class="bi bi-search mr-1"></i>Search Employees
+                    </label>
+                    <input type="text" class="loka-form-input" id="passengerSearch" 
+                           placeholder="Search by name, email, or department...">
                 </div>
-                <div class="modal-body p-4">
-                    <!-- Search Box -->
-                    <div class="mb-3">
-                        <label for="passengerSearch" class="form-label fw-bold">
-                            <i class="bi bi-search me-1"></i>Search Employees
-                        </label>
-                        <input type="text" class="form-control" id="passengerSearch" 
-                               placeholder="Search by name, email, or department...">
-                    </div>
-                    
-                    <!-- Employee List with Checkboxes -->
-                    <div class="mb-4">
-                        <div class="border rounded p-2" style="max-height: 300px; overflow-y: auto;">
-                            <div id="employeeList">
-                                <?php 
-                                $selectedPassengers = post('passengers', []);
-                                foreach ($employees as $emp): 
-                                    $emp = (object) $emp;
-                                    $isSelected = in_array($emp->id, $selectedPassengers);
-                                ?>
-                                <div class="form-check py-2 border-bottom employee-item" 
-                                     data-name="<?= strtolower(e($emp->name)) ?>"
-                                     data-department="<?= strtolower(e($emp->department_name ?? '')) ?>"
-                                     data-email="<?= strtolower(e($emp->email ?? '')) ?>"
-                                     data-search-text="<?= strtolower(e($emp->name . ' ' . ($emp->department_name ?? '') . ' ' . ($emp->email ?? ''))) ?>">
-                                    <input class="form-check-input passenger-checkbox" 
-                                           type="checkbox" 
+                
+                <!-- Employee List with Checkboxes -->
+                <div>
+                    <div class="max-h-[300px] overflow-y-auto rounded-xl border border-base-300 p-2">
+                        <div id="employeeList">
+                            <?php 
+                            $selectedPassengers = post('passengers', []);
+                            foreach ($employees as $emp): 
+                                $emp = (object) $emp;
+                                $isSelected = in_array($emp->id, $selectedPassengers);
+                            ?>
+                            <label class="flex cursor-pointer items-center justify-between gap-3 border-b border-base-200 py-2 px-2 employee-item" 
+                                   data-name="<?= strtolower(e($emp->name)) ?>"
+                                   data-department="<?= strtolower(e($emp->department_name ?? '')) ?>"
+                                   data-email="<?= strtolower(e($emp->email ?? '')) ?>"
+                                   data-search-text="<?= strtolower(e($emp->name . ' ' . ($emp->department_name ?? '') . ' ' . ($emp->email ?? ''))) ?>">
+                                <div class="flex items-center gap-3">
+                                    <input type="checkbox" class="checkbox checkbox-primary checkbox-sm passenger-checkbox" 
                                            value="<?= $emp->id ?>" 
                                            id="emp_<?= $emp->id ?>"
                                            data-type="employee"
                                            data-department="<?= e($emp->department_name ?? 'No Dept') ?>"
                                            <?= $isSelected ? 'checked' : '' ?>>
-                                    <label class="form-check-label w-100" for="emp_<?= $emp->id ?>">
-                                        <div class="d-flex justify-content-between align-items-center">
-                                            <div>
-                                                <div class="fw-medium"><?= e($emp->name) ?></div>
-                                                <small class="text-muted"><?= e($emp->department_name ?? 'No Department') ?></small>
-                                            </div>
-                                            <i class="bi bi-person-fill text-secondary"></i>
-                                        </div>
-                                    </label>
+                                    <div>
+                                        <div class="text-sm font-medium"><?= e($emp->name) ?></div>
+                                        <div class="text-xs text-base-content/60"><?= e($emp->department_name ?? 'No Department') ?></div>
+                                    </div>
                                 </div>
-                                <?php endforeach; ?>
-                            </div>
-                            <div id="noEmployeesFound" class="text-center text-muted py-4 d-none">
-                                <i class="bi bi-search display-6 d-block mb-2"></i>
-                                <p class="mb-0">No employees found matching your search</p>
-                            </div>
+                                <i class="bi bi-person-fill text-base-content/40"></i>
+                            </label>
+                            <?php endforeach; ?>
                         </div>
-                    </div>
-                    
-                    <!-- Add Guest Name -->
-                    <div class="mb-4">
-                        <label for="guestName" class="form-label fw-bold">
-                            <i class="bi bi-person-plus me-1"></i>Add Guest Name
-                        </label>
-                        <div class="input-group">
-                            <input type="text" class="form-control" id="guestName" 
-                                   placeholder="Enter guest name...">
-                            <button type="button" class="btn btn-outline-primary" id="addGuestBtn">
-                                <i class="bi bi-plus-lg me-1"></i>Add Guest
-                            </button>
+                        <div id="noEmployeesFound" class="hidden py-8 text-center text-base-content/50">
+                            <i class="bi bi-search mb-2 block text-4xl"></i>
+                            <p class="mb-0 text-sm">No employees found matching your search</p>
                         </div>
-                        <small class="text-muted">Add external guests who are not employees</small>
-                    </div>
-                    
-                    <!-- Selected Passengers List -->
-                    <div>
-                        <h6 class="small fw-bold text-uppercase text-muted border-bottom pb-2 mb-3">
-                            <i class="bi bi-list-check me-1"></i>Selected Passengers (<span id="selectedCount">0</span>)
-                        </h6>
-                        <div class="border rounded p-2" style="max-height: 250px; overflow-y: auto;">
-                            <ul class="list-unstyled mb-0" id="selectedPassengerList">
-                                <!-- Populated by JS -->
-                            </ul>
-                            <div id="noSelectedPassengers" class="text-center text-muted py-3">
-                                <i class="bi bi-info-circle me-1"></i>No passengers selected yet
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Hidden inputs for form submission -->
-                    <div id="passengerInputs" style="display: none;">
-                        <!-- Will be populated by JS before form submission -->
                     </div>
                 </div>
-                <div class="modal-footer border-0 p-4 pt-0">
-                    <button type="button" class="btn btn-primary w-100 py-2 rounded-3" data-bs-dismiss="modal">
-                        Confirm Selection
-                    </button>
+                
+                <!-- Add Guest Name -->
+                <div>
+                    <label for="guestName" class="loka-form-label font-bold">
+                        <i class="bi bi-person-plus mr-1"></i>Add Guest Name
+                    </label>
+                    <div class="flex gap-2">
+                        <input type="text" class="loka-form-input flex-1" id="guestName" 
+                               placeholder="Enter guest name...">
+                        <button type="button" class="btn btn-outline btn-primary" id="addGuestBtn">
+                            <i class="bi bi-plus-lg mr-1"></i>Add Guest
+                        </button>
+                    </div>
+                    <p class="mt-1 text-xs text-base-content/60">Add external guests who are not employees</p>
+                </div>
+                
+                <!-- Selected Passengers List -->
+                <div>
+                    <h6 class="mb-3 border-b border-base-200 pb-2 text-xs font-bold uppercase text-base-content/60">
+                        <i class="bi bi-list-check mr-1"></i>Selected Passengers (<span id="selectedCount">0</span>)
+                    </h6>
+                    <div class="max-h-[250px] overflow-y-auto rounded-xl border border-base-300 p-2">
+                        <ul class="mb-0 space-y-2" id="selectedPassengerList">
+                            <!-- Populated by JS -->
+                        </ul>
+                        <div id="noSelectedPassengers" class="py-4 text-center text-base-content/50">
+                            <i class="bi bi-info-circle mr-1"></i>No passengers selected yet
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Hidden inputs for form submission -->
+                <div id="passengerInputs" class="hidden">
+                    <!-- Will be populated by JS before form submission -->
                 </div>
             </div>
+            <div class="p-5 border-t border-base-200">
+                <form method="dialog">
+                    <button type="submit" class="btn btn-primary w-full rounded-xl py-2.5">
+                        Confirm Selection
+                    </button>
+                </form>
+            </div>
         </div>
-    </div>
+        <form method="dialog" class="modal-backdrop">
+            <button type="submit">close</button>
+        </form>
+    </dialog>
 </div>
 
 <?php 
@@ -1273,7 +1266,7 @@ ob_start();
                 toast.style.zIndex = '9999';
                 toast.innerHTML = `
                     ${message}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    <button type="button" class="btn-close" onclick="this.closest('.alert').remove()"></button>
                 `;
                 document.body.appendChild(toast);
                 

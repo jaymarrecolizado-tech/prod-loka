@@ -96,94 +96,107 @@ $pageTitle = 'Edit Vehicle';
 require_once INCLUDES_PATH . '/header.php';
 ?>
 
-<div class="container-fluid py-4">
+<div class="loka-page">
     <div class="mb-4">
-        <h4 class="mb-1">Edit Vehicle</h4>
-        <nav aria-label="breadcrumb">
-            <ol class="breadcrumb mb-0">
-                <li class="breadcrumb-item"><a href="<?= APP_URL ?>">Dashboard</a></li>
-                <li class="breadcrumb-item"><a href="<?= APP_URL ?>/?page=vehicles">Vehicles</a></li>
-                <li class="breadcrumb-item active">Edit</li>
-            </ol>
-        </nav>
+        <h2 class="text-xl font-semibold mb-1">Edit Vehicle</h2>
+        <div class="text-sm text-base-content/60">
+            <a href="<?= APP_URL ?>" class="hover:text-primary">Dashboard</a>
+            <span class="mx-1">/</span>
+            <a href="<?= APP_URL ?>/?page=vehicles" class="hover:text-primary">Vehicles</a>
+            <span class="mx-1">/</span>
+            <span>Edit</span>
+        </div>
     </div>
     
-    <div class="row">
-        <div class="col-lg-8">
-            <div class="card">
-                <div class="card-header"><h5 class="mb-0"><i class="bi bi-pencil me-2"></i>Edit Vehicle</h5></div>
-                <div class="card-body">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div class="lg:col-span-2">
+            <div class="loka-card">
+                <div class="p-4 border-b border-base-200">
+                    <h3 class="text-base font-semibold flex items-center gap-2">
+                        <i class="bi bi-pencil"></i>Edit Vehicle
+                    </h3>
+                </div>
+                <div class="p-4">
                     <?php if (!empty($errors)): ?>
-                    <div class="alert alert-danger"><ul class="mb-0"><?php foreach ($errors as $e): ?><li><?= e($e) ?></li><?php endforeach; ?></ul></div>
+                    <div class="alert alert-error mb-4">
+                        <ul class="list-disc list-inside">
+                            <?php foreach ($errors as $err): ?>
+                            <li><?= e($err) ?></li>
+                            <?php endforeach; ?>
+                        </ul>
+                    </div>
                     <?php endif; ?>
                     
                     <form method="POST">
                         <?= csrfField() ?>
-                        <div class="row g-3">
-                            <div class="col-md-6">
-                                <label class="form-label">Plate Number <span class="text-danger">*</span></label>
-                                <input type="text" class="form-control" name="plate_number" value="<?= e(post('plate_number', $vehicle->plate_number)) ?>" required>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="loka-form-label">Plate Number <span class="text-error">*</span></label>
+                                <input type="text" class="input input-bordered w-full" name="plate_number" value="<?= e(post('plate_number', $vehicle->plate_number)) ?>" required>
                             </div>
-                            <div class="col-md-6">
-                                <label class="form-label">Vehicle Type</label>
-                                <select class="form-select" name="vehicle_type_id">
+                            <div>
+                                <label class="loka-form-label">Vehicle Type</label>
+                                <select class="select select-bordered w-full" name="vehicle_type_id">
                                     <?php foreach ($vehicleTypes as $type): ?>
                                     <option value="<?= $type->id ?>" <?= (post('vehicle_type_id', $vehicle->vehicle_type_id) == $type->id) ? 'selected' : '' ?>><?= e($type->name) ?></option>
                                     <?php endforeach; ?>
                                 </select>
                             </div>
-                            <div class="col-md-4">
-                                <label class="form-label">Make <span class="text-danger">*</span></label>
-                                <input type="text" class="form-control" name="make" value="<?= e(post('make', $vehicle->make)) ?>" required>
+                            <div>
+                                <label class="loka-form-label">Make <span class="text-error">*</span></label>
+                                <input type="text" class="input input-bordered w-full" name="make" value="<?= e(post('make', $vehicle->make)) ?>" required>
                             </div>
-                            <div class="col-md-4">
-                                <label class="form-label">Model <span class="text-danger">*</span></label>
-                                <input type="text" class="form-control" name="model" value="<?= e(post('model', $vehicle->model)) ?>" required>
+                            <div>
+                                <label class="loka-form-label">Model <span class="text-error">*</span></label>
+                                <input type="text" class="input input-bordered w-full" name="model" value="<?= e(post('model', $vehicle->model)) ?>" required>
                             </div>
-                            <div class="col-md-4">
-                                <label class="form-label">Year</label>
-                                <input type="text" class="form-control" name="year" value="<?= e(post('year', $vehicle->year)) ?>">
+                            <div>
+                                <label class="loka-form-label">Year</label>
+                                <input type="text" class="input input-bordered w-full" name="year" value="<?= e(post('year', $vehicle->year)) ?>">
                             </div>
-                            <div class="col-md-3">
-                                <label class="form-label">Color</label>
-                                <input type="text" class="form-control" name="color" value="<?= e(post('color', $vehicle->color)) ?>">
+                            <div>
+                                <label class="loka-form-label">Color</label>
+                                <input type="text" class="input input-bordered w-full" name="color" value="<?= e(post('color', $vehicle->color)) ?>">
                             </div>
-                            <div class="col-md-3">
-                                <label class="form-label">Fuel Type</label>
-                                <select class="form-select" name="fuel_type">
+                            <div>
+                                <label class="loka-form-label">Fuel Type</label>
+                                <select class="select select-bordered w-full" name="fuel_type">
                                     <option value="gasoline" <?= post('fuel_type', $vehicle->fuel_type) === 'gasoline' ? 'selected' : '' ?>>Gasoline</option>
                                     <option value="diesel" <?= post('fuel_type', $vehicle->fuel_type) === 'diesel' ? 'selected' : '' ?>>Diesel</option>
                                     <option value="electric" <?= post('fuel_type', $vehicle->fuel_type) === 'electric' ? 'selected' : '' ?>>Electric</option>
                                     <option value="hybrid" <?= post('fuel_type', $vehicle->fuel_type) === 'hybrid' ? 'selected' : '' ?>>Hybrid</option>
                                 </select>
                             </div>
-                            <div class="col-md-3">
-                                <label class="form-label">Transmission</label>
-                                <select class="form-select" name="transmission">
+                            <div>
+                                <label class="loka-form-label">Transmission</label>
+                                <select class="select select-bordered w-full" name="transmission">
                                     <option value="automatic" <?= post('transmission', $vehicle->transmission) === 'automatic' ? 'selected' : '' ?>>Automatic</option>
                                     <option value="manual" <?= post('transmission', $vehicle->transmission) === 'manual' ? 'selected' : '' ?>>Manual</option>
                                 </select>
                             </div>
-                            <div class="col-md-3">
-                                <label class="form-label">Status</label>
-                                <select class="form-select" name="status">
+                            <div>
+                                <label class="loka-form-label">Status</label>
+                                <select class="select select-bordered w-full" name="status">
                                     <?php foreach (VEHICLE_STATUS_LABELS as $key => $info): ?>
                                     <option value="<?= $key ?>" <?= post('status', $vehicle->status) === $key ? 'selected' : '' ?>><?= e($info['label']) ?></option>
                                     <?php endforeach; ?>
                                 </select>
                             </div>
-                            <div class="col-md-4">
-                                <label class="form-label">Mileage (km)</label>
-                                <input type="number" class="form-control" name="mileage" value="<?= e(post('mileage', $vehicle->mileage)) ?>" min="0">
+                            <div>
+                                <label class="loka-form-label">Mileage (km)</label>
+                                <input type="number" class="input input-bordered w-full" name="mileage" value="<?= e(post('mileage', $vehicle->mileage)) ?>" min="0">
                             </div>
-                            <div class="col-12">
-                                <label class="form-label">Notes</label>
-                                <textarea class="form-control" name="notes" rows="2" maxlength="500"><?= e(post('notes', $vehicle->notes)) ?></textarea>
+                            <div class="md:col-span-2">
+                                <label class="loka-form-label">Notes</label>
+                                <textarea class="textarea textarea-bordered w-full" name="notes" rows="2" maxlength="500"><?= e(post('notes', $vehicle->notes)) ?></textarea>
                             </div>
                         </div>
-                        <hr class="my-4">
-                        <button type="submit" class="btn btn-primary"><i class="bi bi-check-lg me-1"></i>Save Changes</button>
-                        <a href="<?= APP_URL ?>/?page=vehicles" class="btn btn-outline-secondary">Cancel</a>
+                        <div class="border-t border-base-200 mt-4 pt-4 flex gap-2">
+                            <button type="submit" class="loka-btn-primary">
+                                <i class="bi bi-check-lg mr-1"></i>Save Changes
+                            </button>
+                            <a href="<?= APP_URL ?>/?page=vehicles" class="loka-btn-secondary">Cancel</a>
+                        </div>
                     </form>
                 </div>
             </div>

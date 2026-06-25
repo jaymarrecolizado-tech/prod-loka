@@ -233,282 +233,296 @@ $defaultDate = date('Y-m-d');
 require_once INCLUDES_PATH . '/header.php';
 ?>
 
-<div class="container-fluid py-4">
-    <div class="row justify-content-center">
-        <div class="col-lg-9 col-xl-8">
+<div class="loka-page">
+    <div class="max-w-3xl mx-auto">
 
-            <!-- Page Header -->
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <div>
-                    <h4 class="mb-1"><i class="bi bi-fuel-pump me-2"></i><?= $pageTitle ?></h4>
-                    <nav aria-label="breadcrumb">
-                        <ol class="breadcrumb mb-0">
-                            <li class="breadcrumb-item"><a href="<?= APP_URL ?>">Dashboard</a></li>
-                            <li class="breadcrumb-item"><a href="<?= APP_URL ?>/?page=gas-vouchers">Gas Vouchers</a></li>
-                            <li class="breadcrumb-item active"><?= $pageTitle ?></li>
-                        </ol>
-                    </nav>
+        <!-- Page Header -->
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+            <div>
+                <h1 class="text-2xl font-bold flex items-center gap-2">
+                    <i class="bi bi-fuel-pump"></i><?= $pageTitle ?>
+                </h1>
+                <div class="text-sm text-base-content/60 mt-1">
+                    <a href="<?= APP_URL ?>" class="link link-primary">Dashboard</a>
+                    <span class="mx-1">/</span>
+                    <a href="<?= APP_URL ?>/?page=gas-vouchers" class="link link-primary">Gas Vouchers</a>
+                    <span class="mx-1">/</span>
+                    <span><?= $pageTitle ?></span>
                 </div>
-                <a href="<?= APP_URL ?>/?page=gas-vouchers" class="btn btn-outline-secondary">
-                    <i class="bi bi-arrow-left me-1"></i>Back
-                </a>
             </div>
-
-            <?php if (!empty($errors)): ?>
-            <div class="alert alert-danger">
-                <ul class="mb-0">
-                    <?php foreach ($errors as $err): ?>
-                    <li><?= e($err) ?></li>
-                    <?php endforeach; ?>
-                </ul>
-            </div>
-            <?php endif; ?>
-
-            <form method="POST" id="voucherForm">
-                <?= csrfField() ?>
-
-                <!-- Voucher Info Card -->
-                <div class="card mb-4">
-                    <div class="card-header bg-primary text-white">
-                        <h6 class="mb-0"><i class="bi bi-info-circle me-2"></i>Voucher Information</h6>
-                    </div>
-                    <div class="card-body">
-                        <div class="row g-3">
-                            <?php if ($isEdit): ?>
-                            <div class="col-md-6">
-                                <label class="form-label fw-semibold">Voucher No.</label>
-                                <input type="text" class="form-control" value="<?= e($voucher->voucher_no) ?>" disabled>
-                            </div>
-                            <?php endif; ?>
-                            <div class="col-md-<?= $isEdit ? '6' : '4' ?>">
-                                <label class="form-label fw-semibold">Request Date <span class="text-danger">*</span></label>
-                                <input type="date" name="request_date" class="form-control"
-                                       value="<?= e($d ? $d->request_date : $defaultDate) ?>" required>
-                            </div>
-                            <div class="col-md-<?= $isEdit ? '12' : '8' ?>">
-                                <label class="form-label fw-semibold">Gas Station <span class="text-danger">*</span></label>
-                                <select name="gas_station" class="form-select" required>
-                                    <option value="">-- Select Gas Station --</option>
-                                    <?php
-                                    $stations = ['Petromar Trade and Service Center', 'Queensforth Corporation'];
-                                    $currentStation = $d?->gas_station ?? '';
-                                    foreach ($stations as $st):
-                                    ?>
-                                    <option value="<?= e($st) ?>" <?= $currentStation === $st ? 'selected' : '' ?>><?= e($st) ?></option>
-                                    <?php endforeach; ?>
-                                </select>
-                                <div class="form-text">Select the gas station where the voucher will be used.</div>
-                            </div>
-                            <?php if (!$isEdit): ?>
-                            <div class="col-md-6">
-                                <label class="form-label fw-semibold">Motorpool Head</label>
-                                <select name="requested_reviewer_id" class="form-select">
-                                    <option value="">-- Auto-assign --</option>
-                                    <?php foreach ($motorpoolHeads as $mp): ?>
-                                    <option value="<?= $mp->id ?>"><?= e($mp->name) ?></option>
-                                    <?php endforeach; ?>
-                                </select>
-                                <div class="form-text">Select a preferred reviewer (optional)</div>
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label fw-semibold">Chief Admin & Finance</label>
-                                <select name="requested_approver_id" class="form-select">
-                                    <option value="">-- Auto-assign --</option>
-                                    <?php foreach ($chiefFinanceUsers as $cf): ?>
-                                    <option value="<?= $cf->id ?>"><?= e($cf->name) ?></option>
-                                    <?php endforeach; ?>
-                                </select>
-                                <div class="form-text">Select a preferred approver (optional)</div>
-                            </div>
-                            <?php endif; ?>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Vehicle & Driver Card -->
-                <div class="card mb-4">
-                    <div class="card-header bg-secondary text-white">
-                        <h6 class="mb-0"><i class="bi bi-car-front me-2"></i>Vehicle & Driver</h6>
-                    </div>
-                    <div class="card-body">
-                        <div class="row g-3">
-                            <div class="col-md-6">
-                                <label class="form-label fw-semibold">Driver / Bearer <span class="text-danger">*</span></label>
-                                <input type="text" name="driver_name" class="form-control"
-                                       list="driverList"
-                                       placeholder="Select or type full name"
-                                       value="<?= e($d?->driver_name ?? '') ?>" required>
-                                <datalist id="driverList">
-                                    <?php foreach ($driversList as $drv): ?>
-                                    <option value="<?= e($drv->name) ?>">
-                                    <?php endforeach; ?>
-                                </datalist>
-                                <div class="form-text">Select an existing driver or type a name manually if they're not listed.</div>
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label fw-semibold">Vehicle Plate Number <span class="text-danger">*</span></label>
-                                <input type="text" name="vehicle_plate" class="form-control"
-                                       list="plateList"
-                                       placeholder="e.g., SJN 940"
-                                       value="<?= e($d?->vehicle_plate ?? '') ?>" required>
-                                <datalist id="plateList">
-                                    <?php foreach ($vehicles as $veh): ?>
-                                    <option value="<?= e($veh->plate_number) ?>">
-                                    <?php endforeach; ?>
-                                </datalist>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Fuel/Items Card -->
-                <div class="card mb-4">
-                    <div class="card-header bg-warning text-dark">
-                        <h6 class="mb-0"><i class="bi bi-fuel-pump me-2"></i>Fuel / Articles Requested</h6>
-                    </div>
-                    <div class="card-body">
-                        <div class="row g-3">
-                            <div class="col-md-4">
-                                <label class="form-label fw-semibold">Fuel Type <span class="text-danger">*</span></label>
-                                <select name="fuel_type" class="form-select" required>
-                                    <option value="Gasoline" <?= ($d?->fuel_type ?? 'Diesel') === 'Gasoline' ? 'selected' : '' ?>>Gasoline</option>
-                                    <option value="Diesel" <?= ($d?->fuel_type ?? 'Diesel') === 'Diesel' ? 'selected' : '' ?>>Diesel</option>
-                                </select>
-                            </div>
-                            <div class="col-md-8">
-                                <label class="form-label fw-semibold">Quantity <span class="text-danger">*</span></label>
-                                <?php
-                                    // Determine initial mode from existing data
-                                    $initMode = 'liters';
-                                    $initQty  = 20;
-                                    if ($d) {
-                                        if ($d->unit === 'FULL TANK' || $d->quantity == 0) {
-                                            $initMode = 'full';
-                                        } else {
-                                            $initQty = $d->quantity ? (float)$d->quantity : 20;
-                                        }
-                                    }
-                                ?>
-                                <!-- Hidden mode field -->
-                                <input type="hidden" name="quantity_mode" id="quantityMode" value="<?= $initMode ?>">
-                                <input type="hidden" name="unit" id="unitHidden" value="<?= $initMode === 'full' ? 'FULL TANK' : 'Liters' ?>">
-
-                                <!-- Toggle buttons -->
-                                <div class="btn-group w-100 mb-2" role="group" id="qtyToggleGroup">
-                                    <button type="button" id="btnFullTank"
-                                            class="btn <?= $initMode === 'full' ? 'btn-warning' : 'btn-outline-warning' ?> fw-semibold"
-                                            onclick="setQtyMode('full')">
-                                        <i class="bi bi-fuel-pump-fill me-1"></i>Full Tank
-                                    </button>
-                                    <button type="button" id="btnLiters"
-                                            class="btn <?= $initMode === 'liters' ? 'btn-primary' : 'btn-outline-primary' ?> fw-semibold"
-                                            onclick="setQtyMode('liters')">
-                                        <i class="bi bi-123 me-1"></i>Specify Liters
-                                    </button>
-                                </div>
-
-                                <!-- Numeric input (shown only in 'liters' mode) -->
-                                <div id="litersInputWrap" style="<?= $initMode === 'full' ? 'display:none;' : '' ?>">
-                                    <div class="input-group">
-                                        <input type="number" name="quantity" id="quantityInput"
-                                               class="form-control"
-                                               step="0.01" min="0.01"
-                                               placeholder="20"
-                                               value="<?= e($initMode === 'liters' ? $initQty : 20) ?>">
-                                        <span class="input-group-text">liters</span>
-                                    </div>
-                                    <div class="form-text">Default: 20 liters. Enter the exact amount needed.</div>
-                                </div>
-
-                                <!-- Full Tank indicator (shown only in 'full' mode) -->
-                                <div id="fullTankIndicator" style="<?= $initMode === 'full' ? '' : 'display:none;' ?>">
-                                    <div class="alert alert-warning py-2 mb-0 d-flex align-items-center gap-2">
-                                        <i class="bi bi-fuel-pump-fill fs-5"></i>
-                                        <span><strong>Full Tank</strong> — Fill the vehicle to full capacity.</span>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-12 mt-3">
-                                <hr>
-                                <label class="form-label fw-semibold">Other Articles / Particulars (Optional)</label>
-                                <div class="row g-2">
-                                    <div class="col-md-3">
-                                        <input type="number" name="other_qty" class="form-control" step="0.01" min="0.01" placeholder="Qty" value="<?= e($d?->other_qty ?? '') ?>">
-                                    </div>
-                                    <div class="col-md-3">
-                                        <input type="text" name="other_unit" class="form-control" placeholder="Unit" value="<?= e($d?->other_unit ?? '') ?>">
-                                    </div>
-                                    <div class="col-md-6">
-                                        <input type="text" name="other_items" class="form-control" placeholder="e.g., Engine Oil, Brake Fluid" value="<?= e($d?->other_items ?? '') ?>">
-                                    </div>
-                                </div>
-                                <div class="form-text">Specify any additional items needing separate quantity and unit on the voucher.</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Fund & Purpose Card -->
-                <div class="card mb-4">
-                    <div class="card-header bg-info text-white">
-                        <h6 class="mb-0"><i class="bi bi-clipboard-data me-2"></i>Fund Source & Purpose</h6>
-                    </div>
-                    <div class="card-body">
-                        <div class="row g-3">
-                            <div class="col-md-6">
-                                <label class="form-label fw-semibold">Fund Source <span class="text-danger">*</span></label>
-                                <input type="text" name="fund_source" class="form-control"
-                                       list="fundList"
-                                       placeholder="e.g., Free WiFi, GASS, ELGU"
-                                       value="<?= e($d?->fund_source ?? '') ?>" required>
-                                <datalist id="fundList">
-                                    <option value="GASS">
-                                    <option value="Free WiFi">
-                                    <option value="ELGU">
-                                    <option value="ILCDB">
-                                    <option value="DRRM/GECS">
-                                    <option value="DTC/Tech4ED">
-                                    <option value="PNPKI">
-                                    <option value="IIDB">
-                                    <option value="NBP/GovNet">
-                                    <option value="GENERAL FUNDS">
-                                    <option value="Cybersecurity">
-                                    <option value="eGOV">
-                                    <option value="GOVNET">
-                                </datalist>
-                                <div class="form-text">The project/program the fuel is derived from.</div>
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label fw-semibold">Purpose <span class="text-danger">*</span></label>
-                                <textarea name="purpose" class="form-control" rows="3"
-                                          placeholder="Describe the purpose of this fuel request..."
-                                          required maxlength="1000"><?= e($d?->purpose ?? '') ?></textarea>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Action Buttons -->
-                <div class="d-flex gap-2 justify-content-end mb-4">
-                    <a href="<?= APP_URL ?>/?page=gas-vouchers<?= $isEdit ? '&action=view&id=' . $voucherId : '' ?>" class="btn btn-outline-secondary">
-                        <i class="bi bi-x-lg me-1"></i>Cancel
-                    </a>
-                    <?php if ($isEdit && in_array($voucher->status, ['pending_review', 'pending_approval'])): ?>
-                        <button type="submit" name="form_action" value="save" class="btn btn-primary">
-                            <i class="bi bi-save me-1"></i>Save Corrections
-                        </button>
-                    <?php else: ?>
-                        <button type="submit" name="form_action" value="save_draft" class="btn btn-outline-primary">
-                            <i class="bi bi-floppy me-1"></i>Save as Draft
-                        </button>
-                        <button type="submit" name="form_action" value="submit" class="btn btn-success">
-                            <i class="bi bi-send me-1"></i>Submit for Review
-                        </button>
-                    <?php endif; ?>
-                </div>
-            </form>
-
+            <a href="<?= APP_URL ?>/?page=gas-vouchers" class="loka-btn loka-btn-secondary">
+                <i class="bi bi-arrow-left me-1"></i>Back
+            </a>
         </div>
+
+        <?php if (!empty($errors)): ?>
+        <div class="alert alert-error mb-6">
+            <ul class="mb-0 list-disc list-inside">
+                <?php foreach ($errors as $err): ?>
+                <li><?= e($err) ?></li>
+                <?php endforeach; ?>
+            </ul>
+        </div>
+        <?php endif; ?>
+
+        <form method="POST" id="voucherForm">
+            <?= csrfField() ?>
+
+            <!-- Voucher Info Card -->
+            <div class="loka-card mb-6">
+                <div class="loka-card-header bg-primary text-primary-content">
+                    <h3 class="loka-card-title"><i class="bi bi-info-circle me-2"></i>Voucher Information</h3>
+                </div>
+                <div class="loka-card-body">
+                    <div class="grid grid-cols-1 md:grid-cols-12 gap-4">
+                        <?php if ($isEdit): ?>
+                        <div class="md:col-span-6">
+                            <label class="label label-text text-xs">Voucher No.</label>
+                            <input type="text" class="input input-bordered w-full" value="<?= e($voucher->voucher_no) ?>" disabled>
+                        </div>
+                        <?php endif; ?>
+                        <div class="md:col-span-<?= $isEdit ? '6' : '4' ?>">
+                            <label class="label label-text text-xs">Request Date <span class="text-error">*</span></label>
+                            <input type="date" name="request_date" class="input input-bordered w-full"
+                                   value="<?= e($d ? $d->request_date : $defaultDate) ?>" required>
+                        </div>
+                        <div class="md:col-span-<?= $isEdit ? '12' : '8' ?>">
+                            <label class="label label-text text-xs">Gas Station <span class="text-error">*</span></label>
+                            <select name="gas_station" class="select select-bordered w-full" required>
+                                <option value="">-- Select Gas Station --</option>
+                                <?php
+                                $stations = ['Petromar Trade and Service Center', 'Queensforth Corporation'];
+                                $currentStation = $d?->gas_station ?? '';
+                                foreach ($stations as $st):
+                                ?>
+                                <option value="<?= e($st) ?>" <?= $currentStation === $st ? 'selected' : '' ?>><?= e($st) ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                            <label class="label">
+                                <span class="label-text-alt text-xs text-base-content/50">Select the gas station where the voucher will be used.</span>
+                            </label>
+                        </div>
+                        <?php if (!$isEdit): ?>
+                        <div class="md:col-span-6">
+                            <label class="label label-text text-xs">Motorpool Head</label>
+                            <select name="requested_reviewer_id" class="select select-bordered w-full">
+                                <option value="">-- Auto-assign --</option>
+                                <?php foreach ($motorpoolHeads as $mp): ?>
+                                <option value="<?= $mp->id ?>"><?= e($mp->name) ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                            <label class="label">
+                                <span class="label-text-alt text-xs text-base-content/50">Select a preferred reviewer (optional)</span>
+                            </label>
+                        </div>
+                        <div class="md:col-span-6">
+                            <label class="label label-text text-xs">Chief Admin & Finance</label>
+                            <select name="requested_approver_id" class="select select-bordered w-full">
+                                <option value="">-- Auto-assign --</option>
+                                <?php foreach ($chiefFinanceUsers as $cf): ?>
+                                <option value="<?= $cf->id ?>"><?= e($cf->name) ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                            <label class="label">
+                                <span class="label-text-alt text-xs text-base-content/50">Select a preferred approver (optional)</span>
+                            </label>
+                        </div>
+                        <?php endif; ?>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Vehicle & Driver Card -->
+            <div class="loka-card mb-6">
+                <div class="loka-card-header bg-secondary text-secondary-content">
+                    <h3 class="loka-card-title"><i class="bi bi-car-front me-2"></i>Vehicle & Driver</h3>
+                </div>
+                <div class="loka-card-body">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="label label-text text-xs">Driver / Bearer <span class="text-error">*</span></label>
+                            <input type="text" name="driver_name" class="input input-bordered w-full"
+                                   list="driverList"
+                                   placeholder="Select or type full name"
+                                   value="<?= e($d?->driver_name ?? '') ?>" required>
+                            <datalist id="driverList">
+                                <?php foreach ($driversList as $drv): ?>
+                                <option value="<?= e($drv->name) ?>">
+                                <?php endforeach; ?>
+                            </datalist>
+                            <label class="label">
+                                <span class="label-text-alt text-xs text-base-content/50">Select an existing driver or type a name manually if they're not listed.</span>
+                            </label>
+                        </div>
+                        <div>
+                            <label class="label label-text text-xs">Vehicle Plate Number <span class="text-error">*</span></label>
+                            <input type="text" name="vehicle_plate" class="input input-bordered w-full"
+                                   list="plateList"
+                                   placeholder="e.g., SJN 940"
+                                   value="<?= e($d?->vehicle_plate ?? '') ?>" required>
+                            <datalist id="plateList">
+                                <?php foreach ($vehicles as $veh): ?>
+                                <option value="<?= e($veh->plate_number) ?>">
+                                <?php endforeach; ?>
+                            </datalist>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Fuel/Items Card -->
+            <div class="loka-card mb-6">
+                <div class="loka-card-header bg-warning text-dark">
+                    <h3 class="loka-card-title"><i class="bi bi-fuel-pump me-2"></i>Fuel / Articles Requested</h3>
+                </div>
+                <div class="loka-card-body">
+                    <div class="grid grid-cols-1 md:grid-cols-12 gap-4">
+                        <div class="md:col-span-4">
+                            <label class="label label-text text-xs">Fuel Type <span class="text-error">*</span></label>
+                            <select name="fuel_type" class="select select-bordered w-full" required>
+                                <option value="Gasoline" <?= ($d?->fuel_type ?? 'Diesel') === 'Gasoline' ? 'selected' : '' ?>>Gasoline</option>
+                                <option value="Diesel" <?= ($d?->fuel_type ?? 'Diesel') === 'Diesel' ? 'selected' : '' ?>>Diesel</option>
+                            </select>
+                        </div>
+                        <div class="md:col-span-8">
+                            <label class="label label-text text-xs">Quantity <span class="text-error">*</span></label>
+                            <?php
+                                // Determine initial mode from existing data
+                                $initMode = 'liters';
+                                $initQty  = 20;
+                                if ($d) {
+                                    if ($d->unit === 'FULL TANK' || $d->quantity == 0) {
+                                        $initMode = 'full';
+                                    } else {
+                                        $initQty = $d->quantity ? (float)$d->quantity : 20;
+                                    }
+                                }
+                            ?>
+                            <!-- Hidden mode field -->
+                            <input type="hidden" name="quantity_mode" id="quantityMode" value="<?= $initMode ?>">
+                            <input type="hidden" name="unit" id="unitHidden" value="<?= $initMode === 'full' ? 'FULL TANK' : 'Liters' ?>">
+
+                            <!-- Toggle buttons -->
+                            <div class="btn-group w-full mb-2" role="group" id="qtyToggleGroup">
+                                <button type="button" id="btnFullTank"
+                                        class="btn <?= $initMode === 'full' ? 'btn-warning' : 'btn-outline-warning' ?> font-semibold flex-1"
+                                        onclick="setQtyMode('full')">
+                                    <i class="bi bi-fuel-pump-fill me-1"></i>Full Tank
+                                </button>
+                                <button type="button" id="btnLiters"
+                                        class="btn <?= $initMode === 'liters' ? 'btn-primary' : 'btn-outline-primary' ?> font-semibold flex-1"
+                                        onclick="setQtyMode('liters')">
+                                    <i class="bi bi-123 me-1"></i>Specify Liters
+                                </button>
+                            </div>
+
+                            <!-- Numeric input (shown only in 'liters' mode) -->
+                            <div id="litersInputWrap" style="<?= $initMode === 'full' ? 'display:none;' : '' ?>">
+                                <div class="join w-full">
+                                    <input type="number" name="quantity" id="quantityInput"
+                                           class="input input-bordered join-item flex-1"
+                                           step="0.01" min="0.01"
+                                           placeholder="20"
+                                           value="<?= e($initMode === 'liters' ? $initQty : 20) ?>">
+                                    <span class="join-item btn btn-disabled">liters</span>
+                                </div>
+                                <label class="label">
+                                    <span class="label-text-alt text-xs text-base-content/50">Default: 20 liters. Enter the exact amount needed.</span>
+                                </label>
+                            </div>
+
+                            <!-- Full Tank indicator (shown only in 'full' mode) -->
+                            <div id="fullTankIndicator" style="<?= $initMode === 'full' ? '' : 'display:none;' ?>">
+                                <div class="alert alert-warning text-sm flex items-center gap-2">
+                                    <i class="bi bi-fuel-pump-fill text-lg"></i>
+                                    <span><strong>Full Tank</strong> — Fill the vehicle to full capacity.</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="md:col-span-12 mt-2">
+                            <hr class="border-base-300">
+                            <label class="label label-text text-xs">Other Articles / Particulars (Optional)</label>
+                            <div class="grid grid-cols-1 md:grid-cols-12 gap-2">
+                                <div class="md:col-span-3">
+                                    <input type="number" name="other_qty" class="input input-bordered input-sm w-full" step="0.01" min="0.01" placeholder="Qty" value="<?= e($d?->other_qty ?? '') ?>">
+                                </div>
+                                <div class="md:col-span-3">
+                                    <input type="text" name="other_unit" class="input input-bordered input-sm w-full" placeholder="Unit" value="<?= e($d?->other_unit ?? '') ?>">
+                                </div>
+                                <div class="md:col-span-6">
+                                    <input type="text" name="other_items" class="input input-bordered input-sm w-full" placeholder="e.g., Engine Oil, Brake Fluid" value="<?= e($d?->other_items ?? '') ?>">
+                                </div>
+                            </div>
+                            <label class="label">
+                                <span class="label-text-alt text-xs text-base-content/50">Specify any additional items needing separate quantity and unit on the voucher.</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Fund & Purpose Card -->
+            <div class="loka-card mb-6">
+                <div class="loka-card-header bg-info text-info-content">
+                    <h3 class="loka-card-title"><i class="bi bi-clipboard-data me-2"></i>Fund Source & Purpose</h3>
+                </div>
+                <div class="loka-card-body">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="label label-text text-xs">Fund Source <span class="text-error">*</span></label>
+                            <input type="text" name="fund_source" class="input input-bordered w-full"
+                                   list="fundList"
+                                   placeholder="e.g., Free WiFi, GASS, ELGU"
+                                   value="<?= e($d?->fund_source ?? '') ?>" required>
+                            <datalist id="fundList">
+                                <option value="GASS">
+                                <option value="Free WiFi">
+                                <option value="ELGU">
+                                <option value="ILCDB">
+                                <option value="DRRM/GECS">
+                                <option value="DTC/Tech4ED">
+                                <option value="PNPKI">
+                                <option value="IIDB">
+                                <option value="NBP/GovNet">
+                                <option value="GENERAL FUNDS">
+                                <option value="Cybersecurity">
+                                <option value="eGOV">
+                                <option value="GOVNET">
+                            </datalist>
+                            <label class="label">
+                                <span class="label-text-alt text-xs text-base-content/50">The project/program the fuel is derived from.</span>
+                            </label>
+                        </div>
+                        <div>
+                            <label class="label label-text text-xs">Purpose <span class="text-error">*</span></label>
+                            <textarea name="purpose" class="textarea textarea-bordered w-full" rows="3"
+                                      placeholder="Describe the purpose of this fuel request..."
+                                      required maxlength="1000"><?= e($d?->purpose ?? '') ?></textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="flex flex-wrap gap-2 justify-end mb-6">
+                <a href="<?= APP_URL ?>/?page=gas-vouchers<?= $isEdit ? '&action=view&id=' . $voucherId : '' ?>" class="loka-btn loka-btn-secondary">
+                    <i class="bi bi-x-lg me-1"></i>Cancel
+                </a>
+                <?php if ($isEdit && in_array($voucher->status, ['pending_review', 'pending_approval'])): ?>
+                    <button type="submit" name="form_action" value="save" class="loka-btn loka-btn-primary">
+                        <i class="bi bi-save me-1"></i>Save Corrections
+                    </button>
+                <?php else: ?>
+                    <button type="submit" name="form_action" value="save_draft" class="loka-btn loka-btn-outline-primary">
+                        <i class="bi bi-floppy me-1"></i>Save as Draft
+                    </button>
+                    <button type="submit" name="form_action" value="submit" class="loka-btn loka-btn-success">
+                        <i class="bi bi-send me-1"></i>Submit for Review
+                    </button>
+                <?php endif; ?>
+            </div>
+        </form>
+
     </div>
 </div>
 

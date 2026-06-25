@@ -79,69 +79,54 @@ if (isAdmin() || isMotorpool() || isChiefAdminFinance()) {
 require_once INCLUDES_PATH . '/header.php';
 ?>
 
-<div class="container-fluid py-4">
+<div class="loka-page">
 
     <!-- Page Header -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
         <div>
-            <h4 class="mb-1"><i class="bi bi-fuel-pump me-2"></i>Gas Vouchers</h4>
-            <nav aria-label="breadcrumb">
-                <ol class="breadcrumb mb-0">
-                    <li class="breadcrumb-item"><a href="<?= APP_URL ?>">Dashboard</a></li>
-                    <li class="breadcrumb-item active">Gas Vouchers</li>
-                </ol>
-            </nav>
+            <h1 class="text-2xl font-bold flex items-center gap-2">
+                <i class="bi bi-fuel-pump"></i>Gas Vouchers
+            </h1>
+            <div class="text-sm text-base-content/60 mt-1">
+                <a href="<?= APP_URL ?>" class="link link-primary">Dashboard</a>
+                <span class="mx-1">/</span>
+                <span>Gas Vouchers</span>
+            </div>
         </div>
-        <a href="<?= APP_URL ?>/?page=gas-vouchers&action=create" class="btn btn-primary">
+        <a href="<?= APP_URL ?>/?page=gas-vouchers&action=create" class="loka-btn loka-btn-primary">
             <i class="bi bi-plus-lg me-1"></i>New Gas Voucher
         </a>
     </div>
 
     <!-- Summary Cards -->
-    <div class="row g-3 mb-4">
-        <div class="col-6 col-md-3">
-            <div class="card border-0 shadow-sm h-100">
-                <div class="card-body text-center">
-                    <div class="fs-2 fw-bold text-warning"><?= $counts['pending_review'] ?? 0 ?></div>
-                    <small class="text-muted">Pending Review</small>
-                </div>
-            </div>
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+        <div class="stat bg-base-100 rounded-box shadow-sm border border-base-200">
+            <div class="stat-title">Pending Review</div>
+            <div class="stat-value text-warning"><?= $counts['pending_review'] ?? 0 ?></div>
         </div>
-        <div class="col-6 col-md-3">
-            <div class="card border-0 shadow-sm h-100">
-                <div class="card-body text-center">
-                    <div class="fs-2 fw-bold text-info"><?= $counts['pending_approval'] ?? 0 ?></div>
-                    <small class="text-muted">Pending Approval</small>
-                </div>
-            </div>
+        <div class="stat bg-base-100 rounded-box shadow-sm border border-base-200">
+            <div class="stat-title">Pending Approval</div>
+            <div class="stat-value text-info"><?= $counts['pending_approval'] ?? 0 ?></div>
         </div>
-        <div class="col-6 col-md-3">
-            <div class="card border-0 shadow-sm h-100">
-                <div class="card-body text-center">
-                    <div class="fs-2 fw-bold text-success"><?= $counts['approved'] ?? 0 ?></div>
-                    <small class="text-muted">Approved</small>
-                </div>
-            </div>
+        <div class="stat bg-base-100 rounded-box shadow-sm border border-base-200">
+            <div class="stat-title">Approved</div>
+            <div class="stat-value text-success"><?= $counts['approved'] ?? 0 ?></div>
         </div>
-        <div class="col-6 col-md-3">
-            <div class="card border-0 shadow-sm h-100">
-                <div class="card-body text-center">
-                    <div class="fs-2 fw-bold text-secondary"><?= array_sum($counts) ?></div>
-                    <small class="text-muted">Total Vouchers</small>
-                </div>
-            </div>
+        <div class="stat bg-base-100 rounded-box shadow-sm border border-base-200">
+            <div class="stat-title">Total Vouchers</div>
+            <div class="stat-value text-secondary"><?= array_sum($counts) ?></div>
         </div>
     </div>
 
     <!-- Filters -->
-    <div class="card table-card mb-4">
-        <div class="card-body">
-            <form method="GET" class="row g-3 align-items-end">
+    <div class="loka-card mb-6">
+        <div class="loka-card-body">
+            <form method="GET" class="flex flex-wrap items-end gap-3">
                 <input type="hidden" name="page" value="gas-vouchers">
 
-                <div class="col-12 col-md-2">
-                    <label class="form-label">Status</label>
-                    <select name="status" class="form-select form-select-sm">
+                <div class="w-full sm:w-auto">
+                    <label class="label label-text text-xs">Status</label>
+                    <select name="status" class="select select-bordered select-sm w-full sm:w-40">
                         <option value="">All</option>
                         <option value="draft" <?= $statusFilter === 'draft' ? 'selected' : '' ?>>Draft</option>
                         <option value="pending_review" <?= $statusFilter === 'pending_review' ? 'selected' : '' ?>>Pending Review</option>
@@ -152,47 +137,47 @@ require_once INCLUDES_PATH . '/header.php';
                     </select>
                 </div>
 
-                <div class="col-12 col-md-3">
-                    <label class="form-label">Search</label>
-                    <input type="text" name="search" class="form-control form-control-sm"
+                <div class="w-full sm:w-auto sm:flex-1 sm:max-w-xs">
+                    <label class="label label-text text-xs">Search</label>
+                    <input type="text" name="search" class="input input-bordered input-sm w-full"
                            placeholder="Voucher no, plate, driver, purpose..."
                            value="<?= e($searchFilter) ?>">
                 </div>
 
-                <div class="col-6 col-md-2">
-                    <label class="form-label">Date From</label>
-                    <input type="date" name="date_from" class="form-control form-control-sm" value="<?= e($dateFrom) ?>">
+                <div class="w-auto">
+                    <label class="label label-text text-xs">Date From</label>
+                    <input type="date" name="date_from" class="input input-bordered input-sm w-40" value="<?= e($dateFrom) ?>">
                 </div>
-                <div class="col-6 col-md-2">
-                    <label class="form-label">Date To</label>
-                    <input type="date" name="date_to" class="form-control form-control-sm" value="<?= e($dateTo) ?>">
+                <div class="w-auto">
+                    <label class="label label-text text-xs">Date To</label>
+                    <input type="date" name="date_to" class="input input-bordered input-sm w-40" value="<?= e($dateTo) ?>">
                 </div>
 
-                <div class="col-12 col-md-3">
-                    <button type="submit" class="btn btn-sm btn-outline-primary me-2">
+                <div class="flex gap-2">
+                    <button type="submit" class="loka-btn loka-btn-primary loka-btn-sm">
                         <i class="bi bi-search me-1"></i>Filter
                     </button>
-                    <a href="<?= APP_URL ?>/?page=gas-vouchers" class="btn btn-sm btn-outline-secondary">Reset</a>
+                    <a href="<?= APP_URL ?>/?page=gas-vouchers" class="loka-btn loka-btn-secondary loka-btn-sm">Reset</a>
                 </div>
             </form>
         </div>
     </div>
 
     <!-- Vouchers Table -->
-    <div class="card table-card">
-        <div class="card-body">
+    <div class="loka-card">
+        <div class="loka-card-body">
             <?php if (empty($vouchers)): ?>
             <div class="empty-state">
-                <i class="bi bi-fuel-pump fs-1 text-muted"></i>
-                <h5 class="mt-3">No gas vouchers found</h5>
-                <p class="text-muted">Create your first gas voucher request to get started.</p>
-                <a href="<?= APP_URL ?>/?page=gas-vouchers&action=create" class="btn btn-primary">
+                <i class="bi bi-fuel-pump text-5xl text-base-content/20"></i>
+                <h3 class="mt-3 text-lg font-semibold">No gas vouchers found</h3>
+                <p class="text-sm text-base-content/50">Create your first gas voucher request to get started.</p>
+                <a href="<?= APP_URL ?>/?page=gas-vouchers&action=create" class="loka-btn loka-btn-primary mt-2">
                     <i class="bi bi-plus-lg me-1"></i>New Gas Voucher
                 </a>
             </div>
             <?php else: ?>
-            <div class="table-responsive">
-                <table class="table table-hover data-table">
+            <div class="loka-table-responsive">
+                <table class="loka-table data-table">
                     <thead>
                         <tr>
                             <th>Voucher No.</th>
@@ -210,29 +195,29 @@ require_once INCLUDES_PATH . '/header.php';
                         <?php foreach ($vouchers as $v): ?>
                         <tr>
                             <td>
-                                <strong class="text-primary"><?= e($v->voucher_no) ?></strong>
+                                <div class="font-bold text-primary"><?= e($v->voucher_no) ?></div>
                                 <?php if (!isAdmin() && !isApprover() && !isMotorpool() && !isChiefAdminFinance()): ?>
-                                <br><small class="text-muted">by Me</small>
+                                <div class="text-xs text-base-content/50">by Me</div>
                                 <?php else: ?>
-                                <br><small class="text-muted"><?= e($v->requester_name) ?></small>
+                                <div class="text-xs text-base-content/50"><?= e($v->requester_name) ?></div>
                                 <?php endif; ?>
                             </td>
                             <td>
                                 <?= e(date('M d, Y', strtotime($v->request_date))) ?>
                                 <?php if ($v->date_withdrawn): ?>
-                                <br><small class="text-muted">Withdrawn: <?= e(date('M d, Y', strtotime($v->date_withdrawn))) ?></small>
+                                <div class="text-xs text-base-content/50">Withdrawn: <?= e(date('M d, Y', strtotime($v->date_withdrawn))) ?></div>
                                 <?php endif; ?>
                             </td>
                             <td>
-                                <div class="fw-semibold"><?= e($v->driver_name) ?></div>
-                                <span class="badge bg-light text-dark"><?= e($v->vehicle_plate) ?></span>
+                                <div class="font-semibold"><?= e($v->driver_name) ?></div>
+                                <span class="badge badge-neutral text-xs"><?= e($v->vehicle_plate) ?></span>
                             </td>
                             <td>
                                 <div><?= e($v->quantity) ?> <?= e($v->unit) ?></div>
-                                <small class="text-muted"><?= e($v->fuel_type) ?></small>
+                                <div class="text-xs text-base-content/50"><?= e($v->fuel_type) ?></div>
                             </td>
                             <td>
-                                <span class="badge bg-secondary"><?= e($v->fund_source) ?></span>
+                                <span class="badge badge-secondary"><?= e($v->fund_source) ?></span>
                             </td>
                             <td>
                                 <span title="<?= e($v->purpose) ?>"><?= e(mb_substr($v->purpose, 0, 40)) ?><?= strlen($v->purpose) > 40 ? '…' : '' ?></span>
@@ -244,31 +229,31 @@ require_once INCLUDES_PATH . '/header.php';
                                 <?php if ($v->total_cost): ?>
                                 ₱<?= number_format($v->total_cost, 2) ?>
                                 <?php else: ?>
-                                <span class="text-muted">—</span>
+                                <span class="text-base-content/30">—</span>
                                 <?php endif; ?>
                             </td>
                             <td>
-                                <div class="btn-group">
+                                <div class="flex flex-wrap gap-1">
                                     <a href="<?= APP_URL ?>/?page=gas-vouchers&action=view&id=<?= $v->id ?>"
-                                       class="btn btn-sm btn-outline-primary" title="View">
+                                       class="loka-btn loka-btn-sm loka-btn-ghost text-primary" title="View">
                                         <i class="bi bi-eye"></i>
                                     </a>
                                     <?php if ($v->status === 'draft' && ($v->requested_by_user_id == userId() || isAdmin())): ?>
                                     <a href="<?= APP_URL ?>/?page=gas-vouchers&action=edit&id=<?= $v->id ?>"
-                                       class="btn btn-sm btn-outline-secondary" title="Edit">
+                                       class="loka-btn loka-btn-sm loka-btn-ghost" title="Edit">
                                         <i class="bi bi-pencil"></i>
                                     </a>
                                     <?php endif; ?>
                                     <?php if ($v->status === 'approved'): ?>
                                     <a href="<?= APP_URL ?>/?page=gas-vouchers&action=print&id=<?= $v->id ?>"
-                                       class="btn btn-sm btn-outline-success" title="Print Voucher" target="_blank">
+                                       class="loka-btn loka-btn-sm loka-btn-ghost text-success" title="Print Voucher" target="_blank">
                                         <i class="bi bi-printer"></i>
                                     </a>
                                     <?php endif; ?>
                                     <?php if (($v->status === 'pending_review' && (isMotorpool() || isApprover() || isAdmin() || isChiefAdminFinance())) ||
                                               ($v->status === 'pending_approval' && (isAdmin() || isMotorpool() || isChiefAdminFinance()))): ?>
                                     <a href="<?= APP_URL ?>/?page=gas-vouchers&action=approve&id=<?= $v->id ?>"
-                                       class="btn btn-sm btn-outline-warning" title="Process">
+                                       class="loka-btn loka-btn-sm loka-btn-ghost text-warning" title="Process">
                                         <i class="bi bi-check-circle"></i>
                                     </a>
                                     <?php endif; ?>

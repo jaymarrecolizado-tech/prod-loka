@@ -363,120 +363,104 @@ $approvedTickets = count(array_filter(fn($t) => $t->status === 'approved', $tick
 require_once INCLUDES_PATH . '/header.php';
 ?>
 
-<div class="container-fluid py-4">
+<div class="px-4 py-4">
     <!-- Page Header -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="flex justify-between items-center mb-4">
         <div>
-            <h1 class="mb-1"><i class="bi bi-file-earmark-text me-2"></i>Trip Tickets</h1>
-            <p class="text-muted mb-0">Manage trip completion tickets and documentation</p>
+            <h1 class="text-2xl font-bold mb-1"><i class="bi bi-file-earmark-text mr-2"></i>Trip Tickets</h1>
+            <p class="text-gray-500 mb-0">Manage trip completion tickets and documentation</p>
         </div>
         <div>
             <?php if (isGuard()): ?>
-                <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#createTicketModal">
-                    <i class="bi bi-plus-circle me-1"></i>Create Trip Ticket
+                <button type="button" class="btn btn-success" onclick="document.getElementById('createTicketModal').showModal()">
+                    <i class="bi bi-plus-circle mr-1"></i>Create Trip Ticket
                 </button>
             <?php endif; ?>
             <?php if (isMotorpool()): ?>
-                <a href="?page=reports" class="btn btn-outline-secondary">
-                    <i class="bi bi-bar-chart me-1"></i>View Reports
+                <a href="?page=reports" class="btn btn-outline">
+                    <i class="bi bi-bar-chart mr-1"></i>View Reports
                 </a>
             <?php endif; ?>
         </div>
     </div>
 
     <!-- Statistics Cards -->
-    <div class="row g-4 mb-4">
-        <div class="col-md-3">
-            <div class="card border-0 shadow-sm">
-                <div class="card-body">
-                    <div class="d-flex align-items-center">
-                        <div class="flex-shrink-0">
-                            <div class="bg-primary bg-opacity-10 rounded p-3">
-                                <i class="bi bi-file-earmark text-primary fs-4"></i>
-                            </div>
-                        </div>
-                        <div class="flex-grow-1 ms-3">
-                            <h6 class="text-muted mb-1">Total Tickets</h6>
-                            <h3 class="mb-0"><?= $totalTickets ?></h3>
-                        </div>
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
+        <div class="bg-base-100 rounded-lg shadow-sm p-5">
+            <div class="flex items-center">
+                <div class="flex-shrink-0">
+                    <div class="bg-primary/10 rounded-lg p-3">
+                        <i class="bi bi-file-earmark text-primary text-xl"></i>
                     </div>
+                </div>
+                <div class="flex-grow ml-3">
+                    <h6 class="text-gray-500 mb-1">Total Tickets</h6>
+                    <h3 class="text-2xl font-bold mb-0"><?= $totalTickets ?></h3>
                 </div>
             </div>
         </div>
-        <div class="col-md-3">
-            <div class="card border-0 shadow-sm">
-                <div class="card-body">
-                    <div class="d-flex align-items-center">
-                        <div class="flex-shrink-0">
-                            <div class="bg-warning bg-opacity-10 rounded p-3">
-                                <i class="bi bi-clock-history text-warning fs-4"></i>
-                            </div>
-                        </div>
-                        <div class="flex-grow-1 ms-3">
-                            <h6 class="text-muted mb-1">Pending Review</h6>
-                            <h3 class="mb-0"><?= $pendingTickets ?></h3>
-                        </div>
+        <div class="bg-base-100 rounded-lg shadow-sm p-5">
+            <div class="flex items-center">
+                <div class="flex-shrink-0">
+                    <div class="bg-warning/10 rounded-lg p-3">
+                        <i class="bi bi-clock-history text-warning text-xl"></i>
                     </div>
+                </div>
+                <div class="flex-grow ml-3">
+                    <h6 class="text-gray-500 mb-1">Pending Review</h6>
+                    <h3 class="text-2xl font-bold mb-0"><?= $pendingTickets ?></h3>
                 </div>
             </div>
         </div>
-        <div class="col-md-3">
-            <div class="card border-0 shadow-sm">
-                <div class="card-body">
-                    <div class="d-flex align-items-center">
-                        <div class="flex-shrink-0">
-                            <div class="bg-success bg-opacity-10 rounded p-3">
-                                <i class="bi bi-check-circle text-success fs-4"></i>
-                            </div>
-                        </div>
-                        <div class="flex-grow-1 ms-3">
-                            <h6 class="text-muted mb-1">Approved</h6>
-                            <h3 class="mb-0"><?= $approvedTickets ?></h3>
-                        </div>
+        <div class="bg-base-100 rounded-lg shadow-sm p-5">
+            <div class="flex items-center">
+                <div class="flex-shrink-0">
+                    <div class="bg-success/10 rounded-lg p-3">
+                        <i class="bi bi-check-circle text-success text-xl"></i>
                     </div>
+                </div>
+                <div class="flex-grow ml-3">
+                    <h6 class="text-gray-500 mb-1">Approved</h6>
+                    <h3 class="text-2xl font-bold mb-0"><?= $approvedTickets ?></h3>
                 </div>
             </div>
         </div>
-        <div class="col-md-3">
-            <div class="card border-0 shadow-sm">
-                <div class="card-body">
-                    <div class="d-flex align-items-center">
-                        <div class="flex-shrink-0">
-                            <div class="bg-info bg-opacity-10 rounded p-3">
-                                <i class="bi bi-info-circle text-info fs-4"></i>
-                            </div>
-                        </div>
-                        <div class="flex-grow-1 ms-3">
-                            <h6 class="text-muted mb-1">Action Required</h6>
-                            <h3 class="mb-0 small"><?= $totalTickets - $pendingTickets - $approvedTickets ?></h3>
-                        </div>
+        <div class="bg-base-100 rounded-lg shadow-sm p-5">
+            <div class="flex items-center">
+                <div class="flex-shrink-0">
+                    <div class="bg-info/10 rounded-lg p-3">
+                        <i class="bi bi-info-circle text-info text-xl"></i>
                     </div>
+                </div>
+                <div class="flex-grow ml-3">
+                    <h6 class="text-gray-500 mb-1">Action Required</h6>
+                    <h3 class="text-2xl font-bold mb-0 small"><?= $totalTickets - $pendingTickets - $approvedTickets ?></h3>
                 </div>
             </div>
         </div>
     </div>
 
     <!-- Filters -->
-    <div class="card mb-4">
-        <div class="card-body">
-            <form method="GET" class="row g-3">
-                <div class="col-md-3">
-                    <label class="form-label">Status</label>
-                    <select class="form-select" name="status">
+    <div class="bg-base-100 rounded-lg shadow-sm mb-4">
+        <div class="p-5">
+            <form method="GET" class="grid grid-cols-1 md:grid-cols-12 gap-3">
+                <div class="md:col-span-3">
+                    <label class="label"><span class="label-text">Status</span></label>
+                    <select class="select select-bordered w-full" name="status">
                         <option value="">All Status</option>
                         <option value="submitted" <?= $statusFilter === 'submitted' ? 'selected' : '' ?>>Pending Review</option>
                         <option value="reviewed" <?= $statusFilter === 'reviewed' ? 'selected' : '' ?>>Returned for Review</option>
                         <option value="approved" <?= $statusFilter === 'approved' ? 'selected' : '' ?>>Approved</option>
                     </select>
                 </div>
-                <div class="col-md-6">
-                    <label class="form-label">Search</label>
-                    <input type="text" class="form-control" name="search" value="<?= e($search) ?>" placeholder="Search by destination, driver, request ID...">
+                <div class="md:col-span-6">
+                    <label class="label"><span class="label-text">Search</span></label>
+                    <input type="text" class="input input-bordered w-full" name="search" value="<?= e($search) ?>" placeholder="Search by destination, driver, request ID...">
                 </div>
-                <div class="col-md-3">
-                    <label class="form-label">&nbsp;</label>
-                    <button type="submit" class="btn btn-primary w-100">
-                        <i class="bi bi-search me-1"></i>Filter
+                <div class="md:col-span-3">
+                    <label class="label"><span class="label-text">&nbsp;</span></label>
+                    <button type="submit" class="btn btn-primary w-full">
+                        <i class="bi bi-search mr-1"></i>Filter
                     </button>
                 </div>
             </form>
@@ -484,22 +468,22 @@ require_once INCLUDES_PATH . '/header.php';
     </div>
 
     <!-- Trip Tickets Table -->
-    <div class="card">
-        <div class="card-header d-flex justify-content-between align-items-center">
-            <h5 class="mb-0">Trip Tickets (<?= count($tickets) ?>)</h5>
-            <button type="button" class="btn btn-outline-primary btn-sm" onclick="exportTickets()">
-                <i class="bi bi-file-earmark-excel me-1"></i>Export
+    <div class="bg-base-100 rounded-lg shadow-sm">
+        <div class="border-b border-base-200 p-4 flex justify-between items-center">
+            <h5 class="font-bold mb-0">Trip Tickets (<?= count($tickets) ?>)</h5>
+            <button type="button" class="btn btn-outline btn-sm" onclick="exportTickets()">
+                <i class="bi bi-file-earmark-excel mr-1"></i>Export
             </button>
         </div>
-        <div class="card-body">
+        <div class="p-5">
             <?php if (empty($tickets)): ?>
                 <div class="text-center py-5">
-                    <i class="bi bi-inbox fs-1 text-muted"></i>
-                    <p class="text-muted mt-3">No trip tickets found.</p>
+                    <i class="bi bi-inbox text-5xl text-gray-400"></i>
+                    <p class="text-gray-500 mt-3">No trip tickets found.</p>
                 </div>
             <?php else: ?>
-                <div class="table-responsive">
-                    <table class="table table-hover align-middle" id="ticketsTable">
+                <div class="overflow-x-auto">
+                    <table class="table table-zebra w-full" id="ticketsTable">
                         <thead>
                             <tr>
                                 <th>ID</th>
@@ -521,16 +505,16 @@ require_once INCLUDES_PATH . '/header.php';
                                     <td><strong>TT-<?= $ticket->request_id ?></strong></td>
                                     <td>
                                         <small>(Ref: VRF-<?= $ticket->request_id ?>)</small><br>
-                                        <small class="text-muted"><?= e($ticket->trip_destination) ?></small>
+                                        <small class="text-gray-500"><?= e($ticket->trip_destination) ?></small>
                                     </td>
                                     <td>
                                         <?php
                                         $tripTypeColors = [
-                                            'official' => 'success',
-                                            'personal' => 'info',
-                                            'maintenance' => 'warning',
-                                            'travel_order' => 'primary',
-                                            'other' => 'secondary'
+                                            'official' => 'badge-success',
+                                            'personal' => 'badge-info',
+                                            'maintenance' => 'badge-warning',
+                                            'travel_order' => 'badge-primary',
+                                            'other' => 'badge-secondary'
                                         ];
                                         $tripTypeLabels = [
                                             'official' => 'Official Business',
@@ -539,36 +523,36 @@ require_once INCLUDES_PATH . '/header.php';
                                             'travel_order' => 'Travel Order',
                                             'other' => 'Other'
                                         ];
-                                        $color = $tripTypeColors[$ticket->trip_type] ?? 'secondary';
+                                        $color = $tripTypeColors[$ticket->trip_type] ?? 'badge-secondary';
                                         $label = $tripTypeLabels[$ticket->trip_type] ?? 'Other';
                                         // Use custom label for "Other" type
                                         if ($ticket->trip_type === 'other' && !empty($ticket->trip_type_other)) {
                                             $label = e($ticket->trip_type_other);
                                         }
                                         ?>
-                                        <span class="badge bg-<?= $color ?>">
+                                        <span class="badge <?= $color ?>">
                                             <?= $label ?>
                                         </span>
                                     </td>
                                     <td>
                                         <?php if ($ticket->driver_name): ?>
                                             <?= e($ticket->driver_name) ?><br>
-                                            <small class="text-muted"><?= e($ticket->driver_license) ?></small>
+                                            <small class="text-gray-500"><?= e($ticket->driver_license) ?></small>
                                         <?php else: ?>
-                                            <span class="text-muted">-</span>
+                                            <span class="text-gray-500">-</span>
                                         <?php endif; ?>
                                     </td>
                                     <td>
                                         <?= e($ticket->destination) ?><br>
-                                        <small class="text-muted"><?= truncate($ticket->purpose, 30) ?></small>
+                                        <small class="text-gray-500"><?= truncate($ticket->purpose, 30) ?></small>
                                     </td>
                                     <td>
                                         <small>
-                                            <i class="bi bi-calendar3 me-1"></i>
+                                            <i class="bi bi-calendar3 mr-1"></i>
                                             <?= formatDate($ticket->start_date, 'M/d') ?>
                                         </small><br>
                                         <small>
-                                            <i class="bi bi-calendar3 me-1"></i>
+                                            <i class="bi bi-calendar3 mr-1"></i>
                                             <?= formatDate($ticket->end_date, 'M/d') ?>
                                         </small>
                                     </td>
@@ -578,71 +562,71 @@ require_once INCLUDES_PATH . '/header.php';
                                         $statusIcon = '';
                                         switch ($ticket->status) {
                                             case 'submitted':
-                                                $statusClass = 'warning';
+                                                $statusClass = 'badge-warning';
                                                 $statusIcon = 'clock';
                                                 break;
                                             case 'reviewed':
-                                                $statusClass = 'info';
+                                                $statusClass = 'badge-info';
                                                 $statusIcon = 'arrow-counterclockwise';
                                                 break;
                                             case 'approved':
-                                                $statusClass = 'success';
+                                                $statusClass = 'badge-success';
                                                 $statusIcon = 'check-circle';
                                                 break;
                                         }
                                         ?>
-                                        <span class="badge bg-<?= $statusClass ?>">
-                                            <i class="bi bi-<?= $statusIcon ?> me-1"></i>
+                                        <span class="badge <?= $statusClass ?>">
+                                            <i class="bi bi-<?= $statusIcon ?> mr-1"></i>
                                             <?= ucfirst($ticket->status) ?>
                                         </span>
                                         <?php if ($ticket->reviewed_by_name): ?>
-                                            <br><small class="text-muted">by <?= e($ticket->reviewed_by_name) ?></small>
+                                            <br><small class="text-gray-500">by <?= e($ticket->reviewed_by_name) ?></small>
                                         <?php endif; ?>
                                     </td>
                                     <td>
                                         <?php
                                         $docs = [];
-                                        if ($ticket->travel_order_path) $docs[] = '<span class="badge bg-secondary">TO</span>';
-                                        if ($ticket->ob_slip_path) $docs[] = '<span class="badge bg-primary">OB</span>';
-                                        if ($ticket->other_documents_path) $docs[] = '<span class="badge bg-info">Docs</span>';
+                                        if ($ticket->travel_order_path) $docs[] = '<span class="badge badge-secondary">TO</span>';
+                                        if ($ticket->ob_slip_path) $docs[] = '<span class="badge badge-primary">OB</span>';
+                                        if ($ticket->other_documents_path) $docs[] = '<span class="badge badge-info">Docs</span>';
                                         ?>
                                         <?php if (!empty($docs)): ?>
                                             <?= implode(' ', $docs) ?>
                                         <?php else: ?>
-                                            <span class="text-muted">None</span>
+                                            <span class="text-gray-500">None</span>
                                         <?php endif; ?>
                                     </td>
                                     <td>
                                         <?php if ($ticket->has_issues): ?>
-                                            <span class="badge bg-danger">
-                                                <i class="bi bi-exclamation-triangle me-1"></i>
+                                            <span class="badge badge-error">
+                                                <i class="bi bi-exclamation-triangle mr-1"></i>
                                                 Issues
                                             </span>
                                         <?php elseif ($ticket->resolved): ?>
-                                            <span class="badge bg-success">
-                                                <i class="bi bi-check me-1"></i>
+                                            <span class="badge badge-success">
+                                                <i class="bi bi-check mr-1"></i>
                                                 Resolved
                                             </span>
                                         <?php else: ?>
-                                            <span class="text-muted">-</span>
+                                            <span class="text-gray-500">-</span>
                                         <?php endif; ?>
                                     </td>
                                     <td>
                                         <small>
-                                            <i class="bi bi-clock me-1"></i>
+                                            <i class="bi bi-clock mr-1"></i>
                                             <?= formatDateTime($ticket->created_at) ?>
                                         </small>
                                     </td>
                                     <td>
-                                        <a href="?page=trip-tickets&action=view&id=<?= $ticket->id ?>" class="btn btn-sm btn-outline-primary">
-                                            <i class="bi bi-eye me-1"></i>View
+                                        <a href="?page=trip-tickets&action=view&id=<?= $ticket->id ?>" class="btn btn-outline btn-sm">
+                                            <i class="bi bi-eye mr-1"></i>View
                                         </a>
                                         <?php if (isMotorpool() && $ticket->status === 'submitted'): ?>
-                                            <button type="button" class="btn btn-sm btn-success ms-1" onclick="approveTicket(<?= $ticket->id ?>)">
-                                                <i class="bi bi-check-lg me-1"></i>
+                                            <button type="button" class="btn btn-success btn-sm ml-1" onclick="approveTicket(<?= $ticket->id ?>)">
+                                                <i class="bi bi-check-lg mr-1"></i>
                                             </button>
-                                            <button type="button" class="btn btn-sm btn-warning ms-1" onclick="rejectTicket(<?= $ticket->id ?>)">
-                                                <i class="bi bi-x-lg me-1"></i>
+                                            <button type="button" class="btn btn-warning btn-sm ml-1" onclick="rejectTicket(<?= $ticket->id ?>)">
+                                                <i class="bi bi-x-lg mr-1"></i>
                                             </button>
                                         <?php endif; ?>
                                     </td>
@@ -658,207 +642,204 @@ require_once INCLUDES_PATH . '/header.php';
 
 <!-- Create Trip Ticket Modal (for guards) -->
 <?php if (isGuard()): ?>
-<div class="modal fade" id="createTicketModal" tabindex="-1">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">
-                    <i class="bi bi-file-earmark-plus me-2"></i>Create Trip Ticket
-                </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+<dialog id="createTicketModal" class="modal">
+    <div class="modal-box w-11/12 max-w-3xl">
+        <form method="dialog">
+            <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
+        </form>
+        <h3 class="font-bold text-lg mb-4">
+            <i class="bi bi-file-earmark-plus mr-2"></i>Create Trip Ticket
+        </h3>
+        <form id="createTicketForm" enctype="multipart/form-data">
+            <?= csrfField() ?>
+            
+            <!-- Trip Selection -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
+                <div>
+                    <label class="label"><span class="label-text">Request <span class="text-error">*</span></span></label>
+                    <select class="select select-bordered w-full" name="request_id" required>
+                        <option value="">Select completed trip...</option>
+                        <?php
+                        // Get driver's recent completed trips without tickets
+                        $completedTrips = db()->fetchAll(
+                            "SELECT r.id, r.destination, r.actual_arrival_datetime,
+                                   d.id as driver_id, u.name as driver_name
+                             FROM requests r
+                             JOIN drivers d ON r.driver_id = d.id
+                             JOIN users u ON d.user_id = u.id
+                             LEFT JOIN trip_tickets tt ON r.id = tt.request_id
+                             WHERE d.user_id = ?
+                               AND r.status = 'completed'
+                               AND r.actual_arrival_datetime IS NOT NULL
+                               AND tt.id IS NULL
+                             ORDER BY r.actual_arrival_datetime DESC
+                             LIMIT 50",
+                            [userId()]
+                        );
+                        ?>
+                        <?php foreach ($completedTrips as $trip): ?>
+                            <option value="<?= $trip->id ?>">
+                                <?= '#'.$trip->id.' - '.$trip->destination.' ('.formatDate($trip->actual_arrival_datetime, 'M/d').') ?>
+                                - <?= e($trip->driver_name) ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                    <small class="text-gray-500">Select from your recent completed trips</small>
+                </div>
+                <div>
+                    <label class="label"><span class="label-text">Trip Type <span class="text-error">*</span></span></label>
+                    <select class="select select-bordered w-full" name="trip_type" required onchange="toggleTripTypeOtherModal()">
+                        <option value="official">Official Business</option>
+                        <option value="personal">Personal</option>
+                        <option value="maintenance">Maintenance Run</option>
+                        <option value="travel_order">Travel Order</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
             </div>
-            <div class="modal-body">
-                <form id="createTicketForm" enctype="multipart/form-data">
-                    <?= csrfField() ?>
-                    
-                    <!-- Trip Selection -->
-                    <div class="row mb-3">
-                        <div class="col-md-6">
-                            <label class="form-label">Request <span class="text-danger">*</span></label>
-                            <select class="form-select" name="request_id" required>
-                                <option value="">Select completed trip...</option>
-                                <?php
-                                // Get driver's recent completed trips without tickets
-                                $completedTrips = db()->fetchAll(
-                                    "SELECT r.id, r.destination, r.actual_arrival_datetime,
-                                           d.id as driver_id, u.name as driver_name
-                                     FROM requests r
-                                     JOIN drivers d ON r.driver_id = d.id
-                                     JOIN users u ON d.user_id = u.id
-                                     LEFT JOIN trip_tickets tt ON r.id = tt.request_id
-                                     WHERE d.user_id = ?
-                                       AND r.status = 'completed'
-                                       AND r.actual_arrival_datetime IS NOT NULL
-                                       AND tt.id IS NULL
-                                     ORDER BY r.actual_arrival_datetime DESC
-                                     LIMIT 50",
-                                    [userId()]
-                                );
-                                ?>
-                                <?php foreach ($completedTrips as $trip): ?>
-                                    <option value="<?= $trip->id ?>">
-                                        <?= '#'.$trip->id.' - '.$trip->destination.' ('.formatDate($trip->actual_arrival_datetime, 'M/d').') ?>
-                                        - <?= e($trip->driver_name) ?>
-                                    </option>
-                                <?php endforeach; ?>
-                            </select>
-                            <small class="text-muted">Select from your recent completed trips</small>
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label">Trip Type <span class="text-danger">*</span></label>
-                            <select class="form-select" name="trip_type" required onchange="toggleTripTypeOtherModal()">
-                                <option value="official">Official Business</option>
-                                <option value="personal">Personal</option>
-                                <option value="maintenance">Maintenance Run</option>
-                                <option value="travel_order">Travel Order</option>
-                                <option value="other">Other</option>
-                            </select>
-                        </div>
-                    </div>
 
-                    <!-- Other Trip Type Description (shown only when Other is selected) -->
-                    <div class="row mb-3" id="tripTypeOtherRowModal" style="display: none;">
-                        <div class="col-12">
-                            <label class="form-label">Specify Trip Type <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" name="trip_type_other" placeholder="Please specify the type of trip...">
-                            <small class="text-muted">Required when "Other" is selected as trip type</small>
-                        </div>
-                    </div>
-
-                    <!-- Date & Time -->
-                    <div class="row mb-3">
-                        <div class="col-md-6">
-                            <label class="form-label">Start Date <span class="text-danger">*</span></label>
-                            <input type="datetime-local" class="form-control" name="start_date" required>
-                            <small class="text-muted">Actual departure time</small>
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label">End Date <span class="text-danger">*</span></label>
-                            <input type="datetime-local" class="form-control" name="end_date" required>
-                            <small class="text-muted">Actual arrival time</small>
-                        </div>
-                    </div>
-
-                    <!-- Destination & Purpose -->
-                    <div class="row mb-3">
-                        <div class="col-md-6">
-                            <label class="form-label">Destination <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" name="destination" required placeholder="e.g., Main Office, Warehouse">
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label">Purpose</label>
-                            <textarea class="form-control" name="purpose" rows="2" placeholder="Purpose of this trip..." maxlength="1000"></textarea>
-                        </div>
-                    </div>
-
-                    <!-- Passengers -->
-                    <div class="mb-3">
-                        <label class="form-label">Number of Passengers</label>
-                        <input type="number" class="form-control" name="passengers" min="0" value="0">
-                    </div>
-
-                    <!-- Mileage -->
-                    <div class="row mb-3">
-                        <div class="col-md-4">
-                            <label class="form-label">Start Odometer</label>
-                            <input type="number" class="form-control" name="start_mileage" placeholder="Starting reading">
-                        </div>
-                        <div class="col-md-4">
-                            <label class="form-label">End Odometer</label>
-                            <input type="number" class="form-control" name="end_mileage" placeholder="Ending reading">
-                        </div>
-                        <div class="col-md-4">
-                            <label class="form-label">Distance (km)</label>
-                            <input type="number" class="form-control" name="distance_traveled" placeholder="Auto-calculated if different">
-                        </div>
-                    </div>
-
-                    <!-- Fuel -->
-                    <div class="row mb-3">
-                        <div class="col-md-6">
-                            <label class="form-label">Fuel Consumed (L)</label>
-                            <input type="number" step="0.01" class="form-control" name="fuel_consumed" placeholder="Total liters">
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label">Fuel Cost (PHP)</label>
-                            <input type="number" step="0.01" class="form-control" name="fuel_cost" placeholder="Total cost">
-                        </div>
-                    </div>
-
-                    <!-- Documents -->
-                    <div class="row mb-3">
-                        <div class="col-md-4">
-                            <label class="form-label">Travel Order (TO)</label>
-                            <input type="file" class="form-control" name="travel_order" accept=".pdf,.jpg,.png">
-                            <small class="text-muted">Optional</small>
-                        </div>
-                        <div class="col-md-4">
-                            <label class="form-label">OB Slip</label>
-                            <input type="file" class="form-control" name="ob_slip" accept=".pdf,.jpg,.png">
-                            <small class="text-muted">Optional</small>
-                        </div>
-                        <div class="col-md-4">
-                            <label class="form-label">Other Documents</label>
-                            <input type="file" class="form-control" name="other_documents" accept=".pdf,.zip" multiple>
-                            <small class="text-muted">Optional</small>
-                        </div>
-                    </div>
-
-                    <!-- Issues -->
-                    <div class="mb-3">
-                        <div class="form-check form-switch">
-                            <input class="form-check-input" type="checkbox" name="has_issues" id="hasIssues" onchange="toggleIssuesFields()">
-                            <label class="form-check-label" for="hasIssues">Any issues or incidents?</label>
-                        </div>
-                    </div>
-
-                    <div id="issuesFields" class="mb-3" style="display: none;">
-                        <div class="row">
-                            <div class="col-md-6">
-                                <label class="form-label">Issues Description</label>
-                                <textarea class="form-control" name="issues_description" rows="2" placeholder="Describe any issues..." maxlength="500"></textarea>
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label">Resolved?</label>
-                                <select class="form-select" name="resolved">
-                                    <option value="0">No</option>
-                                    <option value="1">Yes</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="mt-2">
-                            <label class="form-label">Resolution Notes</label>
-                            <textarea class="form-control" name="resolution_notes" rows="2" placeholder="How was it resolved?" maxlength="500"></textarea>
-                        </div>
-                    </div>
-
-                    <!-- Guard Notes -->
-                    <div class="mb-3">
-                        <label class="form-label">Additional Notes</label>
-                        <textarea class="form-control" name="guard_notes" rows="3" placeholder="Any additional observations..." maxlength="500"></textarea>
-                    </div>
-
-                    <div class="alert alert-info">
-                        <i class="bi bi-info-circle me-2"></i>
-                        <strong>Note:</strong> Documents will be uploaded after creating the ticket. You can then attach TO/OB slips and other documentation.
-                    </div>
-                </form>
+            <!-- Other Trip Type Description (shown only when Other is selected) -->
+            <div class="mb-3 hidden" id="tripTypeOtherRowModal">
+                <label class="label"><span class="label-text">Specify Trip Type <span class="text-error">*</span></span></label>
+                <input type="text" class="input input-bordered w-full" name="trip_type_other" placeholder="Please specify the type of trip...">
+                <small class="text-gray-500">Required when "Other" is selected as trip type</small>
             </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-success" onclick="createTicket()">
-                    <i class="bi bi-plus-circle me-1"></i>Create Ticket
-                </button>
+
+            <!-- Date & Time -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
+                <div>
+                    <label class="label"><span class="label-text">Start Date <span class="text-error">*</span></span></label>
+                    <input type="datetime-local" class="input input-bordered w-full" name="start_date" required>
+                    <small class="text-gray-500">Actual departure time</small>
+                </div>
+                <div>
+                    <label class="label"><span class="label-text">End Date <span class="text-error">*</span></span></label>
+                    <input type="datetime-local" class="input input-bordered w-full" name="end_date" required>
+                    <small class="text-gray-500">Actual arrival time</small>
+                </div>
             </div>
+
+            <!-- Destination & Purpose -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
+                <div>
+                    <label class="label"><span class="label-text">Destination <span class="text-error">*</span></span></label>
+                    <input type="text" class="input input-bordered w-full" name="destination" required placeholder="e.g., Main Office, Warehouse">
+                </div>
+                <div>
+                    <label class="label"><span class="label-text">Purpose</span></label>
+                    <textarea class="textarea textarea-bordered w-full" name="purpose" rows="2" placeholder="Purpose of this trip..." maxlength="1000"></textarea>
+                </div>
+            </div>
+
+            <!-- Passengers -->
+            <div class="mb-3">
+                <label class="label"><span class="label-text">Number of Passengers</span></label>
+                <input type="number" class="input input-bordered w-full" name="passengers" min="0" value="0">
+            </div>
+
+            <!-- Mileage -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-3">
+                <div>
+                    <label class="label"><span class="label-text">Start Odometer</span></label>
+                    <input type="number" class="input input-bordered w-full" name="start_mileage" placeholder="Starting reading">
+                </div>
+                <div>
+                    <label class="label"><span class="label-text">End Odometer</span></label>
+                    <input type="number" class="input input-bordered w-full" name="end_mileage" placeholder="Ending reading">
+                </div>
+                <div>
+                    <label class="label"><span class="label-text">Distance (km)</span></label>
+                    <input type="number" class="input input-bordered w-full" name="distance_traveled" placeholder="Auto-calculated if different">
+                </div>
+            </div>
+
+            <!-- Fuel -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
+                <div>
+                    <label class="label"><span class="label-text">Fuel Consumed (L)</span></label>
+                    <input type="number" step="0.01" class="input input-bordered w-full" name="fuel_consumed" placeholder="Total liters">
+                </div>
+                <div>
+                    <label class="label"><span class="label-text">Fuel Cost (PHP)</span></label>
+                    <input type="number" step="0.01" class="input input-bordered w-full" name="fuel_cost" placeholder="Total cost">
+                </div>
+            </div>
+
+            <!-- Documents -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-3">
+                <div>
+                    <label class="label"><span class="label-text">Travel Order (TO)</span></label>
+                    <input type="file" class="file-input file-input-bordered w-full" name="travel_order" accept=".pdf,.jpg,.png">
+                    <small class="text-gray-500">Optional</small>
+                </div>
+                <div>
+                    <label class="label"><span class="label-text">OB Slip</span></label>
+                    <input type="file" class="file-input file-input-bordered w-full" name="ob_slip" accept=".pdf,.jpg,.png">
+                    <small class="text-gray-500">Optional</small>
+                </div>
+                <div>
+                    <label class="label"><span class="label-text">Other Documents</span></label>
+                    <input type="file" class="file-input file-input-bordered w-full" name="other_documents" accept=".pdf,.zip" multiple>
+                    <small class="text-gray-500">Optional</small>
+                </div>
+            </div>
+
+            <!-- Issues -->
+            <div class="mb-3">
+                <label class="label cursor-pointer justify-start gap-2">
+                    <input class="checkbox checkbox-primary" type="checkbox" name="has_issues" id="hasIssues" onchange="toggleIssuesFields()">
+                    <span class="label-text">Any issues or incidents?</span>
+                </label>
+            </div>
+
+            <div id="issuesFields" class="mb-3 hidden">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div>
+                        <label class="label"><span class="label-text">Issues Description</span></label>
+                        <textarea class="textarea textarea-bordered w-full" name="issues_description" rows="2" placeholder="Describe any issues..." maxlength="500"></textarea>
+                    </div>
+                    <div>
+                        <label class="label"><span class="label-text">Resolved?</span></label>
+                        <select class="select select-bordered w-full" name="resolved">
+                            <option value="0">No</option>
+                            <option value="1">Yes</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="mt-2">
+                    <label class="label"><span class="label-text">Resolution Notes</span></label>
+                    <textarea class="textarea textarea-bordered w-full" name="resolution_notes" rows="2" placeholder="How was it resolved?" maxlength="500"></textarea>
+                </div>
+            </div>
+
+            <!-- Guard Notes -->
+            <div class="mb-3">
+                <label class="label"><span class="label-text">Additional Notes</span></label>
+                <textarea class="textarea textarea-bordered w-full" name="guard_notes" rows="3" placeholder="Any additional observations..." maxlength="500"></textarea>
+            </div>
+
+            <div class="alert alert-info">
+                <i class="bi bi-info-circle mr-2"></i>
+                <strong>Note:</strong> Documents will be uploaded after creating the ticket. You can then attach TO/OB slips and other documentation.
+            </div>
+        </form>
+        <div class="modal-action">
+            <button type="button" class="btn" onclick="document.getElementById('createTicketModal').close()">Cancel</button>
+            <button type="button" class="btn btn-success" onclick="createTicket()">
+                <i class="bi bi-plus-circle mr-1"></i>Create Ticket
+            </button>
         </div>
     </div>
-</div>
+    <form method="dialog" class="modal-backdrop">
+        <button>close</button>
+    </form>
+</dialog>
 <?php endif; ?>
 
 <script type="text/javascript">
 function toggleIssuesFields() {
     const hasIssues = document.getElementById('hasIssues').checked;
-    document.getElementById('issuesFields').style.display = hasIssues ? 'block' : 'none';
+    document.getElementById('issuesFields').classList.toggle('hidden', !hasIssues);
 }
 
 function toggleTripTypeOtherModal() {
@@ -867,10 +848,10 @@ function toggleTripTypeOtherModal() {
     const otherInput = otherRow.querySelector('input[name="trip_type_other"]');
 
     if (tripTypeSelect.value === 'other') {
-        otherRow.style.display = 'block';
+        otherRow.classList.remove('hidden');
         otherInput.required = true;
     } else {
-        otherRow.style.display = 'none';
+        otherRow.classList.add('hidden');
         otherInput.required = false;
         otherInput.value = '';
     }
@@ -890,7 +871,7 @@ async function createTicket() {
         
         if (result.success) {
             // Close modal
-            bootstrap.Modal.getInstance(document.getElementById('createTicketModal')).hide();
+            document.getElementById('createTicketModal').close();
             
             // Show success message
             showAlert('success', result.message);

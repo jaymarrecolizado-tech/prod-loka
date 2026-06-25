@@ -1076,5 +1076,70 @@ Frontend builds to `assets/dist/` directory. Always run `npm run build` before d
 
 ---
 
-**Last Updated:** 2025
+## UI Modernization (Bootstrap → Tailwind/DaisyUI)
+
+### Status
+- **Bootstrap CSS/JS**: Conditionally loaded behind `UI_MODERN_ENABLED` flag (set `false` for rollback)
+- **TailwindCSS + DaisyUI**: Primary styling framework for all pages
+- **DataTable**: jQuery DataTables used globally (migration pending)
+
+### Migrated Pages (Fully Tailwind/DaisyUI)
+| Page | File | Bootstrap Classes | Notes |
+|------|------|-------------------|-------|
+| Header/Navbar | `includes/header.php` | None | DaisyUI `dropdown dropdown-end`; Bootstrap CSS/JS conditionally loaded |
+| Sidebar | `includes/sidebar.php` | None | Uses `loka-sidebar`, `loka-nav-link` |
+| Dashboard | `pages/dashboard/index.php` | None | Fully migrated |
+| Requests List | `pages/requests/index.php` | None | Fully migrated |
+| Requests View | `pages/requests/view.php` | None | Fully migrated; 3 action modals use DaisyUI `<dialog>` |
+| Requests Create | `pages/requests/create.php` | None | Fully migrated; passengerModal DaisyUI `<dialog>`, saved workflows DaisyUI dropdown |
+| Approvals View | `pages/approvals/view.php` | None | `<details>/<summary>` replaces accordion |
+| Vehicles List | `pages/vehicles/index.php` | None | Fully migrated |
+| Vehicles Edit | `pages/vehicles/edit.php` | None | Fully migrated |
+| Drivers List | `pages/drivers/index.php` | None | Fully migrated |
+| Drivers Edit | `pages/drivers/edit.php` | None | Fully migrated |
+| Guard Index | `pages/guard/index.php` | None | Fully migrated; dispatch/arrival modals DaisyUI `<dialog>` |
+| Notifications | `pages/notifications/index.php` | None | DaisyUI `dropdown dropdown-end` |
+| Gas Vouchers View | `pages/gas-vouchers/view.php` | None | Fully migrated |
+| Gas Vouchers List | `pages/gas-vouchers/index.php` | None | Fully migrated |
+| Gas Vouchers Create | `pages/gas-vouchers/create.php` | None | Fully migrated |
+| My Trip Tickets | `pages/my-trip-tickets/index.php` | None | Fully migrated |
+| Generate Summary | `pages/my-trip-tickets/generate-summary.php` | None | Fully migrated |
+| Test Travel Order | `pages/my-trip-tickets/test-travelorder.php` | None | Standalone, Tailwind CDN |
+| Summary Print | `pages/my-trip-tickets/summary-print.php` | N/A | Print template, self-contained CSS |
+| Summary Print TO | `pages/my-trip-tickets/summary-print-travelorder.php` | N/A | Print template, self-contained CSS |
+| Requests Edit | `pages/requests/edit.php` | None | Fully migrated; `<dialog>` modal |
+| Trip Tickets | `pages/trip-tickets/index.php` | None | Fully migrated; `<dialog>` modal |
+| Requests Cancel | `pages/requests/cancel.php` | None | Fully migrated |
+| Settings | `pages/settings/index.php` | None | Fully migrated |
+| Profile | `pages/profile/index.php` | None | Fully migrated |
+| Admin Clear DB | `pages/admin/clear_database.php` | None | Fully migrated |
+
+### Pages Still on Bootstrap CSS (Need Full Migration)
+(none — all pages migrated to Tailwind/DaisyUI)
+
+### Remaining Bootstrap JS Dependencies
+1. **Global DataTables**: jQuery DataTables + Bootstrap5 theme used across 7 pages (conditionally loaded behind `UI_MODERN_ENABLED`)
+2. **Bootstrap bundle JS**: Conditionally loaded behind `UI_MODERN_ENABLED` flag
+
+### Remaining Bootstrap CSS Dependencies
+(none — all pages migrated; Bootstrap CSS conditionally loaded behind `UI_MODERN_ENABLED`)
+
+### Component Classes (design-system.css)
+- `.loka-navbar`, `.loka-navbar-start`, `.loka-navbar-center`, `.loka-navbar-end`
+- `.loka-sidebar`, `.loka-sidebar-content`, `.loka-sidebar-overlay`
+- `.loka-card`, `.loka-badge`, `.loka-table`, `.loka-table-responsive`
+- `.loka-btn-primary`, `.loka-btn-secondary`, `.loka-btn-success`
+- `.loka-alert-success`, `.loka-alert-error`, `.loka-alert-warning`
+- `.loka-avatar`, `.loka-avatar-sm`, `.loka-avatar-lg`
+- `.loka-dropdown`, `.loka-dropdown-content`, `.loka-dropdown-item`
+- `.loka-modal`, `.loka-modal-box`, `.loka-modal-backdrop`
+
+### Next Steps
+1. Replace jQuery DataTables with vanilla JS or Vue `DataTable.vue`
+2. Dark mode implementation (`darkMode: 'class'` already configured in Tailwind)
+3. Remove Bootstrap CSS/JS entirely (set `UI_MODERN_ENABLED=true` permanently)
+
+---
+
+**Last Updated:** 2026-06-25
 **Application Version:** 2.5.1

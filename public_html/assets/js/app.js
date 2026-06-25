@@ -41,14 +41,14 @@ function initSidebar() {
 
   // Create overlay for mobile
   const overlay = document.createElement('div')
-  overlay.className = 'sidebar-overlay'
+  overlay.className = 'loka-sidebar-overlay'
   overlay.id = 'sidebarOverlay'
   document.body.appendChild(overlay)
 
   // Helper function to check if mobile
   const isMobileView = () => window.innerWidth < 992
 
-    if (toggleBtn && sidebar && mainContent) {
+  if (toggleBtn && sidebar && mainContent) {
     const toggleSidebar = () => {
       if (isMobileView()) {
         // Mobile: use show/hide classes with overlay
@@ -101,7 +101,7 @@ function initSidebar() {
     }
 
     // Mobile: close sidebar on link click
-    sidebar.querySelectorAll('.nav-link').forEach(link => {
+    sidebar.querySelectorAll('.loka-nav-link').forEach(link => {
       link.addEventListener('click', () => {
         if (isMobileView()) {
           sidebar.classList.remove('show')
@@ -161,7 +161,31 @@ function initDataTables() {
           '<"row"<"col-sm-12"tr>>' +
           '<"row"<"col-sm-12 col-md-5"i><"col-sm-12 col-md-7"p>>',
         order: [[0, 'desc']],
-        responsive: false,
+        responsive: {
+          details: {
+            type: 'column',
+            renderer: function (api, rowIdx, columns) {
+              var data = columns
+                .map(function (col, i) {
+                  return col.hidden
+                    ? '<li data-dt-row="' +
+                        col.rowIndex +
+                        '" data-dt-column="' +
+                        col.columnIndex +
+                        '">' +
+                        '<span class="dt-bold">' +
+                        col.title +
+                        ':</span> ' +
+                        col.data +
+                        '</li>'
+                    : ''
+                })
+                .join('')
+
+              return data ? $('<ul data-dt-row="' + rowIdx + '"/>').append(data) : false
+            },
+          },
+        },
       })
     }
   })
@@ -230,33 +254,32 @@ function initToasts() {
 }
 
 /**
- * Show toast notification
+ * Show toast notification (DaisyUI alert, no Bootstrap JS)
  */
 function showToast(message, type = 'info') {
   const toastContainer = document.getElementById('toast-container') || createToastContainer()
 
   const toast = document.createElement('div')
-  toast.className = `toast align-items-center text-white bg-${type} border-0`
+  toast.className = `alert alert-${type} shadow-lg max-w-sm animate-[fade-in_0.3s_ease-out]`
   toast.setAttribute('role', 'alert')
   toast.innerHTML = `
-        <div class="d-flex">
-            <div class="toast-body">${message}</div>
-            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
-        </div>
+        <span class="flex-1">${message}</span>
+        <button type="button" class="btn btn-sm btn-ghost" onclick="this.closest('.alert').remove()">✕</button>
     `
 
   toastContainer.appendChild(toast)
-  const bsToast = new bootstrap.Toast(toast)
-  bsToast.show()
 
-  toast.addEventListener('hidden.bs.toast', () => toast.remove())
+  setTimeout(() => {
+    toast.style.transition = 'opacity 0.3s'
+    toast.style.opacity = '0'
+    setTimeout(() => toast.remove(), 300)
+  }, 3000)
 }
 
 function createToastContainer() {
   const container = document.createElement('div')
   container.id = 'toast-container'
-  container.className = 'toast-container position-fixed top-0 end-0 p-3'
-  container.style.zIndex = '1100'
+  container.className = 'fixed top-0 right-0 z-[1100] flex flex-col gap-2 p-3'
   document.body.appendChild(container)
   return container
 }
@@ -292,11 +315,11 @@ function initFormValidation() {
 }
 
 /**
- * Initialize Dropdowns
+ * Initialize Dropdowns (DaisyUI)
  */
 function initDropdowns() {
-  // Ensure dropdown links don't navigate
-  document.querySelectorAll('[data-bs-toggle="dropdown"]').forEach(trigger => {
+  // Prevent dropdown link navigation (DaisyUI uses tabindex + CSS)
+  document.querySelectorAll('.dropdown > [tabindex]').forEach(trigger => {
     trigger.addEventListener('click', function (e) {
       e.preventDefault()
     })
