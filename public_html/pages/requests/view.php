@@ -846,7 +846,7 @@ require_once INCLUDES_PATH . '/header.php';
 
 <!-- Cancel Request Modal -->
 <?php if ($request->user_id === userId() && !in_array($request->status, [STATUS_COMPLETED, STATUS_CANCELLED])): ?>
-<dialog id="cancelRequestModal" class="modal" data-bs-backdrop="static" data-bs-keyboard="false">
+<dialog id="cancelRequestModal" class="modal">
     <div class="modal-box bg-base-100 p-0 max-w-lg border-2 border-error">
         <div class="p-6 bg-error">
             <h5 class="text-error-content font-semibold flex items-center gap-2">

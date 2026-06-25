@@ -67,94 +67,94 @@ if (!isset($availableReports[$type])) {
 require_once INCLUDES_PATH . '/header.php';
 ?>
 
-<div class="container-fluid py-4">
+<div class="container mx-auto px-4 py-4">
     <div class="mb-4">
-        <h4 class="mb-1">Export Reports</h4>
-        <nav aria-label="breadcrumb">
-            <ol class="breadcrumb mb-0">
-                <li class="breadcrumb-item"><a href="<?= APP_URL ?>">Dashboard</a></li>
-                <li class="breadcrumb-item active">Export Reports</li>
-            </ol>
-        </nav>
+        <h4 class="text-xl font-semibold mb-1">Export Reports</h4>
+        <div class="text-sm breadcrumbs">
+            <ul>
+                <li><a href="<?= APP_URL ?>">Dashboard</a></li>
+                <li class="text-base-content/50">Export Reports</li>
+            </ul>
+        </div>
     </div>
 
-    <div class="row">
-        <div class="col-lg-4">
-            <div class="card">
-                <div class="card-header">
-                    <h6 class="mb-0"><i class="bi bi-file-earmark-bar me-2"></i>Select Report</h6>
+    <div class="flex flex-col lg:flex-row gap-4">
+        <div class="lg:w-1/3">
+            <div class="bg-base-100 rounded-xl shadow">
+                <div class="border-b border-base-200 p-4">
+                    <h6 class="font-semibold m-0 flex items-center gap-2"><i class="bi bi-file-earmark-bar"></i> Select Report</h6>
                 </div>
-                <div class="list-group list-group-flush">
+                <div class="flex flex-col">
                     <?php foreach ($availableReports as $reportType => $report): ?>
                         <a href="?page=admin-reports&type=<?= $reportType ?>&start_date=<?= $startDate ?>&end_date=<?= $endDate ?>"
-                           class="list-group-item list-group-item-action d-flex align-items-center <?= $type === $reportType ? 'active' : '' ?>">
-                            <i class="bi <?= $report['icon'] ?> me-3"></i>
+                           class="flex items-center gap-3 p-3 hover:bg-base-200 transition-colors <?= $type === $reportType ? 'bg-primary text-primary-content' : '' ?>">
+                            <i class="bi <?= $report['icon'] ?>"></i>
                             <div>
-                                <div class="fw-bold"><?= e($report['title']) ?></div>
-                                <small class="text-muted"><?= e($report['description']) ?></small>
+                                <div class="font-bold"><?= e($report['title']) ?></div>
+                                <small class="<?= $type === $reportType ? 'text-primary-content/70' : 'text-base-content/50' ?>"><?= e($report['description']) ?></small>
                             </div>
                         </a>
                     <?php endforeach; ?>
                 </div>
             </div>
 
-            <div class="card mt-3">
-                <div class="card-header">
-                    <h6 class="mb-0"><i class="bi bi-calendar-range me-2"></i>Date Range</h6>
+            <div class="bg-base-100 rounded-xl shadow mt-3">
+                <div class="border-b border-base-200 p-4">
+                    <h6 class="font-semibold m-0 flex items-center gap-2"><i class="bi bi-calendar-range"></i> Date Range</h6>
                 </div>
-                <div class="card-body">
+                <div class="p-4">
                     <form method="GET" action="">
                         <input type="hidden" name="page" value="admin-reports">
                         <input type="hidden" name="type" value="<?= $type ?>">
-                        <div class="mb-3">
-                            <label class="form-label">Start Date</label>
-                            <input type="date" class="form-control" name="start_date" value="<?= e($startDate) ?>" required>
+                        <div class="form-control mb-3">
+                            <label class="label"><span class="label-text">Start Date</span></label>
+                            <input type="date" class="input input-bordered w-full" name="start_date" value="<?= e($startDate) ?>" required>
                         </div>
-                        <div class="mb-3">
-                            <label class="form-label">End Date</label>
-                            <input type="date" class="form-control" name="end_date" value="<?= e($endDate) ?>" required>
+                        <div class="form-control mb-3">
+                            <label class="label"><span class="label-text">End Date</span></label>
+                            <input type="date" class="input input-bordered w-full" name="end_date" value="<?= e($endDate) ?>" required>
                         </div>
-                        <button type="submit" class="btn btn-primary w-100">
-                            <i class="bi bi-filter me-1"></i>Apply Filter
+                        <button type="submit" class="btn btn-primary w-full">
+                            <i class="bi bi-filter"></i> Apply Filter
                         </button>
                     </form>
                 </div>
             </div>
         </div>
 
-        <div class="col-lg-8">
-            <div class="card">
-                <div class="card-header">
-                    <h6 class="mb-0">
-                        <i class="bi <?= $availableReports[$type]['icon'] ?> me-2"></i>
+        <div class="lg:w-2/3">
+            <div class="bg-base-100 rounded-xl shadow">
+                <div class="border-b border-base-200 p-4">
+                    <h6 class="font-semibold m-0 flex items-center gap-2">
+                        <i class="bi <?= $availableReports[$type]['icon'] ?>"></i>
                         <?= e($availableReports[$type]['title']) ?>
                     </h6>
                 </div>
-                <div class="card-body">
-                    <p class="text-muted"><?= e($availableReports[$type]['description']) ?></p>
+                <div class="p-4">
+                    <p class="text-base-content/50 mb-4"><?= e($availableReports[$type]['description']) ?></p>
 
-                    <div class="alert alert-info">
-                        <i class="bi bi-info-circle me-2"></i>
-                        Date Range: <strong><?= e($startDate) ?></strong> to <strong><?= e($endDate) ?></strong>
+                    <div class="alert alert-info mb-4">
+                        <i class="bi bi-info-circle"></i>
+                        <span>Date Range: <strong><?= e($startDate) ?></strong> to <strong><?= e($endDate) ?></strong></span>
                     </div>
 
-                    <hr>
+                    <hr class="border-base-200 my-4">
 
-                    <h6 class="mb-3">Download Report</h6>
-                    <div class="row g-3">
-                        <div class="col-md-6">
+                    <h6 class="font-semibold mb-3">Download Report</h6>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <div>
                             <a href="?page=export&format=csv&type=<?= $type ?>&start_date=<?= $startDate ?>&end_date=<?= $endDate ?>"
-                               class="btn btn-success btn-lg w-100">
-                                <i class="bi bi-filetype-csv me-2"></i>Download CSV
+                               class="btn btn-success btn-lg w-full">
+                                <i class="bi bi-filetype-csv"></i> Download CSV
                             </a>
-                            <small class="text-muted d-block text-center mt-1">Opens in Excel, Google Sheets</small>
+                            <small class="text-base-content/50 block text-center mt-1">Opens in Excel, Google Sheets</small>
                         </div>
-                        <div class="col-md-6">
+                        <div>
                             <a href="?page=export&format=pdf&type=<?= $type ?>&start_date=<?= $startDate ?>&end_date=<?= $endDate ?>"
-                               class="btn btn-danger btn-lg w-100">
-                                <i class="bi bi-filetype-pdf me-2"></i>Download PDF
+                               class="btn btn-error btn-lg w-full">
+                                <i class="bi bi-filetype-pdf"></i> Download PDF
                             </a>
-                            <small class="text-muted d-block text-center mt-1">Best for printing and sharing</small>
+                            <small class="text-base-content/50 block text-center mt-1">Best for printing and sharing</small>
                         </div>
                     </div>
                 </div>
@@ -171,12 +171,12 @@ require_once INCLUDES_PATH . '/header.php';
             ?>
 
             <?php if (!empty($recentExports)): ?>
-            <div class="card mt-3">
-                <div class="card-header">
-                    <h6 class="mb-0"><i class="bi bi-clock-history me-2"></i>Recent Exports</h6>
+            <div class="bg-base-100 rounded-xl shadow mt-3">
+                <div class="border-b border-base-200 p-4">
+                    <h6 class="font-semibold m-0 flex items-center gap-2"><i class="bi bi-clock-history"></i> Recent Exports</h6>
                 </div>
-                <div class="table-responsive">
-                    <table class="table table-sm mb-0">
+                <div class="overflow-x-auto">
+                    <table class="table table-sm table-zebra m-0">
                         <thead>
                             <tr>
                                 <th>Date/Time</th>
@@ -192,7 +192,7 @@ require_once INCLUDES_PATH . '/header.php';
                                     <td><?= e($export->created_at) ?></td>
                                     <td><?= e(ucfirst(str_replace('_', ' ', $export->entity_type))) ?></td>
                                     <td>
-                                        <span class="badge <?= ($details['format'] ?? 'csv') === 'pdf' ? 'bg-danger' : 'bg-success' ?>">
+                                        <span class="badge <?= ($details['format'] ?? 'csv') === 'pdf' ? 'badge-error' : 'badge-success' ?>">
                                             <?= e(strtoupper($details['format'] ?? 'csv')) ?>
                                         </span>
                                     </td>

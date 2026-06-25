@@ -6,18 +6,8 @@
     <meta name="description" content="LOKA Fleet Management System">
     <title><?= e($pageTitle ?? 'Dashboard') ?> - <?= APP_NAME ?></title>
     
-    <!-- Bootstrap 5.3 CSS (conditionally loaded) -->
-    <?php if (!UI_MODERN_ENABLED): ?>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <?php endif; ?>
-    
     <!-- Bootstrap Icons -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.2/font/bootstrap-icons.css" rel="stylesheet">
-    
-    <!-- DataTables CSS -->
-    <?php if (!UI_MODERN_ENABLED): ?>
-    <link href="https://cdn.datatables.net/1.13.7/css/dataTables.bootstrap5.min.css" rel="stylesheet">
-    <?php endif; ?>
     
     <!-- Flatpickr CSS -->
     <link href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" rel="stylesheet">
@@ -28,10 +18,8 @@
     <!-- Custom CSS -->
     <link href="<?= ASSETS_PATH ?>/css/style.css" rel="stylesheet">
 
-    <?php if (UI_MODERN_ENABLED): ?>
     <!-- Modern UI (Tailwind + DaisyUI) -->
     <?= viteEntryCssTags('app') ?>
-    <?php endif; ?>
 </head>
 <body>
     <!-- Top Navigation -->

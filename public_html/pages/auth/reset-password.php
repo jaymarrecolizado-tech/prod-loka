@@ -79,9 +79,8 @@ $pageTitle = 'Reset Password';
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= e($pageTitle) ?> - <?= APP_NAME ?></title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.2/font/bootstrap-icons.css" rel="stylesheet">
-    <link href="<?= ASSETS_PATH ?>/css/style.css" rel="stylesheet">
     <style>
         * {
             margin: 0;
@@ -538,6 +537,14 @@ $pageTitle = 'Reset Password';
                 animation: none;
             }
         }
+
+        /* Utility replacements */
+        .d-flex { display: flex; }
+        .align-items-center { align-items: center; }
+        .mb-0 { margin-bottom: 0; }
+        .mb-2 { margin-bottom: 0.5rem; }
+        .me-2 { margin-right: 0.5rem; }
+        .ps-4 { padding-left: 1.5rem; }
     </style>
 </head>
 <body class="reset-password-page">
@@ -672,7 +679,7 @@ $pageTitle = 'Reset Password';
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
     <script>
         (function() {
             // Toggle Password Visibility

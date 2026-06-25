@@ -73,7 +73,6 @@ $counts = [
 ];
 
 function isAdmin() {
-    // Check if current user is admin (implement based on your auth system)
     if (!isset($_SESSION['role'])) {
         return false;
     }
@@ -81,130 +80,84 @@ function isAdmin() {
 }
 ?>
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Clear Requests & Notifications - LOKA Fleet Management</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.2/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@4.12.23/dist/full.min.css" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-        }
-        .card {
-            border: none;
-            border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-        }
-        .warning-banner {
-            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-            color: white;
-            padding: 20px;
-            border-radius: 10px;
-            margin-bottom: 30px;
-        }
-        .count-display {
-            font-size: 2.5rem;
-            font-weight: bold;
-            color: #667eea;
-        }
-        .step-indicator {
-            display: flex;
-            justify-content: center;
-            margin-bottom: 30px;
-        }
-        .step {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background: #e0e0e0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 10px;
-            font-weight: bold;
-            color: #666;
-        }
-        .step.active {
-            background: #667eea;
-            color: white;
-        }
-        .step.completed {
-            background: #28a745;
-            color: white;
-        }
+        body { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; }
     </style>
 </head>
 <body>
-    <div class="container mt-5 mb-5">
-        <div class="row justify-content-center">
-            <div class="col-md-10">
-                <div class="card p-4">
-                    <div class="text-center mb-4">
-                        <h1 class="display-6 fw-bold text-primary">🗑️ Clear Database</h1>
-                        <p class="text-muted">Requests & Notifications Management</p>
+    <div class="container mx-auto px-4 py-10 max-w-5xl">
+        <div class="flex justify-center">
+            <div class="w-full">
+                <div class="card bg-base-100 shadow-xl p-6">
+                    <div class="text-center mb-6">
+                        <h1 class="text-3xl font-bold text-primary flex items-center justify-center gap-2">
+                            <i class="bi bi-trash"></i> Clear Database
+                        </h1>
+                        <p class="text-base-content/50">Requests &amp; Notifications Management</p>
                     </div>
 
                     <?php if ($message): ?>
-                        <div class="alert alert-<?= $messageType === 'success' ? 'success' : 'danger' ?> alert-dismissible" role="alert">
-                            <?= htmlspecialchars($message) ?>
-                            <button type="button" class="btn-close" onclick="this.closest('.alert').remove()"></button>
+                        <div class="alert <?= $messageType === 'success' ? 'alert-success' : 'alert-error' ?> mb-4">
+                            <span><?= htmlspecialchars($message) ?></span>
+                            <button type="button" class="btn btn-sm btn-ghost" onclick="this.closest('.alert').remove()">
+                                <i class="bi bi-x"></i>
+                            </button>
                         </div>
                     <?php endif; ?>
 
                     <?php if ($step === 1): ?>
-                        <!-- STEP 1: Warning & Information -->
-                        <div class="warning-banner text-center">
-                            <h4 class="mb-3"><i class="bi bi-exclamation-triangle-fill"></i> DANGER ZONE</h4>
-                            <p class="mb-0">This operation will <strong>PERMANENTLY DELETE</strong> all requests and notifications from the database.</p>
+                        <div class="bg-gradient-to-r from-pink-400 to-red-500 text-white text-center p-5 rounded-xl mb-6">
+                            <h4 class="text-xl font-bold mb-2"><i class="bi bi-exclamation-triangle-fill"></i> DANGER ZONE</h4>
+                            <p class="m-0">This operation will <strong>PERMANENTLY DELETE</strong> all requests and notifications from the database.</p>
                         </div>
 
-                        <h5 class="mb-4">📊 Current Data Overview</h5>
-                        <div class="row g-4 mb-4">
-                            <div class="col-md-4">
-                                <div class="card text-center p-3 bg-light">
-                                    <div class="count-display"><?= number_format($counts['requests']) ?></div>
-                                    <div class="text-muted">Requests</div>
-                                </div>
+                        <h5 class="text-lg font-semibold mb-4"><i class="bi bi-bar-chart"></i> Current Data Overview</h5>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                            <div class="card bg-base-200 text-center p-4">
+                                <div class="text-4xl font-bold text-primary"><?= number_format($counts['requests']) ?></div>
+                                <div class="text-base-content/50">Requests</div>
                             </div>
-                            <div class="col-md-4">
-                                <div class="card text-center p-3 bg-light">
-                                    <div class="count-display"><?= number_format($counts['notifications']) ?></div>
-                                    <div class="text-muted">Notifications</div>
-                                </div>
+                            <div class="card bg-base-200 text-center p-4">
+                                <div class="text-4xl font-bold text-primary"><?= number_format($counts['notifications']) ?></div>
+                                <div class="text-base-content/50">Notifications</div>
                             </div>
-                            <div class="col-md-4">
-                                <div class="card text-center p-3 bg-light">
-                                    <div class="count-display"><?= number_format($counts['email_queue']) ?></div>
-                                    <div class="text-muted">Email Queue</div>
-                                </div>
+                            <div class="card bg-base-200 text-center p-4">
+                                <div class="text-4xl font-bold text-primary"><?= number_format($counts['email_queue']) ?></div>
+                                <div class="text-base-content/50">Email Queue</div>
                             </div>
                         </div>
 
-                        <h5 class="mb-3">🗂️ Tables That Will Be Cleared</h5>
-                        <div class="card bg-light mb-4">
+                        <h5 class="text-lg font-semibold mb-3"><i class="bi bi-folder2-open"></i> Tables That Will Be Cleared</h5>
+                        <div class="card bg-base-200 mb-6">
                             <div class="card-body">
-                                <ul class="list-unstyled mb-0">
-                                    <li class="mb-2"><i class="bi bi-check-circle text-danger"></i> <strong>notifications</strong> - All notification records</li>
-                                    <li class="mb-2"><i class="bi bi-check-circle text-danger"></i> <strong>requests</strong> - All request records</li>
-                                    <li class="mb-2"><i class="bi bi-check-circle text-danger"></i> <strong>approval_workflow</strong> - Auto-cascade from requests</li>
-                                    <li class="mb-2"><i class="bi bi-check-circle text-danger"></i> <strong>approvals</strong> - Auto-cascade from requests</li>
-                                    <li class="mb-2"><i class="bi bi-check-circle text-danger"></i> <strong>request_passengers</strong> - Auto-cascade from requests</li>
-                                    <li class="mb-0"><i class="bi bi-check-circle text-danger"></i> <strong>email_queue</strong> - Request-related emails</li>
+                                <ul class="list-none m-0 p-0">
+                                    <li class="mb-2"><i class="bi bi-check-circle text-error"></i> <strong>notifications</strong> - All notification records</li>
+                                    <li class="mb-2"><i class="bi bi-check-circle text-error"></i> <strong>requests</strong> - All request records</li>
+                                    <li class="mb-2"><i class="bi bi-check-circle text-error"></i> <strong>approval_workflow</strong> - Auto-cascade from requests</li>
+                                    <li class="mb-2"><i class="bi bi-check-circle text-error"></i> <strong>approvals</strong> - Auto-cascade from requests</li>
+                                    <li class="mb-2"><i class="bi bi-check-circle text-error"></i> <strong>request_passengers</strong> - Auto-cascade from requests</li>
+                                    <li class="m-0"><i class="bi bi-check-circle text-error"></i> <strong>email_queue</strong> - Request-related emails</li>
                                 </ul>
                             </div>
                         </div>
 
-                        <div class="alert alert-warning">
+                        <div class="alert alert-warning mb-6">
                             <i class="bi bi-shield-exclamation"></i>
-                            <strong>Recommendation:</strong> Create a database backup before proceeding.
-                            <br>
-                            <code>mysqldump -u user -p fleet_management > backup.sql</code>
+                            <span>
+                                <strong>Recommendation:</strong> Create a database backup before proceeding.<br>
+                                <code class="text-sm bg-base-200 px-2 py-1 rounded">mysqldump -u user -p fleet_management > backup.sql</code>
+                            </span>
                         </div>
 
-                        <div class="d-grid gap-2">
+                        <div class="flex flex-col gap-2">
                             <a href="?step=2" class="btn btn-warning btn-lg">
                                 <i class="bi bi-arrow-right-circle"></i> I Understand the Risks - Continue
                             </a>
@@ -214,30 +167,31 @@ function isAdmin() {
                         </div>
 
                     <?php elseif ($step === 2): ?>
-                        <!-- STEP 2: Final Confirmation -->
-                        <div class="alert alert-danger text-center">
-                            <h4><i class="bi bi-exclamation-triangle-fill"></i> FINAL WARNING</h4>
-                            <p class="mb-0">This action cannot be undone. Once deleted, all data will be permanently lost.</p>
+                        <div class="alert alert-error text-center mb-6">
+                            <div>
+                                <h4 class="font-bold"><i class="bi bi-exclamation-triangle-fill"></i> FINAL WARNING</h4>
+                                <p class="m-0">This action cannot be undone. Once deleted, all data will be permanently lost.</p>
+                            </div>
                         </div>
 
-                        <div class="card bg-light mb-4">
+                        <div class="card bg-base-200 mb-6">
                             <div class="card-body">
                                 <h5 class="card-title">You are about to delete:</h5>
-                                <ul class="list-unstyled">
+                                <ul class="list-none">
                                     <li class="mb-2"><strong><?= number_format($counts['requests']) ?></strong> request records</li>
                                     <li class="mb-2"><strong><?= number_format($counts['notifications']) ?></strong> notification records</li>
                                     <li class="mb-2"><strong><?= number_format($counts['approval_workflow']) ?></strong> approval workflow records</li>
                                     <li class="mb-2"><strong><?= number_format($counts['approvals']) ?></strong> approval records</li>
                                     <li class="mb-2"><strong><?= number_format($counts['request_passengers']) ?></strong> request passenger records</li>
-                                    <li class="mb-0"><strong><?= number_format($counts['email_queue']) ?></strong> email queue records</li>
+                                    <li class="m-0"><strong><?= number_format($counts['email_queue']) ?></strong> email queue records</li>
                                 </ul>
                             </div>
                         </div>
 
                         <form method="POST">
                             <input type="hidden" name="action" value="clear">
-                            <div class="d-grid gap-2">
-                                <button type="submit" class="btn btn-danger btn-lg" onclick="return confirm('Are you absolutely sure? This cannot be undone!')">
+                            <div class="flex flex-col gap-2">
+                                <button type="submit" class="btn btn-error btn-lg" onclick="return confirm('Are you absolutely sure? This cannot be undone!')">
                                     <i class="bi bi-trash-fill"></i> YES, Delete All Data
                                 </button>
                                 <a href="/" class="btn btn-secondary">
@@ -247,28 +201,29 @@ function isAdmin() {
                         </form>
 
                     <?php elseif ($step === 4): ?>
-                        <!-- STEP 4: Success -->
-                        <div class="alert alert-success text-center">
-                            <h4><i class="bi bi-check-circle-fill"></i> Clearance Complete</h4>
-                            <p class="mb-0">All requests and notifications have been successfully removed from the database.</p>
+                        <div class="alert alert-success text-center mb-6">
+                            <div>
+                                <h4 class="font-bold"><i class="bi bi-check-circle-fill"></i> Clearance Complete</h4>
+                                <p class="m-0">All requests and notifications have been successfully removed from the database.</p>
+                            </div>
                         </div>
 
-                        <div class="card bg-light mb-4">
+                        <div class="card bg-base-200 mb-6">
                             <div class="card-body">
                                 <h5 class="card-title">Summary of Changes:</h5>
-                                <ul class="list-unstyled">
+                                <ul class="list-none">
                                     <li class="mb-2"><i class="bi bi-check-circle text-success"></i> All notification records deleted</li>
                                     <li class="mb-2"><i class="bi bi-check-circle text-success"></i> All request records deleted</li>
                                     <li class="mb-2"><i class="bi bi-check-circle text-success"></i> Related approval workflows deleted</li>
                                     <li class="mb-2"><i class="bi bi-check-circle text-success"></i> Related approvals deleted</li>
                                     <li class="mb-2"><i class="bi bi-check-circle text-success"></i> Related request passengers deleted</li>
-                                    <li class="mb-0"><i class="bi bi-check-circle text-success"></i> Related email queue entries deleted</li>
+                                    <li class="m-0"><i class="bi bi-check-circle text-success"></i> Related email queue entries deleted</li>
                                 </ul>
                             </div>
                         </div>
 
-                        <div class="d-grid">
-                            <a href="/" class="btn btn-primary btn-lg">
+                        <div class="flex">
+                            <a href="/" class="btn btn-primary btn-lg w-full">
                                 <i class="bi bi-house"></i> Return to Dashboard
                             </a>
                         </div>
@@ -277,7 +232,5 @@ function isAdmin() {
             </div>
         </div>
     </div>
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
