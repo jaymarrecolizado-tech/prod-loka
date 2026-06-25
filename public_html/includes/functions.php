@@ -28,6 +28,96 @@ function e(?string $string): string
 }
 
 /**
+ * Load Vite manifest for production assets.
+ * Returns null if manifest is missing or invalid.
+ */
+function viteManifest(): ?array
+{
+    static $manifest = null;
+    static $loaded = false;
+
+    if ($loaded) {
+        return $manifest;
+    }
+
+    $loaded = true;
+    $manifestPath = BASE_PATH . '/assets/dist/.vite/manifest.json';
+
+    if (!file_exists($manifestPath)) {
+        return null;
+    }
+
+    $content = file_get_contents($manifestPath);
+    if ($content === false) {
+        return null;
+    }
+
+    $decoded = json_decode($content, true);
+    if (!is_array($decoded)) {
+        return null;
+    }
+
+    $manifest = $decoded;
+    return $manifest;
+}
+
+/**
+ * Generate CSS link tags for a Vite entry.
+ */
+function viteEntryCssTags(string $entry): string
+{
+    $manifest = viteManifest();
+    if (!$manifest || !isset($manifest[$entry])) {
+        return '';
+    }
+
+    $item = $manifest[$entry];
+    $tags = [];
+
+    if (isset($item['css']) && is_array($item['css'])) {
+        foreach ($item['css'] as $css) {
+            $tags[] = '<link rel="stylesheet" href="' . ASSETS_PATH . '/dist/' . e($css) . '">';
+        }
+    }
+
+    return implode("\n", $tags);
+}
+
+/**
+ * Generate JS script tag for a Vite entry.
+ */
+function viteEntryJsTags(string $entry): string
+{
+    $manifest = viteManifest();
+    if (!$manifest || !isset($manifest[$entry]['file'])) {
+        return '';
+    }
+
+    return '<script type="module" src="' . ASSETS_PATH . '/dist/' . e($manifest[$entry]['file']) . '"></script>';
+}
+
+/**
+ * Generate HTML tags for a Vite entry (CSS + JS).
+ */
+function viteEntryTags(string $entry): string
+{
+    return viteEntryCssTags($entry) . "\n" . viteEntryJsTags($entry);
+}
+
+/**
+ * Get the direct URL for a Vite-built asset by entry name.
+ */
+function viteAssetUrl(string $entry): string
+{
+    $manifest = viteManifest();
+    if (!$manifest || !isset($manifest[$entry]['file'])) {
+        return '';
+    }
+
+    return ASSETS_PATH . '/dist/' . $manifest[$entry]['file'];
+}
+
+/**
  * Redirect to URL
  */
 function redirect(string $url): void

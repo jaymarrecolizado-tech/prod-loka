@@ -26,6 +26,11 @@
 
     <!-- Custom CSS -->
     <link href="<?= ASSETS_PATH ?>/css/style.css" rel="stylesheet">
+
+    <?php if (UI_MODERN_ENABLED): ?>
+    <!-- Modern UI (Tailwind + DaisyUI) -->
+    <?= viteEntryCssTags('app') ?>
+    <?php endif; ?>
 </head>
 <body>
     <!-- Top Navigation -->

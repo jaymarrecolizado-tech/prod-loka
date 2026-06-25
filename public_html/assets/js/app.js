@@ -2,6 +2,9 @@
  * LOKA - Application JavaScript
  */
 
+// Import Tailwind / DaisyUI styles so Vite bundles them for production
+import '../css/app.css'
+
 // Simple debounce utility
 function debounce(fn, ms) {
     let timer;
@@ -346,21 +349,6 @@ function formatDateTime(dateStr) {
         hour: '2-digit',
         minute: '2-digit'
     });
-}
-
-/**
- * Debounce function
- */
-function debounce(func, wait) {
-    let timeout;
-    return function executedFunction(...args) {
-        const later = () => {
-            clearTimeout(timeout);
-            func(...args);
-        };
-        clearTimeout(timeout);
-        timeout = setTimeout(later, wait);
-    };
 }
 
 /**

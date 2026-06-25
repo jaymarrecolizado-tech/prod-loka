@@ -26,7 +26,7 @@
       "@/*": ["assets/js/*"],
       "~/*": ["./*"],
       "@/components": ["assets/js/components"],
-      "@/composablesables": ["assets/js/composablesables"],
+      "@/composables": ["assets/js/composables"],
       "@/utils": ["assets/js/utils"],
       "@/stores": ["assets/js/stores"],
       "@/api": ["assets/js/api"]

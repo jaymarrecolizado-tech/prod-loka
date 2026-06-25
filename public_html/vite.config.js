@@ -9,7 +9,7 @@ export default defineConfig({
       '@': resolve(__dirname, 'assets/js'),
       '~': resolve(__dirname, '.'),
       '@/components': resolve(__dirname, 'assets/js/components'),
-      '@/composablesables': resolve(__dirname, 'assets/js/composablesables'),
+      '@/composables': resolve(__dirname, 'assets/js/composables'),
       '@/utils': resolve(__dirname, 'assets/js/utils'),
       '@/stores': resolve(__dirname, 'assets/js/stores'),
       '@/api': resolve(__dirname, 'assets/js/api'),

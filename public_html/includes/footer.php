@@ -20,7 +20,11 @@
     <script src="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/js/tom-select.complete.min.js"></script>
     
     <!-- Custom JS -->
+    <?php if (UI_MODERN_ENABLED): ?>
+    <?= viteEntryJsTags('app') ?>
+    <?php else: ?>
     <script src="<?= ASSETS_PATH ?>/js/app.js"></script>
+    <?php endif; ?>
     
     <?php if (isset($pageScripts)): ?>
     <?= $pageScripts ?>

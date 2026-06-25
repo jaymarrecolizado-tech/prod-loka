@@ -1,10 +1,11 @@
 /** @type {import('tailwindcss').Config} */
 export default {
   content: [
-    './**/*.php',
+    './index.php',
+    './pages/**/*.php',
+    './includes/**/*.php',
     './assets/js/**/*.vue',
     './assets/js/**/*.js',
-    './pages/**/*.php',
   ],
   darkMode: 'class',
   theme: {
@@ -52,6 +53,20 @@ export default {
         '18': '4.5rem',
         '88': '22rem',
         '128': '32rem',
+        'navbar': '3.5rem',
+        'sidebar': '16rem',
+      },
+      borderRadius: {
+        '2xl': '1rem',
+        '3xl': '1.5rem',
+      },
+      boxShadow: {
+        'soft': '0 2px 15px -3px rgba(0, 0, 0, 0.07), 0 10px 20px -2px rgba(0, 0, 0, 0.04)',
+        'card': '0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05)',
+        'elevated': '0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -4px rgba(0, 0, 0, 0.05)',
+      },
+      transitionTimingFunction: {
+        'soft': 'cubic-bezier(0.4, 0, 0.2, 1)',
       },
       animation: {
         'fade-in': 'fadeIn 0.3s ease-in-out',
@@ -79,62 +94,16 @@ export default {
   plugins: [
     require('@tailwindcss/forms'),
     require('@tailwindcss/typography'),
-    // Custom components plugin
-    function({ addComponents, theme }) {
-      addComponents({
-        '.btn': {
-          display: 'inline-flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          padding: theme('spacing.2') + ' ' + theme('spacing.4'),
-          fontWeight: theme('fontWeight.500'),
-          borderRadius: theme('borderRadius.md'),
-          transition: 'all 0.2s',
-          cursor: 'pointer',
-          '&:disabled': {
-            opacity: '0.5',
-            cursor: 'not-allowed',
-          },
-        },
-        '.btn-primary': {
-          backgroundColor: theme('colors.primary.600'),
-          color: 'white',
-          '&:hover:not(:disabled)': {
-            backgroundColor: theme('colors.primary.700'),
-          },
-        },
-        '.btn-secondary': {
-          backgroundColor: theme('colors.gray.200'),
-          color: theme('colors.gray.800'),
-          '&:hover:not(:disabled)': {
-            backgroundColor: theme('colors.gray.300'),
-          },
-        },
-        '.btn-danger': {
-          backgroundColor: theme('colors.danger.600'),
-          color: 'white',
-          '&:hover:not(:disabled)': {
-            backgroundColor: theme('colors.danger.700'),
-          },
-        },
-        '.input': {
-          width: '100%',
-          padding: theme('spacing.2') + ' ' + theme('spacing.3'),
-          borderRadius: theme('borderRadius.md'),
-          border: '1px solid ' + theme('colors.gray.300'),
-          '&:focus': {
-            outline: 'none',
-            borderColor: theme('colors.primary.500'),
-            'box-shadow': '0 0 0 3px ' + theme('colors.primary.200'),
-          },
-        },
-        '.card': {
-          backgroundColor: 'white',
-          borderRadius: theme('borderRadius.lg'),
-          boxShadow: theme('boxShadow.md'),
-          padding: theme('spacing.6'),
-        },
-      })
-    },
+    require('daisyui'),
   ],
+
+  daisyui: {
+    themes: ['light', 'dark'],
+    darkTheme: 'dark',
+    base: true,
+    styled: true,
+    utils: true,
+    prefix: 'dui-',
+    logs: false,
+  },
 }

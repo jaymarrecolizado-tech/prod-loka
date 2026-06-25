@@ -9,6 +9,10 @@
 define('APP_NAME', 'LOKA Fleet Management');
 define('APP_VERSION', '2.5.1');
 
+// Feature flag for the modern Tailwind/DaisyUI UI. Set UI_MODERN_ENABLED=false to rollback.
+$uiModernEnv = getenv('UI_MODERN_ENABLED');
+define('UI_MODERN_ENABLED', $uiModernEnv !== false ? filter_var($uiModernEnv, FILTER_VALIDATE_BOOLEAN) : true);
+
 $isProduction = (getenv('APP_ENV') === 'production');
 
 // URL Configuration
