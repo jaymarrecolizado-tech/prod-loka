@@ -72,7 +72,7 @@ require_once INCLUDES_PATH . '/header.php';
     </div>
 
     <div class="row g-3 mb-4">
-        <div class="col-md-3">
+        <div class="col-12 col-md-3">
             <div class="card border-0 shadow-sm h-100">
                 <div class="card-body">
                     <div class="d-flex align-items-center">
@@ -89,7 +89,7 @@ require_once INCLUDES_PATH . '/header.php';
                 </div>
             </div>
         </div>
-        <div class="col-md-3">
+        <div class="col-12 col-md-3">
             <div class="card border-0 shadow-sm h-100">
                 <div class="card-body">
                     <div class="d-flex align-items-center">
@@ -106,7 +106,7 @@ require_once INCLUDES_PATH . '/header.php';
                 </div>
             </div>
         </div>
-        <div class="col-md-3">
+        <div class="col-12 col-md-3">
             <div class="card border-0 shadow-sm h-100">
                 <div class="card-body">
                     <div class="d-flex align-items-center">
@@ -123,7 +123,7 @@ require_once INCLUDES_PATH . '/header.php';
                 </div>
             </div>
         </div>
-        <div class="col-md-3">
+        <div class="col-12 col-md-3">
             <div class="card border-0 shadow-sm h-100">
                 <div class="card-body">
                     <div class="d-flex align-items-center">

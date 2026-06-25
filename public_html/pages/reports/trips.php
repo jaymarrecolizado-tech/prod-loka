@@ -87,15 +87,15 @@ require_once INCLUDES_PATH . '/header.php';
             <form method="GET" class="row g-3 align-items-end">
                 <input type="hidden" name="page" value="reports">
                 <input type="hidden" name="action" value="trips">
-                <div class="col-md-3">
+                <div class="col-12 col-md-3">
                     <label class="form-label">Start Date</label>
                     <input type="date" class="form-control" name="start_date" value="<?= e($startDate) ?>">
                 </div>
-                <div class="col-md-3">
+                <div class="col-12 col-md-3">
                     <label class="form-label">End Date</label>
                     <input type="date" class="form-control" name="end_date" value="<?= e($endDate) ?>">
                 </div>
-                <div class="col-md-3">
+                <div class="col-12 col-md-3">
                     <label class="form-label">Status</label>
                     <select class="form-select" name="status">
                         <option value="">All Statuses</option>
@@ -107,7 +107,7 @@ require_once INCLUDES_PATH . '/header.php';
                         <option value="revision" <?= $status === 'revision' ? 'selected' : '' ?>>Revision</option>
                     </select>
                 </div>
-                <div class="col-md-3">
+                <div class="col-12 col-md-3">
                     <button type="submit" class="btn btn-primary">
                         <i class="bi bi-search me-1"></i>Filter
                     </button>

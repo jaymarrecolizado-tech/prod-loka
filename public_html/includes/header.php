@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <meta name="description" content="LOKA Fleet Management System">
     <title><?= e($pageTitle ?? 'Dashboard') ?> - <?= APP_NAME ?></title>
     
@@ -32,7 +32,7 @@
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary fixed-top">
         <div class="container-fluid">
             <!-- Sidebar Toggle -->
-            <button class="btn btn-primary me-2" type="button" id="sidebarToggle">
+            <button class="btn btn-primary me-2" type="button" id="sidebarToggle" aria-label="Toggle navigation menu">
                 <i class="bi bi-list"></i>
             </button>
             

@@ -2,6 +2,15 @@
  * LOKA - Application JavaScript
  */
 
+// Simple debounce utility
+function debounce(fn, ms) {
+    let timer;
+    return function(...args) {
+        clearTimeout(timer);
+        timer = setTimeout(() => fn.apply(this, args), ms);
+    };
+}
+
 document.addEventListener('DOMContentLoaded', function() {
     initSidebar();
     initDataTables();
@@ -91,8 +100,8 @@ function initSidebar() {
         });
     }
 
-    // Handle window resize
-    window.addEventListener('resize', () => {
+    // Handle window resize (debounced to prevent layout thrashing)
+    window.addEventListener('resize', debounce(() => {
         const nowMobile = window.innerWidth < 992;
         const sidebarOverlay = document.getElementById('sidebarOverlay');
 
@@ -102,7 +111,7 @@ function initSidebar() {
             sidebarOverlay.classList.remove('show');
             document.body.classList.remove('sidebar-open');
         }
-    });
+    }, 150));
 }
 
 /**
@@ -133,7 +142,7 @@ function initDataTables() {
                      '<"row"<"col-sm-12"tr>>' +
                      '<"row"<"col-sm-12 col-md-5"i><"col-sm-12 col-md-7"p>>',
                 order: [[0, 'desc']],
-                responsive: true
+                responsive: false
             });
         }
     });

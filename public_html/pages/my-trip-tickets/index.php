@@ -163,7 +163,7 @@ require_once INCLUDES_PATH . '/header.php';
     <div class="card mb-4">
         <div class="card-body">
             <div class="row g-3">
-                <div class="col-md-6">
+                <div class="col-12 col-md-6">
                     <label class="form-label">Status Filter</label>
                     <div class="btn-group w-100" role="group">
                         <a href="?page=my-trip-tickets"
@@ -184,7 +184,7 @@ require_once INCLUDES_PATH . '/header.php';
                         </a>
                     </div>
                 </div>
-                <div class="col-md-6">
+                <div class="col-12 col-md-6">
                     <label class="form-label">Search</label>
                     <form method="GET" class="d-flex gap-2">
                         <input type="hidden" name="page" value="my-trip-tickets">

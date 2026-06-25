@@ -139,7 +139,7 @@ require_once INCLUDES_PATH . '/header.php';
             <form method="GET" class="row g-3 align-items-end">
                 <input type="hidden" name="page" value="gas-vouchers">
 
-                <div class="col-md-2">
+                <div class="col-12 col-md-2">
                     <label class="form-label">Status</label>
                     <select name="status" class="form-select form-select-sm">
                         <option value="">All</option>
@@ -152,23 +152,23 @@ require_once INCLUDES_PATH . '/header.php';
                     </select>
                 </div>
 
-                <div class="col-md-3">
+                <div class="col-12 col-md-3">
                     <label class="form-label">Search</label>
                     <input type="text" name="search" class="form-control form-control-sm"
                            placeholder="Voucher no, plate, driver, purpose..."
                            value="<?= e($searchFilter) ?>">
                 </div>
 
-                <div class="col-md-2">
+                <div class="col-6 col-md-2">
                     <label class="form-label">Date From</label>
                     <input type="date" name="date_from" class="form-control form-control-sm" value="<?= e($dateFrom) ?>">
                 </div>
-                <div class="col-md-2">
+                <div class="col-6 col-md-2">
                     <label class="form-label">Date To</label>
                     <input type="date" name="date_to" class="form-control form-control-sm" value="<?= e($dateTo) ?>">
                 </div>
 
-                <div class="col-md-3">
+                <div class="col-12 col-md-3">
                     <button type="submit" class="btn btn-sm btn-outline-primary me-2">
                         <i class="bi bi-search me-1"></i>Filter
                     </button>

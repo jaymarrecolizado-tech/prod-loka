@@ -210,7 +210,7 @@ require_once INCLUDES_PATH . '/header.php';
     <!-- Calendar Navigation -->
     <div class="card mb-4">
         <div class="card-body py-3">
-            <div class="d-flex justify-content-between align-items-center">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
                 <a href="<?= APP_URL ?>/?page=schedule&action=calendar&year=<?= $prevYear ?>&month=<?= $prevMonth ?>" 
                    class="btn btn-outline-primary">
                     <i class="bi bi-chevron-left me-1"></i>Previous

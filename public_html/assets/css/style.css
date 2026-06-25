@@ -414,9 +414,21 @@ body {
         opacity: 1;
         display: inline;
     }
+
+    /* ===== PAGE HEADER FLEX WRAP ===== */
+    .page-header,
+    .d-flex.justify-content-between {
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+
+    .page-header .btn,
+    .d-flex.justify-content-between .btn {
+        white-space: nowrap;
+    }
 }
 
-/* ===== MOBILE TOUCH TARGETS (768px and below) ===== */
+/* ===== MOBILE (768px and below) ===== */
 @media (max-width: 768px) {
     /* Larger touch targets for buttons */
     .btn {
@@ -437,6 +449,35 @@ body {
         font-size: 0.75rem;
     }
 
+    .btn-icon {
+        width: 44px;
+        height: 44px;
+        padding: 0;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    /* Avatar touch target */
+    .avatar-circle {
+        width: 40px;
+        height: 40px;
+        font-size: 16px;
+    }
+
+    /* Sidebar toggle button sizing */
+    #sidebarToggle {
+        min-width: 44px;
+        min-height: 44px;
+        padding: 0.5rem;
+    }
+
+    /* Sidebar nav links - ensure 44px touch target */
+    .sidebar .nav-link {
+        padding: 0.75rem 1rem;
+        min-height: 44px;
+    }
+
     /* Form controls - larger touch targets */
     .form-control,
     .form-select {
@@ -448,7 +489,6 @@ body {
         font-size: 0.95rem;
     }
 
-    /* Input groups */
     .input-group .form-control {
         min-height: 44px;
     }
@@ -459,15 +499,19 @@ body {
         align-items: center;
     }
 
-    /* Dropdown toggles */
     .dropdown-toggle {
         min-height: 44px;
     }
 
-    /* Checkboxes and radio buttons */
     .form-check-input {
         width: 1.3rem;
         height: 1.3rem;
+    }
+
+    /* Notification dropdown - responsive width */
+    .notification-dropdown {
+        width: calc(100vw - 2rem);
+        max-width: 320px;
     }
 
     /* Cards - full width on mobile */
@@ -502,7 +546,6 @@ body {
         padding: 0 1rem;
     }
 
-    /* Table font size */
     .table {
         font-size: 0.85rem;
     }
@@ -512,7 +555,6 @@ body {
         white-space: nowrap;
     }
 
-    /* Table cells padding */
     .table td,
     .table th {
         padding: 0.5rem;
@@ -542,13 +584,22 @@ body {
         overflow-y: auto;
     }
 
+    .modal-footer {
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+
+    .modal-footer .btn {
+        flex: 1 1 100%;
+        min-height: 44px;
+    }
+
     /* Badge adjustments */
     .badge {
         font-size: 0.7rem;
         padding: 0.25rem 0.4rem;
     }
 
-    /* Page header adjustments */
     h1 {
         font-size: 1.75rem;
     }
@@ -557,19 +608,16 @@ body {
         font-size: 1.25rem;
     }
 
-    /* Alert padding */
     .alert {
         padding: 0.75rem 1rem;
         font-size: 0.9rem;
     }
 
-    /* Form labels */
     .form-label {
         font-size: 0.9rem;
         margin-bottom: 0.4rem;
     }
 
-    /* Pagination adjustments */
     .pagination {
         flex-wrap: nowrap;
         overflow-x: auto;
@@ -580,8 +628,7 @@ body {
         font-size: 0.85rem;
     }
 
-    /* ===== MOBILE-FIRST CHART STYLES ===== */
-    /* Chart containers - proper height control */
+    /* Chart containers */
     .chart-container {
         position: relative;
         height: 250px;
@@ -594,13 +641,11 @@ body {
         width: 100%;
     }
 
-    /* Charts full width on mobile */
     .card-body canvas {
         max-width: 100% !important;
         height: auto !important;
     }
 
-    /* Chart cards stack vertically on mobile */
     .charts-row .col-lg-8,
     .charts-row .col-lg-6,
     .charts-row .col-lg-4,
@@ -610,7 +655,6 @@ body {
         flex: 0 0 100%;
     }
 
-    /* Stats cards - stack vertically on mobile */
     .stats-row .col-xl-3,
     .stats-row .col-md-6 {
         width: 100%;
@@ -618,17 +662,14 @@ body {
         flex: 0 0 100%;
     }
 
-    /* Reduce chart legend size on mobile */
     .chartjs-legend {
         font-size: 0.75rem !important;
     }
 
-    /* Chart title adjustments */
     .card-header h5 {
         font-size: 1rem;
     }
 
-    /* Activity feed mobile adjustments */
     .activity-feed {
         font-size: 0.85rem;
     }
@@ -637,10 +678,39 @@ body {
         padding: 0.5rem 0;
     }
 
-    /* Stats cards - stack vertically with full width */
     .stats-row .col-12 {
         flex: 0 0 100%;
         max-width: 100%;
+    }
+
+    /* Schedule calendar - smaller cells on mobile */
+    .calendar-grid {
+        gap: 1px;
+    }
+    .calendar-header {
+        padding: 6px 2px;
+        font-size: 0.7rem;
+    }
+    .calendar-day {
+        min-height: 60px;
+        padding: 4px;
+    }
+    .calendar-day .day-number {
+        font-size: 0.75rem;
+    }
+    .calendar-day .badge,
+    .calendar-day small {
+        font-size: 0.55rem;
+    }
+
+    /* Legend - wrap items on mobile */
+    .legend-item {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        margin-right: 0.75rem;
+        margin-bottom: 0.35rem;
+        font-size: 0.75rem;
     }
 }
 
@@ -669,19 +739,26 @@ body {
         padding: 0.75rem 1rem;
     }
 
-    /* Hide less important columns on very small screens */
-    .table-responsive .table th:nth-child(n+4),
-    .table-responsive .table td:nth-child(n+4) {
-        display: none;
+    /* Tables: reduce font and let horizontal scroll handle overflow */
+    .table-responsive .table {
+        font-size: 0.8rem;
+    }
+    .table-responsive .table th,
+    .table-responsive .table td {
+        white-space: nowrap;
+    }
+    .table-responsive .table td .btn-group {
+        flex-wrap: nowrap;
     }
 
-    .table-responsive .table th:first-child,
-    .table-responsive .table td:first-child,
-    .table-responsive .table th:nth-child(2),
-    .table-responsive .table td:nth-child(2),
-    .table-responsive .table th:nth-child(3),
-    .table-responsive .table td:nth-child(3) {
-        display: table-cell;
+    /* Calendar - even smaller on tiny screens */
+    .calendar-day {
+        min-height: 48px;
+        padding: 3px;
+    }
+    .calendar-header {
+        padding: 4px 1px;
+        font-size: 0.6rem;
     }
 }
 
@@ -808,5 +885,15 @@ body {
     
     .main-content {
         margin-left: 0 !important;
+    }
+}
+
+/* ===== SAFE AREA INSETS (notched devices) ===== */
+@supports (padding: env(safe-area-inset-top)) {
+    .navbar {
+        padding-top: env(safe-area-inset-top);
+    }
+    .sidebar {
+        height: calc(100vh - var(--navbar-height) - env(safe-area-inset-top));
     }
 }

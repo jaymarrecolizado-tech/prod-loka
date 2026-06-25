@@ -92,7 +92,7 @@ require_once INCLUDES_PATH . '/header.php';
             <form method="GET" class="row g-3 align-items-end">
                 <input type="hidden" name="page" value="reports">
                 <input type="hidden" name="action" value="driver">
-                <div class="col-md-3">
+                <div class="col-12 col-md-3">
                     <label class="form-label">Driver</label>
                     <select class="form-select" name="driver_id" required>
                         <option value="">Select Driver...</option>
@@ -103,21 +103,21 @@ require_once INCLUDES_PATH . '/header.php';
                         <?php endforeach; ?>
                     </select>
                 </div>
-                <div class="col-md-2">
+                <div class="col-6 col-md-2">
                     <label class="form-label">Start Date</label>
                     <input type="date" class="form-control" name="start_date" value="<?= e($startDate) ?>">
                 </div>
-                <div class="col-md-2">
+                <div class="col-6 col-md-2">
                     <label class="form-label">End Date</label>
                     <input type="date" class="form-control" name="end_date" value="<?= e($endDate) ?>">
                 </div>
-                <div class="col-md-2">
+                <div class="col-12 col-md-2">
                     <button type="submit" class="btn btn-primary">
                         <i class="bi bi-search me-1"></i>Generate
                     </button>
                 </div>
                 <?php if ($driverId && !empty($trips)): ?>
-                <div class="col-md-3 text-end">
+                <div class="col-12 col-md-3 text-end">
                     <div class="btn-group">
                         <a href="<?= APP_URL ?>/?page=reports&action=export-driver-csv&driver_id=<?= $driverId ?>&start_date=<?= $startDate ?>&end_date=<?= $endDate ?>" class="btn btn-outline-primary">
                             <i class="bi bi-file-earmark-csv me-1"></i>CSV

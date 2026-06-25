@@ -1,5 +1,5 @@
 <!-- Sidebar -->
-<nav class="sidebar" id="sidebar">
+<nav class="sidebar" id="sidebar" aria-label="Main navigation">
     <div class="sidebar-content">
         <ul class="nav flex-column">
             <!-- Dashboard -->

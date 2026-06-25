@@ -208,10 +208,11 @@ require_once INCLUDES_PATH . '/header.php';
 
                     <!-- Mileage & Fuel -->
                     <div class="row mb-4">
-                        <div class="col-md-6">
+                        <div class="col-12 col-md-6">
                             <h6 class="text-muted mb-2">
                                 <i class="bi bi-speedometer2 me-1"></i> Mileage
                             </h6>
+                            <div class="table-responsive">
                             <table class="table table-sm">
                                 <tbody>
                                     <tr>
@@ -228,11 +229,13 @@ require_once INCLUDES_PATH . '/header.php';
                                     </tr>
                                 </tbody>
                             </table>
+                            </div>
                         </div>
-                        <div class="col-md-6">
+                        <div class="col-12 col-md-6">
                             <h6 class="text-muted mb-2">
                                 <i class="bi bi-fuel-pump me-1"></i> Fuel
                             </h6>
+                            <div class="table-responsive">
                             <table class="table table-sm">
                                 <tbody>
                                     <tr>
@@ -255,6 +258,7 @@ require_once INCLUDES_PATH . '/header.php';
                                     <?php endif; ?>
                                 </tbody>
                             </table>
+                            </div>
                         </div>
                     </div>
 

@@ -63,7 +63,7 @@ require_once INCLUDES_PATH . '/header.php';
             <form method="GET" class="row g-3 align-items-end">
                 <input type="hidden" name="page" value="vehicles">
 
-                <div class="col-md-3">
+                <div class="col-12 col-md-3">
                     <label class="form-label">Status</label>
                     <select name="status" class="form-select">
                         <option value="">All Statuses</option>
@@ -74,7 +74,7 @@ require_once INCLUDES_PATH . '/header.php';
                     </select>
                 </div>
 
-                <div class="col-md-3">
+                <div class="col-12 col-md-3">
                     <label class="form-label">Type</label>
                     <select name="type" class="form-select">
                         <option value="">All Types</option>
@@ -85,7 +85,7 @@ require_once INCLUDES_PATH . '/header.php';
                     </select>
                 </div>
 
-                <div class="col-md-3">
+                <div class="col-12 col-md-3">
                     <button type="submit" class="btn btn-outline-primary me-2"><i
                             class="bi bi-search me-1"></i>Filter</button>
                     <a href="<?= APP_URL ?>/?page=vehicles" class="btn btn-outline-secondary">Reset</a>

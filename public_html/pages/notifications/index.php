@@ -27,7 +27,7 @@ require_once INCLUDES_PATH . '/header.php';
         <div class="col-12 col-lg-8">
             <div class="card shadow-sm">
                 <div class="card-header bg-white border-0 py-3">
-                    <div class="d-flex justify-content-between align-items-center">
+                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
                         <h4 class="card-title mb-0">
                             <i class="bi bi-bell me-2"></i>Notifications
                         </h4>
