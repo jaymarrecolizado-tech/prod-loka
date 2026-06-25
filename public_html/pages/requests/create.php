@@ -1436,9 +1436,6 @@ ob_start();
                     combinedDest.value = destManager.getCombinedDestination();
                 }
             }
-            
-            // Debug: Log passenger count
-            console.log('Submitting form with', selectedPassengers.size, 'passengers');
         });
     }
     

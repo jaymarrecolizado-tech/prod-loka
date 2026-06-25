@@ -879,7 +879,6 @@ require_once INCLUDES_PATH . '/header.php';
         try {
             // Check if already initialized
             if (passengersSelect.classList.contains('tomselected')) {
-                console.log('TomSelect already initialized');
                 return;
             }
             
@@ -926,8 +925,6 @@ require_once INCLUDES_PATH . '/header.php';
                     updatePassengerDisplay();
                 }
             });
-            
-            console.log('TomSelect initialized successfully for passengers');
         } catch (error) {
             console.error('Error initializing passenger select:', error);
             // Fallback: ensure the select still works as a regular multi-select

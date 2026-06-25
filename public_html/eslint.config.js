@@ -58,8 +58,7 @@ export default [
       'no-unused-vars': [
         'warn',
         {
-          varsIgnorePattern:
-            '^(fetchApi|formatCurrency|formatDate|formatDateTime|copyToClipboard|printElement|exportTableToCSV|api|viewAll)$',
+          varsIgnorePattern: '^(api|viewAll|showToast)$',
         },
       ],
     },

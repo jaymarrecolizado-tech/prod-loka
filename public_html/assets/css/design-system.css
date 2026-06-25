@@ -250,39 +250,9 @@
     @apply border-primary/20 bg-primary/10 text-primary;
   }
 
-  /* ===== MODAL (Bottom Sheet on Mobile) ===== */
-  .loka-modal-backdrop {
-    @apply fixed inset-0 z-[1050] bg-black/50;
-  }
-
-  .loka-modal {
-    @apply fixed z-[1060] w-full bg-white shadow-xl;
-    bottom: 0;
-    border-radius: 1.5rem 1.5rem 0 0;
-    max-height: 90vh;
-    overflow-y: auto;
-  }
-
-  @media (min-width: 640px) {
-    .loka-modal {
-      @apply left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-2xl;
-      bottom: auto;
-      max-width: 32rem;
-      max-height: 80vh;
-    }
-  }
-
   /* ===== DROPDOWN ===== */
   .loka-dropdown {
     @apply absolute right-0 z-[1050] mt-2 min-w-[12rem] overflow-hidden rounded-xl border border-base-200 bg-white shadow-elevated;
-  }
-
-  .loka-dropdown-item {
-    @apply flex items-center gap-2 px-4 py-2.5 text-sm text-base-content transition-colors;
-  }
-
-  .loka-dropdown-item:hover {
-    @apply bg-base-200;
   }
 
   .loka-dropdown-divider {
