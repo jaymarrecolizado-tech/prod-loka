@@ -62,16 +62,43 @@ function viteManifest(): ?array
 }
 
 /**
+ * Resolve a short entry name (e.g. 'app') to its full manifest key (e.g. 'assets/js/app.js').
+ */
+function viteResolveEntry(string $entry): ?array
+{
+    $manifest = viteManifest();
+    if (!$manifest) {
+        return null;
+    }
+
+    // Direct key match first
+    if (isset($manifest[$entry])) {
+        return $manifest[$entry];
+    }
+
+    // Search by 'name' field or by key ending with /{entry}.js
+    foreach ($manifest as $key => $item) {
+        if (isset($item['name']) && $item['name'] === $entry) {
+            return $item;
+        }
+        if (str_ends_with($key, '/' . $entry . '.js') || str_ends_with($key, '/' . $entry . '.ts')) {
+            return $item;
+        }
+    }
+
+    return null;
+}
+
+/**
  * Generate CSS link tags for a Vite entry.
  */
 function viteEntryCssTags(string $entry): string
 {
-    $manifest = viteManifest();
-    if (!$manifest || !isset($manifest[$entry])) {
+    $item = viteResolveEntry($entry);
+    if (!$item) {
         return '';
     }
 
-    $item = $manifest[$entry];
     $tags = [];
 
     if (isset($item['css']) && is_array($item['css'])) {
@@ -88,12 +115,12 @@ function viteEntryCssTags(string $entry): string
  */
 function viteEntryJsTags(string $entry): string
 {
-    $manifest = viteManifest();
-    if (!$manifest || !isset($manifest[$entry]['file'])) {
+    $item = viteResolveEntry($entry);
+    if (!$item || !isset($item['file'])) {
         return '';
     }
 
-    return '<script type="module" src="' . ASSETS_PATH . '/dist/' . e($manifest[$entry]['file']) . '"></script>';
+    return '<script type="module" src="' . ASSETS_PATH . '/dist/' . e($item['file']) . '"></script>';
 }
 
 /**

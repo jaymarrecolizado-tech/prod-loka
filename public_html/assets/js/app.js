@@ -14,7 +14,7 @@ function debounce(fn, ms) {
   }
 }
 
-document.addEventListener('DOMContentLoaded', function () {
+function initApp() {
   initSidebar()
   initDataTables()
   initDatePickers()
@@ -23,7 +23,13 @@ document.addEventListener('DOMContentLoaded', function () {
   initFormValidation()
   initDropdowns()
   initNotificationPolling()
-})
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initApp)
+} else {
+  initApp()
+}
 
 /**
  * Sidebar Toggle
@@ -42,7 +48,7 @@ function initSidebar() {
   // Helper function to check if mobile
   const isMobileView = () => window.innerWidth < 992
 
-  if (toggleBtn && sidebar && mainContent) {
+    if (toggleBtn && sidebar && mainContent) {
     const toggleSidebar = () => {
       if (isMobileView()) {
         // Mobile: use show/hide classes with overlay
@@ -52,6 +58,9 @@ function initSidebar() {
           overlay.classList.remove('show')
           document.body.classList.remove('sidebar-open')
         } else {
+          // Remove collapsed class so it doesn't override mobile positioning
+          sidebar.classList.remove('collapsed')
+          mainContent.classList.remove('expanded')
           sidebar.classList.add('show')
           overlay.classList.add('show')
           document.body.classList.add('sidebar-open')

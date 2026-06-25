@@ -59,3 +59,9 @@
     transition: all 0.15s ease-in-out;
   }
 }
+
+/* Fix DaisyUI/Tailwind .collapse{visibility:collapse} overriding Bootstrap's
+   navbar collapse display toggling. Higher specificity wins over DaisyUI's rule. */
+.navbar-collapse.collapse {
+    visibility: visible;
+}
