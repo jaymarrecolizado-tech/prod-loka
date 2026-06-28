@@ -2,7 +2,7 @@
 $pageTitle = 'Requests';
 $currentPage = 'requests';
 
-requireRoles([ROLE_REQUESTER, ROLE_APPROVER, ROLE_MOTORPOOL_HEAD, ROLE_ADMIN]);
+requireRole(ROLE_REQUESTER);
 
 $db = Database::getInstance();
 

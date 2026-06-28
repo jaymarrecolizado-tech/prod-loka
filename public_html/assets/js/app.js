@@ -382,16 +382,28 @@ function initDatePickers() {
 
 /**
  * Initialize Toast Notifications
+ * Auto-dismiss flash alerts after 5 seconds
  */
 function initToasts() {
-  // Auto-dismiss alerts after 5 seconds
-  document.querySelectorAll('.alert-dismissible').forEach(alert => {
+  document.querySelectorAll('[data-auto-dismiss]').forEach(alert => {
+    const delay = parseInt(alert.dataset.autoDismiss) || 5000
     setTimeout(() => {
-      const closeBtn = alert.querySelector('.btn-close')
-      if (closeBtn) {
-        closeBtn.click()
+      alert.style.transition = 'opacity 0.4s'
+      alert.style.opacity = '0'
+      setTimeout(() => alert.remove(), 400)
+    }, delay)
+  })
+
+  // Also handle loka-alert with close buttons
+  document.querySelectorAll('.loka-alert .btn-close').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const alert = btn.closest('.loka-alert')
+      if (alert) {
+        alert.style.transition = 'opacity 0.3s'
+        alert.style.opacity = '0'
+        setTimeout(() => alert.remove(), 300)
       }
-    }, 5000)
+    })
   })
 }
 
@@ -457,13 +469,17 @@ function initFormValidation() {
 }
 
 /**
- * Initialize Dropdowns (DaisyUI)
+ * Initialize Dropdowns (DaisyUI CSS-only approach)
+ * DaisyUI dropdowns work via tabindex + CSS :focus-within.
+ * We do NOT call preventDefault here — that breaks navigation.
+ * We only close the dropdown when the user clicks a link inside it.
  */
 function initDropdowns() {
-  // Prevent dropdown link navigation (DaisyUI uses tabindex + CSS)
-  document.querySelectorAll('.dropdown > [tabindex]').forEach(trigger => {
-    trigger.addEventListener('click', function (e) {
-      e.preventDefault()
+  document.querySelectorAll('.dropdown-content a').forEach(link => {
+    link.addEventListener('click', () => {
+      // Remove focus from the trigger so the dropdown closes
+      const trigger = link.closest('.dropdown')?.querySelector('[tabindex]')
+      if (trigger) trigger.blur()
     })
   })
 }

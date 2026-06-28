@@ -8,6 +8,10 @@
     
     <!-- Bootstrap Icons -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.2/font/bootstrap-icons.css" rel="stylesheet">
+
+    <!-- Google Fonts: Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
     
     <!-- Flatpickr CSS -->
     <link href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" rel="stylesheet">
@@ -117,9 +121,10 @@
             $flashTypeMap = ['success' => 'loka-alert-success', 'danger' => 'loka-alert-danger', 'warning' => 'loka-alert-warning', 'info' => 'loka-alert-info'];
             $lokaFlashClass = $flashTypeMap[$flash['type']] ?? 'loka-alert-info';
             ?>
-            <div class="loka-alert <?= $lokaFlashClass ?> m-3" role="alert">
-                <?= e($flash['message']) ?>
-                <button type="button" class="btn-close" onclick="this.parentElement.remove()"></button>
+            <div class="loka-alert <?= $lokaFlashClass ?>  mx-3 mt-3" role="alert" data-auto-dismiss="5000">
+                <i class="bi bi-info-circle-fill flex-shrink-0"></i>
+                <span class="flex-1"><?= e($flash['message']) ?></span>
+                <button type="button" class="btn-close ms-auto" onclick="this.closest('[role=alert]').remove()" aria-label="Close">×</button>
             </div>
             <?php endif; ?>
 

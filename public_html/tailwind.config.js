@@ -99,7 +99,6 @@ export default {
     base: true,
     styled: true,
     utils: true,
-    prefix: 'dui-',
     logs: false,
   },
 }

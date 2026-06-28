@@ -5,13 +5,6 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --sidebar-width: 16rem;
-  --navbar-height: 56px;
-  --sidebar-bg: #1e293b;
-  --sidebar-text: #94a3b8;
-}
-
 /* ===================================================
    LOKA Design System
    All components are plain CSS to avoid @apply
