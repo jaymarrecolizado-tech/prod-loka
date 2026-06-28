@@ -176,7 +176,7 @@ require_once INCLUDES_PATH . '/header.php';
                     <h6 class="font-semibold m-0 flex items-center gap-2"><i class="bi bi-clock-history"></i> Recent Exports</h6>
                 </div>
                 <div class="overflow-x-auto">
-                    <table class="table table-sm table-zebra m-0">
+                    <table class="loka-table table-sm table-zebra m-0">
                         <thead>
                             <tr>
                                 <th>Date/Time</th>
@@ -192,7 +192,7 @@ require_once INCLUDES_PATH . '/header.php';
                                     <td><?= e($export->created_at) ?></td>
                                     <td><?= e(ucfirst(str_replace('_', ' ', $export->entity_type))) ?></td>
                                     <td>
-                                        <span class="badge <?= ($details['format'] ?? 'csv') === 'pdf' ? 'badge-error' : 'badge-success' ?>">
+                                        <span class="loka-badge <?= ($details['format'] ?? 'csv') === 'pdf' ? 'badge-error' : 'badge-success' ?>">
                                             <?= e(strtoupper($details['format'] ?? 'csv')) ?>
                                         </span>
                                     </td>

@@ -100,7 +100,7 @@ require_once INCLUDES_PATH . '/header.php';
                                 <small class="block text-base-content/60"><?= e($log->user_email) ?></small>
                                 <?php endif; ?>
                             </td>
-                            <td><span class="badge bg-light text-dark"><?= e($log->action) ?></span></td>
+                            <td><span class="loka-badge bg-light text-dark"><?= e($log->action) ?></span></td>
                             <td>
                                 <?= e($log->entity_type) ?>
                                 <?php if ($log->entity_id): ?>

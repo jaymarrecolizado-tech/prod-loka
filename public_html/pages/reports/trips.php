@@ -174,7 +174,7 @@ require_once INCLUDES_PATH . '/header.php';
             </div>
             <?php else: ?>
             <div class="loka-table-responsive">
-                <table class="table table-hover mb-0">
+                <table class="loka-table table-hover mb-0">
                     <thead>
                         <tr>
                             <th>ID</th>

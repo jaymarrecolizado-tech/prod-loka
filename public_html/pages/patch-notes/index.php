@@ -238,7 +238,7 @@ require_once INCLUDES_PATH . '/header.php';
             <p class="text-base-content/60 mb-0">Track system updates and improvements</p>
         </div>
         <div>
-            <span class="badge bg-base-200 text-dark border">
+            <span class="loka-badge bg-base-200 text-dark border">
                 <i class="bi bi-tag me-1"></i>Current Version: <?= APP_VERSION ?>
             </span>
         </div>
@@ -249,10 +249,10 @@ require_once INCLUDES_PATH . '/header.php';
         <div class="p-6">
             <h6 class="card-title mb-3">Change Type Legend</h6>
             <div class="flex flex-wrap gap-2">
-                <span class="badge bg-success"><i class="bi bi-plus-circle me-1"></i>Feature</span>
-                <span class="badge bg-danger"><i class="bi bi-bug me-1"></i>Bug Fix</span>
-                <span class="badge bg-info"><i class="bi bi-arrow-up-circle me-1"></i>Improvement</span>
-                <span class="badge bg-warning"><i class="bi bi-shield-check me-1"></i>Security</span>
+                <span class="loka-badge bg-success"><i class="bi bi-plus-circle me-1"></i>Feature</span>
+                <span class="loka-badge bg-error"><i class="bi bi-bug me-1"></i>Bug Fix</span>
+                <span class="loka-badge bg-info"><i class="bi bi-arrow-up-circle me-1"></i>Improvement</span>
+                <span class="loka-badge bg-warning"><i class="bi bi-shield-check me-1"></i>Security</span>
             </div>
         </div>
     </div>
@@ -264,7 +264,7 @@ require_once INCLUDES_PATH . '/header.php';
             <div class="px-6 py-4 border-b border-base-200 bg-white flex justify-between items-center">
                 <div class="flex items-center">
                     <div class="version-badge me-3">
-                        <span class="badge bg-primary fs-6">v<?= e($note['version']) ?></span>
+                        <span class="loka-badge bg-primary fs-6">v<?= e($note['version']) ?></span>
                     </div>
                     <div>
                         <h5 class="mb-0"><?= e($note['title']) ?></h5>
@@ -278,7 +278,7 @@ require_once INCLUDES_PATH . '/header.php';
                 <ul class="list-unstyled mb-0">
                     <?php foreach ($note['changes'] as $change): ?>
                     <li class="flex items-start mb-2">
-                        <span class="badge <?= getChangeBadgeClass($change['type']) ?> me-2 mt-1" style="min-width: 80px;">
+                        <span class="loka-badge <?= getChangeBadgeClass($change['type']) ?> me-2 mt-1" style="min-width: 80px;">
                             <?= ucfirst($change['type']) ?>
                         </span>
                         <span class="change-text"><?= e($change['text']) ?></span>
@@ -298,7 +298,7 @@ require_once INCLUDES_PATH . '/header.php';
         <div class="p-6">
             <div class="grid grid-cols-12 gap-4">
                 <div class="col-span-12 md:col-span-6">
-                    <table class="table table-borderless table-sm">
+                    <table class="loka-table table-borderless table-sm">
                         <tr>
                             <td class="text-base-content/60">Application Name:</td>
                             <td class="fw-medium"><?= APP_NAME ?></td>
@@ -314,7 +314,7 @@ require_once INCLUDES_PATH . '/header.php';
                     </table>
                 </div>
                 <div class="col-span-12 md:col-span-6">
-                    <table class="table table-borderless table-sm">
+                    <table class="loka-table table-borderless table-sm">
                         <tr>
                             <td class="text-base-content/60">Timezone:</td>
                             <td class="fw-medium">Asia/Manila</td>

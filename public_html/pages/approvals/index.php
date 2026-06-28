@@ -147,11 +147,11 @@ require_once INCLUDES_PATH . '/header.php';
             <?php
             if ($pendingRequestsCount > 0):
             ?>
-            <span class="badge bg-warning fs-6">
+            <span class="loka-badge bg-warning fs-6">
                 <i class="bi bi-hourglass-split me-1"></i><?= $pendingRequestsCount ?> Pending Action<?= $pendingRequestsCount > 1 ? 's' : '' ?>
             </span>
             <?php else: ?>
-            <span class="badge bg-success fs-6">
+            <span class="loka-badge bg-success fs-6">
                 <i class="bi bi-check-circle me-1"></i>All Caught Up
             </span>
             <?php endif; ?>
@@ -164,7 +164,7 @@ require_once INCLUDES_PATH . '/header.php';
             <a class="nav-link <?= $tab === 'pending' ? 'active' : '' ?>" href="<?= APP_URL ?>/?page=approvals&tab=pending&p_pending=1">
                 <i class="bi bi-hourglass-split me-1"></i>Pending
                 <?php if ($pendingRequestsCount > 0): ?>
-                <span class="badge bg-warning ms-1"><?= $pendingRequestsCount ?></span>
+                <span class="loka-badge bg-warning ms-1"><?= $pendingRequestsCount ?></span>
                 <?php endif; ?>
             </a>
         </li>
@@ -172,7 +172,7 @@ require_once INCLUDES_PATH . '/header.php';
             <a class="nav-link <?= $tab === 'processed' ? 'active' : '' ?>" href="<?= APP_URL ?>/?page=approvals&tab=processed&p_processed=1">
                 <i class="bi bi-check-circle me-1"></i>Processed
                 <?php if ($processedRequestsCount > 0): ?>
-                <span class="badge bg-secondary ms-1"><?= $processedRequestsCount ?></span>
+                <span class="loka-badge bg-secondary ms-1"><?= $processedRequestsCount ?></span>
                 <?php endif; ?>
             </a>
         </li>
@@ -210,11 +210,11 @@ require_once INCLUDES_PATH . '/header.php';
                             <td>
                                 <strong>#<?= $request->id ?></strong>
                                 <?php if (!$request->viewed_at): ?>
-                                <span class="badge bg-danger ms-1">NEW</span>
+                                <span class="loka-badge bg-danger ms-1">NEW</span>
                                 <?php endif; ?>
                             </td>
                             <td><?= e($request->requester_name) ?></td>
-                            <td><span class="badge bg-light text-dark"><?= e($request->department_name) ?></span></td>
+                            <td><span class="loka-badge bg-light text-dark"><?= e($request->department_name) ?></span></td>
                             <td><?= truncate($request->purpose, 30) ?></td>
                             <td>
                                 <div><?= formatDateTime($request->start_datetime) ?></div>
@@ -231,12 +231,12 @@ require_once INCLUDES_PATH . '/header.php';
                             <td>
                                 <?php if ($request->status === 'revision'): ?>
                                 <div class="flex items-center gap-1">
-                                    <span class="badge bg-warning text-dark"><i class="bi bi-pencil-square me-1"></i>Revision</span>
+                                    <span class="loka-badge bg-warning text-dark"><i class="bi bi-pencil-square me-1"></i>Revision</span>
                                     <span class="text-warning">Needs Update</span>
                                 </div>
                                 <?php elseif ($request->status === 'pending'): ?>
                                 <div class="flex items-center gap-1">
-                                    <span class="badge bg-info" title="Department Approval">Dept</span>
+                                    <span class="loka-badge bg-info" title="Department Approval">Dept</span>
                                     <span class="text-warning" title="Waiting for your action">
                                         <i class="bi bi-clock-history"></i> Pending
                                     </span>
@@ -244,7 +244,7 @@ require_once INCLUDES_PATH . '/header.php';
                                 <?php else: ?>
                                 <div class="flex flex-col gap-1">
                                     <div class="flex items-center gap-1">
-                                        <span class="badge bg-light text-dark" title="Department Approval">Dept</span>
+                                        <span class="loka-badge bg-light text-dark" title="Department Approval">Dept</span>
                                         <?php if ($request->dept_status === 'approved'): ?>
                                         <span class="text-success" title="Department approved"><i class="bi bi-check-circle"></i> Done</span>
                                         <?php elseif ($request->dept_status === 'rejected'): ?>
@@ -256,7 +256,7 @@ require_once INCLUDES_PATH . '/header.php';
                                         <?php endif; ?>
                                     </div>
                                     <div class="flex items-center gap-1">
-                                        <span class="badge bg-primary" title="Motorpool Approval">MP</span>
+                                        <span class="loka-badge bg-primary" title="Motorpool Approval">MP</span>
                                         <span class="text-warning" title="Waiting for your action">
                                             <i class="bi bi-clock-history"></i> Pending
                                         </span>
@@ -332,12 +332,12 @@ require_once INCLUDES_PATH . '/header.php';
                             <td><?= e($request->requester_name) ?></td>
                             <td><?= truncate($request->purpose, 25) ?></td>
                             <td>
-                                <span class="badge bg-<?= $request->approval_type === 'motorpool' ? 'primary' : 'info' ?>">
+                                <span class="loka-badge bg-<?= $request->approval_type === 'motorpool' ? 'primary' : 'info' ?>">
                                     <?= ucfirst($request->approval_type) ?>
                                 </span>
                             </td>
                             <td>
-                                <span class="badge bg-<?= $request->my_action === 'approved' ? 'success' : 'danger' ?>">
+                                <span class="loka-badge bg-<?= $request->my_action === 'approved' ? 'success' : 'danger' ?>">
                                     <?= ucfirst($request->my_action) ?>
                                 </span>
                             </td>

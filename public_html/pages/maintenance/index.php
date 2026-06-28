@@ -156,7 +156,7 @@ require_once INCLUDES_PATH . '/header.php';
                        href="<?= APP_URL ?>/?page=maintenance&status=pending">
                         <i class="bi bi-clock me-1"></i>Pending
                         <?php if ($stats['pending'] > 0): ?>
-                            <span class="badge bg-warning ms-1"><?= $stats['pending'] ?></span>
+                            <span class="loka-badge bg-warning ms-1"><?= $stats['pending'] ?></span>
                         <?php endif; ?>
                     </a>
                 </li>
@@ -182,7 +182,7 @@ require_once INCLUDES_PATH . '/header.php';
                 </div>
             <?php else: ?>
                 <div class="loka-table-responsive">
-                    <table class="table table-hover align-middle">
+                    <table class="loka-table table-hover align-middle">
                         <thead>
                             <tr>
                                 <th>ID</th>
@@ -209,14 +209,14 @@ require_once INCLUDES_PATH . '/header.php';
                                     </td>
                                     <td>
                                         <?php $typeInfo = MAINTENANCE_TYPES[$req->type] ?? ['label' => ucfirst($req->type), 'icon' => 'bi-wrench']; ?>
-                                        <span class="badge bg-base-200 text-dark">
+                                        <span class="loka-badge bg-base-200 text-dark">
                                             <i class="bi <?= $typeInfo['icon'] ?> me-1"></i>
                                             <?= $typeInfo['label'] ?>
                                         </span>
                                     </td>
                                     <td>
                                         <?php $priorityInfo = MAINTENANCE_PRIORITIES[$req->priority] ?? ['label' => ucfirst($req->priority), 'color' => 'secondary']; ?>
-                                        <span class="badge bg-<?= $priorityInfo['color'] ?>">
+                                        <span class="loka-badge bg-<?= $priorityInfo['color'] ?>">
                                             <?= $priorityInfo['label'] ?>
                                         </span>
                                     </td>
@@ -236,7 +236,7 @@ require_once INCLUDES_PATH . '/header.php';
                                     </td>
                                     <td>
                                         <?php $statusInfo = MAINTENANCE_STATUSES[$req->status] ?? ['label' => ucfirst(str_replace('_', ' ', $req->status)), 'color' => 'secondary']; ?>
-                                        <span class="badge bg-<?= $statusInfo['color'] ?>">
+                                        <span class="loka-badge bg-<?= $statusInfo['color'] ?>">
                                             <?= $statusInfo['label'] ?>
                                         </span>
                                     </td>

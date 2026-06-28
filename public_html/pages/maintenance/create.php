@@ -228,10 +228,10 @@ require_once INCLUDES_PATH . '/header.php';
                 <div class="p-6">
                     <h6><i class="bi bi-exclamation-triangle me-2"></i>Priority Guide</h6>
                     <ul class="small text-base-content/60 mb-0">
-                        <li class="mb-2"><span class="badge bg-error">Critical</span> Vehicle cannot operate</li>
-                        <li class="mb-2"><span class="badge bg-warning">High</span> Safety concern</li>
-                        <li class="mb-2"><span class="badge bg-info">Medium</span> Needs attention soon</li>
-                        <li><span class="badge bg-secondary">Low</span> Minor issue</li>
+                        <li class="mb-2"><span class="loka-badge bg-error">Critical</span> Vehicle cannot operate</li>
+                        <li class="mb-2"><span class="loka-badge bg-warning">High</span> Safety concern</li>
+                        <li class="mb-2"><span class="loka-badge bg-info">Medium</span> Needs attention soon</li>
+                        <li><span class="loka-badge bg-secondary">Low</span> Minor issue</li>
                     </ul>
                 </div>
             </div>

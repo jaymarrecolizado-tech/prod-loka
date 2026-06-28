@@ -319,7 +319,7 @@ require_once INCLUDES_PATH . '/header.php';
                         </div>
                         <div class="col-span-12 sm:col-span-4">
                             <small class="text-base-content/60">Vehicle Plate</small>
-                            <div><span class="badge bg-dark"><?= e($voucher->vehicle_plate) ?></span></div>
+                            <div><span class="loka-badge bg-base-content text-white"><?= e($voucher->vehicle_plate) ?></span></div>
                         </div>
                         <div class="col-span-12 sm:col-span-4">
                             <small class="text-base-content/60">Fuel</small>
@@ -327,7 +327,7 @@ require_once INCLUDES_PATH . '/header.php';
                         </div>
                         <div class="col-span-12 sm:col-span-6">
                             <small class="text-base-content/60">Fund Source</small>
-                            <div><span class="badge bg-secondary"><?= e($voucher->fund_source) ?></span></div>
+                            <div><span class="loka-badge bg-secondary"><?= e($voucher->fund_source) ?></span></div>
                         </div>
                         <div class="col-span-12">
                             <small class="text-base-content/60">Purpose</small>

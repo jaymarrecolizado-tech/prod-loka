@@ -195,21 +195,21 @@ require_once INCLUDES_PATH . '/header.php';
             $statusHtml = '';
             
             if ($request->status === STATUS_PENDING && $isCurrentUserApprover && $canApprove) {
-                $statusHtml = '<span class="badge badge-warning gap-1 text-sm"><i class="bi bi-hourglass-split"></i>Pending Your Approval</span>';
+                $statusHtml = '<span class="loka-badge badge-warning gap-1 text-sm"><i class="bi bi-hourglass-split"></i>Pending Your Approval</span>';
             } elseif ($request->status === STATUS_PENDING_MOTORPOOL && $isCurrentUserMotorpool && $canApprove) {
-                $statusHtml = '<span class="badge badge-warning gap-1 text-sm"><i class="bi bi-hourglass-split"></i>Awaiting Your Approval</span>';
+                $statusHtml = '<span class="loka-badge badge-warning gap-1 text-sm"><i class="bi bi-hourglass-split"></i>Awaiting Your Approval</span>';
             } elseif ($request->status === STATUS_PENDING) {
-                $statusHtml = '<span class="badge badge-info gap-1 text-sm"><i class="bi bi-clock-history"></i>Awaiting Department Approval</span>';
+                $statusHtml = '<span class="loka-badge badge-info gap-1 text-sm"><i class="bi bi-clock-history"></i>Awaiting Department Approval</span>';
             } elseif ($request->status === STATUS_PENDING_MOTORPOOL) {
-                $statusHtml = '<span class="badge badge-primary gap-1 text-sm"><i class="bi bi-truck-front"></i>Awaiting Motorpool Assignment</span>';
+                $statusHtml = '<span class="loka-badge badge-primary gap-1 text-sm"><i class="bi bi-truck-front"></i>Awaiting Motorpool Assignment</span>';
             } elseif ($request->status === STATUS_APPROVED) {
-                $statusHtml = '<span class="badge badge-success gap-1 text-sm"><i class="bi bi-check-circle"></i>Fully Approved</span>';
+                $statusHtml = '<span class="loka-badge badge-success gap-1 text-sm"><i class="bi bi-check-circle"></i>Fully Approved</span>';
             } elseif ($request->status === STATUS_REJECTED) {
-                $statusHtml = '<span class="badge badge-error gap-1 text-sm"><i class="bi bi-x-circle"></i>Rejected</span>';
+                $statusHtml = '<span class="loka-badge badge-error gap-1 text-sm"><i class="bi bi-x-circle"></i>Rejected</span>';
             } elseif ($request->status === STATUS_REVISION) {
-                $statusHtml = '<span class="badge badge-warning gap-1 text-sm"><i class="bi bi-arrow-repeat"></i>Under Revision</span>';
+                $statusHtml = '<span class="loka-badge badge-warning gap-1 text-sm"><i class="bi bi-arrow-repeat"></i>Under Revision</span>';
             } elseif ($request->status === STATUS_CANCELLED) {
-                $statusHtml = '<span class="badge badge-ghost gap-1 text-sm"><i class="bi bi-slash-circle"></i>Cancelled</span>';
+                $statusHtml = '<span class="loka-badge badge-ghost gap-1 text-sm"><i class="bi bi-slash-circle"></i>Cancelled</span>';
             } else {
                 $statusHtml = requestStatusBadge($request->status);
             }
@@ -229,7 +229,7 @@ require_once INCLUDES_PATH . '/header.php';
                 <!-- Department Approval Stage -->
                 <div class="rounded-xl border p-4 <?= $departmentApproval && $departmentApproval->status === 'approved' ? 'border-success bg-success/10' : ($departmentApproval && $departmentApproval->status === 'rejected' ? 'border-error bg-error/10' : ($departmentApproval && $departmentApproval->status === 'revision' ? 'border-warning bg-warning/10' : 'bg-base-200/50')) ?>">
                     <div class="mb-2 flex items-center gap-2">
-                        <span class="badge <?= $departmentApproval ? ($departmentApproval->status === 'approved' ? 'badge-success' : ($departmentApproval->status === 'rejected' ? 'badge-error' : 'badge-warning')) : 'badge-ghost' ?> badge-sm rounded-full p-2">
+                        <span class="loka-badge <?= $departmentApproval ? ($departmentApproval->status === 'approved' ? 'badge-success' : ($departmentApproval->status === 'rejected' ? 'badge-error' : 'badge-warning')) : 'badge-ghost' ?> badge-sm rounded-full p-2">
                             <i class="bi bi-<?= $departmentApproval ? ($departmentApproval->status === 'approved' ? 'check-circle' : ($departmentApproval->status === 'rejected' ? 'x-circle' : 'arrow-repeat')) : 'clock' ?>"></i>
                         </span>
                         <strong class="text-sm">Department Approval</strong>
@@ -255,7 +255,7 @@ require_once INCLUDES_PATH . '/header.php';
                 <!-- Motorpool Approval Stage -->
                 <div class="rounded-xl border p-4 <?= $motorpoolApproval && $motorpoolApproval->status === 'approved' ? 'border-success bg-success/10' : ($motorpoolApproval && $motorpoolApproval->status === 'rejected' ? 'border-error bg-error/10' : ($motorpoolApproval && $motorpoolApproval->status === 'revision' ? 'border-warning bg-warning/10' : 'bg-base-200/50')) ?>">
                     <div class="mb-2 flex items-center gap-2">
-                        <span class="badge <?= $motorpoolApproval ? ($motorpoolApproval->status === 'approved' ? 'badge-success' : ($motorpoolApproval->status === 'rejected' ? 'badge-error' : 'badge-warning')) : 'badge-ghost' ?> badge-sm rounded-full p-2">
+                        <span class="loka-badge <?= $motorpoolApproval ? ($motorpoolApproval->status === 'approved' ? 'badge-success' : ($motorpoolApproval->status === 'rejected' ? 'badge-error' : 'badge-warning')) : 'badge-ghost' ?> badge-sm rounded-full p-2">
                             <i class="bi bi-<?= $motorpoolApproval ? ($motorpoolApproval->status === 'approved' ? 'check-circle' : ($motorpoolApproval->status === 'rejected' ? 'x-circle' : 'arrow-repeat')) : 'clock' ?>"></i>
                         </span>
                         <strong class="text-sm">Motorpool Approval</strong>
@@ -525,7 +525,7 @@ require_once INCLUDES_PATH . '/header.php';
                             <div class="mb-3 flex gap-3">
                                 <div>
                                     <span
-                                        class="badge <?= $approval->status === 'approved' ? 'badge-success' : 'badge-error' ?> rounded-full p-2">
+                                        class="loka-badge <?= $approval->status === 'approved' ? 'badge-success' : 'badge-error' ?> rounded-full p-2">
                                         <i class="bi bi-<?= $approval->status === 'approved' ? 'check' : 'x' ?>-lg"></i>
                                     </span>
                                 </div>
@@ -589,7 +589,7 @@ require_once INCLUDES_PATH . '/header.php';
                                             <?php if ($hasRequestedVehicle): ?>
                                                 <div class="mb-2">
                                                     <strong>Requested Vehicle:</strong>
-                                                    <span class="badge badge-primary ml-1">
+                                                    <span class="loka-badge badge-primary ml-1">
                                                         <i class="bi bi-car-front mr-1"></i><?= e($requestedVehicle->plate_number) ?> - <?= e($requestedVehicle->make . ' ' . $requestedVehicle->model) ?>
                                                     </span>
                                                     <span class="text-sm text-base-content/60">(will be auto-selected)</span>
@@ -599,7 +599,7 @@ require_once INCLUDES_PATH . '/header.php';
                                             <?php if ($hasRequestedDriver): ?>
                                                 <div class="mb-2">
                                                     <strong>Requested Driver:</strong>
-                                                    <span class="badge badge-primary ml-1">
+                                                    <span class="loka-badge badge-primary ml-1">
                                                         <i class="bi bi-person-badge mr-1"></i><?= e($requestedDriver->name) ?>
                                                     </span>
                                                     <span class="text-sm text-base-content/60">(will be auto-selected)</span>
@@ -609,7 +609,7 @@ require_once INCLUDES_PATH . '/header.php';
                                             <?php if ($recommendedVehicle): ?>
                                                 <div>
                                                     <strong>Recommended Vehicle:</strong>
-                                                    <span class="badge badge-success ml-1">
+                                                    <span class="loka-badge badge-success ml-1">
                                                         <i class="bi bi-truck mr-1"></i><?= $recommendedVehicle ?>
                                                     </span>
                                                     <span class="text-sm text-base-content/60">(for <?= $request->passenger_count ?> passenger<?= $request->passenger_count > 1 ? 's' : '' ?>)</span>
@@ -626,7 +626,7 @@ require_once INCLUDES_PATH . '/header.php';
                                                 Conflict Status
                                             </h6>
                                             <?php if ($hasConflicts): ?>
-                                                <span class="badge badge-dark rounded-full" id="conflictCountBadge">
+                                                <span class="loka-badge badge-dark rounded-full" id="conflictCountBadge">
                                                     <?= $totalConflicts ?> conflict<?= $totalConflicts > 1 ? 's' : '' ?>
                                                 </span>
                                             <?php endif; ?>
@@ -639,7 +639,7 @@ require_once INCLUDES_PATH . '/header.php';
                                                 <div>
                                                     <div class="flex items-center rounded-xl border border-base-300 bg-base-200/50 p-3">
                                                         <div class="mr-3">
-                                                            <span class="badge <?= $vehicleConflictSeverity === 'none' ? 'badge-success' : ($vehicleConflictSeverity === 'minor' ? 'badge-warning' : 'badge-error') ?> rounded-full p-2 text-xl" id="vehicleStatusBadge">
+                                                            <span class="loka-badge <?= $vehicleConflictSeverity === 'none' ? 'badge-success' : ($vehicleConflictSeverity === 'minor' ? 'badge-warning' : 'badge-error') ?> rounded-full p-2 text-xl" id="vehicleStatusBadge">
                                                                 <i class="bi bi-<?= $vehicleConflictSeverity === 'none' ? 'check-lg' : 'exclamation-lg' ?>"></i>
                                                             </span>
                                                         </div>
@@ -659,7 +659,7 @@ require_once INCLUDES_PATH . '/header.php';
                                                 <div>
                                                     <div class="flex items-center rounded-xl border border-base-300 bg-base-200/50 p-3">
                                                         <div class="mr-3">
-                                                            <span class="badge <?= $driverConflictSeverity === 'none' ? 'badge-success' : ($driverConflictSeverity === 'minor' ? 'badge-warning' : 'badge-error') ?> rounded-full p-2 text-xl" id="driverStatusBadge">
+                                                            <span class="loka-badge <?= $driverConflictSeverity === 'none' ? 'badge-success' : ($driverConflictSeverity === 'minor' ? 'badge-warning' : 'badge-error') ?> rounded-full p-2 text-xl" id="driverStatusBadge">
                                                                 <i class="bi bi-<?= $driverConflictSeverity === 'none' ? 'check-lg' : 'exclamation-lg' ?>"></i>
                                                             </span>
                                                         </div>
@@ -976,7 +976,7 @@ require_once INCLUDES_PATH . '/header.php';
                 .then(data => {
                     if (data.conflict && data.conflicts.length > 0) {
                         const conflict = data.conflicts[0];
-                        const overlapBadge = `<span class="badge badge-${getSeverityColor(data.severity)} ml-2">${data.severity.toUpperCase()} (${data.overlap_minutes}min)</span>`;
+                        const overlapBadge = `<span class="loka-badge badge-${getSeverityColor(data.severity)} ml-2">${data.severity.toUpperCase()} (${data.overlap_minutes}min)</span>`;
 
                         alertEl.querySelector('.message').innerHTML = `
                             <strong>Conflict with Request #${conflict.id}</strong>${overlapBadge}<br>

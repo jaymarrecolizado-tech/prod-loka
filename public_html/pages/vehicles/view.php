@@ -105,7 +105,7 @@ require_once INCLUDES_PATH . '/header.php';
                     <div class="empty-state py-4"><p class="mb-0 text-base-content/60">No trips yet</p></div>
                     <?php else: ?>
                     <div class="loka-table-responsive">
-                        <table class="table table-hover mb-0">
+                        <table class="loka-table table-hover mb-0">
                             <thead><tr><th>Date</th><th>Requester</th><th>Destination</th><th>Status</th></tr></thead>
                             <tbody>
                                 <?php foreach ($recentTrips as $trip): ?>

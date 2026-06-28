@@ -32,7 +32,7 @@ require_once INCLUDES_PATH . '/header.php';
                         </div>
                         <h5>Vehicle History</h5>
                         <p class="text-base-content/60 mb-3">View trip history and utilization for each vehicle with export options</p>
-                        <span class="badge bg-primary">PDF Export</span>
+                        <span class="loka-badge bg-primary">PDF Export</span>
                     </div>
                 </div>
             </a>
@@ -48,7 +48,7 @@ require_once INCLUDES_PATH . '/header.php';
                         </div>
                         <h5>Driver Report</h5>
                         <p class="text-base-content/60 mb-3">View trip history and statistics for each driver with export options</p>
-                        <span class="badge bg-success">PDF Export</span>
+                        <span class="loka-badge bg-success">PDF Export</span>
                     </div>
                 </div>
             </a>
@@ -64,7 +64,7 @@ require_once INCLUDES_PATH . '/header.php';
                         </div>
                         <h5>Trip Requests</h5>
                         <p class="text-base-content/60 mb-3">View all trip requests with filtering and export options</p>
-                        <span class="badge bg-info">CSV & PDF Export</span>
+                        <span class="loka-badge bg-info">CSV & PDF Export</span>
                     </div>
                 </div>
             </a>
@@ -81,7 +81,7 @@ require_once INCLUDES_PATH . '/header.php';
                         </div>
                         <h5>Admin Reports</h5>
                         <p class="text-base-content/60 mb-3">Advanced reports: users, vehicles, departments, audit logs</p>
-                        <span class="badge bg-warning text-dark">Admin Only</span>
+                        <span class="loka-badge bg-warning text-dark">Admin Only</span>
                     </div>
                 </div>
             </a>

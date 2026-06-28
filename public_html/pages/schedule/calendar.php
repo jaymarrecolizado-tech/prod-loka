@@ -302,7 +302,7 @@ require_once INCLUDES_PATH . '/header.php';
             <span class="day-number"><?= $day ?></span>
             
             <?php if ($totalVehicles > 0): ?>
-            <span class="badge availability-badge <?= $bookedCount >= $totalVehicles ? 'bg-danger' : ($bookedCount > 0 ? 'bg-warning text-dark' : 'bg-success') ?>">
+            <span class="loka-badge availability-badge <?= $bookedCount >= $totalVehicles ? 'bg-danger' : ($bookedCount > 0 ? 'bg-warning text-dark' : 'bg-success') ?>">
                 <?= $totalVehicles - $bookedCount ?>/<?= $totalVehicles ?> free
             </span>
             <?php endif; ?>
@@ -354,7 +354,7 @@ require_once INCLUDES_PATH . '/header.php';
             </div>
             <?php else: ?>
             <div class="loka-table-responsive">
-                <table class="table table-hover mb-0">
+                <table class="loka-table table-hover mb-0">
                     <thead class="table-light">
                         <tr>
                             <th>Date Range</th>
@@ -378,16 +378,16 @@ require_once INCLUDES_PATH . '/header.php';
                             <td><?= e($req->destination) ?></td>
                             <td>
                                 <?php if ($req->plate_number): ?>
-                                <span class="badge bg-primary"><?= e($req->plate_number) ?></span>
+                                <span class="loka-badge bg-primary"><?= e($req->plate_number) ?></span>
                                 <?php else: ?>
-                                <span class="badge bg-secondary">Pending Assignment</span>
+                                <span class="loka-badge bg-secondary">Pending Assignment</span>
                                 <?php endif; ?>
                             </td>
                             <td>
                                 <?php if ($req->vehicle_id): ?>
-                                <span class="badge bg-success">Approved</span>
+                                <span class="loka-badge bg-success">Approved</span>
                                 <?php else: ?>
-                                <span class="badge bg-warning text-dark">Pending Motorpool</span>
+                                <span class="loka-badge bg-warning text-dark">Pending Motorpool</span>
                                 <?php endif; ?>
                             </td>
                         </tr>

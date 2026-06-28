@@ -429,7 +429,7 @@ if ($endDate) $baseParams['end_date'] = $endDate;
                                     <?php endif; ?>
                                 </td>
                                 <td>
-                                    <span class="badge bg-info"><?= $passengerCount ?></span>
+                                    <span class="loka-badge bg-info"><?= $passengerCount ?></span>
                                 </td>
                                 <?php if (in_array($role, [ROLE_MOTORPOOL, ROLE_ADMIN])): ?>
                                 <td>

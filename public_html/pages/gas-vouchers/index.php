@@ -210,14 +210,14 @@ require_once INCLUDES_PATH . '/header.php';
                             </td>
                             <td>
                                 <div class="font-semibold"><?= e($v->driver_name) ?></div>
-                                <span class="badge badge-neutral text-xs"><?= e($v->vehicle_plate) ?></span>
+                                <span class="loka-badge badge-neutral text-xs"><?= e($v->vehicle_plate) ?></span>
                             </td>
                             <td>
                                 <div><?= e($v->quantity) ?> <?= e($v->unit) ?></div>
                                 <div class="text-xs text-base-content/50"><?= e($v->fuel_type) ?></div>
                             </td>
                             <td>
-                                <span class="badge badge-secondary"><?= e($v->fund_source) ?></span>
+                                <span class="loka-badge badge-secondary"><?= e($v->fund_source) ?></span>
                             </td>
                             <td>
                                 <span title="<?= e($v->purpose) ?>"><?= e(mb_substr($v->purpose, 0, 40)) ?><?= strlen($v->purpose) > 40 ? '…' : '' ?></span>

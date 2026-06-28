@@ -181,12 +181,12 @@ require_once INCLUDES_PATH . '/header.php';
                     <h6 class="mb-0">
                         <i class="bi bi-bell me-2"></i>
                         Upcoming Maintenance Alerts
-                        <span class="badge bg-warning ms-2"><?= count($upcomingAlerts) ?></span>
+                        <span class="loka-badge bg-warning ms-2"><?= count($upcomingAlerts) ?></span>
                     </h6>
                 </div>
                 <div class="p-6">
                     <div class="loka-table-responsive">
-                        <table class="table table-sm mb-0">
+                        <table class="loka-table table-sm mb-0">
                             <thead>
                                 <tr>
                                     <th>Vehicle</th>
@@ -218,12 +218,12 @@ require_once INCLUDES_PATH . '/header.php';
                                     </td>
                                     <td>
                                         <?php if ($alert['is_overdue']): ?>
-                                            <span class="badge bg-danger">
+                                            <span class="loka-badge bg-error">
                                                 <i class="bi bi-exclamation-triangle me-1"></i>
                                                 Overdue
                                             </span>
                                         <?php else: ?>
-                                            <span class="badge bg-warning text-dark">
+                                            <span class="loka-badge bg-warning text-dark">
                                                 <i class="bi bi-clock me-1"></i>
                                                 Due Soon
                                             </span>
@@ -330,7 +330,7 @@ require_once INCLUDES_PATH . '/header.php';
             }
             ?>
             <div class="loka-table-responsive">
-                <table class="table table-bordered calendar-table">
+                <table class="loka-table table-bordered calendar-table">
                     <thead>
                         <tr>
                             <th class="text-center" style="width: 14%">Mon</th>
@@ -368,7 +368,7 @@ require_once INCLUDES_PATH . '/header.php';
                                 <td class="<?= $isToday ? 'table-primary' : '' ?> <?= $cellDay === null ? 'bg-base-200' : '' ?>" valign="top">
                                     <?php if ($cellDay): ?>
                                         <div class="flex justify-between">
-                                            <span class="badge <?= $isToday ? 'bg-primary' : 'bg-secondary' ?>">
+                                            <span class="loka-badge <?= $isToday ? 'bg-primary' : 'bg-secondary' ?>">
                                                 <?= $cellDay ?>
                                             </span>
                                         </div>
@@ -420,7 +420,7 @@ require_once INCLUDES_PATH . '/header.php';
                 </div>
             <?php else: ?>
                 <div class="loka-table-responsive">
-                    <table class="table table-hover align-middle">
+                    <table class="loka-table table-hover align-middle">
                         <thead>
                             <tr>
                                 <th>ID</th>
@@ -453,17 +453,17 @@ require_once INCLUDES_PATH . '/header.php';
                                         }
                                         if ($typeInfo):
                                         ?>
-                                        <span class="badge bg-base-200 text-dark">
+                                        <span class="loka-badge bg-base-200 text-dark">
                                             <i class="bi <?= $typeInfo['icon'] ?> me-1"></i>
                                             <?= $typeInfo['label'] ?>
                                         </span>
                                         <?php else: ?>
-                                        <span class="badge bg-base-200 text-dark"><?= ucfirst($req->type) ?></span>
+                                        <span class="loka-badge bg-base-200 text-dark"><?= ucfirst($req->type) ?></span>
                                         <?php endif; ?>
                                     </td>
                                     <td>
                                         <?php $priorityInfo = MAINTENANCE_PRIORITIES[$req->priority] ?? ['label' => ucfirst($req->priority), 'color' => 'secondary']; ?>
-                                        <span class="badge bg-<?= $priorityInfo['color'] ?>">
+                                        <span class="loka-badge bg-<?= $priorityInfo['color'] ?>">
                                             <?= $priorityInfo['label'] ?>
                                         </span>
                                     </td>
@@ -486,7 +486,7 @@ require_once INCLUDES_PATH . '/header.php';
                                     </td>
                                     <td>
                                         <?php $statusInfo = MAINTENANCE_STATUSES[$req->status] ?? ['label' => ucfirst(str_replace('_', ' ', $req->status)), 'color' => 'secondary']; ?>
-                                        <span class="badge bg-<?= $statusInfo['color'] ?>">
+                                        <span class="loka-badge bg-<?= $statusInfo['color'] ?>">
                                             <?= $statusInfo['label'] ?>
                                         </span>
                                     </td>

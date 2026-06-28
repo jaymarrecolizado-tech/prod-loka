@@ -111,7 +111,7 @@ require_once INCLUDES_PATH . '/header.php';
             <p class="text-base-content/60 mb-0">View your assigned and requested trips</p>
         </div>
         <div class="flex gap-2">
-            <span class="badge bg-base-200 text-base-content border border-base-300 text-sm">
+            <span class="loka-badge bg-base-200 text-base-content border border-base-300 text-sm">
                 <i class="bi bi-person-badge mr-1"></i><?= e($driver->name) ?>
             </span>
             <a href="?page=my-trips&action=export-pdf&filter=<?= $filter ?>" class="bg-success text-success-content hover:bg-success/90 px-4 py-2 text-sm font-medium rounded-xl inline-flex items-center gap-2 transition-colors">
@@ -186,7 +186,7 @@ require_once INCLUDES_PATH . '/header.php';
                             <h3 class="mb-0">
                                 <?= $stats['trip_tickets_approved'] ?>
                                 <?php if ($stats['trip_tickets_pending'] > 0): ?>
-                                    <span class="badge bg-warning ml-1"><?= $stats['trip_tickets_pending'] ?> pending</span>
+                                    <span class="loka-badge bg-warning ml-1"><?= $stats['trip_tickets_pending'] ?> pending</span>
                                 <?php endif; ?>
                             </h3>
                         </div>
@@ -204,7 +204,7 @@ require_once INCLUDES_PATH . '/header.php';
                        href="<?= APP_URL ?>/?page=my-trips">
                         <i class="bi bi-calendar-event mr-1"></i>Upcoming
                         <?php if ($stats['upcoming'] > 0): ?>
-                            <span class="badge bg-primary ml-1"><?= $stats['upcoming'] ?></span>
+                            <span class="loka-badge bg-primary ml-1"><?= $stats['upcoming'] ?></span>
                         <?php endif; ?>
                     </a>
                 </li>
@@ -303,9 +303,9 @@ require_once INCLUDES_PATH . '/header.php';
                                     <td><?= requestStatusBadge($trip->status) ?></td>
                                     <td>
                                         <?php if ($isAssignedDriver): ?>
-                                            <span class="badge bg-success">Assigned Driver</span>
+                                            <span class="loka-badge bg-success">Assigned Driver</span>
                                         <?php elseif ($isRequestedDriver): ?>
-                                            <span class="badge bg-warning text-dark">Requested</span>
+                                            <span class="loka-badge bg-warning text-dark">Requested</span>
                                         <?php endif; ?>
                                     </td>
                                     <td>
@@ -329,7 +329,7 @@ require_once INCLUDES_PATH . '/header.php';
                                                     break;
                                             }
                                             ?>
-                                            <span class="badge bg-<?= $ticketStatusClass ?>">
+                                            <span class="loka-badge bg-<?= $ticketStatusClass ?>">
                                                 <i class="bi bi-<?= $ticketStatusIcon ?> mr-1"></i>
                                                 <?= ucfirst($trip->trip_ticket_status) ?>
                                             </span>
@@ -358,7 +358,7 @@ require_once INCLUDES_PATH . '/header.php';
     <div class="loka-alert loka-alert-warning mt-4">
         <i class="bi bi-exclamation-triangle mr-2"></i>
         <strong>Status Notice:</strong> Your current driver status is 
-        <span class="badge bg-<?= $driver->status === 'on_trip' ? 'primary' : ($driver->status === 'on_leave' ? 'warning text-dark' : 'error') ?>">
+        <span class="loka-badge bg-<?= $driver->status === 'on_trip' ? 'primary' : ($driver->status === 'on_leave' ? 'warning text-dark' : 'error') ?>">
             <?= ucfirst(str_replace('_', ' ', $driver->status)) ?>
         </span>.
         <?php if ($driver->status === 'on_leave'): ?>

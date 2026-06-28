@@ -143,7 +143,7 @@ require_once INCLUDES_PATH . '/header.php';
                             </div>
                             <div>
                                 <div class="text-xs text-base-content/50 mb-1">Vehicle Plate No.</div>
-                                <div class="font-semibold"><span class="badge badge-neutral text-lg"><?= e($voucher->vehicle_plate) ?></span></div>
+                                <div class="font-semibold"><span class="loka-badge badge-neutral text-lg"><?= e($voucher->vehicle_plate) ?></span></div>
                             </div>
                         </div>
                     </div>
@@ -192,13 +192,13 @@ require_once INCLUDES_PATH . '/header.php';
                         <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                             <div>
                                 <div class="text-xs text-base-content/50 mb-1">Fund Source</div>
-                                <span class="badge badge-secondary text-lg"><?= e($voucher->fund_source) ?></span>
+                                <span class="loka-badge badge-secondary text-lg"><?= e($voucher->fund_source) ?></span>
                                 <div class="text-xs text-base-content/50 mt-1">Project/program the fuel is derived from</div>
                             </div>
                             <?php if ($voucher->chargeable_against): ?>
                             <div>
                                 <div class="text-xs text-base-content/50 mb-1">Chargeable Against</div>
-                                <span class="badge badge-secondary text-lg"><?= e($voucher->chargeable_against) ?></span>
+                                <span class="loka-badge badge-secondary text-lg"><?= e($voucher->chargeable_against) ?></span>
                                 <div class="text-xs text-base-content/50 mt-1">Specific project/budget the fuel is charged to</div>
                             </div>
                             <?php endif; ?>
@@ -322,7 +322,7 @@ require_once INCLUDES_PATH . '/header.php';
                         $payColors = ['unpaid' => 'badge-warning', 'paid' => 'badge-success', 'cancelled' => 'badge-error', 'processed' => 'badge-info'];
                         $payColor = $payColors[$voucher->payment_status] ?? 'badge-neutral';
                         ?>
-                        <span class="badge <?= $payColor ?> text-lg px-4 py-2">
+                        <span class="loka-badge <?= $payColor ?> text-lg px-4 py-2">
                             <?= ucfirst($voucher->payment_status) ?>
                         </span>
                         <?php if ($voucher->date_withdrawn): ?>

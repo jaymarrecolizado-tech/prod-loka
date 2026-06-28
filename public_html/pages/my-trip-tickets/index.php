@@ -286,11 +286,11 @@ require_once INCLUDES_PATH . '/header.php';
                                         <div class="text-xs text-base-content/60"><?= $tt->make ?> <?= $tt->vehicle_model ?></div>
                                     </td>
                                     <td>
-                                        <span class="badge <?= $statusClass ?> gap-1">
+                                        <span class="loka-badge <?= $statusClass ?> gap-1">
                                             <i class="bi bi-<?= $statusIcon ?>"></i>
                                             <?= ucfirst($tt->status) ?>
                                         </span>
-                                        <span class="badge <?= $typeInfo['color'] ?>">
+                                        <span class="loka-badge <?= $typeInfo['color'] ?>">
                                             <?= $typeInfo['label'] ?>
                                         </span>
                                     </td>

@@ -90,7 +90,7 @@ require_once INCLUDES_PATH . '/header.php';
                     <h4 class="mb-0">
                         <i class="bi bi-file-earmark-text mr-2"></i>
                         Trip Ticket TT-<?= $ticket->request_id ?> (Ref: VRF-<?= $ticket->request_id ?>)
-                        <span class="badge bg-<?= $ticket->status === 'approved' ? 'success' : ($ticket->status === 'reviewed' ? 'info' : 'warning') ?> ml-2">
+                        <span class="loka-badge bg-<?= $ticket->status === 'approved' ? 'success' : ($ticket->status === 'reviewed' ? 'info' : 'warning') ?> ml-2">
                             <?= ucfirst($ticket->status) ?>
                         </span>
                     </h4>
@@ -153,7 +153,7 @@ require_once INCLUDES_PATH . '/header.php';
                                     $typeInfo['label'] = e($ticket->trip_type_other);
                                 }
                                 ?>
-                                <span class="badge bg-<?= $typeInfo['color'] ?>">
+                                <span class="loka-badge bg-<?= $typeInfo['color'] ?>">
                                     <?= $typeInfo['label'] ?>
                                 </span>
                             </div>
@@ -250,7 +250,7 @@ require_once INCLUDES_PATH . '/header.php';
                                         <tr>
                                             <td>Efficiency</td>
                                             <td>
-                                                <span class="badge bg-<?= ($ticket->distance_traveled / $ticket->fuel_consumed) < 10 ? 'danger' : (($ticket->distance_traveled / $ticket->fuel_consumed) < 15 ? 'warning' : 'success') ?>">
+                                                <span class="loka-badge bg-<?= ($ticket->distance_traveled / $ticket->fuel_consumed) < 10 ? 'danger' : (($ticket->distance_traveled / $ticket->fuel_consumed) < 15 ? 'warning' : 'success') ?>">
                                                     <?= number_format($ticket->distance_traveled / $ticket->fuel_consumed, 2) ?> km/L
                                                 </span>
                                             </td>
@@ -324,11 +324,11 @@ require_once INCLUDES_PATH . '/header.php';
                             <div>
                                 <strong>Status:</strong>
                                 <?php if ($ticket->resolved): ?>
-                                    <span class="badge bg-success">
+                                    <span class="loka-badge bg-success">
                                         <i class="bi bi-check mr-1"></i> Resolved
                                     </span>
                                 <?php else: ?>
-                                    <span class="badge bg-error">
+                                    <span class="loka-badge bg-error">
                                         <i class="bi bi-x mr-1"></i> Unresolved
                                     </span>
                                 <?php endif; ?>
@@ -396,7 +396,7 @@ require_once INCLUDES_PATH . '/header.php';
                                 </div>
                                 <?php if ($ticket->status === 'approved'): ?>
                                     <div class="mt-2">
-                                        <span class="badge bg-success">
+                                        <span class="loka-badge bg-success">
                                             <i class="bi bi-check-circle mr-1"></i> Approved
                                         </span>
                                     </div>
@@ -568,7 +568,7 @@ require_once INCLUDES_PATH . '/header.php';
             <div class="grid grid-cols-12 gap-4 mb-4 p-3 bg-base-200 rounded-xl">
                 <div class="col-span-12">
                     <h6 class="mb-3">
-                        <span class="badge bg-info mr-1">1</span>
+                        <span class="loka-badge bg-info mr-1">1</span>
                         PASSENGER(S) ACKNOWLEDGMENT
                     </h6>
                     <p class="text-sm text-base-content/60 mb-3">
@@ -596,7 +596,7 @@ require_once INCLUDES_PATH . '/header.php';
             <div class="grid grid-cols-12 gap-4 mb-4 p-3 bg-base-200 rounded-xl">
                 <div class="col-span-12">
                     <h6 class="mb-3">
-                        <span class="badge bg-warning text-dark mr-1">2</span>
+                        <span class="loka-badge bg-warning text-dark mr-1">2</span>
                         MOTORPOOL HEAD - Verification & Approval
                     </h6>
                     <p class="text-sm text-base-content/60 mb-3">
@@ -624,7 +624,7 @@ require_once INCLUDES_PATH . '/header.php';
             <div class="grid grid-cols-12 gap-4 mb-4 p-3 bg-base-200 rounded-xl">
                 <div class="col-span-12">
                     <h6 class="mb-3">
-                        <span class="badge bg-success mr-1">3</span>
+                        <span class="loka-badge bg-success mr-1">3</span>
                         ADMIN / FINANCE DIVISION CHIEF - Final Approval
                     </h6>
                     <p class="text-sm text-base-content/60 mb-3">

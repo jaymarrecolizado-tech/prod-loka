@@ -139,8 +139,8 @@ require_once INCLUDES_PATH . '/header.php';
                     <h6 class="text-base-content/60 mb-3">Vehicle Information</h6>
                     <h4 class="mb-1"><?= e($vehicleInfo->plate_number) ?></h4>
                     <p class="text-base-content/60 mb-2"><?= e($vehicleInfo->make . ' ' . $vehicleInfo->model) ?> (<?= e($vehicleInfo->year) ?>)</p>
-                    <span class="badge bg-primary"><?= e($vehicleInfo->type_name) ?></span>
-                    <span class="badge bg-<?= $vehicleInfo->status === 'available' ? 'success' : ($vehicleInfo->status === 'in_use' ? 'warning' : 'secondary') ?>">
+                    <span class="loka-badge bg-primary"><?= e($vehicleInfo->type_name) ?></span>
+                    <span class="loka-badge bg-<?= $vehicleInfo->status === 'available' ? 'success' : ($vehicleInfo->status === 'in_use' ? 'warning' : 'secondary') ?>">
                         <?= ucfirst($vehicleInfo->status) ?>
                     </span>
                 </div>
@@ -197,7 +197,7 @@ require_once INCLUDES_PATH . '/header.php';
             </div>
             <?php else: ?>
             <div class="loka-table-responsive">
-                <table class="table table-hover">
+                <table class="loka-table table-hover">
                     <thead>
                         <tr>
                             <th>ID</th>

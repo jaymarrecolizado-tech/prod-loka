@@ -410,7 +410,7 @@ require_once INCLUDES_PATH . '/header.php';
                         <dt class="col-span-5">Duration:</dt>
                         <dd class="col-span-7">
                             <?php if ($durationHours > 0): ?>
-                                <span class="badge bg-info">
+                                <span class="loka-badge bg-info">
                                     <?= $durationHours ?>h <?= $durationMinutes ?>m
                                 </span>
                             <?php else: ?>

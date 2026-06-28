@@ -267,12 +267,12 @@ require_once INCLUDES_PATH . '/header.php';
                                     <td>
                                         <?php if ($trip->has_travel_order): ?>
                                             <div class="mb-1">
-                                                <span class="badge bg-success">TO: <?= e($trip->travel_order_number) ?></span>
+                                                <span class="loka-badge bg-success">TO: <?= e($trip->travel_order_number) ?></span>
                                             </div>
                                         <?php endif; ?>
                                         <?php if ($trip->has_official_business_slip): ?>
                                             <div>
-                                                <span class="badge bg-primary">OB: <?= e($trip->ob_slip_number) ?></span>
+                                                <span class="loka-badge bg-primary">OB: <?= e($trip->ob_slip_number) ?></span>
                                             </div>
                                         <?php endif; ?>
                                         <?php if (!$trip->has_travel_order && !$trip->has_official_business_slip): ?>

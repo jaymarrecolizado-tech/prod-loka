@@ -1150,7 +1150,7 @@ ob_start();
             const passengerCountText = document.getElementById('passengerCountText');
             if (passengerCountText) {
                 const label = count === 1 ? 'Passenger (You)' : 'Passengers (Including You)';
-                passengerCountText.innerHTML = '<span class="badge bg-primary rounded-pill">' + count + '</span>' +
+                passengerCountText.innerHTML = '<span class="loka-badge bg-primary rounded-pill">' + count + '</span>' +
                                              '<span class="small text-muted ms-1">' + label + '</span>';
             }
             

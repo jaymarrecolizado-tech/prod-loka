@@ -78,7 +78,7 @@ require_once INCLUDES_PATH . '/header.php';
                         <div class="col-span-12 md:col-span-6">
                             <h6 class="text-base-content/60">Status</h6>
                             <?php $statusInfo = MAINTENANCE_STATUSES[$maintenance->status] ?? ['label' => ucfirst(str_replace('_', ' ', $maintenance->status)), 'color' => 'secondary']; ?>
-                            <span class="badge bg-<?= $statusInfo['color'] ?> fs-6">
+                            <span class="loka-badge bg-<?= $statusInfo['color'] ?> fs-6">
                                 <?= $statusInfo['label'] ?>
                             </span>
                         </div>
@@ -93,7 +93,7 @@ require_once INCLUDES_PATH . '/header.php';
                         <div class="col-span-12 md:col-span-4">
                             <h6 class="text-base-content/60">Priority</h6>
                             <?php $priorityInfo = MAINTENANCE_PRIORITIES[$maintenance->priority] ?? ['label' => ucfirst($maintenance->priority), 'color' => 'secondary']; ?>
-                            <span class="badge bg-<?= $priorityInfo['color'] ?>">
+                            <span class="loka-badge bg-<?= $priorityInfo['color'] ?>">
                                 <?= $priorityInfo['label'] ?>
                             </span>
                         </div>

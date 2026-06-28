@@ -118,7 +118,7 @@ require_once INCLUDES_PATH . '/header.php';
             <h5 class="mb-0">
                 <i class="bi bi-gear me-1"></i>SMTP Configuration Status
             </h5>
-            <span class="badge bg-white text-<?= $smtpConfigured ? 'success' : 'danger' ?> fs-6">
+            <span class="loka-badge bg-white text-<?= $smtpConfigured ? 'success' : 'danger' ?> fs-6">
                 <?= $smtpConfigured ? '✅ Configured' : '❌ Not Configured' ?>
             </span>
         </div>
@@ -137,7 +137,7 @@ require_once INCLUDES_PATH . '/header.php';
                 </ul>
             </div>
             <?php endif; ?>
-            <table class="table table-sm mb-0">
+            <table class="loka-table table-sm mb-0">
                 <thead><tr><th>Setting</th><th>Value</th><th>Status</th></tr></thead>
                 <tbody>
                 <?php foreach ($smtpStatus as $key => [$status, $val]): ?>
@@ -146,11 +146,11 @@ require_once INCLUDES_PATH . '/header.php';
                     <td><?= e($val) ?></td>
                     <td>
                         <?php if ($status === 'ok'): ?>
-                            <span class="badge bg-success">✓ OK</span>
+                            <span class="loka-badge bg-success">✓ OK</span>
                         <?php elseif ($status === 'warn'): ?>
-                            <span class="badge bg-warning text-dark">⚠ Warning</span>
+                            <span class="loka-badge bg-warning text-dark">⚠ Warning</span>
                         <?php else: ?>
-                            <span class="badge bg-danger">✗ Missing</span>
+                            <span class="loka-badge bg-error">✗ Missing</span>
                         <?php endif; ?>
                     </td>
                 </tr>
@@ -250,7 +250,7 @@ require_once INCLUDES_PATH . '/header.php';
         </div>
         <div class="p-0">
             <div class="loka-table-responsive">
-                <table class="table table-hover table-sm mb-0">
+                <table class="loka-table table-hover table-sm mb-0">
                     <thead class="table-light">
                         <tr>
                             <th>ID</th>
@@ -272,7 +272,7 @@ require_once INCLUDES_PATH . '/header.php';
                             <td><code><?= e($email->template ?: '-') ?></code></td>
                             <td>
                                 <?php $colors = ['pending'=>'warning','processing'=>'info','sent'=>'success','failed'=>'danger']; ?>
-                                <span class="badge bg-<?= $colors[$email->status] ?? 'secondary' ?>">
+                                <span class="loka-badge bg-<?= $colors[$email->status] ?? 'secondary' ?>">
                                     <?= $email->status ?>
                                 </span>
                             </td>

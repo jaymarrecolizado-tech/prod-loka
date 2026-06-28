@@ -367,7 +367,7 @@ require_once INCLUDES_PATH . '/header.php';
                 <div class="p-6">
                     <h6><i class="bi bi-info-circle me-2"></i>Current Status</h6>
                     <?php $statusInfo = MAINTENANCE_STATUSES[$maintenance->status] ?? ['label' => ucfirst(str_replace('_', ' ', $maintenance->status)), 'color' => 'secondary']; ?>
-                    <span class="badge bg-<?= $statusInfo['color'] ?> fs-6">
+                    <span class="loka-badge bg-<?= $statusInfo['color'] ?> fs-6">
                         <?= $statusInfo['label'] ?>
                     </span>
                     

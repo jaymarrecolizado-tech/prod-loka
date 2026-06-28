@@ -483,7 +483,7 @@ require_once INCLUDES_PATH . '/header.php';
                 </div>
             <?php else: ?>
                 <div class="overflow-x-auto">
-                    <table class="table table-zebra w-full" id="ticketsTable">
+                    <table class="loka-table table-zebra w-full" id="ticketsTable">
                         <thead>
                             <tr>
                                 <th>ID</th>
@@ -530,7 +530,7 @@ require_once INCLUDES_PATH . '/header.php';
                                             $label = e($ticket->trip_type_other);
                                         }
                                         ?>
-                                        <span class="badge <?= $color ?>">
+                                        <span class="loka-badge <?= $color ?>">
                                             <?= $label ?>
                                         </span>
                                     </td>
@@ -575,7 +575,7 @@ require_once INCLUDES_PATH . '/header.php';
                                                 break;
                                         }
                                         ?>
-                                        <span class="badge <?= $statusClass ?>">
+                                        <span class="loka-badge <?= $statusClass ?>">
                                             <i class="bi bi-<?= $statusIcon ?> mr-1"></i>
                                             <?= ucfirst($ticket->status) ?>
                                         </span>
@@ -586,9 +586,9 @@ require_once INCLUDES_PATH . '/header.php';
                                     <td>
                                         <?php
                                         $docs = [];
-                                        if ($ticket->travel_order_path) $docs[] = '<span class="badge badge-secondary">TO</span>';
-                                        if ($ticket->ob_slip_path) $docs[] = '<span class="badge badge-primary">OB</span>';
-                                        if ($ticket->other_documents_path) $docs[] = '<span class="badge badge-info">Docs</span>';
+                                        if ($ticket->travel_order_path) $docs[] = '<span class="loka-badge badge-secondary">TO</span>';
+                                        if ($ticket->ob_slip_path) $docs[] = '<span class="loka-badge badge-primary">OB</span>';
+                                        if ($ticket->other_documents_path) $docs[] = '<span class="loka-badge badge-info">Docs</span>';
                                         ?>
                                         <?php if (!empty($docs)): ?>
                                             <?= implode(' ', $docs) ?>
@@ -598,12 +598,12 @@ require_once INCLUDES_PATH . '/header.php';
                                     </td>
                                     <td>
                                         <?php if ($ticket->has_issues): ?>
-                                            <span class="badge badge-error">
+                                            <span class="loka-badge badge-error">
                                                 <i class="bi bi-exclamation-triangle mr-1"></i>
                                                 Issues
                                             </span>
                                         <?php elseif ($ticket->resolved): ?>
-                                            <span class="badge badge-success">
+                                            <span class="loka-badge badge-success">
                                                 <i class="bi bi-check mr-1"></i>
                                                 Resolved
                                             </span>

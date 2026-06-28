@@ -376,7 +376,7 @@ function statusBadge(string $status, array $labels): string
 {
     $info = $labels[$status] ?? ['label' => ucfirst($status), 'color' => 'secondary'];
     return sprintf(
-        '<span class="badge bg-%s">%s</span>',
+        '<span class="loka-badge bg-%s">%s</span>',
         e($info['color']),
         e($info['label'])
     );

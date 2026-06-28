@@ -810,7 +810,7 @@ require_once INCLUDES_PATH . '/header.php';
 
             if (passengerCountText) {
                 const label = count === 1 ? 'Passenger (You)' : 'Passengers (Including You)';
-                passengerCountText.innerHTML = '<span class="badge badge-primary">' + count + '</span>' +
+                passengerCountText.innerHTML = '<span class="loka-badge badge-primary">' + count + '</span>' +
                                              '<span class="text-sm text-base-content/60 ml-1">' + label + '</span>';
             }
             
@@ -827,7 +827,7 @@ require_once INCLUDES_PATH . '/header.php';
             let modalHtml = '<li class="py-2 px-3 bg-base-200 rounded-lg flex items-center">' +
                 '<i class="bi bi-person-badge-fill mr-2 text-primary"></i>' +
                 '<div class="text-sm font-semibold text-primary"><?= e(currentUser()->name) ?> (You - Requester)</div>' +
-                '<span class="badge badge-primary ml-auto text-[0.6rem]">REQUIRED</span>' +
+                '<span class="loka-badge badge-primary ml-auto text-[0.6rem]">REQUIRED</span>' +
             '</li>';
             
             if (items.length > 0) {
