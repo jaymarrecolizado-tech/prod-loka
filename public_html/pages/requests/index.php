@@ -43,9 +43,8 @@ if ($dateTo) {
 }
 
 if ($searchQuery) {
-    $where[] = "(r.purpose LIKE ? OR u.first_name LIKE ? OR u.last_name LIKE ?)";
+    $where[] = "(r.purpose LIKE ? OR u.name LIKE ?)";
     $searchParam = "%{$searchQuery}%";
-    $params[] = $searchParam;
     $params[] = $searchParam;
     $params[] = $searchParam;
 }
@@ -61,9 +60,9 @@ $totalPages = max(1, ceil($totalItems / $perPage));
 
 // Fetch requests
 $sql = "SELECT r.*,
-        u.first_name, u.last_name, u.email,
-        v.plate_number, v.brand, v.model,
-        d.first_name as driver_first, d.last_name as driver_last
+        u.name, u.email,
+        v.plate_number, v.make, v.model,
+        d.name as driver_name
         FROM requests r
         LEFT JOIN users u ON r.user_id = u.id
         LEFT JOIN vehicles v ON r.vehicle_id = v.id
@@ -212,10 +211,10 @@ require_once INCLUDES_PATH . '/header.php';
                         <td>
                             <div class="flex items-center gap-2">
                                 <div class="loka-avatar loka-avatar-sm">
-                                    <?= strtoupper(substr($req['first_name'], 0, 1) . substr($req['last_name'], 0, 1)) ?>
+                                    <?= strtoupper(substr($req['name'] ?? 'U', 0, 1)) ?>
                                 </div>
                                 <div>
-                                    <p class="text-sm font-medium text-base-content"><?= e($req['first_name'] . ' ' . $req['last_name']) ?></p>
+                                    <p class="text-sm font-medium text-base-content"><?= e($req['name'] ?? 'Unknown') ?></p>
                                 </div>
                             </div>
                         </td>
