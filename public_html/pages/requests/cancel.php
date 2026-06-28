@@ -283,22 +283,22 @@ require_once INCLUDES_PATH . '/header.php';
 
                     <div class="bg-base-200 rounded-lg mb-4">
                         <div class="p-5">
-                            <h6 class="text-gray-500 mb-3">Request Details</h6>
+                            <h6 class="text-base-content/60 dark:text-gray-400 mb-3">Request Details</h6>
                             <div class="grid grid-cols-1 sm:grid-cols-12 gap-3">
                                 <div class="sm:col-span-4">
-                                    <label class="text-xs text-gray-500">Request #</label>
+                                    <label class="text-xs text-base-content/50 dark:text-gray-400">Request #</label>
                                     <div class="font-bold"><?= $requestId ?></div>
                                 </div>
                                 <div class="sm:col-span-8">
-                                    <label class="text-xs text-gray-500">Purpose</label>
+                                    <label class="text-xs text-base-content/50 dark:text-gray-400">Purpose</label>
                                     <div class="font-bold"><?= e($request->purpose) ?></div>
                                 </div>
                                 <div class="sm:col-span-4">
-                                    <label class="text-xs text-gray-500">Destination</label>
+                                    <label class="text-xs text-base-content/50 dark:text-gray-400">Destination</label>
                                     <div><?= e($request->destination) ?></div>
                                 </div>
                                 <div class="sm:col-span-8">
-                                    <label class="text-xs text-gray-500">Date & Time</label>
+                                    <label class="text-xs text-base-content/50 dark:text-gray-400">Date & Time</label>
                                     <div><?= formatDateTime($request->start_datetime) ?></div>
                                 </div>
                             </div>
@@ -348,7 +348,7 @@ require_once INCLUDES_PATH . '/header.php';
                             </label>
                             <textarea class="textarea textarea-bordered w-full" id="reason" name="reason" rows="3" required
                                 placeholder="Please provide a reason for cancelling this request..." maxlength="500"></textarea>
-                            <small class="text-gray-500">This field is required</small>
+                            <small class="text-base-content/60 dark:text-gray-400">This field is required</small>
                         </div>
 
                         <div class="flex flex-col md:flex-row gap-2 md:justify-end">

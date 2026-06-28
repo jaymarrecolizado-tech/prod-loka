@@ -11,7 +11,7 @@
 
   /* Elevated card surface */
   .loka-card {
-    @apply rounded-2xl border border-base-200 bg-white shadow-card transition-shadow duration-200;
+    @apply rounded-2xl border border-base-200 bg-white shadow-card transition-shadow duration-200 dark:bg-gray-800 dark:border-gray-700;
   }
 
   .loka-card:hover {
@@ -63,7 +63,7 @@
   }
 
   .loka-btn-icon:hover {
-    @apply bg-base-200;
+    @apply bg-base-200 dark:hover:bg-gray-700;
   }
 
   /* Button base */
@@ -76,7 +76,7 @@
   }
 
   .loka-btn-secondary {
-    @apply loka-btn bg-base-200 text-base-content hover:bg-base-300;
+    @apply loka-btn bg-base-200 text-base-content hover:bg-base-300 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600;
   }
 
   .loka-btn-success {
@@ -88,7 +88,7 @@
   }
 
   .loka-btn-ghost {
-    @apply loka-btn bg-transparent text-base-content hover:bg-base-200;
+    @apply loka-btn bg-transparent text-base-content hover:bg-base-200 dark:hover:bg-gray-700;
   }
 
   .loka-btn-sm {
@@ -110,20 +110,20 @@
 
   /* Section label */
   .loka-section-label {
-    @apply px-4 py-2 text-xs font-bold uppercase tracking-wider text-base-content/40;
+    @apply px-4 py-2 text-xs font-bold uppercase tracking-wider text-base-content/40 dark:text-gray-500;
   }
 
   /* Modern nav link (used inside sidebar) */
   .loka-nav-link {
-    @apply relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-base-content/70 transition-all duration-200;
+    @apply relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-base-content/70 transition-all duration-200 dark:text-gray-400;
   }
 
   .loka-nav-link:hover {
-    @apply bg-base-200 text-base-content;
+    @apply bg-base-200 text-base-content dark:bg-gray-700 dark:text-gray-200;
   }
 
   .loka-nav-link.active {
-    @apply bg-primary/10 text-primary;
+    @apply bg-primary/10 text-primary dark:bg-primary/20 dark:text-primary;
   }
 
   .loka-nav-link.active::before {
@@ -229,11 +229,11 @@
 
   /* ===== FORM COMPONENTS ===== */
   .loka-form-label {
-    @apply mb-1.5 block text-sm font-medium text-base-content;
+    @apply mb-1.5 block text-sm font-medium text-base-content dark:text-gray-300;
   }
 
   .loka-form-input {
-    @apply w-full rounded-xl border border-base-300 bg-white px-4 py-2.5 text-sm text-base-content transition-colors;
+    @apply w-full rounded-xl border border-base-300 bg-white px-4 py-2.5 text-sm text-base-content transition-colors dark:bg-gray-800 dark:border-gray-600 dark:text-gray-200;
   }
 
   .loka-form-input:focus {
@@ -241,7 +241,7 @@
   }
 
   .loka-form-input::placeholder {
-    @apply text-base-content/40;
+    @apply text-base-content/40 dark:text-gray-500;
   }
 
   /* ===== ALERT COMPONENTS ===== */
@@ -267,7 +267,7 @@
 
   /* ===== DROPDOWN ===== */
   .loka-dropdown {
-    @apply absolute right-0 z-[1050] mt-2 min-w-[12rem] overflow-hidden rounded-xl border border-base-200 bg-white shadow-elevated;
+    @apply absolute right-0 z-[1050] mt-2 min-w-[12rem] overflow-hidden rounded-xl border border-base-200 bg-white shadow-elevated dark:bg-gray-800 dark:border-gray-700;
   }
 
   /* ===== NAVBAR COMPONENTS ===== */

@@ -527,3 +527,22 @@ body {
         height: calc(100vh - var(--navbar-height) - env(safe-area-inset-top));
     }
 }
+
+/* ===== DARK MODE OVERRIDES ===== */
+.dark body,
+.dark .main-content {
+    background-color: #111827;
+}
+
+.dark .table-card .card-header {
+    background: #1f2937;
+    border-bottom-color: #374151;
+}
+
+.dark .table th {
+    color: #9ca3af;
+}
+
+.dark .empty-state {
+    color: #6b7280;
+}
