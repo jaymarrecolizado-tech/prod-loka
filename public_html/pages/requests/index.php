@@ -12,10 +12,10 @@ $page = max(1, (int)($_GET['p'] ?? 1));
 $offset = ($page - 1) * $perPage;
 
 // Filters
-$statusFilter = sanitizeInput($_GET['status'] ?? '');
-$dateFrom = sanitizeInput($_GET['date_from'] ?? '');
-$dateTo = sanitizeInput($_GET['date_to'] ?? '');
-$searchQuery = sanitizeInput($_GET['q'] ?? '');
+$statusFilter = getSafe('status', '', 50);
+$dateFrom = getSafe('date_from', '', 20);
+$dateTo = getSafe('date_to', '', 20);
+$searchQuery = getSafe('q', '', 100);
 
 // Build query conditions
 $where = [];
@@ -23,7 +23,7 @@ $params = [];
 
 // Role-based filtering
 if (hasRole(ROLE_REQUESTER) && !hasRole(ROLE_APPROVER)) {
-    $where[] = "r.requester_id = ?";
+    $where[] = "r.user_id = ?";
     $params[] = userId();
 }
 
@@ -54,9 +54,9 @@ $whereClause = !empty($where) ? 'WHERE ' . implode(' AND ', $where) : '';
 
 // Get total count
 $countSql = "SELECT COUNT(*) FROM requests r
-             LEFT JOIN users u ON r.requester_id = u.id
+             LEFT JOIN users u ON r.user_id = u.id
              {$whereClause}";
-$totalItems = $db->fetch($countSql, $params)['COUNT(*)'] ?? 0;
+$totalItems = $db->fetch($countSql, $params)->{"COUNT(*)"} ?? 0;
 $totalPages = max(1, ceil($totalItems / $perPage));
 
 // Fetch requests
@@ -65,7 +65,7 @@ $sql = "SELECT r.*,
         v.plate_number, v.brand, v.model,
         d.first_name as driver_first, d.last_name as driver_last
         FROM requests r
-        LEFT JOIN users u ON r.requester_id = u.id
+        LEFT JOIN users u ON r.user_id = u.id
         LEFT JOIN vehicles v ON r.vehicle_id = v.id
         LEFT JOIN drivers dr ON r.driver_id = dr.id
         LEFT JOIN users d ON dr.user_id = d.id
@@ -81,7 +81,7 @@ $requests = $db->fetchAll($sql, $params);
 $statusCounts = $db->fetchAll("
     SELECT status, COUNT(*) as count
     FROM requests
-    " . (hasRole(ROLE_REQUESTER) && !hasRole(ROLE_APPROVER) ? "WHERE requester_id = " . userId() : "") . "
+    " . (hasRole(ROLE_REQUESTER) && !hasRole(ROLE_APPROVER) ? "WHERE r.user_id = " . userId() : "") . "
     GROUP BY status
 ");
 $statusMap = array_column($statusCounts, 'count', 'status');
