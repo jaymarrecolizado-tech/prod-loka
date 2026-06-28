@@ -69,7 +69,7 @@ $pageTitle = 'Trip Ticket Details';
 require_once INCLUDES_PATH . '/header.php';
 ?>
 
-<div class="container-fluid py-4">
+<div class="w-full px-4 py-4 sm:px-6 lg:px-8">
     <!-- Breadcrumb -->
     <nav aria-label="breadcrumb">
         <ol class="breadcrumb">
@@ -83,29 +83,29 @@ require_once INCLUDES_PATH . '/header.php';
     </nav>
 
     <!-- Ticket Header -->
-    <div class="row mb-4">
-        <div class="col-md-8">
-            <div class="card">
-                <div class="card-header bg-primary text-white">
+    <div class="grid grid-cols-12 gap-4 mb-4">
+        <div class="col-span-12 md:col-span-8">
+            <div class="loka-card">
+                <div class="px-6 py-4 border-b border-base-200 bg-primary text-white">
                     <h4 class="mb-0">
-                        <i class="bi bi-file-earmark-text me-2"></i>
+                        <i class="bi bi-file-earmark-text mr-2"></i>
                         Trip Ticket TT-<?= $ticket->request_id ?> (Ref: VRF-<?= $ticket->request_id ?>)
-                        <span class="badge bg-<?= $ticket->status === 'approved' ? 'success' : ($ticket->status === 'reviewed' ? 'info' : 'warning') ?> ms-2">
+                        <span class="badge bg-<?= $ticket->status === 'approved' ? 'success' : ($ticket->status === 'reviewed' ? 'info' : 'warning') ?> ml-2">
                             <?= ucfirst($ticket->status) ?>
                         </span>
                     </h4>
                 </div>
-                <div class="card-body">
+                <div class="p-6">
                     <!-- Trip Reference -->
                     <div class="mb-4">
-                        <h6 class="text-muted mb-2">
-                            <i class="bi bi-link-45deg me-1"></i> Trip Reference
+                        <h6 class="text-base-content/60 mb-2">
+                            <i class="bi bi-link-45deg mr-1"></i> Trip Reference
                         </h6>
-                         <div class="p-3 bg-light rounded">
+                         <div class="p-3 bg-base-200 rounded-xl">
                              <strong>Request #<?= $ticket->request_id ?></strong>
                              <br>
-                             <small class="text-muted">
-                                 <i class="bi bi-geo-alt me-1"></i>
+                             <small class="text-base-content/60">
+                                 <i class="bi bi-geo-alt mr-1"></i>
                                  <?= e($ticket->trip_destination) ?>
                              </small>
                          </div>
@@ -113,31 +113,31 @@ require_once INCLUDES_PATH . '/header.php';
 
                     <!-- Driver Information -->
                     <div class="mb-4">
-                        <h6 class="text-muted mb-2">
-                            <i class="bi bi-person me-1"></i> Driver Information
+                        <h6 class="text-base-content/60 mb-2">
+                            <i class="bi bi-person mr-1"></i> Driver Information
                         </h6>
-                        <div class="p-3 bg-light rounded">
+                        <div class="p-3 bg-base-200 rounded-xl">
                             <strong><?= e($ticket->driver_name) ?></strong>
                             <?php if ($ticket->driver_phone): ?>
-                                <small class="text-muted">
-                                    <i class="bi bi-telephone me-1"></i>
+                                <small class="text-base-content/60">
+                                    <i class="bi bi-telephone mr-1"></i>
                                     <?= e($ticket->driver_phone) ?>
                                 </small>
                             <?php endif; ?>
                             <br>
-                            <small class="text-muted">
-                                <i class="bi bi-card-text me-1"></i>
+                            <small class="text-base-content/60">
+                                <i class="bi bi-card-text mr-1"></i>
                                 License: <?= e($ticket->driver_license) ?>
                             </small>
                         </div>
                     </div>
 
                     <!-- Trip Details -->
-                    <div class="row mb-4">
-                        <div class="col-md-6">
+                    <div class="grid grid-cols-12 gap-4 mb-4">
+                        <div class="col-span-12 md:col-span-6">
                             <div class="mb-3">
-                                <h6 class="text-muted mb-2">
-                                    <i class="bi bi-calendar3 me-1"></i> Trip Type
+                                <h6 class="text-base-content/60 mb-2">
+                                    <i class="bi bi-calendar3 mr-1"></i> Trip Type
                                 </h6>
                                 <?php
                                 $tripTypeLabels = [
@@ -158,39 +158,39 @@ require_once INCLUDES_PATH . '/header.php';
                                 </span>
                             </div>
                              <div class="mb-3">
-                                 <h6 class="text-muted mb-2">
-                                     <i class="bi bi-calendar3 me-1"></i> Trip Type
-                                 </h6>
+                             <h6 class="text-base-content/60 mb-2">
+                                      <i class="bi bi-calendar3 mr-1"></i> Trip Type
+                                  </h6>
                              </div>
                               <div class="mb-3">
-                                  <h6 class="text-muted mb-2">
-                                      <i class="bi bi-flag me-1"></i> Destination
+                                  <h6 class="text-base-content/60 mb-2">
+                                      <i class="bi bi-flag mr-1"></i> Destination
                                   </h6>
                               </div>
                             <div class="mb-3">
-                                <h6 class="text-muted mb-2">
-                                    <i class="bi bi-people me-1"></i> Passengers
+                                <h6 class="text-base-content/60 mb-2">
+                                    <i class="bi bi-people mr-1"></i> Passengers
                                 </h6>
-                                <span class="fw-bold"><?= (int)$ticket->passengers ?></span>
+                                <span class="font-bold"><?= (int)$ticket->passengers ?></span>
                             </div>
                         </div>
-                        <div class="col-md-6">
+                        <div class="col-span-12 md:col-span-6">
                             <div class="mb-3">
-                                <h6 class="text-muted mb-2">
-                                    <i class="bi bi-clock-history me-1"></i> Trip Duration
+                                <h6 class="text-base-content/60 mb-2">
+                                    <i class="bi bi-clock-history mr-1"></i> Trip Duration
                                 </h6>
                                 <p class="mb-0">
-                                    <i class="bi bi-calendar-check me-1"></i>
+                                    <i class="bi bi-calendar-check mr-1"></i>
                                     <?= formatDateTime($ticket->start_date) ?>
                                 </p>
                                 <p class="mb-0">
-                                    <i class="bi bi-calendar-x me-1"></i>
+                                    <i class="bi bi-calendar-x mr-1"></i>
                                     <?= formatDateTime($ticket->end_date) ?>
                                 </p>
                             </div>
                             <div class="mb-3">
-                                <h6 class="text-muted mb-2">
-                                    <i class="bi bi-truck me-1"></i> Actual Trip Duration
+                                <h6 class="text-base-content/60 mb-2">
+                                    <i class="bi bi-truck mr-1"></i> Actual Trip Duration
                                 </h6>
                                 <?php
                                 $start = strtotime($ticket->start_date);
@@ -199,7 +199,7 @@ require_once INCLUDES_PATH . '/header.php';
                                 $hours = floor($diff / 3600);
                                 $minutes = floor(($diff % 3600) / 60);
                                 ?>
-                                <span class="fw-bold fs-5">
+                                <span class="font-bold text-2xl">
                                     <?= $hours ?>h <?= $minutes ?>m
                                 </span>
                             </div>
@@ -207,13 +207,13 @@ require_once INCLUDES_PATH . '/header.php';
                     </div>
 
                     <!-- Mileage & Fuel -->
-                    <div class="row mb-4">
-                        <div class="col-12 col-md-6">
-                            <h6 class="text-muted mb-2">
-                                <i class="bi bi-speedometer2 me-1"></i> Mileage
+                    <div class="grid grid-cols-12 gap-4 mb-4">
+                        <div class="col-span-12 md:col-span-6">
+                            <h6 class="text-base-content/60 mb-2">
+                                <i class="bi bi-speedometer2 mr-1"></i> Mileage
                             </h6>
-                            <div class="table-responsive">
-                            <table class="table table-sm">
+                            <div class="loka-table-responsive">
+                            <table class="loka-table">
                                 <tbody>
                                     <tr>
                                         <td>Start Odometer</td>
@@ -231,12 +231,12 @@ require_once INCLUDES_PATH . '/header.php';
                             </table>
                             </div>
                         </div>
-                        <div class="col-12 col-md-6">
-                            <h6 class="text-muted mb-2">
-                                <i class="bi bi-fuel-pump me-1"></i> Fuel
+                        <div class="col-span-12 md:col-span-6">
+                            <h6 class="text-base-content/60 mb-2">
+                                <i class="bi bi-fuel-pump mr-1"></i> Fuel
                             </h6>
-                            <div class="table-responsive">
-                            <table class="table table-sm">
+                            <div class="loka-table-responsive">
+                            <table class="loka-table">
                                 <tbody>
                                     <tr>
                                         <td>Consumed</td>
@@ -264,45 +264,45 @@ require_once INCLUDES_PATH . '/header.php';
 
                     <!-- Documents -->
                     <div class="mb-4">
-                        <h6 class="text-muted mb-2">
-                            <i class="bi bi-files me-1"></i> Attached Documents
+                        <h6 class="text-base-content/60 mb-2">
+                            <i class="bi bi-files mr-1"></i> Attached Documents
                         </h6>
-                        <div class="row g-3">
-                            <div class="col-md-4">
-                                <div class="text-center p-3 <?= $ticket->travel_order_path ? 'bg-success' : 'bg-secondary' ?>">
-                                    <i class="bi bi-file-earmark-text fs-2"></i>
+                        <div class="grid grid-cols-12 gap-3">
+                            <div class="col-span-12 md:col-span-4">
+                                <div class="text-center p-3 <?= $ticket->travel_order_path ? 'bg-success' : 'bg-base-200' ?>">
+                                    <i class="bi bi-file-earmark-text text-2xl"></i>
                                     <div class="mt-2">
                                         <strong>Travel Order</strong>
                                         <br>
                                         <small><?= $ticket->travel_order_path ? 'Attached' : 'Not attached' ?></small>
                                         <?php if ($ticket->travel_order_path): ?>
                                             <br>
-                                            <a href="<?= '/uploads/trip_tickets/' . $ticket->travel_order_path ?>" target="_blank" class="btn btn-sm btn-outline-light mt-1">
-                                                <i class="bi bi-eye me-1"></i>View
+                                            <a href="<?= '/uploads/trip_tickets/' . $ticket->travel_order_path ?>" target="_blank" class="bg-white/20 text-white hover:bg-white/30 px-4 py-2 text-sm font-medium rounded-xl inline-flex items-center gap-2 transition-colors loka-btn-sm mt-1">
+                                                <i class="bi bi-eye mr-1"></i>View
                                             </a>
                                         <?php endif; ?>
                                     </div>
                                 </div>
                             </div>
-                            <div class="col-md-4">
-                                <div class="text-center p-3 <?= $ticket->ob_slip_path ? 'bg-primary' : 'bg-secondary' ?>">
-                                    <i class="bi bi-card-checklist fs-2"></i>
+                            <div class="col-span-12 md:col-span-4">
+                                <div class="text-center p-3 <?= $ticket->ob_slip_path ? 'bg-primary' : 'bg-base-200' ?>">
+                                    <i class="bi bi-card-checklist text-2xl"></i>
                                     <div class="mt-2">
                                         <strong>OB Slip</strong>
                                         <br>
                                         <small><?= $ticket->ob_slip_path ? 'Attached' : 'Not attached' ?></small>
                                         <?php if ($ticket->ob_slip_path): ?>
                                             <br>
-                                            <a href="<?= '/uploads/trip_tickets/' . $ticket->ob_slip_path ?>" target="_blank" class="btn btn-sm btn-outline-light mt-1">
-                                                <i class="bi bi-eye me-1"></i>View
+                                            <a href="<?= '/uploads/trip_tickets/' . $ticket->ob_slip_path ?>" target="_blank" class="bg-white/20 text-white hover:bg-white/30 px-4 py-2 text-sm font-medium rounded-xl inline-flex items-center gap-2 transition-colors loka-btn-sm mt-1">
+                                                <i class="bi bi-eye mr-1"></i>View
                                             </a>
                                         <?php endif; ?>
                                     </div>
                                 </div>
                             </div>
-                            <div class="col-md-4">
-                                <div class="text-center p-3 <?= $ticket->other_documents_path ? 'bg-info' : 'bg-secondary' ?>">
-                                    <i class="bi bi-folder2-open fs-2"></i>
+                            <div class="col-span-12 md:col-span-4">
+                                <div class="text-center p-3 <?= $ticket->other_documents_path ? 'bg-info' : 'bg-base-200' ?>">
+                                    <i class="bi bi-folder2-open text-2xl"></i>
                                     <div class="mt-2">
                                         <strong>Other Docs</strong>
                                         <br>
@@ -315,9 +315,9 @@ require_once INCLUDES_PATH . '/header.php';
 
                     <!-- Issues -->
                     <?php if ($ticket->has_issues): ?>
-                        <div class="alert alert-danger mb-4">
+                        <div class="loka-alert loka-alert-danger mb-4">
                             <h6 class="mb-2">
-                                <i class="bi bi-exclamation-triangle me-1"></i>
+                                <i class="bi bi-exclamation-triangle mr-1"></i>
                                 Issues Reported
                             </h6>
                             <p class="mb-2"><?= e($ticket->issues_description) ?></p>
@@ -325,11 +325,11 @@ require_once INCLUDES_PATH . '/header.php';
                                 <strong>Status:</strong>
                                 <?php if ($ticket->resolved): ?>
                                     <span class="badge bg-success">
-                                        <i class="bi bi-check me-1"></i> Resolved
+                                        <i class="bi bi-check mr-1"></i> Resolved
                                     </span>
                                 <?php else: ?>
-                                    <span class="badge bg-danger">
-                                        <i class="bi bi-x me-1"></i> Unresolved
+                                    <span class="badge bg-error">
+                                        <i class="bi bi-x mr-1"></i> Unresolved
                                     </span>
                                 <?php endif; ?>
                             </div>
@@ -344,26 +344,26 @@ require_once INCLUDES_PATH . '/header.php';
                     <?php endif; ?>
 
                     <!-- Guard Verification -->
-                    <div class="row mb-4">
-                        <div class="col-md-6">
-                            <h6 class="text-muted mb-2">
-                                <i class="bi bi-shield-check me-1"></i> Dispatch Verification
+                    <div class="grid grid-cols-12 gap-4 mb-4">
+                        <div class="col-span-12 md:col-span-6">
+                            <h6 class="text-base-content/60 mb-2">
+                                <i class="bi bi-shield-check mr-1"></i> Dispatch Verification
                             </h6>
-                            <div class="p-3 bg-light rounded">
+                            <div class="p-3 bg-base-200 rounded-xl">
                                 <strong><?= e($ticket->dispatch_guard) ?></strong>
                                 <?php if ($ticket->dispatch_guard_phone): ?>
-                                    <br><small class="text-muted"><i class="bi bi-telephone me-1"></i> <?= e($ticket->dispatch_guard_phone) ?></small>
+                                    <br><small class="text-base-content/60"><i class="bi bi-telephone mr-1"></i> <?= e($ticket->dispatch_guard_phone) ?></small>
                                 <?php endif; ?>
                             </div>
                         </div>
-                        <div class="col-md-6">
-                            <h6 class="text-muted mb-2">
-                                <i class="bi bi-box-arrow-in-right me-1"></i> Arrival Verification
+                        <div class="col-span-12 md:col-span-6">
+                            <h6 class="text-base-content/60 mb-2">
+                                <i class="bi bi-box-arrow-in-right mr-1"></i> Arrival Verification
                             </h6>
-                            <div class="p-3 bg-light rounded">
+                            <div class="p-3 bg-base-200 rounded-xl">
                                 <strong><?= e($ticket->arrival_guard) ?></strong>
                                 <?php if ($ticket->arrival_guard_phone): ?>
-                                    <br><small class="text-muted"><i class="bi bi-telephone me-1"></i> <?= e($ticket->arrival_guard_phone) ?></small>
+                                    <br><small class="text-base-content/60"><i class="bi bi-telephone mr-1"></i> <?= e($ticket->arrival_guard_phone) ?></small>
                                 <?php endif; ?>
                             </div>
                         </div>
@@ -372,10 +372,10 @@ require_once INCLUDES_PATH . '/header.php';
                     <!-- Guard Notes -->
                     <?php if ($ticket->guard_notes): ?>
                         <div class="mb-4">
-                            <h6 class="text-muted mb-2">
-                                <i class="bi bi-chat-text me-1"></i> Guard Notes
+                            <h6 class="text-base-content/60 mb-2">
+                                <i class="bi bi-chat-text mr-1"></i> Guard Notes
                             </h6>
-                            <div class="p-3 bg-info bg-opacity-10 rounded">
+                            <div class="p-3 bg-info/10 rounded-xl">
                                 <div style="white-space: pre-wrap;"><?= nl2br(e($ticket->guard_notes)) ?></div>
                             </div>
                         </div>
@@ -384,10 +384,10 @@ require_once INCLUDES_PATH . '/header.php';
                     <!-- Review Status -->
                     <?php if ($ticket->reviewed_by_name): ?>
                         <div class="mb-4">
-                            <h6 class="text-muted mb-2">
-                                <i class="bi bi-clipboard-check me-1"></i> Review Status
+                            <h6 class="text-base-content/60 mb-2">
+                                <i class="bi bi-clipboard-check mr-1"></i> Review Status
                             </h6>
-                            <div class="p-3 bg-success bg-opacity-10 rounded">
+                            <div class="p-3 bg-success/10 rounded-xl">
                                 <div>
                                     <strong>Reviewed by:</strong> <?= e($ticket->reviewed_by_name) ?>
                                 </div>
@@ -397,7 +397,7 @@ require_once INCLUDES_PATH . '/header.php';
                                 <?php if ($ticket->status === 'approved'): ?>
                                     <div class="mt-2">
                                         <span class="badge bg-success">
-                                            <i class="bi bi-check-circle me-1"></i> Approved
+                                            <i class="bi bi-check-circle mr-1"></i> Approved
                                         </span>
                                     </div>
                                 <?php endif; ?>
@@ -407,11 +407,11 @@ require_once INCLUDES_PATH . '/header.php';
 
                     <!-- Audit Trail -->
                     <div class="mb-4">
-                        <h6 class="text-muted mb-2">
-                            <i class="bi bi-clock-history me-1"></i> Audit Trail
+                        <h6 class="text-base-content/60 mb-2">
+                            <i class="bi bi-clock-history mr-1"></i> Audit Trail
                         </h6>
-                        <div class="table-responsive">
-                            <table class="table table-sm">
+                        <div class="loka-table-responsive">
+                            <table class="loka-table">
                                 <thead>
                                     <tr>
                                         <th>Event</th>
@@ -426,7 +426,7 @@ require_once INCLUDES_PATH . '/header.php';
                                             <?php if ($ticket->driver_name): ?>
                                                 <?= e($ticket->driver_name) ?>
                                             <?php else: ?>
-                                                <small class="text-muted">System</small>
+                                                <small class="text-base-content/60">System</small>
                                             <?php endif; ?>
                                         </td>
                                         <td><?= formatDateTime($ticket->created_at) ?></td>
@@ -463,20 +463,20 @@ require_once INCLUDES_PATH . '/header.php';
 
                     <!-- Actions -->
                     <div class="mb-3">
-                        <a href="?page=trip-tickets" class="btn btn-outline-secondary">
-                            <i class="bi bi-arrow-left me-1"></i>Back to Trip Tickets
+                        <a href="?page=trip-tickets" class="loka-btn-secondary">
+                            <i class="bi bi-arrow-left mr-1"></i>Back to Trip Tickets
                         </a>
-                        <a href="?page=trip-tickets&action=export-pdf&id=<?= $ticket->id ?>" class="btn btn-danger">
-                            <i class="bi bi-file-earmark-pdf me-1"></i>Export PDF
+                        <a href="?page=trip-tickets&action=export-pdf&id=<?= $ticket->id ?>" class="bg-error text-error-content hover:bg-error/90 px-4 py-2 text-sm font-medium rounded-xl inline-flex items-center gap-2 transition-colors">
+                            <i class="bi bi-file-earmark-pdf mr-1"></i>Export PDF
                         </a>
-                        <a href="?page=trip-tickets&action=export-excel&id=<?= $ticket->id ?>" class="btn btn-success">
-                            <i class="bi bi-file-earmark-excel me-1"></i>Export Excel
+                        <a href="?page=trip-tickets&action=export-excel&id=<?= $ticket->id ?>" class="bg-success text-success-content hover:bg-success/90 px-4 py-2 text-sm font-medium rounded-xl inline-flex items-center gap-2 transition-colors">
+                            <i class="bi bi-file-earmark-excel mr-1"></i>Export Excel
                         </a>
-                        <button type="button" class="btn btn-primary" onclick="window.print()">
-                            <i class="bi bi-printer me-1"></i>Print
+                        <button type="button" class="loka-btn-primary" onclick="window.print()">
+                            <i class="bi bi-printer mr-1"></i>Print
                         </button>
-                        <a href="?page=requests&action=view&id=<?= $ticket->request_id ?>" class="btn btn-info">
-                            <i class="bi bi-eye me-1"></i>View Request
+                        <a href="?page=requests&action=view&id=<?= $ticket->request_id ?>" class="bg-info text-info-content hover:bg-info/90 px-4 py-2 text-sm font-medium rounded-xl inline-flex items-center gap-2 transition-colors">
+                            <i class="bi bi-eye mr-1"></i>View Request
                         </a>
                     </div>
                 </div>
@@ -485,36 +485,36 @@ require_once INCLUDES_PATH . '/header.php';
     </div>
 
     <!-- Requester Information -->
-    <div class="col-md-4">
-        <div class="card">
-            <div class="card-header bg-info text-white">
+    <div class="col-span-12 md:col-span-4">
+        <div class="loka-card">
+            <div class="px-6 py-4 border-b border-base-200 bg-info text-white">
                 <h5 class="mb-0">
-                    <i class="bi bi-person-circle me-2"></i>
+                    <i class="bi bi-person-circle mr-2"></i>
                     Requester
                 </h5>
             </div>
-            <div class="card-body">
+            <div class="p-6">
                 <div class="text-center mb-3">
                     <strong><?= e($ticket->requester_name) ?></strong>
                 </div>
                 <div class="mb-3">
-                    <small class="text-muted">
-                        <i class="bi bi-envelope me-1"></i>
+                    <small class="text-base-content/60">
+                        <i class="bi bi-envelope mr-1"></i>
                         <?= e($ticket->requester_email) ?>
                     </small>
                 </div>
                 <?php if ($ticket->requester_phone): ?>
                     <div class="mb-3">
-                        <small class="text-muted">
-                            <i class="bi bi-telephone me-1"></i>
+                        <small class="text-base-content/60">
+                            <i class="bi bi-telephone mr-1"></i>
                             <?= e($ticket->requester_phone) ?>
                         </small>
                     </div>
                 <?php endif; ?>
                 <hr>
                 <div class="mb-3">
-                    <a href="mailto:<?= e($ticket->requester_email) ?>" class="btn btn-sm btn-outline-primary">
-                        <i class="bi bi-send me-1"></i>Contact Requester
+                    <a href="mailto:<?= e($ticket->requester_email) ?>" class="loka-btn-outline-primary loka-btn-sm">
+                        <i class="bi bi-send mr-1"></i>Contact Requester
                     </a>
                 </div>
             </div>
@@ -524,30 +524,30 @@ require_once INCLUDES_PATH . '/header.php';
 
 <!-- Signature Section (Visible on Print) -->
 <div class="signature-section mt-4 d-print-block">
-    <div class="card border-primary">
-        <div class="card-header bg-primary text-white">
+    <div class="loka-card border-primary">
+        <div class="px-6 py-4 border-b border-base-200 bg-primary text-white">
             <h5 class="mb-0">
-                <i class="bi bi-pencil-square me-2"></i>
+                <i class="bi bi-pencil-square mr-2"></i>
                 SIGNATORY CLEARANCE (For Manual Routing)
             </h5>
         </div>
-        <div class="card-body">
-            <div class="row mb-4">
-                <div class="col-12">
-                    <div class="alert alert-info mb-3">
+        <div class="p-6">
+            <div class="grid grid-cols-12 gap-4 mb-4">
+                <div class="col-span-12">
+                    <div class="loka-alert loka-alert-info mb-3">
                         <strong>Instructions:</strong> This trip ticket must be signed by all parties below in the order indicated. Submit the completed form to the Finance Division for processing.
                     </div>
                 </div>
             </div>
 
             <!-- Driver Signature -->
-            <div class="row mb-4 p-3 bg-light rounded">
-                <div class="col-12">
+            <div class="grid grid-cols-12 gap-4 mb-4 p-3 bg-base-200 rounded-xl">
+                <div class="col-span-12">
                     <h6 class="mb-3">
-                        <i class="bi bi-person me-1"></i> PREPARED BY (Driver)
+                        <i class="bi bi-person mr-1"></i> PREPARED BY (Driver)
                     </h6>
-                    <div class="row">
-                        <div class="col-md-6">
+                    <div class="grid grid-cols-12 gap-4">
+                        <div class="col-span-12 md:col-span-6">
                             <div class="mb-2">
                                 <strong>Name:</strong> <?= e($ticket->driver_name) ?>
                             </div>
@@ -555,9 +555,9 @@ require_once INCLUDES_PATH . '/header.php';
                                 <strong>Date:</strong> _______________________
                             </div>
                         </div>
-                        <div class="col-md-6">
-                            <div class="border-bottom border-dark" style="min-height: 50px;">
-                                <small class="text-muted">Signature over Printed Name:</small>
+                        <div class="col-span-12 md:col-span-6">
+                            <div class="border-b border-base-content" style="min-height: 50px;">
+                                <small class="text-base-content/60">Signature over Printed Name:</small>
                             </div>
                         </div>
                     </div>
@@ -565,17 +565,17 @@ require_once INCLUDES_PATH . '/header.php';
             </div>
 
             <!-- Passenger Acknowledgment -->
-            <div class="row mb-4 p-3 bg-light rounded">
-                <div class="col-12">
+            <div class="grid grid-cols-12 gap-4 mb-4 p-3 bg-base-200 rounded-xl">
+                <div class="col-span-12">
                     <h6 class="mb-3">
-                        <span class="badge bg-info me-1">1</span>
+                        <span class="badge bg-info mr-1">1</span>
                         PASSENGER(S) ACKNOWLEDGMENT
                     </h6>
-                    <p class="small text-muted mb-3">
+                    <p class="text-sm text-base-content/60 mb-3">
                         I hereby acknowledge that I was a passenger on this trip and the information stated above is correct.
                     </p>
-                    <div class="row">
-                        <div class="col-md-6">
+                    <div class="grid grid-cols-12 gap-4">
+                        <div class="col-span-12 md:col-span-6">
                             <div class="mb-2">
                                 <strong>Passenger Name(s):</strong> _________________________
                             </div>
@@ -583,9 +583,9 @@ require_once INCLUDES_PATH . '/header.php';
                                 <strong>Date:</strong> _______________________
                             </div>
                         </div>
-                        <div class="col-md-6">
-                            <div class="border-bottom border-dark" style="min-height: 50px;">
-                                <small class="text-muted">Signature:</small>
+                        <div class="col-span-12 md:col-span-6">
+                            <div class="border-b border-base-content" style="min-height: 50px;">
+                                <small class="text-base-content/60">Signature:</small>
                             </div>
                         </div>
                     </div>
@@ -593,17 +593,17 @@ require_once INCLUDES_PATH . '/header.php';
             </div>
 
             <!-- Motorpool Head -->
-            <div class="row mb-4 p-3 bg-light rounded">
-                <div class="col-12">
+            <div class="grid grid-cols-12 gap-4 mb-4 p-3 bg-base-200 rounded-xl">
+                <div class="col-span-12">
                     <h6 class="mb-3">
-                        <span class="badge bg-warning text-dark me-1">2</span>
+                        <span class="badge bg-warning text-dark mr-1">2</span>
                         MOTORPOOL HEAD - Verification & Approval
                     </h6>
-                    <p class="small text-muted mb-3">
+                    <p class="text-sm text-base-content/60 mb-3">
                         Verified trip details, vehicle condition, and mileage recording. Approved for processing.
                     </p>
-                    <div class="row">
-                        <div class="col-md-6">
+                    <div class="grid grid-cols-12 gap-4">
+                        <div class="col-span-12 md:col-span-6">
                             <div class="mb-2">
                                 <strong>Name:</strong> _________________________
                             </div>
@@ -611,9 +611,9 @@ require_once INCLUDES_PATH . '/header.php';
                                 <strong>Date:</strong> _______________________
                             </div>
                         </div>
-                        <div class="col-md-6">
-                            <div class="border-bottom border-dark" style="min-height: 50px;">
-                                <small class="text-muted">Signature:</small>
+                        <div class="col-span-12 md:col-span-6">
+                            <div class="border-b border-base-content" style="min-height: 50px;">
+                                <small class="text-base-content/60">Signature:</small>
                             </div>
                         </div>
                     </div>
@@ -621,17 +621,17 @@ require_once INCLUDES_PATH . '/header.php';
             </div>
 
             <!-- Admin/Finance Chief -->
-            <div class="row mb-4 p-3 bg-light rounded">
-                <div class="col-12">
+            <div class="grid grid-cols-12 gap-4 mb-4 p-3 bg-base-200 rounded-xl">
+                <div class="col-span-12">
                     <h6 class="mb-3">
-                        <span class="badge bg-success me-1">3</span>
+                        <span class="badge bg-success mr-1">3</span>
                         ADMIN / FINANCE DIVISION CHIEF - Final Approval
                     </h6>
-                    <p class="small text-muted mb-3">
+                    <p class="text-sm text-base-content/60 mb-3">
                         Certified that all documents are complete and trip is valid for reimbursement/payment processing.
                     </p>
-                    <div class="row">
-                        <div class="col-md-6">
+                    <div class="grid grid-cols-12 gap-4">
+                        <div class="col-span-12 md:col-span-6">
                             <div class="mb-2">
                                 <strong>Name:</strong> _________________________
                             </div>
@@ -639,9 +639,9 @@ require_once INCLUDES_PATH . '/header.php';
                                 <strong>Date:</strong> _______________________
                             </div>
                         </div>
-                        <div class="col-md-6">
-                            <div class="border-bottom border-dark" style="min-height: 50px;">
-                                <small class="text-muted">Signature:</small>
+                        <div class="col-span-12 md:col-span-6">
+                            <div class="border-b border-base-content" style="min-height: 50px;">
+                                <small class="text-base-content/60">Signature:</small>
                             </div>
                         </div>
                     </div>
@@ -649,9 +649,9 @@ require_once INCLUDES_PATH . '/header.php';
             </div>
 
             <!-- Notes -->
-            <div class="alert alert-secondary mb-0">
-                <h6 class="mb-2"><i class="bi bi-info-circle me-1"></i> NOTES:</h6>
-                <ol class="mb-0 small">
+            <div class="bg-base-200 text-base-content/80 px-4 py-3 rounded-xl mb-0">
+                <h6 class="mb-2"><i class="bi bi-info-circle mr-1"></i> NOTES:</h6>
+                <ol class="mb-0 text-sm">
                     <li>This document must be signed by all parties indicated above.</li>
                     <li>Attach original Travel Order (TO) and Official Business Slip if applicable.</li>
                     <li>Submit completed form to the Finance Division for processing.</li>
@@ -663,10 +663,10 @@ require_once INCLUDES_PATH . '/header.php';
 
 <style>
 @media print {
-    .breadcrumb, .btn:not(.btn-print) {
+    .breadcrumb, [class*="loka-btn"]:not(.btn-print) {
         display: none;
     }
-    .card {
+    .loka-card {
         page-break-inside: avoid;
         border: 1px solid #ddd;
     }

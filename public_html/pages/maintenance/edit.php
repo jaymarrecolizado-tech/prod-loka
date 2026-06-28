@@ -191,7 +191,7 @@ $pageTitle = 'Edit Maintenance Request #' . $maintenanceId;
 require_once INCLUDES_PATH . '/header.php';
 ?>
 
-<div class="container-fluid py-4">
+<div class="w-full px-4 py-4 sm:px-6 lg:px-8">
     <div class="mb-4">
         <h4 class="mb-1">Edit Maintenance Request #<?= $maintenanceId ?></h4>
         <nav aria-label="breadcrumb">
@@ -203,28 +203,28 @@ require_once INCLUDES_PATH . '/header.php';
         </nav>
     </div>
     
-    <div class="row">
-        <div class="col-lg-8">
+    <div class="grid grid-cols-12 gap-4">
+        <div class="col-span-12 lg:col-span-8">
             <?php if (!empty($errors)): ?>
-            <div class="alert alert-danger">
+            <div class="loka-alert loka-alert-danger">
                 <ul class="mb-0"><?php foreach ($errors as $e): ?><li><?= e($e) ?></li><?php endforeach; ?></ul>
             </div>
             <?php endif; ?>
             
             <!-- Status Update Card -->
-            <div class="card mb-4 border-primary">
-                <div class="card-header bg-primary text-white">
+            <div class="loka-card mb-4 border-primary">
+                <div class="px-6 py-4 border-b border-base-200 bg-primary text-white">
                     <h5 class="mb-0"><i class="bi bi-arrow-repeat me-2"></i>Update Status</h5>
                 </div>
-                <div class="card-body">
+                <div class="p-6">
                     <form method="POST">
                         <?= csrfField() ?>
                         <input type="hidden" name="action" value="update_status">
                         
-                        <div class="row g-3">
-                            <div class="col-md-4">
-                                <label class="form-label">Status</label>
-                                <select class="form-select" name="status" id="statusSelect">
+                        <div class="grid grid-cols-12 gap-3">
+                            <div class="col-span-12 md:col-span-4">
+                                <label class="loka-form-label">Status</label>
+                                <select class="loka-form-input" name="status" id="statusSelect">
                                     <option value="pending" <?= $maintenance->status === 'pending' ? 'selected' : '' ?>>Pending</option>
                                     <option value="scheduled" <?= $maintenance->status === 'scheduled' ? 'selected' : '' ?>>Scheduled</option>
                                     <option value="in_progress" <?= $maintenance->status === 'in_progress' ? 'selected' : '' ?>>In Progress</option>
@@ -233,39 +233,39 @@ require_once INCLUDES_PATH . '/header.php';
                                 </select>
                             </div>
 
-                            <div class="col-md-4">
-                                <label class="form-label">Actual Cost</label>
-                                <div class="input-group">
-                                    <span class="input-group-text">₱</span>
-                                    <input type="number" class="form-control" name="actual_cost"
+                            <div class="col-span-12 md:col-span-4">
+                                <label class="loka-form-label">Actual Cost</label>
+                                <div class="flex items-center gap-0">
+                                    <span class="px-3 py-2.5 bg-base-200 rounded-l-xl text-sm font-medium text-base-content/60 border border-r-0 border-base-300">₱</span>
+                                    <input type="number" class="loka-form-input" name="actual_cost"
                                            value="<?= e($maintenance->actual_cost ?? '') ?>" step="0.01" min="0">
                                 </div>
                             </div>
 
-                            <div class="col-md-4">
-                                <label class="form-label">Completed Date</label>
-                                <input type="text" class="form-control datepicker" name="completed_date"
+                            <div class="col-span-12 md:col-span-4">
+                                <label class="loka-form-label">Completed Date</label>
+                                <input type="text" class="loka-form-input datepicker" name="completed_date"
                                        value="<?= e($maintenance->completed_date ?? '') ?>">
                             </div>
 
-                            <div class="col-md-6" id="mileageAtCompletionWrapper" style="display: <?= $maintenance->status === MAINTENANCE_STATUS_COMPLETED ? 'block' : 'none' ?>;">
-                                <label class="form-label">Odometer at Completion <span class="text-danger">*</span></label>
-                                <div class="input-group">
-                                    <input type="number" class="form-control" name="mileage_at_completion"
+                            <div class="col-span-12 md:col-span-6" id="mileageAtCompletionWrapper" style="display: <?= $maintenance->status === MAINTENANCE_STATUS_COMPLETED ? 'block' : 'none' ?>;">
+                                <label class="loka-form-label">Odometer at Completion <span class="text-error">*</span></label>
+                                <div class="flex items-center gap-0">
+                                    <input type="number" class="loka-form-input" name="mileage_at_completion"
                                            value="<?= e($maintenance->mileage_at_completion ?? '') ?>" min="0">
-                                    <span class="input-group-text">km</span>
+                                    <span class="px-3 py-2.5 bg-base-200 rounded-r-xl text-sm font-medium text-base-content/60 border border-l-0 border-base-300">km</span>
                                 </div>
-                                <small class="text-muted">Vehicle's odometer reading when maintenance was completed</small>
+                                <small class="text-base-content/60">Vehicle's odometer reading when maintenance was completed</small>
                             </div>
 
-                            <div class="col-12">
-                                <label class="form-label">Resolution Notes</label>
-                                <textarea class="form-control" name="resolution_notes" rows="2"
+                            <div class="col-span-12">
+                                <label class="loka-form-label">Resolution Notes</label>
+                                <textarea class="loka-form-input" name="resolution_notes" rows="2"
                                           placeholder="Notes about the repair or resolution..." maxlength="500"><?= e($maintenance->resolution_notes ?? '') ?></textarea>
                             </div>
                         </div>
                         
-                        <button type="submit" class="btn btn-primary mt-3">
+                        <button type="submit" class="loka-btn-primary mt-3">
                             <i class="bi bi-check-lg me-1"></i>Update Status
                         </button>
                     </form>
@@ -273,18 +273,18 @@ require_once INCLUDES_PATH . '/header.php';
             </div>
             
             <!-- Edit Details Card -->
-            <div class="card">
-                <div class="card-header">
+            <div class="loka-card">
+                <div class="px-6 py-4 border-b border-base-200">
                     <h5 class="mb-0"><i class="bi bi-pencil me-2"></i>Edit Details</h5>
                 </div>
-                <div class="card-body">
+                <div class="p-6">
                     <form method="POST">
                         <?= csrfField() ?>
                         
-                        <div class="row g-3">
-                            <div class="col-md-6">
-                                <label class="form-label">Vehicle</label>
-                                <select class="form-select" name="vehicle_id">
+                        <div class="grid grid-cols-12 gap-3">
+                            <div class="col-span-12 md:col-span-6">
+                                <label class="loka-form-label">Vehicle</label>
+                                <select class="loka-form-input" name="vehicle_id">
                                     <?php foreach ($vehicles as $v): ?>
                                     <option value="<?= $v->id ?>" <?= ($maintenance->vehicle_id == $v->id || post('vehicle_id') == $v->id) ? 'selected' : '' ?>>
                                         <?= e($v->plate_number) ?> - <?= e($v->make . ' ' . $v->model) ?>
@@ -293,9 +293,9 @@ require_once INCLUDES_PATH . '/header.php';
                                 </select>
                             </div>
                             
-                            <div class="col-md-3">
-                                <label class="form-label">Type</label>
-                                <select class="form-select" name="type">
+                            <div class="col-span-12 md:col-span-3">
+                                <label class="loka-form-label">Type</label>
+                                <select class="loka-form-input" name="type">
                                     <optgroup label="Maintenance Categories">
                                         <option value="corrective" <?= $maintenance->type === 'corrective' ? 'selected' : '' ?>>Corrective</option>
                                         <option value="preventive" <?= $maintenance->type === 'preventive' ? 'selected' : '' ?>>Preventive</option>
@@ -311,9 +311,9 @@ require_once INCLUDES_PATH . '/header.php';
                                 </select>
                             </div>
                             
-                            <div class="col-md-3">
-                                <label class="form-label">Priority</label>
-                                <select class="form-select" name="priority">
+                            <div class="col-span-12 md:col-span-3">
+                                <label class="loka-form-label">Priority</label>
+                                <select class="loka-form-input" name="priority">
                                     <option value="low" <?= $maintenance->priority === 'low' ? 'selected' : '' ?>>Low</option>
                                     <option value="medium" <?= $maintenance->priority === 'medium' ? 'selected' : '' ?>>Medium</option>
                                     <option value="high" <?= $maintenance->priority === 'high' ? 'selected' : '' ?>>High</option>
@@ -321,28 +321,28 @@ require_once INCLUDES_PATH . '/header.php';
                                 </select>
                             </div>
                             
-                            <div class="col-12">
-                                <label class="form-label">Title</label>
-                                <input type="text" class="form-control" name="title" 
+                            <div class="col-span-12">
+                                <label class="loka-form-label">Title</label>
+                                <input type="text" class="loka-form-input" name="title" 
                                        value="<?= e(post('title', $maintenance->title)) ?>">
                             </div>
                             
-                            <div class="col-12">
-                                <label class="form-label">Description</label>
-                                <textarea class="form-control" name="description" rows="3" maxlength="500"><?= e(post('description', $maintenance->description)) ?></textarea>
+                            <div class="col-span-12">
+                                <label class="loka-form-label">Description</label>
+                                <textarea class="loka-form-input" name="description" rows="3" maxlength="500"><?= e(post('description', $maintenance->description)) ?></textarea>
                             </div>
                             
-                            <div class="col-md-6">
-                                <label class="form-label">Scheduled Date</label>
-                                <input type="text" class="form-control datepicker" name="scheduled_date" 
+                            <div class="col-span-12 md:col-span-6">
+                                <label class="loka-form-label">Scheduled Date</label>
+                                <input type="text" class="loka-form-input datepicker" name="scheduled_date" 
                                        value="<?= e(post('scheduled_date', $maintenance->scheduled_date)) ?>">
                             </div>
                             
-                            <div class="col-md-6">
-                                <label class="form-label">Estimated Cost</label>
-                                <div class="input-group">
-                                    <span class="input-group-text">₱</span>
-                                    <input type="number" class="form-control" name="estimated_cost" 
+                            <div class="col-span-12 md:col-span-6">
+                                <label class="loka-form-label">Estimated Cost</label>
+                                <div class="flex items-center gap-0">
+                                    <span class="px-3 py-2.5 bg-base-200 rounded-l-xl text-sm font-medium text-base-content/60 border border-r-0 border-base-300">₱</span>
+                                    <input type="number" class="loka-form-input" name="estimated_cost" 
                                            value="<?= e(post('estimated_cost', $maintenance->estimated_cost)) ?>" step="0.01" min="0">
                                 </div>
                             </div>
@@ -350,21 +350,21 @@ require_once INCLUDES_PATH . '/header.php';
                         
                         <hr class="my-4">
                         
-                        <div class="d-flex gap-2">
-                            <button type="submit" class="btn btn-primary">
+                        <div class="flex gap-2">
+                            <button type="submit" class="loka-btn-primary">
                                 <i class="bi bi-check-lg me-1"></i>Save Changes
                             </button>
                             <a href="<?= APP_URL ?>/?page=maintenance&action=view&id=<?= $maintenanceId ?>" 
-                               class="btn btn-outline-secondary">Cancel</a>
+                               class="loka-btn-secondary">Cancel</a>
                         </div>
                     </form>
                 </div>
             </div>
         </div>
         
-        <div class="col-lg-4">
-            <div class="card bg-light border-0">
-                <div class="card-body">
+        <div class="col-span-12 lg:col-span-4">
+            <div class="loka-card bg-base-200 border-0">
+                <div class="p-6">
                     <h6><i class="bi bi-info-circle me-2"></i>Current Status</h6>
                     <?php $statusInfo = MAINTENANCE_STATUSES[$maintenance->status] ?? ['label' => ucfirst(str_replace('_', ' ', $maintenance->status)), 'color' => 'secondary']; ?>
                     <span class="badge bg-<?= $statusInfo['color'] ?> fs-6">
@@ -372,7 +372,7 @@ require_once INCLUDES_PATH . '/header.php';
                     </span>
                     
                     <hr>
-                    <p class="small text-muted mb-0">
+                    <p class="small text-base-content/60 mb-0">
                         <strong>Created:</strong> <?= formatDateTime($maintenance->created_at) ?><br>
                         <strong>Updated:</strong> <?= formatDateTime($maintenance->updated_at) ?>
                     </p>

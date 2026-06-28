@@ -322,44 +322,44 @@ $tripTypeOtherValue = '';
 require_once INCLUDES_PATH . '/header.php';
 ?>
 
-<div class="container-fluid py-4">
+<div class="w-full px-4 py-4 sm:px-6 lg:px-8">
     <!-- Page Header -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="flex justify-between items-center mb-4">
         <div>
             <h1 class="mb-1">
-                <i class="bi bi-file-earmark-plus me-2"></i>
+                <i class="bi bi-file-earmark-plus mr-2"></i>
                 Create Trip Ticket
             </h1>
-            <p class="text-muted mb-0">Document completed trip details and documents</p>
+            <p class="text-base-content/60 mb-0">Document completed trip details and documents</p>
         </div>
         <div>
-            <a href="?page=trip-tickets" class="btn btn-outline-secondary">
-                <i class="bi bi-arrow-left me-1"></i>Back to Trip Tickets
+            <a href="?page=trip-tickets" class="loka-btn-secondary">
+                <i class="bi bi-arrow-left mr-1"></i>Back to Trip Tickets
             </a>
         </div>
     </div>
 
     <!-- Trip Reference Card -->
-    <div class="card mb-4 border-primary">
-        <div class="card-header bg-primary text-white">
+    <div class="loka-card mb-4 border-primary">
+        <div class="px-6 py-4 border-b border-base-200 bg-primary text-white">
             <h5 class="mb-0">
-                <i class="bi bi-link-45deg me-2"></i>
+                <i class="bi bi-link-45deg mr-2"></i>
                 Trip Reference: Request #<?= $requestId ?>
             </h5>
         </div>
-        <div class="card-body">
-            <div class="row">
-                <div class="col-md-6">
-                     <dl class="row">
-                         <dt class="col-sm-4">Requester:</dt>
-                         <dd class="col-sm-8"><?= e($request->requester_name) ?></dd>
+        <div class="p-6">
+            <div class="grid grid-cols-12 gap-4">
+                <div class="col-span-12 md:col-span-6">
+                     <dl class="grid grid-cols-12 gap-4">
+                         <dt class="col-span-4">Requester:</dt>
+                         <dd class="col-span-8"><?= e($request->requester_name) ?></dd>
                          
-                         <dt class="col-sm-4">Department:</dt>
-                         <dd class="col-sm-8"><?= e($request->department_name) ?></dd>
+                         <dt class="col-span-4">Department:</dt>
+                         <dd class="col-span-8"><?= e($request->department_name) ?></dd>
                          
-                         <dt class="col-sm-4">Driver Assigned:</dt>
-                         <dd class="col-sm-8">
-                             <select class="form-select" id="driverSelect" onchange="updateDriverInfo()">
+                         <dt class="col-span-4">Driver Assigned:</dt>
+                         <dd class="col-span-8">
+                             <select class="loka-form-input" id="driverSelect" onchange="updateDriverInfo()">
                                  <option value="">-- Select Driver --</option>
                                  <?php foreach ($drivers as $driver): ?>
                                      <option value="<?= $driver->id ?>" <?= $request->driver_id == $driver->id ? 'selected' : '' ?>>
@@ -367,48 +367,48 @@ require_once INCLUDES_PATH . '/header.php';
                                      </option>
                                  <?php endforeach; ?>
                              </select>
-                             <small class="text-muted" id="currentDriverInfo">
+                             <small class="text-base-content/60" id="currentDriverInfo">
                                  Currently: <?= e($request->driver_name) ?> (<?= e($request->driver_license) ?>)
                              </small>
                          </dd>
                      </dl>
                 </div>
-                <div class="col-md-6">
-                    <dl class="row">
-                        <dt class="col-sm-4">Vehicle:</dt>
-                        <dd class="col-sm-8">
+                <div class="col-span-12 md:col-span-6">
+                    <dl class="grid grid-cols-12 gap-4">
+                        <dt class="col-span-4">Vehicle:</dt>
+                        <dd class="col-span-8">
                             <?= $plateNumber ?: 'No vehicle assigned' ?>
                         </dd>
                         
-                        <dt class="col-sm-4">Destination:</dt>
-                        <dd class="col-sm-8"><?= e($request->destination) ?></dd>
+                        <dt class="col-span-4">Destination:</dt>
+                        <dd class="col-span-8"><?= e($request->destination) ?></dd>
                         
-                        <dt class="col-sm-4">Original Purpose:</dt>
-                        <dd class="col-sm-8"><?= truncate($request->purpose, 50) ?></dd>
+                        <dt class="col-span-4">Original Purpose:</dt>
+                        <dd class="col-span-8"><?= truncate($request->purpose, 50) ?></dd>
                     </dl>
                 </div>
             </div>
-            <div class="row">
-                <div class="col-md-4">
-                    <dl class="row">
-                        <dt class="col-sm-5">Dispatched:</dt>
-                        <dd class="col-sm-7">
+            <div class="grid grid-cols-12 gap-4">
+                <div class="col-span-12 md:col-span-4">
+                    <dl class="grid grid-cols-12 gap-4">
+                        <dt class="col-span-5">Dispatched:</dt>
+                        <dd class="col-span-7">
                             <?= $request->actual_dispatch_datetime ? formatDateTime($request->actual_dispatch_datetime) : '-' ?>
                         </dd>
                     </dl>
                 </div>
-                <div class="col-md-4">
-                    <dl class="row">
-                        <dt class="col-sm-5">Arrived:</dt>
-                        <dd class="col-sm-7">
+                <div class="col-span-12 md:col-span-4">
+                    <dl class="grid grid-cols-12 gap-4">
+                        <dt class="col-span-5">Arrived:</dt>
+                        <dd class="col-span-7">
                             <?= $request->actual_arrival_datetime ? formatDateTime($request->actual_arrival_datetime) : '-' ?>
                         </dd>
                     </dl>
                 </div>
-                <div class="col-md-4">
-                    <dl class="row">
-                        <dt class="col-sm-5">Duration:</dt>
-                        <dd class="col-sm-7">
+                <div class="col-span-12 md:col-span-4">
+                    <dl class="grid grid-cols-12 gap-4">
+                        <dt class="col-span-5">Duration:</dt>
+                        <dd class="col-span-7">
                             <?php if ($durationHours > 0): ?>
                                 <span class="badge bg-info">
                                     <?= $durationHours ?>h <?= $durationMinutes ?>m
@@ -420,19 +420,19 @@ require_once INCLUDES_PATH . '/header.php';
                     </dl>
                 </div>
             </div>
-            <div class="row">
-                <div class="col-md-6">
-                    <dl class="row">
-                        <dt class="col-sm-5">Start Mileage:</dt>
-                        <dd class="col-sm-7">
+            <div class="grid grid-cols-12 gap-4">
+                <div class="col-span-12 md:col-span-6">
+                    <dl class="grid grid-cols-12 gap-4">
+                        <dt class="col-span-5">Start Mileage:</dt>
+                        <dd class="col-span-7">
                             <strong><?= $startMileage ? number_format($startMileage) . ' km' : '-' ?></strong>
                         </dd>
                     </dl>
                 </div>
-                <div class="col-md-6">
-                    <dl class="row">
-                        <dt class="col-sm-5">Dispatched By:</dt>
-                        <dd class="col-sm-7">
+                <div class="col-span-12 md:col-span-6">
+                    <dl class="grid grid-cols-12 gap-4">
+                        <dt class="col-span-5">Dispatched By:</dt>
+                        <dd class="col-span-7">
                             <?= e($request->dispatch_guard) ?: '-' ?>
                         </dd>
                     </dl>
@@ -442,17 +442,17 @@ require_once INCLUDES_PATH . '/header.php';
     </div>
 
     <!-- Trip Ticket Form -->
-    <div class="card">
-        <div class="card-header">
+    <div class="loka-card">
+        <div class="px-6 py-4 border-b border-base-200">
             <h5 class="mb-0">
-                <i class="bi bi-pencil-square me-2"></i>
+                <i class="bi bi-pencil-square mr-2"></i>
                 Trip Ticket Details
             </h5>
         </div>
-        <div class="card-body">
+        <div class="p-6">
             <?php if (!empty($errors)): ?>
-                <div class="alert alert-danger">
-                    <strong><i class="bi bi-exclamation-triangle me-2"></i>Please fix the following errors:</strong>
+                <div class="loka-alert loka-alert-danger">
+                    <strong><i class="bi bi-exclamation-triangle mr-2"></i>Please fix the following errors:</strong>
                     <ul>
                         <?php foreach ($errors as $error): ?>
                             <li><?= e($error) ?></li>
@@ -465,93 +465,93 @@ require_once INCLUDES_PATH . '/header.php';
                 <?= csrfField() ?>
                 
                 <!-- Trip Type & Purpose -->
-                <div class="row mb-3">
-                    <div class="col-md-6">
-                        <label class="form-label">Trip Type <span class="text-danger">*</span></label>
-                        <select class="form-select" name="trip_type" id="tripTypeSelect" required onchange="toggleTripTypeOther()">
+                <div class="grid grid-cols-12 gap-4 mb-4">
+                    <div class="col-span-12 md:col-span-6">
+                        <label class="loka-form-label">Trip Type <span class="text-error">*</span></label>
+                        <select class="loka-form-input" name="trip_type" id="tripTypeSelect" required onchange="toggleTripTypeOther()">
                             <option value="official" <?= $tripTypeValue === 'official' ? 'selected' : '' ?>>Official Business</option>
                             <option value="personal" <?= $tripTypeValue === 'personal' ? 'selected' : '' ?>>Personal</option>
                             <option value="maintenance" <?= $tripTypeValue === 'maintenance' ? 'selected' : '' ?>>Maintenance Run</option>
                             <option value="travel_order" <?= $tripTypeValue === 'travel_order' ? 'selected' : '' ?>>Travel Order</option>
                             <option value="other" <?= $tripTypeValue === 'other' ? 'selected' : '' ?>>Other</option>
                         </select>
-                        <small class="text-muted">Select the nature of this trip</small>
+                        <small class="text-base-content/60">Select the nature of this trip</small>
                     </div>
-                    <div class="col-md-6">
-                        <label class="form-label">Purpose</label>
-                        <textarea class="form-control" name="purpose" rows="2" placeholder="Detailed purpose of the trip..." maxlength="1000"><?= e($purposeValue) ?></textarea>
-                        <small class="text-muted">Original: <?= truncate($tripPurpose, 40) ?></small>
+                    <div class="col-span-12 md:col-span-6">
+                        <label class="loka-form-label">Purpose</label>
+                        <textarea class="loka-form-input" name="purpose" rows="2" placeholder="Detailed purpose of the trip..." maxlength="1000"><?= e($purposeValue) ?></textarea>
+                        <small class="text-base-content/60">Original: <?= truncate($tripPurpose, 40) ?></small>
                     </div>
                 </div>
 
                 <!-- Other Trip Type Description (shown only when Other is selected) -->
-                <div class="row mb-3" id="tripTypeOtherRow" style="display: <?= $tripTypeValue === 'other' ? 'block' : 'none' ?>;">
-                    <div class="col-md-12">
-                        <label class="form-label">Specify Trip Type <span class="text-danger">*</span></label>
-                        <input type="text" class="form-control" name="trip_type_other" value="<?= e($tripTypeOtherValue) ?>" placeholder="Please specify the type of trip..." <?= $tripTypeValue === 'other' ? 'required' : '' ?>>
-                        <small class="text-muted">Required when "Other" is selected as trip type</small>
+                <div class="grid grid-cols-12 gap-4 mb-4" id="tripTypeOtherRow" style="display: <?= $tripTypeValue === 'other' ? 'block' : 'none' ?>;">
+                    <div class="col-span-12">
+                        <label class="loka-form-label">Specify Trip Type <span class="text-error">*</span></label>
+                        <input type="text" class="loka-form-input" name="trip_type_other" value="<?= e($tripTypeOtherValue) ?>" placeholder="Please specify the type of trip..." <?= $tripTypeValue === 'other' ? 'required' : '' ?>>
+                        <small class="text-base-content/60">Required when "Other" is selected as trip type</small>
                     </div>
                 </div>
 
                 <!-- Date & Time (Pre-filled but editable) -->
-                <div class="row mb-3">
-                    <div class="col-md-6">
-                        <label class="form-label">Start Date <span class="text-danger">*</span></label>
-                        <input type="datetime-local" class="form-control" name="start_date" value="<?= $startDate ?>" required>
-                        <small class="text-muted">
-                            <i class="bi bi-info-circle me-1"></i>Pre-filled from dispatch time (can be edited)
+                <div class="grid grid-cols-12 gap-4 mb-4">
+                    <div class="col-span-12 md:col-span-6">
+                        <label class="loka-form-label">Start Date <span class="text-error">*</span></label>
+                        <input type="datetime-local" class="loka-form-input" name="start_date" value="<?= $startDate ?>" required>
+                        <small class="text-base-content/60">
+                            <i class="bi bi-info-circle mr-1"></i>Pre-filled from dispatch time (can be edited)
                         </small>
                     </div>
-                    <div class="col-md-6">
-                        <label class="form-label">End Date <span class="text-danger">*</span></label>
-                        <input type="datetime-local" class="form-control" name="end_date" value="<?= $endDate ?>" required>
-                        <small class="text-muted">
-                            <i class="bi bi-info-circle me-1"></i>Pre-filled from arrival time (can be edited)
+                    <div class="col-span-12 md:col-span-6">
+                        <label class="loka-form-label">End Date <span class="text-error">*</span></label>
+                        <input type="datetime-local" class="loka-form-input" name="end_date" value="<?= $endDate ?>" required>
+                        <small class="text-base-content/60">
+                            <i class="bi bi-info-circle mr-1"></i>Pre-filled from arrival time (can be edited)
                         </small>
                     </div>
                 </div>
 
                 <!-- Destination (Pre-filled but editable) -->
-                <div class="mb-3">
-                    <label class="form-label">Destination <span class="text-danger">*</span></label>
-                    <input type="text" class="form-control" name="destination" value="<?= e($destinationValue) ?>" required>
-                    <small class="text-muted">From request: <?= e($destination) ?></small>
+                <div class="mb-4">
+                    <label class="loka-form-label">Destination <span class="text-error">*</span></label>
+                    <input type="text" class="loka-form-input" name="destination" value="<?= e($destinationValue) ?>" required>
+                    <small class="text-base-content/60">From request: <?= e($destination) ?></small>
                 </div>
 
                 <!-- Passengers -->
-                <div class="mb-3">
-                    <label class="form-label">Number of Passengers</label>
-                    <input type="number" class="form-control" name="passengers" min="0" value="<?= $passengersValue ?>">
-                    <small class="text-muted">Including driver (from request)</small>
+                <div class="mb-4">
+                    <label class="loka-form-label">Number of Passengers</label>
+                    <input type="number" class="loka-form-input" name="passengers" min="0" value="<?= $passengersValue ?>">
+                    <small class="text-base-content/60">Including driver (from request)</small>
                 </div>
 
                 <!-- Mileage -->
-                <div class="row mb-3">
-                    <div class="col-md-4">
-                        <label class="form-label">Start Odometer</label>
-                        <input type="number" class="form-control" name="start_mileage" value="<?= $startMileageValue ?>" placeholder="Starting reading">
-                        <small class="text-muted">From request: <?= $startMileage ? number_format($startMileage) . ' km' : 'Not set' ?></small>
+                <div class="grid grid-cols-12 gap-4 mb-4">
+                    <div class="col-span-12 md:col-span-4">
+                        <label class="loka-form-label">Start Odometer</label>
+                        <input type="number" class="loka-form-input" name="start_mileage" value="<?= $startMileageValue ?>" placeholder="Starting reading">
+                        <small class="text-base-content/60">From request: <?= $startMileage ? number_format($startMileage) . ' km' : 'Not set' ?></small>
                     </div>
-                    <div class="col-md-4">
-                        <label class="form-label">End Odometer</label>
-                        <input type="number" class="form-control" name="end_mileage" value="<?= $endMileageValue ?>" placeholder="Ending reading" required>
-                        <small class="text-danger">Required</small>
+                    <div class="col-span-12 md:col-span-4">
+                        <label class="loka-form-label">End Odometer</label>
+                        <input type="number" class="loka-form-input" name="end_mileage" value="<?= $endMileageValue ?>" placeholder="Ending reading" required>
+                        <small class="text-error">Required</small>
                     </div>
-                    <div class="col-md-4">
-                        <label class="form-label">Distance Traveled (km)</label>
-                        <input type="number" class="form-control" name="distance_traveled" value="<?= $distanceTraveledValue ?>" placeholder="Auto-calculated if different">
+                    <div class="col-span-12 md:col-span-4">
+                        <label class="loka-form-label">Distance Traveled (km)</label>
+                        <input type="number" class="loka-form-input" name="distance_traveled" value="<?= $distanceTraveledValue ?>" placeholder="Auto-calculated if different">
                     </div>
                 </div>
 
                 <!-- Fuel -->
-                <div class="row mb-3">
-                    <div class="col-md-6">
-                        <label class="form-label">Fuel Consumed (L)</label>
-                        <input type="number" step="0.01" class="form-control" name="fuel_consumed" value="<?= $fuelConsumedValue ?>" placeholder="Total liters consumed">
+                <div class="grid grid-cols-12 gap-4 mb-4">
+                    <div class="col-span-12 md:col-span-6">
+                        <label class="loka-form-label">Fuel Consumed (L)</label>
+                        <input type="number" step="0.01" class="loka-form-input" name="fuel_consumed" value="<?= $fuelConsumedValue ?>" placeholder="Total liters consumed">
                     </div>
-                    <div class="col-md-6">
-                        <label class="form-label">Fuel Cost (PHP)</label>
-                        <input type="number" step="0.01" class="form-control" name="fuel_cost" value="<?= $fuelCostValue ?>" placeholder="Total cost in PHP">
+                    <div class="col-span-12 md:col-span-6">
+                        <label class="loka-form-label">Fuel Cost (PHP)</label>
+                        <input type="number" step="0.01" class="loka-form-input" name="fuel_cost" value="<?= $fuelCostValue ?>" placeholder="Total cost in PHP">
                     </div>
                 </div>
 
@@ -560,28 +560,28 @@ require_once INCLUDES_PATH . '/header.php';
                 <!-- Documents Upload Section -->
                 <div class="mb-4">
                     <h6 class="mb-3">
-                        <i class="bi bi-files me-1"></i>
+                        <i class="bi bi-files mr-1"></i>
                         Upload Documents
                     </h6>
-                    <div class="alert alert-info">
-                        <i class="bi bi-info-circle me-2"></i>
+                    <div class="loka-alert loka-alert-info">
+                        <i class="bi bi-info-circle mr-2"></i>
                         <strong>Note:</strong> Upload Travel Order (TO) and OB Slip documents here. These are required for official business trips.
                     </div>
-                    <div class="row">
-                        <div class="col-md-4">
-                            <label class="form-label">Travel Order (TO)</label>
-                            <input type="file" class="form-control" name="travel_order" accept=".pdf,.jpg,.jpeg,.png" id="travelOrderInput">
-                            <small class="text-muted">PDF or Image files</small>
+                    <div class="grid grid-cols-12 gap-4">
+                        <div class="col-span-12 md:col-span-4">
+                            <label class="loka-form-label">Travel Order (TO)</label>
+                            <input type="file" class="loka-form-input" name="travel_order" accept=".pdf,.jpg,.jpeg,.png" id="travelOrderInput">
+                            <small class="text-base-content/60">PDF or Image files</small>
                         </div>
-                        <div class="col-md-4">
-                            <label class="form-label">OB Slip</label>
-                            <input type="file" class="form-control" name="ob_slip" accept=".pdf,.jpg,.jpeg,.png" id="obSlipInput">
-                            <small class="text-muted">PDF or Image files</small>
+                        <div class="col-span-12 md:col-span-4">
+                            <label class="loka-form-label">OB Slip</label>
+                            <input type="file" class="loka-form-input" name="ob_slip" accept=".pdf,.jpg,.jpeg,.png" id="obSlipInput">
+                            <small class="text-base-content/60">PDF or Image files</small>
                         </div>
-                        <div class="col-md-4">
-                            <label class="form-label">Other Documents</label>
-                            <input type="file" class="form-control" name="other_documents" accept=".pdf,.zip" multiple id="otherDocsInput">
-                            <small class="text-muted">Optional additional documents</small>
+                        <div class="col-span-12 md:col-span-4">
+                            <label class="loka-form-label">Other Documents</label>
+                            <input type="file" class="loka-form-input" name="other_documents" accept=".pdf,.zip" multiple id="otherDocsInput">
+                            <small class="text-base-content/60">Optional additional documents</small>
                         </div>
                     </div>
                 </div>
@@ -591,31 +591,31 @@ require_once INCLUDES_PATH . '/header.php';
                 <!-- Issues Section -->
                 <div class="mb-4">
                     <h6 class="mb-3">
-                        <i class="bi bi-exclamation-triangle me-1"></i>
+                        <i class="bi bi-exclamation-triangle mr-1"></i>
                         Report Issues (Optional)
                     </h6>
-                    <div class="form-check form-switch mb-3">
-                        <input class="form-check-input" type="checkbox" name="has_issues" id="hasIssues" onchange="toggleIssuesFields()" <?= $hasIssuesValue ? 'checked' : '' ?>>
-                        <label class="form-check-label" for="hasIssues">Were there any issues or incidents during this trip?</label>
+                    <div class="flex items-center gap-2 mb-3">
+                        <input class="loka-form-input w-auto" type="checkbox" name="has_issues" id="hasIssues" onchange="toggleIssuesFields()" <?= $hasIssuesValue ? 'checked' : '' ?>>
+                        <label class="loka-form-label mb-0" for="hasIssues">Were there any issues or incidents during this trip?</label>
                     </div>
 
                     <div id="issuesFields" class="mb-3" style="display: <?= $hasIssuesValue ? 'block' : 'none' ?>;">
-                        <div class="row">
-                            <div class="col-md-6">
-                                <label class="form-label">Issues Description</label>
-                                <textarea class="form-control" name="issues_description" rows="3" placeholder="Describe any issues, incidents, or concerns..." maxlength="500"><?= e($issuesDescriptionValue) ?></textarea>
+                        <div class="grid grid-cols-12 gap-4">
+                            <div class="col-span-12 md:col-span-6">
+                                <label class="loka-form-label">Issues Description</label>
+                                <textarea class="loka-form-input" name="issues_description" rows="3" placeholder="Describe any issues, incidents, or concerns..." maxlength="500"><?= e($issuesDescriptionValue) ?></textarea>
                             </div>
-                            <div class="col-md-6">
-                                <label class="form-label">Resolved?</label>
-                                <select class="form-select" name="resolved">
+                            <div class="col-span-12 md:col-span-6">
+                                <label class="loka-form-label">Resolved?</label>
+                                <select class="loka-form-input" name="resolved">
                                     <option value="0" <?= !$resolvedValue ? 'selected' : '' ?>>No</option>
                                     <option value="1" <?= $resolvedValue ? 'selected' : '' ?>>Yes</option>
                                 </select>
                             </div>
                         </div>
                         <div class="mt-2">
-                            <label class="form-label">Resolution Notes</label>
-                            <textarea class="form-control" name="resolution_notes" rows="2" placeholder="How were the issues resolved? (if applicable)" maxlength="500"><?= e($resolutionNotesValue) ?></textarea>
+                            <label class="loka-form-label">Resolution Notes</label>
+                            <textarea class="loka-form-input" name="resolution_notes" rows="2" placeholder="How were the issues resolved? (if applicable)" maxlength="500"><?= e($resolutionNotesValue) ?></textarea>
                         </div>
                     </div>
                 </div>
@@ -624,30 +624,30 @@ require_once INCLUDES_PATH . '/header.php';
 
                 <!-- Guard Notes -->
                 <div class="mb-4">
-                    <label class="form-label">Guard Notes</label>
-                    <textarea class="form-control" name="guard_notes" rows="3" placeholder="Any additional observations, comments, or notes..." maxlength="500"><?= e($guardNotesValue) ?></textarea>
-                    <small class="text-muted">Include any special circumstances or relevant information</small>
+                    <label class="loka-form-label">Guard Notes</label>
+                    <textarea class="loka-form-input" name="guard_notes" rows="3" placeholder="Any additional observations, comments, or notes..." maxlength="500"><?= e($guardNotesValue) ?></textarea>
+                    <small class="text-base-content/60">Include any special circumstances or relevant information</small>
                 </div>
 
                 <!-- Action Buttons -->
-                <div class="d-flex justify-content-between align-items-center">
-                    <a href="?page=<?= isDriver() ? 'my-trips' : 'guard' ?>" class="btn btn-outline-secondary">
-                        <i class="bi bi-x-circle me-1"></i>
+                <div class="flex justify-between items-center">
+                    <a href="?page=<?= isDriver() ? 'my-trips' : 'guard' ?>" class="loka-btn-secondary">
+                        <i class="bi bi-x-circle mr-1"></i>
                         Cancel
                     </a>
-                    <button type="submit" class="btn btn-success">
-                        <i class="bi bi-check-circle me-1"></i>
+                    <button type="submit" class="bg-success text-success-content hover:bg-success/90 px-4 py-2 text-sm font-medium rounded-xl inline-flex items-center gap-2 transition-colors">
+                        <i class="bi bi-check-circle mr-1"></i>
                         Create Trip Ticket
                     </button>
                 </div>
 
                 <!-- Info Box -->
-                <div class="alert alert-info mb-0">
-                    <i class="bi bi-info-circle me-2"></i>
+                <div class="loka-alert loka-alert-info mb-0">
+                    <i class="bi bi-info-circle mr-2"></i>
                     <strong>Note:</strong> You can upload Travel Order and OB Slip documents now, or leave them empty to upload later. All trip details will be saved and linked to request #<?= $requestId ?>.
                     <br><br>
-                    <small class="text-muted">
-                        <i class="bi bi-file-earmark-pdf me-1"></i>
+                    <small class="text-base-content/60">
+                        <i class="bi bi-file-earmark-pdf mr-1"></i>
                         Accepted formats: PDF, JPG, PNG, GIF (max 10MB per file)
                     </small>
                 </div>
@@ -689,7 +689,7 @@ document.addEventListener('DOMContentLoaded', function() {
     border-color: #dc3545;
 }
 
-.card-header.bg-primary {
+.px-6.py-4.border-b.border-base-200.bg-primary {
     background: linear-gradient(135deg, #0d6efd 0%, #0b5ed7 100%);
 }
 </style>

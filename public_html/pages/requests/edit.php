@@ -398,7 +398,7 @@ require_once INCLUDES_PATH . '/header.php';
     <div class="mb-6">
         <h1 class="text-2xl font-bold">Edit Request #<?= $requestId ?>
             <?php if ($request->status === STATUS_REVISION): ?>
-                <span class="badge badge-warning ml-2"><i class="bi bi-arrow-repeat mr-1"></i>Revision Requested</span>
+                <span class="loka-badge loka-badge-warning ml-2"><i class="bi bi-arrow-repeat mr-1"></i>Revision Requested</span>
             <?php endif; ?>
         </h1>
         <div class="text-sm breadcrumbs mt-1">
@@ -411,7 +411,7 @@ require_once INCLUDES_PATH . '/header.php';
     </div>
 
     <?php if ($request->status === STATUS_REVISION && $revisionComments): ?>
-    <div class="alert alert-warning border-l-4 border-warning mb-6">
+    <div class="loka-alert loka-alert-warning border-l-4 border-warning mb-6">
         <h6 class="font-semibold mb-2"><i class="bi bi-exclamation-triangle mr-2"></i>Revision Requested by <?= e($revisionBy) ?></h6>
         <p class="mb-0"><strong>Reason:</strong> <?= nl2br(e($revisionComments)) ?></p>
         <hr class="my-2 border-warning/30">
@@ -428,7 +428,7 @@ require_once INCLUDES_PATH . '/header.php';
                 </div>
                 <div class="p-6">
                     <?php if (!empty($errors)): ?>
-                        <div class="alert alert-error mb-4">
+                        <div class="loka-alert loka-alert-danger mb-4">
                             <ul class="list-disc pl-4">
                                 <?php foreach ($errors as $error): ?>
                                     <li><?= e($error) ?></li>
@@ -471,7 +471,7 @@ require_once INCLUDES_PATH . '/header.php';
                                 <label for="destination" class="label">
                                     <span class="label-text font-medium">Destination <span class="text-error">*</span></span>
                                 </label>
-                                <div class="alert alert-info text-sm py-2 mb-2">
+                                <div class="loka-alert loka-alert-info text-sm py-2 mb-2">
                                     <i class="bi bi-info-circle mr-1"></i>
                                     <strong>Note:</strong> Add locations in sequential order (first stop to last stop).
                                 </div>
@@ -498,7 +498,7 @@ require_once INCLUDES_PATH . '/header.php';
                                                    placeholder="Enter location address..."
                                                    <?= $index === 0 ? 'required' : '' ?>>
                                             <?php if ($index > 0): ?>
-                                            <button type="button" class="btn btn-outline btn-error join-item remove-destination" title="Remove location">
+                                            <button type="button" class="loka-btn-outline-error join-item remove-destination" title="Remove location">
                                                 <i class="bi bi-trash"></i>
                                             </button>
                                             <?php endif; ?>
@@ -506,7 +506,7 @@ require_once INCLUDES_PATH . '/header.php';
                                     </div>
                                     <?php endforeach; ?>
                                 </div>
-                                <button type="button" class="btn btn-outline btn-primary btn-sm mt-2" id="addDestinationBtn">
+                                <button type="button" class="loka-btn-outline-primary loka-btn-sm mt-2" id="addDestinationBtn">
                                     <i class="bi bi-plus-circle mr-1"></i>Add Another Location
                                 </button>
                                 <input type="hidden" name="destination" id="destinationCombined">
@@ -519,11 +519,11 @@ require_once INCLUDES_PATH . '/header.php';
                                         <div>
                                             <h6 class="font-semibold"><i class="bi bi-people-fill mr-2 text-primary"></i>Passengers</h6>
                                             <div id="passengerCountText" class="mt-1">
-                                                <span class="badge badge-primary"><?= $request->passenger_count ?></span>
+                                                 <span class="loka-badge loka-badge-primary"><?= $request->passenger_count ?></span>
                                                 <span class="text-sm text-base-content/60 ml-1">Passengers (Requester Included)</span>
                                             </div>
                                         </div>
-                                        <button type="button" class="btn btn-primary btn-sm rounded-full px-4"
+                                        <button type="button" class="loka-btn-primary loka-btn-sm rounded-full px-4"
                                                 onclick="document.getElementById('passengerModal').showModal()">
                                             <i class="bi bi-person-plus mr-1"></i>Manage Passengers
                                         </button>
@@ -554,7 +554,7 @@ require_once INCLUDES_PATH . '/header.php';
                                 <label class="label">
                                     <span class="label-text-alt text-base-content/50">Select the vehicle you need for this trip</span>
                                 </label>
-                                <div id="vehicleCapacityAlert" class="alert alert-warning text-sm py-2 mt-2 hidden">
+                                <div id="vehicleCapacityAlert" class="loka-alert loka-alert-warning text-sm py-2 mt-2 hidden">
                                     <i class="bi bi-exclamation-triangle mr-1"></i>
                                     <span class="message"></span>
                                 </div>
@@ -645,11 +645,11 @@ require_once INCLUDES_PATH . '/header.php';
                         <hr class="my-6 border-base-200">
 
                         <div class="flex gap-3">
-                            <button type="submit" class="btn btn-primary">
+                            <button type="submit" class="loka-btn-primary">
                                 <i class="bi bi-check-lg mr-1"></i>Save Changes
                             </button>
                             <a href="<?= APP_URL ?>/?page=requests&action=view&id=<?= $requestId ?>"
-                                class="btn btn-outline">Cancel</a>
+                                class="loka-btn-secondary">Cancel</a>
                         </div>
                     </form>
                 </div>
@@ -773,7 +773,7 @@ require_once INCLUDES_PATH . '/header.php';
             </div>
         </div>
         <div class="modal-action">
-            <button type="button" class="btn btn-primary w-full py-2 rounded-xl"
+            <button type="button" class="loka-btn-primary w-full py-2 rounded-xl"
                     onclick="document.getElementById('passengerModal').close()">
                 Confirm Selection
             </button>

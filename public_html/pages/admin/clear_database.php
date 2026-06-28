@@ -96,7 +96,7 @@ function isAdmin() {
     <div class="container mx-auto px-4 py-10 max-w-5xl">
         <div class="flex justify-center">
             <div class="w-full">
-                <div class="card bg-base-100 shadow-xl p-6">
+                    <div class="loka-card bg-base-100 shadow-xl p-6">
                     <div class="text-center mb-6">
                         <h1 class="text-3xl font-bold text-primary flex items-center justify-center gap-2">
                             <i class="bi bi-trash"></i> Clear Database
@@ -105,9 +105,9 @@ function isAdmin() {
                     </div>
 
                     <?php if ($message): ?>
-                        <div class="alert <?= $messageType === 'success' ? 'alert-success' : 'alert-error' ?> mb-4">
+                        <div class="loka-alert <?= $messageType === 'success' ? 'loka-alert-success' : 'loka-alert-danger' ?> mb-4">
                             <span><?= htmlspecialchars($message) ?></span>
-                            <button type="button" class="btn btn-sm btn-ghost" onclick="this.closest('.alert').remove()">
+                            <button type="button" class="loka-btn-ghost loka-btn-sm" onclick="this.closest('.loka-alert').remove()">
                                 <i class="bi bi-x"></i>
                             </button>
                         </div>
@@ -121,23 +121,23 @@ function isAdmin() {
 
                         <h5 class="text-lg font-semibold mb-4"><i class="bi bi-bar-chart"></i> Current Data Overview</h5>
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                            <div class="card bg-base-200 text-center p-4">
+                            <div class="loka-card bg-base-200 text-center p-4">
                                 <div class="text-4xl font-bold text-primary"><?= number_format($counts['requests']) ?></div>
                                 <div class="text-base-content/50">Requests</div>
                             </div>
-                            <div class="card bg-base-200 text-center p-4">
+                            <div class="loka-card bg-base-200 text-center p-4">
                                 <div class="text-4xl font-bold text-primary"><?= number_format($counts['notifications']) ?></div>
                                 <div class="text-base-content/50">Notifications</div>
                             </div>
-                            <div class="card bg-base-200 text-center p-4">
+                            <div class="loka-card bg-base-200 text-center p-4">
                                 <div class="text-4xl font-bold text-primary"><?= number_format($counts['email_queue']) ?></div>
                                 <div class="text-base-content/50">Email Queue</div>
                             </div>
                         </div>
 
                         <h5 class="text-lg font-semibold mb-3"><i class="bi bi-folder2-open"></i> Tables That Will Be Cleared</h5>
-                        <div class="card bg-base-200 mb-6">
-                            <div class="card-body">
+                        <div class="loka-card bg-base-200 mb-6">
+                            <div class="p-6">
                                 <ul class="list-none m-0 p-0">
                                     <li class="mb-2"><i class="bi bi-check-circle text-error"></i> <strong>notifications</strong> - All notification records</li>
                                     <li class="mb-2"><i class="bi bi-check-circle text-error"></i> <strong>requests</strong> - All request records</li>
@@ -149,7 +149,7 @@ function isAdmin() {
                             </div>
                         </div>
 
-                        <div class="alert alert-warning mb-6">
+                        <div class="loka-alert loka-alert-warning mb-6">
                             <i class="bi bi-shield-exclamation"></i>
                             <span>
                                 <strong>Recommendation:</strong> Create a database backup before proceeding.<br>
@@ -158,24 +158,24 @@ function isAdmin() {
                         </div>
 
                         <div class="flex flex-col gap-2">
-                            <a href="?step=2" class="btn btn-warning btn-lg">
+                            <a href="?step=2" class="bg-warning text-warning-content hover:bg-warning/90 text-base px-6 py-3 font-medium rounded-xl inline-flex items-center gap-2 transition-colors">
                                 <i class="bi bi-arrow-right-circle"></i> I Understand the Risks - Continue
                             </a>
-                            <a href="/" class="btn btn-secondary">
+                            <a href="/" class="loka-btn-secondary">
                                 <i class="bi bi-x-circle"></i> Cancel - Return to Dashboard
                             </a>
                         </div>
 
                     <?php elseif ($step === 2): ?>
-                        <div class="alert alert-error text-center mb-6">
+                        <div class="loka-alert loka-alert-danger text-center mb-6">
                             <div>
                                 <h4 class="font-bold"><i class="bi bi-exclamation-triangle-fill"></i> FINAL WARNING</h4>
                                 <p class="m-0">This action cannot be undone. Once deleted, all data will be permanently lost.</p>
                             </div>
                         </div>
 
-                        <div class="card bg-base-200 mb-6">
-                            <div class="card-body">
+                        <div class="loka-card bg-base-200 mb-6">
+                            <div class="p-6">
                                 <h5 class="card-title">You are about to delete:</h5>
                                 <ul class="list-none">
                                     <li class="mb-2"><strong><?= number_format($counts['requests']) ?></strong> request records</li>
@@ -191,25 +191,25 @@ function isAdmin() {
                         <form method="POST">
                             <input type="hidden" name="action" value="clear">
                             <div class="flex flex-col gap-2">
-                                <button type="submit" class="btn btn-error btn-lg" onclick="return confirm('Are you absolutely sure? This cannot be undone!')">
+                                <button type="submit" class="bg-error text-error-content hover:bg-error/90 text-base px-6 py-3 font-medium rounded-xl inline-flex items-center gap-2 transition-colors" onclick="return confirm('Are you absolutely sure? This cannot be undone!')">
                                     <i class="bi bi-trash-fill"></i> YES, Delete All Data
                                 </button>
-                                <a href="/" class="btn btn-secondary">
+                                <a href="/" class="loka-btn-secondary">
                                     <i class="bi bi-x-circle"></i> Cancel
                                 </a>
                             </div>
                         </form>
 
                     <?php elseif ($step === 4): ?>
-                        <div class="alert alert-success text-center mb-6">
+                        <div class="loka-alert loka-alert-success text-center mb-6">
                             <div>
                                 <h4 class="font-bold"><i class="bi bi-check-circle-fill"></i> Clearance Complete</h4>
                                 <p class="m-0">All requests and notifications have been successfully removed from the database.</p>
                             </div>
                         </div>
 
-                        <div class="card bg-base-200 mb-6">
-                            <div class="card-body">
+                        <div class="loka-card bg-base-200 mb-6">
+                            <div class="p-6">
                                 <h5 class="card-title">Summary of Changes:</h5>
                                 <ul class="list-none">
                                     <li class="mb-2"><i class="bi bi-check-circle text-success"></i> All notification records deleted</li>
@@ -223,7 +223,7 @@ function isAdmin() {
                         </div>
 
                         <div class="flex">
-                            <a href="/" class="btn btn-primary btn-lg w-full">
+                            <a href="/" class="loka-btn-primary text-base px-6 py-3 w-full">
                                 <i class="bi bi-house"></i> Return to Dashboard
                             </a>
                         </div>

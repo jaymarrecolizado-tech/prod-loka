@@ -112,7 +112,7 @@ require_once INCLUDES_PATH . '/header.php';
                 </div>
                 <div class="p-4">
                     <?php if (!empty($errors)): ?>
-                    <div class="alert alert-error mb-4">
+                    <div class="loka-alert loka-alert-danger mb-4">
                         <ul class="list-disc list-inside">
                             <?php foreach ($errors as $err): ?>
                             <li><?= e($err) ?></li>

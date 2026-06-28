@@ -104,89 +104,89 @@ $stats = [
 require_once INCLUDES_PATH . '/header.php';
 ?>
 
-<div class="container-fluid py-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
+<div class="w-full px-4 py-4 sm:px-6 lg:px-8">
+    <div class="flex justify-between items-center mb-4">
         <div>
-            <h4 class="mb-1"><i class="bi bi-truck me-2"></i>My Trips</h4>
-            <p class="text-muted mb-0">View your assigned and requested trips</p>
+            <h4 class="mb-1"><i class="bi bi-truck mr-2"></i>My Trips</h4>
+            <p class="text-base-content/60 mb-0">View your assigned and requested trips</p>
         </div>
-        <div class="d-flex gap-2">
-            <span class="badge bg-light text-dark border fs-6">
-                <i class="bi bi-person-badge me-1"></i><?= e($driver->name) ?>
+        <div class="flex gap-2">
+            <span class="badge bg-base-200 text-base-content border border-base-300 text-sm">
+                <i class="bi bi-person-badge mr-1"></i><?= e($driver->name) ?>
             </span>
-            <a href="?page=my-trips&action=export-pdf&filter=<?= $filter ?>" class="btn btn-success">
-                <i class="bi bi-file-earmark-pdf me-1"></i>Export PDF
+            <a href="?page=my-trips&action=export-pdf&filter=<?= $filter ?>" class="bg-success text-success-content hover:bg-success/90 px-4 py-2 text-sm font-medium rounded-xl inline-flex items-center gap-2 transition-colors">
+                <i class="bi bi-file-earmark-pdf mr-1"></i>Export PDF
             </a>
         </div>
     </div>
 
-    <div class="row g-3 mb-4">
-        <div class="col-md-3">
-            <div class="card border-0 shadow-sm h-100">
-                <div class="card-body">
-                    <div class="d-flex align-items-center">
+    <div class="grid grid-cols-12 gap-3 mb-4">
+        <div class="col-span-12 md:col-span-3">
+            <div class="loka-card h-full">
+                <div class="p-6">
+                    <div class="flex items-center">
                         <div class="flex-shrink-0">
-                            <div class="bg-primary bg-opacity-10 rounded p-3">
-                                <i class="bi bi-calendar-event text-primary fs-4"></i>
+                            <div class="bg-primary/10 rounded-xl p-3">
+                                <i class="bi bi-calendar-event text-primary text-xl"></i>
                             </div>
                         </div>
-                        <div class="flex-grow-1 ms-3">
-                            <h6 class="text-muted mb-1">Upcoming Trips</h6>
+                        <div class="flex-1 ml-3">
+                            <h6 class="text-base-content/60 mb-1">Upcoming Trips</h6>
                             <h3 class="mb-0"><?= $stats['upcoming'] ?></h3>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-        <div class="col-md-3">
-            <div class="card border-0 shadow-sm h-100">
-                <div class="card-body">
-                    <div class="d-flex align-items-center">
+        <div class="col-span-12 md:col-span-3">
+            <div class="loka-card h-full">
+                <div class="p-6">
+                    <div class="flex items-center">
                         <div class="flex-shrink-0">
-                            <div class="bg-success bg-opacity-10 rounded p-3">
-                                <i class="bi bi-check-circle text-success fs-4"></i>
+                            <div class="bg-success/10 rounded-xl p-3">
+                                <i class="bi bi-check-circle text-success text-xl"></i>
                             </div>
                         </div>
-                        <div class="flex-grow-1 ms-3">
-                            <h6 class="text-muted mb-1">Completed Trips</h6>
+                        <div class="flex-1 ml-3">
+                            <h6 class="text-base-content/60 mb-1">Completed Trips</h6>
                             <h3 class="mb-0"><?= $stats['completed'] ?></h3>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-        <div class="col-md-3">
-            <div class="card border-0 shadow-sm h-100">
-                <div class="card-body">
-                    <div class="d-flex align-items-center">
+        <div class="col-span-12 md:col-span-3">
+            <div class="loka-card h-full">
+                <div class="p-6">
+                    <div class="flex items-center">
                         <div class="flex-shrink-0">
-                            <div class="bg-info bg-opacity-10 rounded p-3">
-                                <i class="bi bi-calendar-check text-info fs-4"></i>
+                            <div class="bg-info/10 rounded-xl p-3">
+                                <i class="bi bi-calendar-check text-info text-xl"></i>
                             </div>
                         </div>
-                        <div class="flex-grow-1 ms-3">
-                            <h6 class="text-muted mb-1">This Month</h6>
+                        <div class="flex-1 ml-3">
+                            <h6 class="text-base-content/60 mb-1">This Month</h6>
                             <h3 class="mb-0"><?= $stats['this_month'] ?></h3>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-        <div class="col-md-3">
-            <div class="card border-0 shadow-sm h-100">
-                <div class="card-body">
-                    <div class="d-flex align-items-center">
+        <div class="col-span-12 md:col-span-3">
+            <div class="loka-card h-full">
+                <div class="p-6">
+                    <div class="flex items-center">
                         <div class="flex-shrink-0">
-                            <div class="bg-warning bg-opacity-10 rounded p-3">
-                                <i class="bi bi-file-earmark-text text-warning fs-4"></i>
+                            <div class="bg-warning/10 rounded-xl p-3">
+                                <i class="bi bi-file-earmark-text text-warning text-xl"></i>
                             </div>
                         </div>
-                        <div class="flex-grow-1 ms-3">
-                            <h6 class="text-muted mb-1">Trip Tickets</h6>
+                        <div class="flex-1 ml-3">
+                            <h6 class="text-base-content/60 mb-1">Trip Tickets</h6>
                             <h3 class="mb-0">
                                 <?= $stats['trip_tickets_approved'] ?>
                                 <?php if ($stats['trip_tickets_pending'] > 0): ?>
-                                    <span class="badge bg-warning ms-1"><?= $stats['trip_tickets_pending'] ?> pending</span>
+                                    <span class="badge bg-warning ml-1"><?= $stats['trip_tickets_pending'] ?> pending</span>
                                 <?php endif; ?>
                             </h3>
                         </div>
@@ -196,37 +196,37 @@ require_once INCLUDES_PATH . '/header.php';
         </div>
     </div>
 
-    <div class="card">
-        <div class="card-header bg-white">
+    <div class="loka-card">
+        <div class="px-6 py-4 border-b border-base-200 bg-white">
             <ul class="nav nav-tabs card-header-tabs">
                 <li class="nav-item">
                     <a class="nav-link <?= $filter === 'upcoming' ? 'active' : '' ?>" 
                        href="<?= APP_URL ?>/?page=my-trips">
-                        <i class="bi bi-calendar-event me-1"></i>Upcoming
+                        <i class="bi bi-calendar-event mr-1"></i>Upcoming
                         <?php if ($stats['upcoming'] > 0): ?>
-                            <span class="badge bg-primary ms-1"><?= $stats['upcoming'] ?></span>
+                            <span class="badge bg-primary ml-1"><?= $stats['upcoming'] ?></span>
                         <?php endif; ?>
                     </a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link <?= $filter === 'past' ? 'active' : '' ?>" 
                        href="<?= APP_URL ?>/?page=my-trips&filter=past">
-                        <i class="bi bi-clock-history me-1"></i>Past Trips
+                        <i class="bi bi-clock-history mr-1"></i>Past Trips
                     </a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link <?= $filter === 'all' ? 'active' : '' ?>" 
                        href="<?= APP_URL ?>/?page=my-trips&filter=all">
-                        <i class="bi bi-list-ul me-1"></i>All Trips
+                        <i class="bi bi-list-ul mr-1"></i>All Trips
                     </a>
                 </li>
             </ul>
         </div>
-        <div class="card-body">
+        <div class="p-6">
             <?php if (empty($trips)): ?>
                 <div class="text-center py-5">
-                    <i class="bi bi-calendar-x fs-1 text-muted"></i>
-                    <p class="text-muted mt-3">
+                    <i class="bi bi-calendar-x text-4xl text-base-content/60"></i>
+                    <p class="text-base-content/60 mt-3">
                         <?php if ($filter === 'upcoming'): ?>
                             No upcoming trips assigned to you.
                         <?php elseif ($filter === 'past'): ?>
@@ -237,8 +237,8 @@ require_once INCLUDES_PATH . '/header.php';
                     </p>
                 </div>
             <?php else: ?>
-                <div class="table-responsive">
-                    <table class="table table-hover align-middle">
+                <div class="loka-table-responsive">
+                    <table class="loka-table">
                         <thead>
                             <tr>
                                 <th>Request #</th>
@@ -264,41 +264,41 @@ require_once INCLUDES_PATH . '/header.php';
                                         <strong>#<?= $trip->id ?></strong>
                                     </td>
                                     <td>
-                                        <div class="small">
-                                            <i class="bi bi-box-arrow-right text-success me-1"></i>
+                                        <div class="text-sm">
+                                            <i class="bi bi-box-arrow-right text-success mr-1"></i>
                                             <?= formatDateTime($trip->start_datetime) ?>
                                         </div>
-                                        <div class="small">
-                                            <i class="bi bi-box-arrow-in-left text-danger me-1"></i>
+                                        <div class="text-sm">
+                                            <i class="bi bi-box-arrow-in-left text-error mr-1"></i>
                                             <?= formatDateTime($trip->end_datetime) ?>
                                         </div>
                                     </td>
                                     <td>
-                                        <div class="fw-medium"><?= e($trip->destination) ?></div>
-                                        <small class="text-muted"><?= truncate($trip->purpose, 50) ?></small>
+                                        <div class="font-medium"><?= e($trip->destination) ?></div>
+                                        <small class="text-base-content/60"><?= truncate($trip->purpose, 50) ?></small>
                                     </td>
                                     <td>
                                         <?php if ($trip->plate_number): ?>
-                                            <div class="fw-medium"><?= e($trip->plate_number) ?></div>
-                                            <small class="text-muted"><?= e($trip->make . ' ' . $trip->vehicle_model) ?></small>
+                                            <div class="font-medium"><?= e($trip->plate_number) ?></div>
+                                            <small class="text-base-content/60"><?= e($trip->make . ' ' . $trip->vehicle_model) ?></small>
                                         <?php else: ?>
-                                            <span class="text-muted">Not assigned</span>
+                                            <span class="text-base-content/60">Not assigned</span>
                                         <?php endif; ?>
                                     </td>
                                     <td>
                                         <?php if ($trip->mileage_actual): ?>
-                                            <div class="fw-medium text-primary"><?= number_format($trip->mileage_actual) ?> km</div>
-                                            <small class="text-muted">Actual distance</small>
+                                            <div class="font-medium text-primary"><?= number_format($trip->mileage_actual) ?> km</div>
+                                            <small class="text-base-content/60">Actual distance</small>
                                         <?php elseif ($trip->mileage_start): ?>
-                                            <div class="fw-medium"><?= number_format($trip->mileage_start) ?> km</div>
-                                            <small class="text-muted">Start only</small>
+                                            <div class="font-medium"><?= number_format($trip->mileage_start) ?> km</div>
+                                            <small class="text-base-content/60">Start only</small>
                                         <?php else: ?>
-                                            <span class="text-muted">-</span>
+                                            <span class="text-base-content/60">-</span>
                                         <?php endif; ?>
                                     </td>
                                     <td>
-                                        <div class="fw-medium"><?= e($trip->requester_name) ?></div>
-                                        <small class="text-muted"><?= e($trip->department_name) ?></small>
+                                        <div class="font-medium"><?= e($trip->requester_name) ?></div>
+                                        <small class="text-base-content/60"><?= e($trip->department_name) ?></small>
                                     </td>
                                     <td><?= requestStatusBadge($trip->status) ?></td>
                                     <td>
@@ -330,18 +330,18 @@ require_once INCLUDES_PATH . '/header.php';
                                             }
                                             ?>
                                             <span class="badge bg-<?= $ticketStatusClass ?>">
-                                                <i class="bi bi-<?= $ticketStatusIcon ?> me-1"></i>
+                                                <i class="bi bi-<?= $ticketStatusIcon ?> mr-1"></i>
                                                 <?= ucfirst($trip->trip_ticket_status) ?>
                                             </span>
                                         <?php elseif ($trip->status === STATUS_COMPLETED): ?>
-                                            <span class="text-muted">-</span>
+                                            <span class="text-base-content/60">-</span>
                                         <?php else: ?>
-                                            <span class="text-muted">-</span>
+                                            <span class="text-base-content/60">-</span>
                                         <?php endif; ?>
                                     </td>
                                     <td>
                                         <a href="<?= APP_URL ?>/?page=requests&action=view&id=<?= $trip->id ?>"
-                                           class="btn btn-sm btn-outline-primary">
+                                           class="loka-btn-outline-primary loka-btn-sm">
                                             <i class="bi bi-eye"></i> View
                                         </a>
                                     </td>
@@ -355,10 +355,10 @@ require_once INCLUDES_PATH . '/header.php';
     </div>
 
     <?php if ($driver->status !== 'available'): ?>
-    <div class="alert alert-warning mt-4">
-        <i class="bi bi-exclamation-triangle me-2"></i>
+    <div class="loka-alert loka-alert-warning mt-4">
+        <i class="bi bi-exclamation-triangle mr-2"></i>
         <strong>Status Notice:</strong> Your current driver status is 
-        <span class="badge bg-<?= $driver->status === 'on_trip' ? 'primary' : ($driver->status === 'on_leave' ? 'warning text-dark' : 'danger') ?>">
+        <span class="badge bg-<?= $driver->status === 'on_trip' ? 'primary' : ($driver->status === 'on_leave' ? 'warning text-dark' : 'error') ?>">
             <?= ucfirst(str_replace('_', ' ', $driver->status)) ?>
         </span>.
         <?php if ($driver->status === 'on_leave'): ?>

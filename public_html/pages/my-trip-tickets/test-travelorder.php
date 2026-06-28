@@ -129,10 +129,10 @@ if ($isPrint) {
                     <div class="mb-3">
                         <label class="label"><span class="label-text font-medium">Select Template:</span></label>
                         <div class="grid grid-cols-1 gap-2">
-                            <a href="?template=travelorder&print=1" target="_blank" class="btn btn-outline btn-primary">
+                            <a href="?template=travelorder&print=1" target="_blank" class="loka-btn-outline-primary">
                                 <i class="bi bi-file-text me-2"></i>Preview Travel Order Template
                             </a>
-                            <a href="?template=vehicle&print=1" target="_blank" class="btn btn-outline btn-success">
+                            <a href="?template=vehicle&print=1" target="_blank" class="loka-btn-secondary">
                                 <i class="bi bi-car-front me-2"></i>Preview Vehicle Trip Ticket Template
                             </a>
                         </div>

@@ -60,71 +60,68 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 require_once INCLUDES_PATH . '/header.php';
 ?>
 
-<div class="container-fluid py-4">
-    <div class="mb-4">
-        <h4 class="mb-1">Add Driver</h4>
-        <nav aria-label="breadcrumb">
-            <ol class="breadcrumb mb-0">
-                <li class="breadcrumb-item"><a href="<?= APP_URL ?>">Dashboard</a></li>
-                <li class="breadcrumb-item"><a href="<?= APP_URL ?>/?page=drivers">Drivers</a></li>
-                <li class="breadcrumb-item active">Add</li>
-            </ol>
-        </nav>
+<div class="loka-page">
+    <div class="loka-page-header">
+        <div>
+            <h1 class="text-2xl font-bold text-base-content">Add Driver</h1>
+            <p class="text-sm text-base-content/60">Create a new driver profile</p>
+        </div>
     </div>
     
-    <div class="row">
-        <div class="col-lg-8">
-            <div class="card">
-                <div class="card-header"><h5 class="mb-0"><i class="bi bi-person-badge me-2"></i>Driver Details</h5></div>
-                <div class="card-body">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div class="lg:col-span-2">
+            <div class="loka-card">
+                <div class="p-6">
+                    <h5 class="text-lg font-semibold text-base-content mb-4"><i class="bi bi-person-badge me-2"></i>Driver Details</h5>
+                    
                     <?php if (!empty($errors)): ?>
-                    <div class="alert alert-danger"><ul class="mb-0"><?php foreach ($errors as $e): ?><li><?= e($e) ?></li><?php endforeach; ?></ul></div>
+                    <div class="loka-alert loka-alert-danger"><ul class="mb-0"><?php foreach ($errors as $e): ?><li><?= e($e) ?></li><?php endforeach; ?></ul></div>
                     <?php endif; ?>
                     
                     <form method="POST">
                         <?= csrfField() ?>
-                        <div class="row g-3">
-                            <div class="col-md-6">
-                                <label class="form-label">User Account <span class="text-danger">*</span></label>
-                                <select class="form-select" name="user_id" required>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="loka-form-label">User Account <span class="text-error">*</span></label>
+                                <select class="select select-bordered w-full bg-base-100" name="user_id" required>
                                     <option value="">Select user...</option>
                                     <?php foreach ($availableUsers as $user): ?>
                                     <option value="<?= $user->id ?>" <?= post('user_id') == $user->id ? 'selected' : '' ?>><?= e($user->name) ?> (<?= e($user->email) ?>)</option>
                                     <?php endforeach; ?>
                                 </select>
                             </div>
-                            <div class="col-md-6">
-                                <label class="form-label">License Number <span class="text-danger">*</span></label>
-                                <input type="text" class="form-control" name="license_number" value="<?= e(post('license_number', '')) ?>" required>
+                            <div>
+                                <label class="loka-form-label">License Number <span class="text-error">*</span></label>
+                                <input type="text" class="loka-form-input" name="license_number" value="<?= e(post('license_number', '')) ?>" required>
                             </div>
-                            <div class="col-md-4">
-                                <label class="form-label">License Expiry <span class="text-danger">*</span></label>
-                                <input type="text" class="form-control datepicker" name="license_expiry" value="<?= e(post('license_expiry', '')) ?>" required>
+                            <div>
+                                <label class="loka-form-label">License Expiry <span class="text-error">*</span></label>
+                                <input type="text" class="loka-form-input datepicker" name="license_expiry" value="<?= e(post('license_expiry', '')) ?>" required>
                             </div>
-                            <div class="col-md-4">
-                                <label class="form-label">License Class</label>
-                                <input type="text" class="form-control" name="license_class" value="<?= e(post('license_class', 'B')) ?>">
+                            <div>
+                                <label class="loka-form-label">License Class</label>
+                                <input type="text" class="loka-form-input" name="license_class" value="<?= e(post('license_class', 'B')) ?>">
                             </div>
-                            <div class="col-md-4">
-                                <label class="form-label">Years Experience</label>
-                                <input type="number" class="form-control" name="years_experience" value="<?= e(post('years_experience', '0')) ?>" min="0">
+                            <div>
+                                <label class="loka-form-label">Years Experience</label>
+                                <input type="number" class="loka-form-input" name="years_experience" value="<?= e(post('years_experience', '0')) ?>" min="0">
                             </div>
-                            <div class="col-md-6">
-                                <label class="form-label">Emergency Contact Name</label>
-                                <input type="text" class="form-control" name="emergency_contact_name" value="<?= e(post('emergency_contact_name', '')) ?>">
+                            <div>
+                                <label class="loka-form-label">Emergency Contact Name</label>
+                                <input type="text" class="loka-form-input" name="emergency_contact_name" value="<?= e(post('emergency_contact_name', '')) ?>">
                             </div>
-                            <div class="col-md-6">
-                                <label class="form-label">Emergency Contact Phone</label>
-                                <input type="text" class="form-control" name="emergency_contact_phone" value="<?= e(post('emergency_contact_phone', '')) ?>">
+                            <div>
+                                <label class="loka-form-label">Emergency Contact Phone</label>
+                                <input type="text" class="loka-form-input" name="emergency_contact_phone" value="<?= e(post('emergency_contact_phone', '')) ?>">
                             </div>
-                            <div class="col-12">
-                                <label class="form-label">Notes</label>
-                                <textarea class="form-control" name="notes" rows="2" maxlength="500"><?= e(post('notes', '')) ?></textarea>
+                            <div class="md:col-span-2">
+                                <label class="loka-form-label">Notes</label>
+                                <textarea class="loka-form-input" name="notes" rows="2" maxlength="500"><?= e(post('notes', '')) ?></textarea>
                             </div>
                         </div>
-                        <hr class="my-4">
-                        <button type="submit" class="btn btn-primary"><i class="bi bi-check-lg me-1"></i>Save Driver</button>
-                        <a href="<?= APP_URL ?>/?page=drivers" class="btn btn-outline-secondary">Cancel</a>
+                        <div class="border-t border-base-200 my-6"></div>
+                        <button type="submit" class="loka-btn-primary"><i class="bi bi-check-lg me-1"></i>Save Driver</button>
+                        <a href="<?= APP_URL ?>/?page=drivers" class="loka-btn-secondary">Cancel</a>
                     </form>
                 </div>
             </div>

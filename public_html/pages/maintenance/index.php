@@ -60,80 +60,80 @@ $stats = [
 require_once INCLUDES_PATH . '/header.php';
 ?>
 
-<div class="container-fluid py-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
+<div class="w-full px-4 py-4 sm:px-6 lg:px-8">
+    <div class="flex justify-between items-center mb-4">
         <div>
             <h4 class="mb-1"><i class="bi bi-wrench me-2"></i>Maintenance Requests</h4>
-            <p class="text-muted mb-0">Manage vehicle maintenance and repairs</p>
+            <p class="text-base-content/60 mb-0">Manage vehicle maintenance and repairs</p>
         </div>
-        <a href="<?= APP_URL ?>/?page=maintenance&action=create" class="btn btn-primary">
+        <a href="<?= APP_URL ?>/?page=maintenance&action=create" class="loka-btn-primary">
             <i class="bi bi-plus-lg me-1"></i>New Request
         </a>
     </div>
 
-    <div class="row g-3 mb-4">
-        <div class="col-12 col-md-3">
-            <div class="card border-0 shadow-sm h-100">
-                <div class="card-body">
-                    <div class="d-flex align-items-center">
+    <div class="grid grid-cols-12 gap-3 mb-4">
+        <div class="col-span-12 md:col-span-3">
+            <div class="loka-card border-0 shadow-sm h-100">
+                <div class="p-6">
+                    <div class="flex items-center">
                         <div class="flex-shrink-0">
                             <div class="bg-warning bg-opacity-10 rounded p-3">
                                 <i class="bi bi-clock text-warning fs-4"></i>
                             </div>
                         </div>
                         <div class="flex-grow-1 ms-3">
-                            <h6 class="text-muted mb-1">Pending</h6>
+                            <h6 class="text-base-content/60 mb-1">Pending</h6>
                             <h3 class="mb-0"><?= $stats['pending'] ?></h3>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-        <div class="col-12 col-md-3">
-            <div class="card border-0 shadow-sm h-100">
-                <div class="card-body">
-                    <div class="d-flex align-items-center">
+        <div class="col-span-12 md:col-span-3">
+            <div class="loka-card border-0 shadow-sm h-100">
+                <div class="p-6">
+                    <div class="flex items-center">
                         <div class="flex-shrink-0">
                             <div class="bg-info bg-opacity-10 rounded p-3">
                                 <i class="bi bi-calendar-check text-info fs-4"></i>
                             </div>
                         </div>
                         <div class="flex-grow-1 ms-3">
-                            <h6 class="text-muted mb-1">Scheduled</h6>
+                            <h6 class="text-base-content/60 mb-1">Scheduled</h6>
                             <h3 class="mb-0"><?= $stats['scheduled'] ?></h3>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-        <div class="col-12 col-md-3">
-            <div class="card border-0 shadow-sm h-100">
-                <div class="card-body">
-                    <div class="d-flex align-items-center">
+        <div class="col-span-12 md:col-span-3">
+            <div class="loka-card border-0 shadow-sm h-100">
+                <div class="p-6">
+                    <div class="flex items-center">
                         <div class="flex-shrink-0">
                             <div class="bg-primary bg-opacity-10 rounded p-3">
                                 <i class="bi bi-tools text-primary fs-4"></i>
                             </div>
                         </div>
                         <div class="flex-grow-1 ms-3">
-                            <h6 class="text-muted mb-1">In Progress</h6>
+                            <h6 class="text-base-content/60 mb-1">In Progress</h6>
                             <h3 class="mb-0"><?= $stats['in_progress'] ?></h3>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-        <div class="col-12 col-md-3">
-            <div class="card border-0 shadow-sm h-100">
-                <div class="card-body">
-                    <div class="d-flex align-items-center">
+        <div class="col-span-12 md:col-span-3">
+            <div class="loka-card border-0 shadow-sm h-100">
+                <div class="p-6">
+                    <div class="flex items-center">
                         <div class="flex-shrink-0">
                             <div class="bg-success bg-opacity-10 rounded p-3">
                                 <i class="bi bi-check-circle text-success fs-4"></i>
                             </div>
                         </div>
                         <div class="flex-grow-1 ms-3">
-                            <h6 class="text-muted mb-1">Completed</h6>
+                            <h6 class="text-base-content/60 mb-1">Completed</h6>
                             <h3 class="mb-0"><?= $stats['completed'] ?></h3>
                         </div>
                     </div>
@@ -142,8 +142,8 @@ require_once INCLUDES_PATH . '/header.php';
         </div>
     </div>
 
-    <div class="card">
-        <div class="card-header bg-white">
+    <div class="loka-card">
+        <div class="px-6 py-4 border-b border-base-200 bg-white">
             <ul class="nav nav-tabs card-header-tabs">
                 <li class="nav-item">
                     <a class="nav-link <?= $filter === 'all' && !$status ? 'active' : '' ?>" 
@@ -174,14 +174,14 @@ require_once INCLUDES_PATH . '/header.php';
                 </li>
             </ul>
         </div>
-        <div class="card-body">
+        <div class="p-6">
             <?php if (empty($maintenanceRequests)): ?>
                 <div class="text-center py-5">
-                    <i class="bi bi-wrench-adjustable fs-1 text-muted"></i>
-                    <p class="text-muted mt-3">No maintenance requests found.</p>
+                    <i class="bi bi-wrench-adjustable fs-1 text-base-content/60"></i>
+                    <p class="text-base-content/60 mt-3">No maintenance requests found.</p>
                 </div>
             <?php else: ?>
-                <div class="table-responsive">
+                <div class="loka-table-responsive">
                     <table class="table table-hover align-middle">
                         <thead>
                             <tr>
@@ -201,15 +201,15 @@ require_once INCLUDES_PATH . '/header.php';
                                     <td><strong>#<?= $req->id ?></strong></td>
                                     <td>
                                         <div class="fw-medium"><?= e($req->plate_number) ?></div>
-                                        <small class="text-muted"><?= e($req->make . ' ' . $req->model) ?></small>
+                                        <small class="text-base-content/60"><?= e($req->make . ' ' . $req->model) ?></small>
                                     </td>
                                     <td>
                                         <div class="fw-medium"><?= e($req->title) ?></div>
-                                        <small class="text-muted"><?= truncate($req->description, 50) ?></small>
+                                        <small class="text-base-content/60"><?= truncate($req->description, 50) ?></small>
                                     </td>
                                     <td>
                                         <?php $typeInfo = MAINTENANCE_TYPES[$req->type] ?? ['label' => ucfirst($req->type), 'icon' => 'bi-wrench']; ?>
-                                        <span class="badge bg-light text-dark">
+                                        <span class="badge bg-base-200 text-dark">
                                             <i class="bi <?= $typeInfo['icon'] ?> me-1"></i>
                                             <?= $typeInfo['label'] ?>
                                         </span>
@@ -223,7 +223,7 @@ require_once INCLUDES_PATH . '/header.php';
                                     <td>
                                         <?php if ($req->scheduled_date): ?>
                                             <?php if ($req->status === MAINTENANCE_STATUS_PENDING && strtotime($req->scheduled_date) < time()): ?>
-                                                <span class="text-danger">
+                                                <span class="text-error">
                                                     <i class="bi bi-exclamation-circle me-1"></i>
                                                     <?= formatDate($req->scheduled_date) ?>
                                                 </span>
@@ -231,7 +231,7 @@ require_once INCLUDES_PATH . '/header.php';
                                                 <?= formatDate($req->scheduled_date) ?>
                                             <?php endif; ?>
                                         <?php else: ?>
-                                            <span class="text-muted">-</span>
+                                            <span class="text-base-content/60">-</span>
                                         <?php endif; ?>
                                     </td>
                                     <td>
@@ -243,21 +243,21 @@ require_once INCLUDES_PATH . '/header.php';
                                     <td>
                                         <div class="btn-group">
                                             <a href="<?= APP_URL ?>/?page=maintenance&action=view&id=<?= $req->id ?>"
-                                               class="btn btn-sm btn-outline-primary">
+                                               class="loka-btn-outline-primary loka-btn-sm">
                                                 <i class="bi bi-eye"></i>
                                             </a>
                                             <?php if ($req->status !== MAINTENANCE_STATUS_COMPLETED && $req->status !== MAINTENANCE_STATUS_CANCELLED): ?>
                                             <a href="<?= APP_URL ?>/?page=maintenance&action=edit&id=<?= $req->id ?>"
-                                               class="btn btn-sm btn-outline-secondary">
+                                               class="loka-btn-secondary loka-btn-sm">
                                                 <i class="bi bi-pencil"></i>
                                             </a>
                                             <?php endif; ?>
                                             <?php if (isAdmin()): ?>
-                                            <form method="POST" action="<?= APP_URL ?>/?page=maintenance&action=delete" class="d-inline"
+                                            <form method="POST" action="<?= APP_URL ?>/?page=maintenance&action=delete" class="inline"
                                                   onsubmit="return confirm('Are you sure you want to delete this maintenance request?')">
                                                 <?= csrfField() ?>
                                                 <input type="hidden" name="id" value="<?= $req->id ?>">
-                                                <button type="submit" class="btn btn-sm btn-outline-danger">
+                                                <button type="submit" class="loka-btn-outline-error loka-btn-sm">
                                                     <i class="bi bi-trash"></i>
                                                 </button>
                                             </form>

@@ -22,7 +22,7 @@ if ($status) {
 
 // Get stats
 $stats = db()->fetch(
-    "SELECT 
+    "SELECT
         COUNT(*) as total,
         SUM(CASE WHEN r.status = 'approved' THEN 1 ELSE 0 END) as approved,
         SUM(CASE WHEN r.status = 'completed' THEN 1 ELSE 0 END) as completed,
@@ -57,8 +57,8 @@ $requests = db()->fetchAll(
 require_once INCLUDES_PATH . '/header.php';
 ?>
 
-<div class="container-fluid py-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
+<div class="w-full px-4 py-4 sm:px-6 lg:px-8">
+    <div class="flex justify-between items-center mb-4">
         <div>
             <h4 class="mb-1">Trip Requests Report</h4>
             <nav aria-label="breadcrumb">
@@ -70,12 +70,12 @@ require_once INCLUDES_PATH . '/header.php';
             </nav>
         </div>
         <div class="btn-group">
-            <a href="<?= APP_URL ?>/?page=reports&action=export&start_date=<?= $startDate ?>&end_date=<?= $endDate ?><?= $status ? '&status=' . $status : '' ?>" 
-               class="btn btn-outline-primary">
+            <a href="<?= APP_URL ?>/?page=reports&action=export&start_date=<?= $startDate ?>&end_date=<?= $endDate ?><?= $status ? '&status=' . $status : '' ?>"
+               class="loka-btn-outline-primary">
                 <i class="bi bi-file-earmark-csv me-1"></i>Export CSV
             </a>
-            <a href="<?= APP_URL ?>/?page=reports&action=export-pdf&start_date=<?= $startDate ?>&end_date=<?= $endDate ?>" 
-               class="btn btn-outline-danger">
+            <a href="<?= APP_URL ?>/?page=reports&action=export-pdf&start_date=<?= $startDate ?>&end_date=<?= $endDate ?>"
+               class="loka-btn-outline-error">
                 <i class="bi bi-file-earmark-pdf me-1"></i>Export PDF
             </a>
         </div>
@@ -84,20 +84,20 @@ require_once INCLUDES_PATH . '/header.php';
     <!-- Filters -->
     <div class="card mb-4">
         <div class="card-body">
-            <form method="GET" class="row g-3 align-items-end">
+            <form method="GET" class="grid grid-cols-12 gap-3 items-end">
                 <input type="hidden" name="page" value="reports">
                 <input type="hidden" name="action" value="trips">
-                <div class="col-12 col-md-3">
-                    <label class="form-label">Start Date</label>
-                    <input type="date" class="form-control" name="start_date" value="<?= e($startDate) ?>">
+                <div class="col-span-12 md:col-span-3">
+                    <label class="loka-form-label">Start Date</label>
+                    <input type="date" class="loka-form-input" name="start_date" value="<?= e($startDate) ?>">
                 </div>
-                <div class="col-12 col-md-3">
-                    <label class="form-label">End Date</label>
-                    <input type="date" class="form-control" name="end_date" value="<?= e($endDate) ?>">
+                <div class="col-span-12 md:col-span-3">
+                    <label class="loka-form-label">End Date</label>
+                    <input type="date" class="loka-form-input" name="end_date" value="<?= e($endDate) ?>">
                 </div>
-                <div class="col-12 col-md-3">
-                    <label class="form-label">Status</label>
-                    <select class="form-select" name="status">
+                <div class="col-span-12 md:col-span-3">
+                    <label class="loka-form-label">Status</label>
+                    <select class="loka-form-input" name="status">
                         <option value="">All Statuses</option>
                         <option value="pending" <?= $status === 'pending' ? 'selected' : '' ?>>Pending</option>
                         <option value="pending_motorpool" <?= $status === 'pending_motorpool' ? 'selected' : '' ?>>Pending Motorpool</option>
@@ -107,55 +107,55 @@ require_once INCLUDES_PATH . '/header.php';
                         <option value="revision" <?= $status === 'revision' ? 'selected' : '' ?>>Revision</option>
                     </select>
                 </div>
-                <div class="col-12 col-md-3">
-                    <button type="submit" class="btn btn-primary">
+                <div class="col-span-12 md:col-span-3">
+                    <button type="submit" class="loka-btn-primary">
                         <i class="bi bi-search me-1"></i>Filter
                     </button>
-                    <a href="<?= APP_URL ?>/?page=reports&action=trips" class="btn btn-outline-secondary">Reset</a>
+                    <a href="<?= APP_URL ?>/?page=reports&action=trips" class="loka-btn-secondary">Reset</a>
                 </div>
             </form>
         </div>
     </div>
 
     <!-- Stats Cards -->
-    <div class="row g-3 mb-4">
-        <div class="col-md-2">
+    <div class="grid grid-cols-12 gap-3 mb-4">
+        <div class="col-span-6 md:col-span-2">
             <div class="card bg-primary bg-opacity-10">
                 <div class="card-body text-center py-2">
                     <h4 class="text-primary mb-0"><?= $stats->total ?></h4>
-                    <small class="text-muted">Total</small>
+                    <small class="text-base-content/60">Total</small>
                 </div>
             </div>
         </div>
-        <div class="col-md-2">
+        <div class="col-span-6 md:col-span-2">
             <div class="card bg-success bg-opacity-10">
                 <div class="card-body text-center py-2">
                     <h4 class="text-success mb-0"><?= $stats->approved ?></h4>
-                    <small class="text-muted">Approved</small>
+                    <small class="text-base-content/60">Approved</small>
                 </div>
             </div>
         </div>
-        <div class="col-md-2">
+        <div class="col-span-6 md:col-span-2">
             <div class="card bg-info bg-opacity-10">
                 <div class="card-body text-center py-2">
                     <h4 class="text-info mb-0"><?= $stats->completed ?></h4>
-                    <small class="text-muted">Completed</small>
+                    <small class="text-base-content/60">Completed</small>
                 </div>
             </div>
         </div>
-        <div class="col-md-2">
+        <div class="col-span-6 md:col-span-2">
             <div class="card bg-danger bg-opacity-10">
                 <div class="card-body text-center py-2">
                     <h4 class="text-danger mb-0"><?= $stats->rejected ?></h4>
-                    <small class="text-muted">Rejected</small>
+                    <small class="text-base-content/60">Rejected</small>
                 </div>
             </div>
         </div>
-        <div class="col-md-2">
+        <div class="col-span-6 md:col-span-2">
             <div class="card bg-warning bg-opacity-10">
                 <div class="card-body text-center py-2">
                     <h4 class="text-warning mb-0"><?= $stats->pending ?></h4>
-                    <small class="text-muted">Pending</small>
+                    <small class="text-base-content/60">Pending</small>
                 </div>
             </div>
         </div>
@@ -168,12 +168,12 @@ require_once INCLUDES_PATH . '/header.php';
         </div>
         <div class="card-body p-0">
             <?php if (empty($requests)): ?>
-            <div class="text-center py-5 text-muted">
+            <div class="text-center py-5 text-base-content/60">
                 <i class="bi bi-clipboard-x fs-1"></i>
                 <p class="mt-2">No trip requests found for the selected period.</p>
             </div>
             <?php else: ?>
-            <div class="table-responsive">
+            <div class="loka-table-responsive">
                 <table class="table table-hover mb-0">
                     <thead>
                         <tr>
@@ -200,20 +200,20 @@ require_once INCLUDES_PATH . '/header.php';
                             <td>
                                 <small>
                                     <?= formatDateTime($req->start_datetime) ?><br>
-                                    <span class="text-muted">to <?= formatDateTime($req->end_datetime) ?></span>
+                                    <span class="text-base-content/60">to <?= formatDateTime($req->end_datetime) ?></span>
                                 </small>
                             </td>
                             <td>
                                 <?= e($req->requester_name) ?>
-                                <small class="d-block text-muted"><?= e($req->department_name) ?></small>
+                                <small class="block text-base-content/60"><?= e($req->department_name) ?></small>
                             </td>
                             <td><?= e(strlen($req->destination) > 30 ? substr($req->destination, 0, 30) . '...' : $req->destination) ?></td>
                             <td>
                                 <?php if ($req->plate_number): ?>
                                 <strong><?= e($req->plate_number) ?></strong>
-                                <small class="d-block text-muted"><?= e($req->make) ?></small>
+                                <small class="block text-base-content/60"><?= e($req->make) ?></small>
                                 <?php else: ?>
-                                <span class="text-muted">-</span>
+                                <span class="text-base-content/60">-</span>
                                 <?php endif; ?>
                             </td>
                             <td><?= e($req->driver_name ?: '-') ?></td>
@@ -222,7 +222,7 @@ require_once INCLUDES_PATH . '/header.php';
                                 <?php if ($req->actual_duration): ?>
                                     <span class="text-success"><?= floor($req->actual_duration / 60) ?>h <?= $req->actual_duration % 60 ?>m</span>
                                 <?php elseif ($req->planned_duration): ?>
-                                    <span class="text-muted"><?= floor($req->planned_duration / 60) ?>h <?= $req->planned_duration % 60 ?>m</span>
+                                    <span class="text-base-content/60"><?= floor($req->planned_duration / 60) ?>h <?= $req->planned_duration % 60 ?>m</span>
                                 <?php else: ?>
                                     -
                                 <?php endif; ?>

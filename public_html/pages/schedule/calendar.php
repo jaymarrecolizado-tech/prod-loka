@@ -195,41 +195,41 @@ require_once INCLUDES_PATH . '/header.php';
 }
 </style>
 
-<div class="container-fluid py-4">
+<div class="w-full px-4 sm:px-6 lg:px-8">
     <!-- Page Header -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="flex justify-between items-center mb-4">
         <div>
             <h4 class="mb-1"><i class="bi bi-calendar3 me-2"></i>Vehicle Availability Calendar</h4>
-            <p class="text-muted mb-0">View scheduled trips to plan your requests</p>
+            <p class="text-base-content/60 mb-0">View scheduled trips to plan your requests</p>
         </div>
-        <a href="<?= APP_URL ?>/?page=requests&action=create" class="btn btn-primary">
+        <a href="<?= APP_URL ?>/?page=requests&action=create" class="loka-btn-primary">
             <i class="bi bi-plus-lg me-1"></i>New Request
         </a>
     </div>
     
     <!-- Calendar Navigation -->
-    <div class="card mb-4">
-        <div class="card-body py-3">
-            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+    <div class="loka-card mb-4">
+        <div class="p-6 py-3">
+            <div class="flex justify-between items-center flex-wrap gap-2">
                 <a href="<?= APP_URL ?>/?page=schedule&action=calendar&year=<?= $prevYear ?>&month=<?= $prevMonth ?>" 
-                   class="btn btn-outline-primary">
+                   class="loka-btn-outline-primary">
                     <i class="bi bi-chevron-left me-1"></i>Previous
                 </a>
                 
                 <div class="text-center">
                     <h3 class="mb-0"><?= $monthName ?> <?= $year ?></h3>
-                    <small class="text-muted"><?= $totalVehicles ?> vehicles in fleet</small>
+                    <small class="text-base-content/60"><?= $totalVehicles ?> vehicles in fleet</small>
                 </div>
                 
                 <a href="<?= APP_URL ?>/?page=schedule&action=calendar&year=<?= $nextYear ?>&month=<?= $nextMonth ?>" 
-                   class="btn btn-outline-primary">
+                   class="loka-btn-outline-primary">
                     Next<i class="bi bi-chevron-right ms-1"></i>
                 </a>
             </div>
             
             <!-- Quick Jump -->
             <div class="text-center mt-3">
-                <a href="<?= APP_URL ?>/?page=schedule&action=calendar" class="btn btn-sm btn-outline-secondary">
+                <a href="<?= APP_URL ?>/?page=schedule&action=calendar" class="loka-btn-secondary loka-btn-sm">
                     <i class="bi bi-calendar-event me-1"></i>Today
                 </a>
             </div>
@@ -237,7 +237,7 @@ require_once INCLUDES_PATH . '/header.php';
     </div>
     
     <!-- Legend -->
-    <div class="mb-3 p-3 bg-light rounded">
+    <div class="mb-3 p-3 bg-base-200 rounded">
         <div class="legend-item">
             <span class="legend-dot bg-success"></span>
             <span>Available</span>
@@ -312,7 +312,7 @@ require_once INCLUDES_PATH . '/header.php';
                 $shown = 0;
                 foreach ($dayEvents as $event): 
                     if ($shown >= 3) {
-                        echo '<small class="text-muted">+' . (count($dayEvents) - 3) . ' more</small>';
+                        echo '<small class="text-base-content/60">+' . (count($dayEvents) - 3) . ' more</small>';
                         break;
                     }
                     $shown++;
@@ -342,18 +342,18 @@ require_once INCLUDES_PATH . '/header.php';
     </div>
     
     <!-- Upcoming Trips List -->
-    <div class="card mt-4">
-        <div class="card-header">
+    <div class="loka-card mt-4">
+        <div class="px-6 py-4 border-b border-base-200">
             <h5 class="mb-0"><i class="bi bi-list-ul me-2"></i>Scheduled Trips This Month</h5>
         </div>
-        <div class="card-body p-0">
+        <div class="p-6 p-0">
             <?php if (empty($approvedRequests)): ?>
-            <div class="text-center py-4 text-muted">
+            <div class="text-center py-4 text-base-content/60">
                 <i class="bi bi-calendar-check fs-1 d-block mb-2"></i>
                 No scheduled trips this month
             </div>
             <?php else: ?>
-            <div class="table-responsive">
+            <div class="loka-table-responsive">
                 <table class="table table-hover mb-0">
                     <thead class="table-light">
                         <tr>
@@ -369,7 +369,7 @@ require_once INCLUDES_PATH . '/header.php';
                         <tr>
                             <td>
                                 <div class="fw-medium"><?= date('M j', strtotime($req->start_datetime)) ?></div>
-                                <small class="text-muted">
+                                <small class="text-base-content/60">
                                     <?= date('g:i A', strtotime($req->start_datetime)) ?> - 
                                     <?= date('M j, g:i A', strtotime($req->end_datetime)) ?>
                                 </small>

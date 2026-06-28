@@ -36,6 +36,11 @@
 
         <!-- Right Side -->
         <div class="loka-navbar-actions">
+            <!-- Dark Mode Toggle -->
+            <button class="loka-navbar-notification" type="button" id="darkModeToggle" aria-label="Toggle dark mode">
+                <i class="bi bi-moon text-lg" id="darkModeIcon"></i>
+            </button>
+
             <!-- Notifications (DaisyUI dropdown) -->
             <div class="dropdown dropdown-end">
                 <div tabindex="0" role="button" class="loka-navbar-notification" id="notificationDropdown">
@@ -117,3 +122,44 @@
                 <button type="button" class="btn-close" onclick="this.parentElement.remove()"></button>
             </div>
             <?php endif; ?>
+
+    <!-- Dark Mode Toggle Script -->
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const html = document.documentElement;
+        const darkModeToggle = document.getElementById('darkModeToggle');
+        const darkModeIcon = document.getElementById('darkModeIcon');
+        const storageKey = 'theme';
+
+        function setTheme(dark) {
+            if (dark) {
+                html.classList.add('dark');
+                darkModeIcon.classList.remove('bi-moon');
+                darkModeIcon.classList.add('bi-sun');
+            } else {
+                html.classList.remove('dark');
+                darkModeIcon.classList.remove('bi-sun');
+                darkModeIcon.classList.add('bi-moon');
+            }
+        }
+
+        function initTheme() {
+            const stored = localStorage.getItem(storageKey);
+            if (stored === 'dark') {
+                setTheme(true);
+            } else if (stored === 'light') {
+                setTheme(false);
+            } else {
+                setTheme(window.matchMedia('(prefers-color-scheme: dark)').matches);
+            }
+        }
+
+        initTheme();
+
+        darkModeToggle.addEventListener('click', function() {
+            const isDark = html.classList.toggle('dark');
+            localStorage.setItem(storageKey, isDark ? 'dark' : 'light');
+            setTheme(isDark);
+        });
+    });
+    </script>

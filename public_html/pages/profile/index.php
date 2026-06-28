@@ -102,7 +102,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 require_once INCLUDES_PATH . '/header.php';
 ?>
 
-<div class="container-fluid py-4">
+<div class="w-full px-4 py-4 sm:px-6 lg:px-8">
     <div class="mb-4">
         <h4 class="mb-1">My Profile</h4>
         <nav aria-label="breadcrumb">
@@ -114,25 +114,25 @@ require_once INCLUDES_PATH . '/header.php';
     </div>
     
     <?php if ($success): ?>
-    <div class="alert alert-success alert-dismissible">
+    <div class="loka-alert loka-alert-success">
         Profile updated successfully.
         <button type="button" class="btn-close" onclick="this.closest('.alert').remove()"></button>
     </div>
     <?php endif; ?>
     
-    <div class="row g-4">
-        <div class="col-lg-4">
+    <div class="grid grid-cols-12 gap-4">
+        <div class="col-span-12 lg:col-span-4">
             <!-- Profile Card -->
-            <div class="card">
-                <div class="card-body text-center">
+            <div class="loka-card">
+                <div class="p-6 text-center">
                     <div class="avatar-circle mx-auto mb-3" style="width:80px;height:80px;font-size:2rem;background:#0d6efd;color:#fff;">
                         <?= strtoupper(substr($user->name, 0, 1)) ?>
                     </div>
                     <h5 class="mb-1"><?= e($user->name) ?></h5>
-                    <p class="text-muted mb-2"><?= e($user->email) ?></p>
+                    <p class="text-base-content/60 mb-2"><?= e($user->email) ?></p>
                     <?= roleBadge($user->role) ?>
                     <hr>
-                    <div class="text-start">
+                    <div class="text-left">
                         <p class="mb-1"><strong>Department:</strong> <?= e($user->department_name ?: 'None') ?></p>
                         <p class="mb-1"><strong>Phone:</strong> <?= e($user->phone ?: '-') ?></p>
                         <p class="mb-0"><strong>Member since:</strong> <?= formatDate($user->created_at) ?></p>
@@ -141,15 +141,15 @@ require_once INCLUDES_PATH . '/header.php';
             </div>
         </div>
         
-        <div class="col-lg-8">
+        <div class="col-span-12 lg:col-span-8">
             <!-- Edit Profile Form -->
-            <div class="card">
-                <div class="card-header">
+            <div class="loka-card">
+                <div class="px-6 py-4 border-b border-base-200">
                     <h5 class="mb-0"><i class="bi bi-pencil me-2"></i>Edit Profile</h5>
                 </div>
-                <div class="card-body">
+                <div class="p-6">
                     <?php if (!empty($errors)): ?>
-                    <div class="alert alert-danger">
+                    <div class="loka-alert loka-alert-danger">
                         <ul class="mb-0"><?php foreach ($errors as $e): ?><li><?= e($e) ?></li><?php endforeach; ?></ul>
                     </div>
                     <?php endif; ?>
@@ -157,24 +157,24 @@ require_once INCLUDES_PATH . '/header.php';
                     <form method="POST">
                         <?= csrfField() ?>
                         
-                        <h6 class="text-muted mb-3">Basic Information</h6>
-                        <div class="row g-3 mb-4">
-                            <div class="col-md-6">
-                                <label class="form-label">Full Name <span class="text-danger">*</span></label>
-                                <input type="text" class="form-control" name="name" value="<?= e(post('name', $user->name)) ?>" required>
+                        <h6 class="text-base-content/60 mb-3">Basic Information</h6>
+                        <div class="grid grid-cols-12 gap-3 mb-4">
+                            <div class="col-span-12 md:col-span-6">
+                                <label class="loka-form-label">Full Name <span class="text-error">*</span></label>
+                                <input type="text" class="loka-form-input" name="name" value="<?= e(post('name', $user->name)) ?>" required>
                             </div>
-                            <div class="col-md-6">
-                                <label class="form-label">Email</label>
-                                <input type="email" class="form-control" value="<?= e($user->email) ?>" disabled>
-                                <small class="text-muted">Contact admin to change email</small>
+                            <div class="col-span-12 md:col-span-6">
+                                <label class="loka-form-label">Email</label>
+                                <input type="email" class="loka-form-input" value="<?= e($user->email) ?>" disabled>
+                                <small class="text-base-content/60">Contact admin to change email</small>
                             </div>
-                            <div class="col-md-6">
-                                <label class="form-label">Phone</label>
-                                <input type="tel" class="form-control" name="phone" value="<?= e(post('phone', $user->phone)) ?>" placeholder="e.g., 09171234567">
+                            <div class="col-span-12 md:col-span-6">
+                                <label class="loka-form-label">Phone</label>
+                                <input type="tel" class="loka-form-input" name="phone" value="<?= e(post('phone', $user->phone)) ?>" placeholder="e.g., 09171234567">
                             </div>
-                            <div class="col-md-6">
-                                <label class="form-label">Department</label>
-                                <select class="form-select" name="department_id">
+                            <div class="col-span-12 md:col-span-6">
+                                <label class="loka-form-label">Department</label>
+                                <select class="loka-form-input" name="department_id">
                                     <option value="">Select department...</option>
                                     <?php foreach ($departments as $dept): ?>
                                     <option value="<?= $dept->id ?>" <?= (post('department_id', $user->department_id) == $dept->id) ? 'selected' : '' ?>>
@@ -185,27 +185,27 @@ require_once INCLUDES_PATH . '/header.php';
                             </div>
                         </div>
                         
-                        <h6 class="text-muted mb-3">Change Password</h6>
-                        <div class="row g-3">
-                            <div class="col-md-4">
-                                <label class="form-label">Current Password</label>
-                                <input type="password" class="form-control" name="current_password">
+                        <h6 class="text-base-content/60 mb-3">Change Password</h6>
+                        <div class="grid grid-cols-12 gap-3">
+                            <div class="col-span-12 md:col-span-4">
+                                <label class="loka-form-label">Current Password</label>
+                                <input type="password" class="loka-form-input" name="current_password">
                             </div>
-                            <div class="col-md-4">
-                                <label class="form-label">New Password</label>
-                                <input type="password" class="form-control" name="new_password" minlength="<?= PASSWORD_MIN_LENGTH ?>">
+                            <div class="col-span-12 md:col-span-4">
+                                <label class="loka-form-label">New Password</label>
+                                <input type="password" class="loka-form-input" name="new_password" minlength="<?= PASSWORD_MIN_LENGTH ?>">
                             </div>
-                            <div class="col-md-4">
-                                <label class="form-label">Confirm New Password</label>
-                                <input type="password" class="form-control" name="confirm_password">
+                            <div class="col-span-12 md:col-span-4">
+                                <label class="loka-form-label">Confirm New Password</label>
+                                <input type="password" class="loka-form-input" name="confirm_password">
                             </div>
                         </div>
-                        <small class="text-muted">
+                        <small class="text-base-content/60">
                             Leave blank to keep current password. Requirements: <?= e($security->getPasswordRequirements()) ?>
                         </small>
                         
                         <hr class="my-4">
-                        <button type="submit" class="btn btn-primary">
+                        <button type="submit" class="loka-btn-primary">
                             <i class="bi bi-check-lg me-1"></i>Save Changes
                         </button>
                     </form>

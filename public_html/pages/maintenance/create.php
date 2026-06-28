@@ -91,7 +91,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 require_once INCLUDES_PATH . '/header.php';
 ?>
 
-<div class="container-fluid py-4">
+<div class="w-full px-4 py-4 sm:px-6 lg:px-8">
     <div class="mb-4">
         <h4 class="mb-1">New Maintenance Request</h4>
         <nav aria-label="breadcrumb">
@@ -103,15 +103,15 @@ require_once INCLUDES_PATH . '/header.php';
         </nav>
     </div>
     
-    <div class="row">
-        <div class="col-lg-8">
-            <div class="card">
-                <div class="card-header">
+    <div class="grid grid-cols-12 gap-4">
+        <div class="col-span-12 lg:col-span-8">
+            <div class="loka-card">
+                <div class="px-6 py-4 border-b border-base-200">
                     <h5 class="mb-0"><i class="bi bi-wrench me-2"></i>Request Details</h5>
                 </div>
-                <div class="card-body">
+                <div class="p-6">
                     <?php if (!empty($errors)): ?>
-                    <div class="alert alert-danger">
+                    <div class="loka-alert loka-alert-danger">
                         <ul class="mb-0"><?php foreach ($errors as $e): ?><li><?= e($e) ?></li><?php endforeach; ?></ul>
                     </div>
                     <?php endif; ?>
@@ -119,10 +119,10 @@ require_once INCLUDES_PATH . '/header.php';
                     <form method="POST">
                         <?= csrfField() ?>
                         
-                        <div class="row g-3">
-                            <div class="col-md-6">
-                                <label class="form-label">Vehicle <span class="text-danger">*</span></label>
-                                <select class="form-select" name="vehicle_id" required>
+                        <div class="grid grid-cols-12 gap-3">
+                            <div class="col-span-12 md:col-span-6">
+                                <label class="loka-form-label">Vehicle <span class="text-error">*</span></label>
+                                <select class="loka-form-input" name="vehicle_id" required>
                                     <option value="">Select vehicle...</option>
                                     <?php foreach ($vehicles as $v): ?>
                                     <option value="<?= $v->id ?>" <?= post('vehicle_id') == $v->id ? 'selected' : '' ?>>
@@ -133,9 +133,9 @@ require_once INCLUDES_PATH . '/header.php';
                                 </select>
                             </div>
                             
-                            <div class="col-md-3">
-                                <label class="form-label">Type <span class="text-danger">*</span></label>
-                                <select class="form-select" name="type" required>
+                            <div class="col-span-12 md:col-span-3">
+                                <label class="loka-form-label">Type <span class="text-error">*</span></label>
+                                <select class="loka-form-input" name="type" required>
                                     <optgroup label="Maintenance Categories">
                                         <option value="corrective" <?= post('type') === 'corrective' ? 'selected' : '' ?>>Corrective</option>
                                         <option value="preventive" <?= post('type') === 'preventive' ? 'selected' : '' ?>>Preventive</option>
@@ -151,9 +151,9 @@ require_once INCLUDES_PATH . '/header.php';
                                 </select>
                             </div>
                             
-                            <div class="col-md-3">
-                                <label class="form-label">Priority <span class="text-danger">*</span></label>
-                                <select class="form-select" name="priority" required>
+                            <div class="col-span-12 md:col-span-3">
+                                <label class="loka-form-label">Priority <span class="text-error">*</span></label>
+                                <select class="loka-form-input" name="priority" required>
                                     <option value="medium" <?= post('priority') === 'medium' ? 'selected' : '' ?>>Medium</option>
                                     <option value="low" <?= post('priority') === 'low' ? 'selected' : '' ?>>Low</option>
                                     <option value="high" <?= post('priority') === 'high' ? 'selected' : '' ?>>High</option>
@@ -161,62 +161,62 @@ require_once INCLUDES_PATH . '/header.php';
                                 </select>
                             </div>
                             
-                            <div class="col-12">
-                                <label class="form-label">Title <span class="text-danger">*</span></label>
-                                <input type="text" class="form-control" name="title" 
+                            <div class="col-span-12">
+                                <label class="loka-form-label">Title <span class="text-error">*</span></label>
+                                <input type="text" class="loka-form-input" name="title" 
                                        value="<?= e(post('title', '')) ?>" 
                                        placeholder="Brief description of the issue" required>
                             </div>
                             
-                            <div class="col-12">
-                                <label class="form-label">Description <span class="text-danger">*</span></label>
-                                <textarea class="form-control" name="description" rows="4" 
+                            <div class="col-span-12">
+                                <label class="loka-form-label">Description <span class="text-error">*</span></label>
+                                <textarea class="loka-form-input" name="description" rows="4" 
                                           placeholder="Detailed description of the maintenance needed..." required maxlength="500"><?= e(post('description', '')) ?></textarea>
                             </div>
                             
-                            <div class="col-md-4">
-                                <label class="form-label">Scheduled Date</label>
-                                <input type="text" class="form-control datepicker" name="scheduled_date" 
+                            <div class="col-span-12 md:col-span-4">
+                                <label class="loka-form-label">Scheduled Date</label>
+                                <input type="text" class="loka-form-input datepicker" name="scheduled_date" 
                                        value="<?= e(post('scheduled_date', '')) ?>">
                             </div>
                             
-                            <div class="col-md-4">
-                                <label class="form-label">Estimated Cost</label>
-                                <div class="input-group">
-                                    <span class="input-group-text">₱</span>
-                                    <input type="number" class="form-control" name="estimated_cost" 
+                            <div class="col-span-12 md:col-span-4">
+                                <label class="loka-form-label">Estimated Cost</label>
+                                <div class="flex items-center gap-0">
+                                    <span class="px-3 py-2.5 bg-base-200 rounded-l-xl text-sm font-medium text-base-content/60 border border-r-0 border-base-300">₱</span>
+                                    <input type="number" class="loka-form-input" name="estimated_cost" 
                                            value="<?= e(post('estimated_cost', '')) ?>" step="0.01" min="0">
                                 </div>
                             </div>
                             
-                            <div class="col-md-4">
-                                <label class="form-label">Odometer Reading</label>
-                                <div class="input-group">
-                                    <input type="number" class="form-control" name="odometer" 
+                            <div class="col-span-12 md:col-span-4">
+                                <label class="loka-form-label">Odometer Reading</label>
+                                <div class="flex items-center gap-0">
+                                    <input type="number" class="loka-form-input" name="odometer" 
                                            value="<?= e(post('odometer', '')) ?>" min="0">
-                                    <span class="input-group-text">km</span>
+                                    <span class="px-3 py-2.5 bg-base-200 rounded-r-xl text-sm font-medium text-base-content/60 border border-l-0 border-base-300">km</span>
                                 </div>
                             </div>
                         </div>
                         
                         <hr class="my-4">
                         
-                        <div class="d-flex gap-2">
-                            <button type="submit" class="btn btn-primary">
+                        <div class="flex gap-2">
+                            <button type="submit" class="loka-btn-primary">
                                 <i class="bi bi-check-lg me-1"></i>Create Request
                             </button>
-                            <a href="<?= APP_URL ?>/?page=maintenance" class="btn btn-outline-secondary">Cancel</a>
+                            <a href="<?= APP_URL ?>/?page=maintenance" class="loka-btn-secondary">Cancel</a>
                         </div>
                     </form>
                 </div>
             </div>
         </div>
         
-        <div class="col-lg-4">
-            <div class="card bg-light border-0">
-                <div class="card-body">
+        <div class="col-span-12 lg:col-span-4">
+            <div class="loka-card bg-base-200 border-0">
+                <div class="p-6">
                     <h6><i class="bi bi-info-circle me-2"></i>Maintenance Types</h6>
-                    <ul class="small text-muted mb-0">
+                    <ul class="small text-base-content/60 mb-0">
                         <li class="mb-2"><strong>Preventive:</strong> Regular scheduled maintenance</li>
                         <li class="mb-2"><strong>Corrective:</strong> Repair of identified issues</li>
                         <li><strong>Emergency:</strong> Urgent repairs needed immediately</li>
@@ -224,11 +224,11 @@ require_once INCLUDES_PATH . '/header.php';
                 </div>
             </div>
             
-            <div class="card mt-3 bg-light border-0">
-                <div class="card-body">
+            <div class="loka-card mt-3 bg-base-200 border-0">
+                <div class="p-6">
                     <h6><i class="bi bi-exclamation-triangle me-2"></i>Priority Guide</h6>
-                    <ul class="small text-muted mb-0">
-                        <li class="mb-2"><span class="badge bg-danger">Critical</span> Vehicle cannot operate</li>
+                    <ul class="small text-base-content/60 mb-0">
+                        <li class="mb-2"><span class="badge bg-error">Critical</span> Vehicle cannot operate</li>
                         <li class="mb-2"><span class="badge bg-warning">High</span> Safety concern</li>
                         <li class="mb-2"><span class="badge bg-info">Medium</span> Needs attention soon</li>
                         <li><span class="badge bg-secondary">Low</span> Minor issue</li>

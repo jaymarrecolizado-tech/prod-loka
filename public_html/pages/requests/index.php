@@ -127,13 +127,13 @@ require_once INCLUDES_PATH . '/header.php';
     <div class="loka-card mb-6">
         <form method="GET" class="flex flex-wrap items-end gap-3">
             <input type="hidden" name="page" value="requests">
-            <div class="form-control flex-1 min-w-[200px]">
+            <div class="flex flex-col gap-1.5 flex-1 min-w-[200px]">
                 <label class="label">
                     <span class="label-text text-xs font-semibold text-base-content/70 uppercase tracking-wide">Search</span>
                 </label>
                 <input type="text" name="q" value="<?= e($searchQuery) ?>" placeholder="Purpose, requester..." class="input input-bordered input-sm w-full bg-base-100">
             </div>
-            <div class="form-control min-w-[130px]">
+            <div class="flex flex-col gap-1.5 min-w-[130px]">
                 <label class="label">
                     <span class="label-text text-xs font-semibold text-base-content/70 uppercase tracking-wide">Status</span>
                 </label>
@@ -144,13 +144,13 @@ require_once INCLUDES_PATH . '/header.php';
                     <?php endforeach; ?>
                 </select>
             </div>
-            <div class="form-control min-w-[140px]">
+            <div class="flex flex-col gap-1.5 min-w-[140px]">
                 <label class="label">
                     <span class="label-text text-xs font-semibold text-base-content/70 uppercase tracking-wide">From</span>
                 </label>
                 <input type="date" name="date_from" value="<?= e($dateFrom) ?>" class="input input-bordered input-sm bg-base-100">
             </div>
-            <div class="form-control min-w-[140px]">
+            <div class="flex flex-col gap-1.5 min-w-[140px]">
                 <label class="label">
                     <span class="label-text text-xs font-semibold text-base-content/70 uppercase tracking-wide">To</span>
                 </label>

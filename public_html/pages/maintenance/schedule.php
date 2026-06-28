@@ -159,14 +159,14 @@ usort($upcomingAlerts, function($a, $b) {
 require_once INCLUDES_PATH . '/header.php';
 ?>
 
-<div class="container-fluid py-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
+<div class="w-full px-4 py-4 sm:px-6 lg:px-8">
+    <div class="flex justify-between items-center mb-4">
         <div>
             <h4 class="mb-1"><i class="bi bi-calendar-check me-2"></i>Maintenance Schedule</h4>
-            <p class="text-muted mb-0">Plan and track vehicle maintenance</p>
+            <p class="text-base-content/60 mb-0">Plan and track vehicle maintenance</p>
         </div>
-        <div class="d-flex gap-2">
-            <a href="<?= APP_URL ?>/?page=maintenance&action=create" class="btn btn-primary">
+        <div class="flex gap-2">
+            <a href="<?= APP_URL ?>/?page=maintenance&action=create" class="loka-btn-primary">
                 <i class="bi bi-plus-lg me-1"></i>New Request
             </a>
         </div>
@@ -174,18 +174,18 @@ require_once INCLUDES_PATH . '/header.php';
 
     <!-- Upcoming Maintenance Alerts -->
     <?php if (!empty($upcomingAlerts)): ?>
-    <div class="row mb-4">
-        <div class="col-12">
-            <div class="card border-warning">
-                <div class="card-header bg-warning bg-opacity-10">
+    <div class="grid grid-cols-12 gap-4 mb-4">
+        <div class="col-span-12">
+            <div class="loka-card border-warning">
+                <div class="px-6 py-4 border-b border-base-200 bg-warning bg-opacity-10">
                     <h6 class="mb-0">
                         <i class="bi bi-bell me-2"></i>
                         Upcoming Maintenance Alerts
                         <span class="badge bg-warning ms-2"><?= count($upcomingAlerts) ?></span>
                     </h6>
                 </div>
-                <div class="card-body">
-                    <div class="table-responsive">
+                <div class="p-6">
+                    <div class="loka-table-responsive">
                         <table class="table table-sm mb-0">
                             <thead>
                                 <tr>
@@ -201,7 +201,7 @@ require_once INCLUDES_PATH . '/header.php';
                                 <tr class="<?= $alert['is_overdue'] ? 'table-danger' : 'table-warning' ?>">
                                     <td>
                                         <div class="fw-medium"><?= e($alert['vehicle']->plate_number) ?></div>
-                                        <small class="text-muted">
+                                        <small class="text-base-content/60">
                                             <?= e($alert['vehicle']->make . ' ' . $alert['vehicle']->model) ?>
                                             (<?= number_format($alert['vehicle']->mileage) ?> km)
                                         </small>
@@ -228,11 +228,11 @@ require_once INCLUDES_PATH . '/header.php';
                                                 Due Soon
                                             </span>
                                         <?php endif; ?>
-                                        <small class="d-block text-muted"><?= $alert['due_reason'] ?></small>
+                                        <small class="block text-base-content/60"><?= $alert['due_reason'] ?></small>
                                     </td>
                                     <td>
                                         <a href="<?= APP_URL ?>/?page=maintenance&action=create&vehicle_id=<?= $alert['vehicle']->id ?>&type=<?= $alert['type'] ?>"
-                                           class="btn btn-sm btn-outline-primary">
+                                           class="loka-btn-outline-primary loka-btn-sm">
                                             <i class="bi bi-plus me-1"></i>Schedule
                                         </a>
                                     </td>
@@ -248,15 +248,15 @@ require_once INCLUDES_PATH . '/header.php';
     <?php endif; ?>
 
     <!-- Filters -->
-    <div class="card mb-4">
-        <div class="card-body">
-            <form method="GET" class="row g-3">
+    <div class="loka-card mb-4">
+        <div class="p-6">
+            <form method="GET" class="grid grid-cols-12 gap-3">
                 <input type="hidden" name="page" value="maintenance">
                 <input type="hidden" name="action" value="schedule">
 
-                <div class="col-md-3">
-                    <label class="form-label">View</label>
-                    <select name="view" class="form-select" onchange="this.form.submit()">
+                <div class="col-span-12 md:col-span-3">
+                    <label class="loka-form-label">View</label>
+                    <select name="view" class="loka-form-input" onchange="this.form.submit()">
                         <option value="calendar" <?= $view === 'calendar' ? 'selected' : '' ?>>Calendar View</option>
                         <option value="list" <?= $view === 'list' ? 'selected' : '' ?>>List View</option>
                         <option value="upcoming" <?= $view === 'upcoming' ? 'selected' : '' ?>>Upcoming (30 days)</option>
@@ -264,9 +264,9 @@ require_once INCLUDES_PATH . '/header.php';
                     </select>
                 </div>
 
-                <div class="col-md-3">
-                    <label class="form-label">Vehicle</label>
-                    <select name="vehicle" class="form-select" onchange="this.form.submit()">
+                <div class="col-span-12 md:col-span-3">
+                    <label class="loka-form-label">Vehicle</label>
+                    <select name="vehicle" class="loka-form-input" onchange="this.form.submit()">
                         <option value="">All Vehicles</option>
                         <?php foreach ($vehicles as $v): ?>
                         <option value="<?= $v->id ?>" <?= $vehicleId === $v->id ? 'selected' : '' ?>>
@@ -276,11 +276,11 @@ require_once INCLUDES_PATH . '/header.php';
                     </select>
                 </div>
 
-                <div class="col-md-3 d-flex align-items-end">
-                    <button type="submit" class="btn btn-primary">
+                <div class="col-span-12 md:col-span-3 flex items-end">
+                    <button type="submit" class="loka-btn-primary">
                         <i class="bi bi-filter me-1"></i>Apply Filters
                     </button>
-                    <a href="<?= APP_URL ?>/?page=maintenance&action=schedule" class="btn btn-outline-secondary ms-2">
+                    <a href="<?= APP_URL ?>/?page=maintenance&action=schedule" class="loka-btn-secondary ms-2">
                         <i class="bi bi-x-circle me-1"></i>Clear
                     </a>
                 </div>
@@ -290,14 +290,14 @@ require_once INCLUDES_PATH . '/header.php';
 
     <!-- Calendar View -->
     <?php if ($view === 'calendar'): ?>
-    <div class="card">
-        <div class="card-header bg-white">
+    <div class="loka-card">
+        <div class="px-6 py-4 border-b border-base-200 bg-white">
             <h6 class="mb-0">
                 <i class="bi bi-calendar3 me-2"></i>
                 <?= date('F Y', strtotime($month . '-01')) ?>
             </h6>
         </div>
-        <div class="card-body">
+        <div class="p-6">
             <?php
             // Generate calendar
             $timestamp = strtotime($month . '-01');
@@ -329,7 +329,7 @@ require_once INCLUDES_PATH . '/header.php';
                 $calendarEvents[$day][] = $m;
             }
             ?>
-            <div class="table-responsive">
+            <div class="loka-table-responsive">
                 <table class="table table-bordered calendar-table">
                     <thead>
                         <tr>
@@ -365,9 +365,9 @@ require_once INCLUDES_PATH . '/header.php';
                                     $day++;
                                 }
                                 ?>
-                                <td class="<?= $isToday ? 'table-primary' : '' ?> <?= $cellDay === null ? 'bg-light' : '' ?>" valign="top">
+                                <td class="<?= $isToday ? 'table-primary' : '' ?> <?= $cellDay === null ? 'bg-base-200' : '' ?>" valign="top">
                                     <?php if ($cellDay): ?>
-                                        <div class="d-flex justify-content-between">
+                                        <div class="flex justify-between">
                                             <span class="badge <?= $isToday ? 'bg-primary' : 'bg-secondary' ?>">
                                                 <?= $cellDay ?>
                                             </span>
@@ -386,7 +386,7 @@ require_once INCLUDES_PATH . '/header.php';
                                                     $color = $statusColors[$event->status] ?? 'secondary';
                                                     ?>
                                                     <a href="<?= APP_URL ?>/?page=maintenance&action=view&id=<?= $event->id ?>"
-                                                       class="d-block mb-1 p-1 rounded bg-<?= $color ?> bg-opacity-10 text-decoration-none">
+                                                       class="block mb-1 p-1 rounded bg-<?= $color ?> bg-opacity-10 no-underline">
                                                         <small>
                                                             <strong>#<?= $event->id ?></strong>
                                                             <?= e($event->plate_number) ?>
@@ -411,15 +411,15 @@ require_once INCLUDES_PATH . '/header.php';
 
     <!-- List View -->
     <?php if ($view !== 'calendar'): ?>
-    <div class="card">
-        <div class="card-body">
+    <div class="loka-card">
+        <div class="p-6">
             <?php if (empty($maintenanceRequests)): ?>
                 <div class="text-center py-5">
-                    <i class="bi bi-calendar-x fs-1 text-muted"></i>
-                    <p class="text-muted mt-3">No maintenance requests found.</p>
+                    <i class="bi bi-calendar-x fs-1 text-base-content/60"></i>
+                    <p class="text-base-content/60 mt-3">No maintenance requests found.</p>
                 </div>
             <?php else: ?>
-                <div class="table-responsive">
+                <div class="loka-table-responsive">
                     <table class="table table-hover align-middle">
                         <thead>
                             <tr>
@@ -439,11 +439,11 @@ require_once INCLUDES_PATH . '/header.php';
                                     <td><strong>#<?= $req->id ?></strong></td>
                                     <td>
                                         <div class="fw-medium"><?= e($req->plate_number) ?></div>
-                                        <small class="text-muted"><?= e($req->make . ' ' . $req->model) ?></small>
+                                        <small class="text-base-content/60"><?= e($req->make . ' ' . $req->model) ?></small>
                                     </td>
                                     <td>
                                         <div class="fw-medium"><?= e($req->title) ?></div>
-                                        <small class="text-muted"><?= truncate($req->description, 50) ?></small>
+                                        <small class="text-base-content/60"><?= truncate($req->description, 50) ?></small>
                                     </td>
                                     <td>
                                         <?php
@@ -453,12 +453,12 @@ require_once INCLUDES_PATH . '/header.php';
                                         }
                                         if ($typeInfo):
                                         ?>
-                                        <span class="badge bg-light text-dark">
+                                        <span class="badge bg-base-200 text-dark">
                                             <i class="bi <?= $typeInfo['icon'] ?> me-1"></i>
                                             <?= $typeInfo['label'] ?>
                                         </span>
                                         <?php else: ?>
-                                        <span class="badge bg-light text-dark"><?= ucfirst($req->type) ?></span>
+                                        <span class="badge bg-base-200 text-dark"><?= ucfirst($req->type) ?></span>
                                         <?php endif; ?>
                                     </td>
                                     <td>
@@ -473,7 +473,7 @@ require_once INCLUDES_PATH . '/header.php';
                                             $isOverdue = $req->status === MAINTENANCE_STATUS_PENDING && strtotime($req->scheduled_date) < time();
                                             ?>
                                             <?php if ($isOverdue): ?>
-                                                <span class="text-danger">
+                                                <span class="text-error">
                                                     <i class="bi bi-exclamation-circle me-1"></i>
                                                     <?= formatDate($req->scheduled_date) ?>
                                                 </span>
@@ -481,7 +481,7 @@ require_once INCLUDES_PATH . '/header.php';
                                                 <?= formatDate($req->scheduled_date) ?>
                                             <?php endif; ?>
                                         <?php else: ?>
-                                            <span class="text-muted">-</span>
+                                            <span class="text-base-content/60">-</span>
                                         <?php endif; ?>
                                     </td>
                                     <td>
@@ -493,21 +493,21 @@ require_once INCLUDES_PATH . '/header.php';
                                     <td>
                                         <div class="btn-group">
                                             <a href="<?= APP_URL ?>/?page=maintenance&action=view&id=<?= $req->id ?>"
-                                               class="btn btn-sm btn-outline-primary">
+                                               class="loka-btn-outline-primary loka-btn-sm">
                                                 <i class="bi bi-eye"></i>
                                             </a>
                                             <?php if ($req->status !== MAINTENANCE_STATUS_COMPLETED && $req->status !== MAINTENANCE_STATUS_CANCELLED): ?>
                                             <a href="<?= APP_URL ?>/?page=maintenance&action=edit&id=<?= $req->id ?>"
-                                               class="btn btn-sm btn-outline-secondary">
+                                               class="loka-btn-secondary loka-btn-sm">
                                                 <i class="bi bi-pencil"></i>
                                             </a>
                                             <?php endif; ?>
                                             <?php if (isAdmin()): ?>
-                                            <form method="POST" action="<?= APP_URL ?>/?page=maintenance&action=delete" class="d-inline"
+                                            <form method="POST" action="<?= APP_URL ?>/?page=maintenance&action=delete" class="inline"
                                                   onsubmit="return confirm('Are you sure you want to delete this maintenance request?')">
                                                 <?= csrfField() ?>
                                                 <input type="hidden" name="id" value="<?= $req->id ?>">
-                                                <button type="submit" class="btn btn-sm btn-outline-danger">
+                                                <button type="submit" class="loka-btn-outline-error loka-btn-sm">
                                                     <i class="bi bi-trash"></i>
                                                 </button>
                                             </form>

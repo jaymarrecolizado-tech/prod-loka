@@ -230,25 +230,25 @@ function getChangeBadgeClass($type) {
 require_once INCLUDES_PATH . '/header.php';
 ?>
 
-<div class="container-fluid py-4">
+<div class="w-full px-4 py-4 sm:px-6 lg:px-8">
     <!-- Page Header -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="flex justify-between items-center mb-4">
         <div>
             <h4 class="mb-1"><i class="bi bi-journal-text me-2"></i>Patch Notes</h4>
-            <p class="text-muted mb-0">Track system updates and improvements</p>
+            <p class="text-base-content/60 mb-0">Track system updates and improvements</p>
         </div>
         <div>
-            <span class="badge bg-light text-dark border">
+            <span class="badge bg-base-200 text-dark border">
                 <i class="bi bi-tag me-1"></i>Current Version: <?= APP_VERSION ?>
             </span>
         </div>
     </div>
 
     <!-- Legend -->
-    <div class="card mb-4">
-        <div class="card-body">
+    <div class="loka-card mb-4">
+        <div class="p-6">
             <h6 class="card-title mb-3">Change Type Legend</h6>
-            <div class="d-flex flex-wrap gap-2">
+            <div class="flex flex-wrap gap-2">
                 <span class="badge bg-success"><i class="bi bi-plus-circle me-1"></i>Feature</span>
                 <span class="badge bg-danger"><i class="bi bi-bug me-1"></i>Bug Fix</span>
                 <span class="badge bg-info"><i class="bi bi-arrow-up-circle me-1"></i>Improvement</span>
@@ -260,24 +260,24 @@ require_once INCLUDES_PATH . '/header.php';
     <!-- Patch Notes Timeline -->
     <div class="patch-notes-timeline">
         <?php foreach (array_reverse($patchNotes) as $note): ?>
-        <div class="card mb-4 patch-note-item">
-            <div class="card-header bg-white d-flex justify-content-between align-items-center">
-                <div class="d-flex align-items-center">
+        <div class="loka-card mb-4 patch-note-item">
+            <div class="px-6 py-4 border-b border-base-200 bg-white flex justify-between items-center">
+                <div class="flex items-center">
                     <div class="version-badge me-3">
                         <span class="badge bg-primary fs-6">v<?= e($note['version']) ?></span>
                     </div>
                     <div>
                         <h5 class="mb-0"><?= e($note['title']) ?></h5>
-                        <small class="text-muted">
+                        <small class="text-base-content/60">
                             <i class="bi bi-calendar3 me-1"></i><?= formatDate($note['date']) ?>
                         </small>
                     </div>
                 </div>
             </div>
-            <div class="card-body">
+            <div class="p-6">
                 <ul class="list-unstyled mb-0">
                     <?php foreach ($note['changes'] as $change): ?>
-                    <li class="d-flex align-items-start mb-2">
+                    <li class="flex items-start mb-2">
                         <span class="badge <?= getChangeBadgeClass($change['type']) ?> me-2 mt-1" style="min-width: 80px;">
                             <?= ucfirst($change['type']) ?>
                         </span>
@@ -291,36 +291,36 @@ require_once INCLUDES_PATH . '/header.php';
     </div>
 
     <!-- System Info -->
-    <div class="card mt-4">
-        <div class="card-header">
+    <div class="loka-card mt-4">
+        <div class="px-6 py-4 border-b border-base-200">
             <h5 class="mb-0"><i class="bi bi-info-circle me-2"></i>System Information</h5>
         </div>
-        <div class="card-body">
-            <div class="row">
-                <div class="col-md-6">
+        <div class="p-6">
+            <div class="grid grid-cols-12 gap-4">
+                <div class="col-span-12 md:col-span-6">
                     <table class="table table-borderless table-sm">
                         <tr>
-                            <td class="text-muted">Application Name:</td>
+                            <td class="text-base-content/60">Application Name:</td>
                             <td class="fw-medium"><?= APP_NAME ?></td>
                         </tr>
                         <tr>
-                            <td class="text-muted">Current Version:</td>
+                            <td class="text-base-content/60">Current Version:</td>
                             <td class="fw-medium"><?= APP_VERSION ?></td>
                         </tr>
                         <tr>
-                            <td class="text-muted">Environment:</td>
+                            <td class="text-base-content/60">Environment:</td>
                             <td class="fw-medium"><?= IS_PRODUCTION ? 'Production' : 'Development' ?></td>
                         </tr>
                     </table>
                 </div>
-                <div class="col-md-6">
+                <div class="col-span-12 md:col-span-6">
                     <table class="table table-borderless table-sm">
                         <tr>
-                            <td class="text-muted">Timezone:</td>
+                            <td class="text-base-content/60">Timezone:</td>
                             <td class="fw-medium">Asia/Manila</td>
                         </tr>
                         <tr>
-                            <td class="text-muted">Last Updated:</td>
+                            <td class="text-base-content/60">Last Updated:</td>
                             <td class="fw-medium"><?= formatDate(date('Y-m-d')) ?></td>
                         </tr>
                     </table>

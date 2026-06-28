@@ -346,7 +346,7 @@ require_once INCLUDES_PATH . '/header.php';
                             <p class="text-sm font-medium text-base-content"><?= e($trip->driver_name ?? 'Not assigned') ?></p>
                         </div>
 
-                        <div class="form-control">
+                        <div class="flex flex-col gap-1.5">
                             <label class="label">
                                 <span class="label-text text-xs font-semibold text-base-content/70 uppercase tracking-wide">Dispatch Time <span class="text-error">*</span></span>
                             </label>
@@ -379,7 +379,7 @@ require_once INCLUDES_PATH . '/header.php';
                             </div>
                         </div>
 
-                        <div class="form-control">
+                        <div class="flex flex-col gap-1.5">
                             <label class="label">
                                 <span class="label-text text-xs font-semibold text-base-content/70 uppercase tracking-wide">Notes (Optional)</span>
                             </label>
@@ -391,9 +391,9 @@ require_once INCLUDES_PATH . '/header.php';
 
                     <div class="p-6 border-t border-base-200 flex justify-end gap-2">
                         <form method="dialog">
-                            <button type="submit" class="btn btn-sm">Cancel</button>
+                            <button type="submit" class="loka-btn-secondary loka-btn-sm">Cancel</button>
                         </form>
-                        <button type="submit" class="btn btn-sm bg-success text-success-content hover:bg-success/90">
+                        <button type="submit" class="bg-success text-success-content hover:bg-success/90 px-4 py-2 text-sm font-medium rounded-xl inline-flex items-center gap-2 transition-colors loka-btn-sm">
                             Confirm Dispatch
                         </button>
                     </div>
@@ -443,7 +443,7 @@ require_once INCLUDES_PATH . '/header.php';
                             </p>
                         </div>
 
-                        <div class="form-control">
+                        <div class="flex flex-col gap-1.5">
                             <label class="label">
                                 <span class="label-text text-xs font-semibold text-base-content/70 uppercase tracking-wide">Arrival Time <span class="text-error">*</span></span>
                             </label>
@@ -459,7 +459,7 @@ require_once INCLUDES_PATH . '/header.php';
                         </div>
 
                         <?php if ($trip->mileage_start): ?>
-                        <div class="form-control">
+                        <div class="flex flex-col gap-1.5">
                             <label class="label">
                                 <span class="label-text text-xs font-semibold text-base-content/70 uppercase tracking-wide">Ending Mileage (Optional)</span>
                             </label>
@@ -471,7 +471,7 @@ require_once INCLUDES_PATH . '/header.php';
                         </div>
                         <?php endif; ?>
 
-                        <div class="form-control">
+                        <div class="flex flex-col gap-1.5">
                             <label class="label">
                                 <span class="label-text text-xs font-semibold text-base-content/70 uppercase tracking-wide">Notes (Optional)</span>
                             </label>
@@ -483,9 +483,9 @@ require_once INCLUDES_PATH . '/header.php';
 
                     <div class="p-6 border-t border-base-200 flex justify-end gap-2">
                         <form method="dialog">
-                            <button type="submit" class="btn btn-sm">Cancel</button>
+                            <button type="submit" class="loka-btn-secondary loka-btn-sm">Cancel</button>
                         </form>
-                        <button type="submit" class="btn btn-sm bg-primary text-primary-content hover:bg-primary/90">
+                        <button type="submit" class="bg-primary text-primary-content hover:bg-primary/90 px-4 py-2 text-sm font-medium rounded-xl inline-flex items-center gap-2 transition-colors loka-btn-sm">
                             Confirm Arrival
                         </button>
                     </div>

@@ -18,7 +18,7 @@
             <p class="text-sm text-gray-600">{{ stat.label }}</p>
             <p class="mt-1 text-2xl font-bold" :class="stat.textColor">{{ stat.value }}</p>
           </div>
-          <component :is="stat.icon" class="h-8 w-8" :class="stat.iconColor" />
+          <i :class="stat.icon" class="h-8 w-8 text-3xl"></i>
         </div>
       </div>
     </div>
@@ -41,7 +41,7 @@ const stats = ref([
   {
     label: 'Active Vehicles',
     value: '24',
-    icon: 'CarIcon',
+    icon: 'bi bi-truck text-blue-500',
     textColor: 'text-blue-600',
     iconColor: 'text-blue-500',
     borderColor: 'border-blue-500',
@@ -49,7 +49,7 @@ const stats = ref([
   {
     label: "Today's Trips",
     value: '12',
-    icon: 'MapIcon',
+    icon: 'bi bi-map text-green-500',
     textColor: 'text-green-600',
     iconColor: 'text-green-500',
     borderColor: 'border-green-500',
@@ -57,7 +57,7 @@ const stats = ref([
   {
     label: 'Pending Requests',
     value: '5',
-    icon: 'ClockIcon',
+    icon: 'bi bi-clock text-yellow-500',
     textColor: 'text-yellow-600',
     iconColor: 'text-yellow-500',
     borderColor: 'border-yellow-500',
@@ -65,7 +65,7 @@ const stats = ref([
   {
     label: 'Active Drivers',
     value: '18',
-    icon: 'UserIcon',
+    icon: 'bi bi-person text-purple-500',
     textColor: 'text-purple-600',
     iconColor: 'text-purple-500',
     borderColor: 'border-purple-500',

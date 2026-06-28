@@ -66,7 +66,7 @@ $pageTitle = 'Verify Gas Voucher';
 
     <div class="p-6">
         <?php if (isset($error)): ?>
-            <div class="alert alert-error shadow-lg mb-6 text-white bg-red-600 rounded-lg p-4 flex flex-row items-center gap-4">
+            <div class="loka-alert loka-alert-danger shadow-lg mb-6 text-white bg-red-600 rounded-lg p-4 flex flex-row items-center gap-4">
                 <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current flex-shrink-0 h-8 w-8 text-white" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                 <div>
                     <h3 class="font-bold text-lg">Verification Failed</h3>

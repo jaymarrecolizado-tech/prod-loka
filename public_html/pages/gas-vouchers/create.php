@@ -256,7 +256,7 @@ require_once INCLUDES_PATH . '/header.php';
         </div>
 
         <?php if (!empty($errors)): ?>
-        <div class="alert alert-error mb-6">
+        <div class="loka-alert loka-alert-danger mb-6">
             <ul class="mb-0 list-disc list-inside">
                 <?php foreach ($errors as $err): ?>
                 <li><?= e($err) ?></li>
@@ -433,7 +433,8 @@ require_once INCLUDES_PATH . '/header.php';
 
                             <!-- Full Tank indicator (shown only in 'full' mode) -->
                             <div id="fullTankIndicator" style="<?= $initMode === 'full' ? '' : 'display:none;' ?>">
-                                <div class="alert alert-warning text-sm flex items-center gap-2">
+                                <div class="loka-alert loka-alert-warning text-sm flex 
+items-center gap-2">
                                     <i class="bi bi-fuel-pump-fill text-lg"></i>
                                     <span><strong>Full Tank</strong> — Fill the vehicle to full capacity.</span>
                                 </div>

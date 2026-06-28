@@ -46,7 +46,7 @@ require_once INCLUDES_PATH . '/header.php';
     <div class="loka-card mb-6">
         <form method="GET" class="flex flex-wrap items-end gap-3">
             <input type="hidden" name="page" value="drivers">
-            <div class="form-control min-w-[150px]">
+            <div class="flex flex-col gap-1.5 min-w-[150px]">
                 <label class="label">
                     <span class="label-text text-xs font-semibold text-base-content/70 uppercase tracking-wide">Status</span>
                 </label>

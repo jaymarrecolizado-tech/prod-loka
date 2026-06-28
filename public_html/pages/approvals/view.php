@@ -703,7 +703,7 @@ require_once INCLUDES_PATH . '/header.php';
                                                                         Overlap: <?= calculateOverlapMinutes($conflict, $request->start_datetime, $request->end_datetime) ?> minutes
                                                                     </div>
                                                                     <a href="<?= APP_URL ?>/?page=approvals&action=view&id=<?= $conflict['id'] ?>"
-                                                                       class="btn btn-outline btn-primary btn-sm mt-2" target="_blank">
+                                                                       class="loka-btn-outline-primary loka-btn-sm mt-2" target="_blank">
                                                                         <i class="bi bi-arrow-up-right-square mr-1"></i>View Request #<?= $conflict['id'] ?>
                                                                     </a>
                                                                 </div>
@@ -729,7 +729,7 @@ require_once INCLUDES_PATH . '/header.php';
                                                                         Overlap: <?= calculateOverlapMinutes($conflict, $request->start_datetime, $request->end_datetime) ?> minutes
                                                                     </div>
                                                                     <a href="<?= APP_URL ?>/?page=approvals&action=view&id=<?= $conflict['id'] ?>"
-                                                                       class="btn btn-outline btn-primary btn-sm mt-2" target="_blank">
+                                                                       class="loka-btn-outline-primary loka-btn-sm mt-2" target="_blank">
                                                                         <i class="bi bi-arrow-up-right-square mr-1"></i>View Request #<?= $conflict['id'] ?>
                                                                     </a>
                                                                 </div>
@@ -781,7 +781,7 @@ require_once INCLUDES_PATH . '/header.php';
                                                 </option>
                                             <?php endforeach; ?>
                                         </select>
-                                        <div id="vehicleConflictAlert" class="mt-2 rounded-xl border border-warning bg-warning/10 p-2 text-sm d-none">
+                                        <div id="vehicleConflictAlert" class="mt-2 rounded-xl border border-warning bg-warning/10 p-2 text-sm hidden">
                                             <i class="bi bi-exclamation-triangle mr-1"></i>
                                             <span class="message"></span>
                                         </div>
@@ -819,13 +819,13 @@ require_once INCLUDES_PATH . '/header.php';
                                                 </option>
                                             <?php endforeach; ?>
                                         </select>
-                                        <div id="driverConflictAlert" class="mt-2 rounded-xl border border-warning bg-warning/10 p-2 text-sm d-none">
+                                        <div id="driverConflictAlert" class="mt-2 rounded-xl border border-warning bg-warning/10 p-2 text-sm hidden">
                                             <i class="bi bi-exclamation-triangle mr-1"></i>
                                             <span class="message"></span>
                                         </div>
                                     </div>
 
-                                    <div id="overrideConfirm" class="mb-3 flex items-center gap-2 d-none">
+                                    <div id="overrideConfirm" class="mb-3 flex items-center gap-2 hidden">
                                         <input type="checkbox" class="checkbox checkbox-error checkbox-sm" id="confirmOverride"
                                             name="override_conflict" value="1">
                                         <label class="text-sm font-bold text-error" for="confirmOverride">
@@ -847,13 +847,13 @@ require_once INCLUDES_PATH . '/header.php';
                         </label>
                         <textarea class="textarea textarea-bordered w-full" id="comments" name="comments" rows="3"
                             placeholder="Enter your comments or remarks..." maxlength="500"></textarea>
-                        <div class="mt-1 text-sm text-error d-none" id="commentsFeedback">Comments are required when rejecting or requesting revision.</div>
+                        <div class="mt-1 text-sm text-error hidden" id="commentsFeedback">Comments are required when rejecting or requesting revision.</div>
                     </div>
 
                     <!-- Action Buttons -->
                     <div class="flex flex-wrap gap-2">
                             <input type="hidden" name="approval_action" id="approvalActionInput" value="">
-                            <button type="button" id="approveBtn" class="btn btn-success" data-action="approve">
+                            <button type="button" id="approveBtn" class="bg-success text-success-content hover:bg-success/90 px-4 py-2 text-sm font-medium rounded-xl inline-flex items-center gap-2 transition-colors" data-action="approve">
                             <span class="btn-text">
                                 <i class="bi bi-check-lg mr-1"></i>Approve
                             </span>
@@ -862,7 +862,7 @@ require_once INCLUDES_PATH . '/header.php';
                                 Processing...
                             </span>
                         </button>
-                            <button type="button" id="revisionBtn" class="btn btn-warning" data-action="revision">
+                            <button type="button" id="revisionBtn" class="bg-warning text-warning-content hover:bg-warning/90 px-4 py-2 text-sm font-medium rounded-xl inline-flex items-center gap-2 transition-colors" data-action="revision">
                             <span class="btn-text">
                                 <i class="bi bi-arrow-repeat mr-1"></i>Request Revision
                             </span>
@@ -871,7 +871,7 @@ require_once INCLUDES_PATH . '/header.php';
                                 Processing...
                             </span>
                         </button>
-                            <button type="button" id="rejectBtn" class="btn btn-error" data-action="reject">
+                            <button type="button" id="rejectBtn" class="bg-error text-error-content hover:bg-error/90 px-4 py-2 text-sm font-medium rounded-xl inline-flex items-center gap-2 transition-colors" data-action="reject">
                             <span class="btn-text">
                                 <i class="bi bi-x-lg mr-1"></i>Reject
                             </span>
@@ -880,7 +880,7 @@ require_once INCLUDES_PATH . '/header.php';
                                 Processing...
                             </span>
                         </button>
-                        <a href="<?= APP_URL ?>/?page=approvals" class="btn btn-outline">Cancel</a>
+                        <a href="<?= APP_URL ?>/?page=approvals" class="loka-btn-secondary">Cancel</a>
                     </div>
                     </form>
                 </div>

@@ -305,7 +305,7 @@ require_once INCLUDES_PATH . '/header.php';
                         </div>
                     </div>
 
-                    <div class="alert alert-error mb-4 flex items-start">
+                    <div class="loka-alert loka-alert-danger mb-4 flex items-start">
                         <i class="bi bi-exclamation-triangle-fill flex-shrink-0 mr-3 text-xl"></i>
                         <div>
                             <strong class="block mb-2">This action cannot be undone!</strong>
@@ -318,7 +318,7 @@ require_once INCLUDES_PATH . '/header.php';
                     </div>
 
                     <?php if ($request->status === STATUS_APPROVED): ?>
-                    <div class="alert alert-warning mb-4">
+                    <div class="loka-alert loka-alert-warning mb-4">
                         <i class="bi bi-info-circle-fill mr-2"></i>
                         <strong>Attention:</strong> This request has already been approved.
                         <?php if ($request->vehicle_plate): ?>
@@ -331,7 +331,7 @@ require_once INCLUDES_PATH . '/header.php';
                     <?php endif; ?>
 
                     <?php if ($request->status === STATUS_REJECTED): ?>
-                    <div class="alert alert-info mb-4">
+                    <div class="loka-alert loka-alert-info mb-4">
                         <i class="bi bi-info-circle-fill mr-2"></i>
                         <strong>Note:</strong> This request was rejected. Cancelling will permanently close this request.
                     </div>
@@ -353,10 +353,10 @@ require_once INCLUDES_PATH . '/header.php';
 
                         <div class="flex flex-col md:flex-row gap-2 md:justify-end">
                             <a href="<?= APP_URL ?>/?page=requests&action=view&id=<?= $requestId ?>"
-                               class="btn btn-outline btn-lg">
+                               class="loka-btn-secondary text-base px-6 py-3">
                                 <i class="bi bi-x-lg mr-1"></i>No, Go Back
                             </a>
-                            <button type="submit" class="btn btn-error btn-lg">
+                            <button type="submit" class="bg-error text-error-content hover:bg-error/90 px-6 py-3 text-base font-medium rounded-xl inline-flex items-center gap-2 transition-colors">
                                 <i class="bi bi-check-lg mr-1"></i>Yes, Cancel Request
                             </button>
                         </div>

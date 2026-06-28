@@ -381,20 +381,20 @@ class NotificationService
             'daily_digest' => ['label' => 'Daily Digest', 'description' => 'Daily summary of pending approvals']
         ];
 
-        $html = '<div class="card"><div class="card-body"><h5 class="card-title mb-3">Email Notifications</h5>';
-        $html .= '<p class="text-muted small">Select which notifications you want to receive:</p>';
-        $html .= '<div class="form-check form-switch mb-2">';
-        $html .= '<input class="form-check-input" type="checkbox" id="enableAll" checked>';
-        $html .= '<label class="form-check-label" for="enableAll"><strong>Enable All Notifications</strong></label>';
+        $html = '<div class="loka-card p-6"><h5 class="text-base-content font-semibold mb-3">Email Notifications</h5>';
+        $html .= '<p class="text-base-content/60 text-sm">Select which notifications you want to receive:</p>';
+        $html .= '<div class="flex items-center gap-2 mb-2">';
+        $html .= '<input class="checkbox checkbox-sm checkbox-primary" type="checkbox" id="enableAll" checked>';
+        $html .= '<label class="text-sm text-base-content cursor-pointer" for="enableAll"><strong>Enable All Notifications</strong></label>';
         $html .= '</div>';
 
         foreach ($notifications as $key => $notif) {
             $checked = isset($prefs[$key]) ? ($prefs[$key] ? 'checked' : '') : 'checked';
-            $html .= '<div class="form-check mb-2">';
-            $html .= '<input class="form-check-input notification-toggle" type="checkbox" id="notif_' . $key . '" name="notifications[' . $key . ']" ' . $checked . '>';
-            $html .= '<label class="form-check-label" for="notif_' . $key . '">';
+            $html .= '<div class="flex items-center gap-2 mb-2">';
+            $html .= '<input class="checkbox checkbox-sm checkbox-primary notification-toggle" type="checkbox" id="notif_' . $key . '" name="notifications[' . $key . ']" ' . $checked . '>';
+            $html .= '<label class="text-sm text-base-content cursor-pointer" for="notif_' . $key . '">';
             $html .= '<strong>' . $notif['label'] . '</strong>';
-            $html .= '<br><small class="text-muted">' . $notif['description'] . '</small>';
+            $html .= '<br><small class="text-base-content/60">' . $notif['description'] . '</small>';
             $html .= '</label>';
             $html .= '</div>';
         }

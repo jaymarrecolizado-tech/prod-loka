@@ -164,12 +164,12 @@ foreach ($allTripsForStats as $t) {
 require_once INCLUDES_PATH . '/header.php';
 ?>
 
-<div class="container-fluid py-4">
+<div class="w-full px-4 py-4 sm:px-6 lg:px-8">
     <!-- Page Header -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="flex justify-between items-center mb-4">
         <div>
-            <h4 class="mb-1"><i class="bi bi-check-all me-2"></i>Completed Trips</h4>
-            <p class="text-muted mb-0">
+            <h4 class="mb-1"><i class="bi bi-check-all mr-2"></i>Completed Trips</h4>
+            <p class="text-base-content/60 mb-0">
                 <?php if ($isDriver): ?>
                     Your completed trip history
                 <?php elseif ($role === ROLE_GUARD): ?>
@@ -184,76 +184,76 @@ require_once INCLUDES_PATH . '/header.php';
             </p>
         </div>
         <div>
-            <button type="button" class="btn btn-success" onclick="exportCompletedTrips()">
-                <i class="bi bi-file-earmark-excel me-1"></i>Export CSV
+            <button type="button" class="bg-success text-success-content hover:bg-success/90 px-4 py-2 text-sm font-medium rounded-xl inline-flex items-center gap-2 transition-colors" onclick="exportCompletedTrips()">
+                <i class="bi bi-file-earmark-excel mr-1"></i>Export CSV
             </button>
         </div>
     </div>
 
     <!-- Statistics Cards -->
-    <div class="row g-3 mb-4">
-        <div class="col-md-3">
-            <div class="card border-0 shadow-sm">
-                <div class="card-body">
-                    <div class="d-flex align-items-center">
+    <div class="grid grid-cols-12 gap-3 mb-4">
+        <div class="col-span-12 md:col-span-3">
+            <div class="loka-card">
+                <div class="p-6">
+                    <div class="flex items-center">
                         <div class="flex-shrink-0">
-                            <div class="bg-primary bg-opacity-10 rounded p-3">
-                                <i class="bi bi-list-check text-primary fs-4"></i>
+                            <div class="bg-primary/10 rounded-xl p-3">
+                                <i class="bi bi-list-check text-primary text-xl"></i>
                             </div>
                         </div>
-                        <div class="flex-grow-1 ms-3">
-                            <h6 class="text-muted mb-1">Total Trips</h6>
+                        <div class="flex-1 ml-3">
+                            <h6 class="text-base-content/60 mb-1">Total Trips</h6>
                             <h3 class="mb-0"><?= $totalTrips ?></h3>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-        <div class="col-md-3">
-            <div class="card border-0 shadow-sm">
-                <div class="card-body">
-                    <div class="d-flex align-items-center">
+        <div class="col-span-12 md:col-span-3">
+            <div class="loka-card">
+                <div class="p-6">
+                    <div class="flex items-center">
                         <div class="flex-shrink-0">
-                            <div class="bg-success bg-opacity-10 rounded p-3">
-                                <i class="bi bi-speedometer2 text-success fs-4"></i>
+                            <div class="bg-success/10 rounded-xl p-3">
+                                <i class="bi bi-speedometer2 text-success text-xl"></i>
                             </div>
                         </div>
-                        <div class="flex-grow-1 ms-3">
-                            <h6 class="text-muted mb-1">Total Distance</h6>
+                        <div class="flex-1 ml-3">
+                            <h6 class="text-base-content/60 mb-1">Total Distance</h6>
                             <h3 class="mb-0"><?= number_format($totalDistance) ?> km</h3>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-        <div class="col-md-3">
-            <div class="card border-0 shadow-sm">
-                <div class="card-body">
-                    <div class="d-flex align-items-center">
+        <div class="col-span-12 md:col-span-3">
+            <div class="loka-card">
+                <div class="p-6">
+                    <div class="flex items-center">
                         <div class="flex-shrink-0">
-                            <div class="bg-info bg-opacity-10 rounded p-3">
-                                <i class="bi bi-clock text-info fs-4"></i>
+                            <div class="bg-info/10 rounded-xl p-3">
+                                <i class="bi bi-clock text-info text-xl"></i>
                             </div>
                         </div>
-                        <div class="flex-grow-1 ms-3">
-                            <h6 class="text-muted mb-1">Total Hours</h6>
+                        <div class="flex-1 ml-3">
+                            <h6 class="text-base-content/60 mb-1">Total Hours</h6>
                             <h3 class="mb-0"><?= number_format($totalHours, 1) ?>h</h3>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-        <div class="col-md-3">
-            <div class="card border-0 shadow-sm">
-                <div class="card-body">
-                    <div class="d-flex align-items-center">
+        <div class="col-span-12 md:col-span-3">
+            <div class="loka-card">
+                <div class="p-6">
+                    <div class="flex items-center">
                         <div class="flex-shrink-0">
-                            <div class="bg-warning bg-opacity-10 rounded p-3">
-                                <i class="bi bi-people text-warning fs-4"></i>
+                            <div class="bg-warning/10 rounded-xl p-3">
+                                <i class="bi bi-people text-warning text-xl"></i>
                             </div>
                         </div>
-                        <div class="flex-grow-1 ms-3">
-                            <h6 class="text-muted mb-1">Total Passengers</h6>
+                        <div class="flex-1 ml-3">
+                            <h6 class="text-base-content/60 mb-1">Total Passengers</h6>
                             <h3 class="mb-0"><?= $totalPassengers ?></h3>
                         </div>
                     </div>
@@ -263,46 +263,46 @@ require_once INCLUDES_PATH . '/header.php';
     </div>
 
     <!-- Filters -->
-    <div class="card mb-4">
-        <div class="card-body">
-            <form method="GET" class="row g-3">
+    <div class="loka-card mb-4">
+        <div class="p-6">
+            <form method="GET" class="grid grid-cols-12 gap-3">
                 <input type="hidden" name="page" value="completed-trips">
-                <div class="col-md-2">
-                    <label class="form-label">Date Range</label>
-                    <select class="form-select" name="all" onchange="this.form.submit()">
+                <div class="col-span-12 md:col-span-2">
+                    <label class="loka-form-label">Date Range</label>
+                    <select class="loka-form-input" name="all" onchange="this.form.submit()">
                         <option value="1" <?= $showAll === '1' ? 'selected' : '' ?>>All Time</option>
                         <option value="0" <?= $showAll !== '1' ? 'selected' : '' ?>>Custom Range</option>
                     </select>
                 </div>
                 <?php if ($showAll !== '1'): ?>
-                <div class="col-md-2">
-                    <label class="form-label">Start Date</label>
-                    <input type="date" class="form-control" name="start_date" value="<?= $startDate ?? date('Y-m-01') ?>">
+                <div class="col-span-12 md:col-span-2">
+                    <label class="loka-form-label">Start Date</label>
+                    <input type="date" class="loka-form-input" name="start_date" value="<?= $startDate ?? date('Y-m-01') ?>">
                 </div>
-                <div class="col-md-2">
-                    <label class="form-label">End Date</label>
-                    <input type="date" class="form-control" name="end_date" value="<?= $endDate ?? date('Y-m-t') ?>">
+                <div class="col-span-12 md:col-span-2">
+                    <label class="loka-form-label">End Date</label>
+                    <input type="date" class="loka-form-input" name="end_date" value="<?= $endDate ?? date('Y-m-t') ?>">
                 </div>
                 <?php endif; ?>
-                <div class="<?= $showAll === '1' ? 'col-md-3' : 'col-md-2' ?>">
-                    <label class="form-label">Per Page</label>
-                    <select class="form-select" name="per_page" onchange="this.form.submit()">
+                <div class="<?= $showAll === '1' ? 'col-span-12 md:col-span-3' : 'col-span-12 md:col-span-2' ?>">
+                    <label class="loka-form-label">Per Page</label>
+                    <select class="loka-form-input" name="per_page" onchange="this.form.submit()">
                         <option value="10" <?= $limit === 10 ? 'selected' : '' ?>>10</option>
                         <option value="25" <?= $limit === 25 ? 'selected' : '' ?>>25</option>
                         <option value="50" <?= $limit === 50 ? 'selected' : '' ?>>50</option>
                         <option value="100" <?= $limit === 100 ? 'selected' : '' ?>>100</option>
                     </select>
                 </div>
-                <div class="col-md-3">
-                    <label class="form-label">Search</label>
-                    <input type="text" class="form-control" name="search" value="<?= e($search) ?>"
+                <div class="col-span-12 md:col-span-3">
+                    <label class="loka-form-label">Search</label>
+                    <input type="text" class="loka-form-input" name="search" value="<?= e($search) ?>"
                            placeholder="Vehicle, requester, driver, destination...">
                 </div>
-                <div class="col-md-2 d-flex align-items-end gap-2">
-                    <button type="submit" class="btn btn-primary flex-grow-1">
-                        <i class="bi bi-search me-1"></i>Filter
+                <div class="col-span-12 md:col-span-2 flex items-end gap-2">
+                    <button type="submit" class="loka-btn-primary flex-1">
+                        <i class="bi bi-search mr-1"></i>Filter
                     </button>
-                    <a href="<?= APP_URL ?>/?page=completed-trips" class="btn btn-outline-secondary">
+                    <a href="<?= APP_URL ?>/?page=completed-trips" class="loka-btn-secondary">
                         <i class="bi bi-arrow-clockwise"></i>
                     </a>
                 </div>
@@ -311,11 +311,11 @@ require_once INCLUDES_PATH . '/header.php';
     </div>
 
     <!-- Completed Trips Table -->
-    <div class="card">
-        <div class="card-header d-flex justify-content-between align-items-center">
+    <div class="loka-card">
+        <div class="px-6 py-4 border-b border-base-200 flex justify-between items-center">
             <div>
                 <h5 class="mb-0">Completed Trips (<?= $totalCount ?> total)</h5>
-                <small class="text-muted">
+                <small class="text-base-content/60">
                     <?php if ($showAll === '1'): ?>
                         Showing all time • Page <?= $page ?> of <?= $totalPages ?>
                     <?php else: ?>
@@ -323,13 +323,13 @@ require_once INCLUDES_PATH . '/header.php';
                     <?php endif; ?>
                 </small>
             </div>
-            <div class="d-flex align-items-center gap-2">
-                <span class="text-muted small">
+            <div class="flex items-center gap-2">
+                <span class="text-base-content/60 text-sm">
                     <?= ($page - 1) * $limit + 1 ?>-<?= min($page * $limit, $totalCount) ?> of <?= $totalCount ?>
                 </span>
             </div>
         </div>
-        <div class="card-body">
+        <div class="p-6">
             <?php
 function buildSortUrl($column, $currentSort, $currentDir, $baseParams) {
     $newDir = ($currentSort === $column && $currentDir === 'DESC') ? 'ASC' : 'DESC';
@@ -348,22 +348,22 @@ if ($endDate) $baseParams['end_date'] = $endDate;
 ?>
             <?php if (empty($trips)): ?>
                 <div class="text-center py-5">
-                    <i class="bi bi-calendar-x fs-1 text-muted"></i>
-                    <p class="text-muted mt-3">No completed trips found for the selected criteria.</p>
+                    <i class="bi bi-calendar-x text-4xl text-base-content/60"></i>
+                    <p class="text-base-content/60 mt-3">No completed trips found for the selected criteria.</p>
                 </div>
             <?php else: ?>
-                <div class="table-responsive">
-                    <table class="table table-hover align-middle" id="completedTripsTable">
+                <div class="loka-table-responsive">
+                    <table class="loka-table" id="completedTripsTable">
                         <thead>
                             <tr>
-                                <th><a href="<?= buildSortUrl('id', $sort, $sortDir, $baseParams) ?>" class="text-decoration-none text-dark<?= $sort === 'id' ? ' text-primary' : '' ?>" style="cursor:pointer">ID <?= $sort === 'id' ? ($sortDir === 'ASC' ? '<i class="bi bi-arrow-up"></i>' : '<i class="bi bi-arrow-down"></i>') : '' ?></a></th>
-                                <th><a href="<?= buildSortUrl('completed_date', $sort, $sortDir, $baseParams) ?>" class="text-decoration-none text-dark<?= $sort === 'completed_date' ? ' text-primary' : '' ?>" style="cursor:pointer">Completed Date <?= $sort === 'completed_date' ? ($sortDir === 'ASC' ? '<i class="bi bi-arrow-up"></i>' : '<i class="bi bi-arrow-down"></i>') : '' ?></a></th>
-                                <th><a href="<?= buildSortUrl('plate_number', $sort, $sortDir, $baseParams) ?>" class="text-decoration-none text-dark<?= $sort === 'plate_number' ? ' text-primary' : '' ?>" style="cursor:pointer">Vehicle <?= $sort === 'plate_number' ? ($sortDir === 'ASC' ? '<i class="bi bi-arrow-up"></i>' : '<i class="bi bi-arrow-down"></i>') : '' ?></a></th>
-                                <th><a href="<?= buildSortUrl('driver_name', $sort, $sortDir, $baseParams) ?>" class="text-decoration-none text-dark<?= $sort === 'driver_name' ? ' text-primary' : '' ?>" style="cursor:pointer">Driver <?= $sort === 'driver_name' ? ($sortDir === 'ASC' ? '<i class="bi bi-arrow-up"></i>' : '<i class="bi bi-arrow-down"></i>') : '' ?></a></th>
-                                <th><a href="<?= buildSortUrl('requester_name', $sort, $sortDir, $baseParams) ?>" class="text-decoration-none text-dark<?= $sort === 'requester_name' ? ' text-primary' : '' ?>" style="cursor:pointer">Requester <?= $sort === 'requester_name' ? ($sortDir === 'ASC' ? '<i class="bi bi-arrow-up"></i>' : '<i class="bi bi-arrow-down"></i>') : '' ?></a></th>
-                                <th><a href="<?= buildSortUrl('destination', $sort, $sortDir, $baseParams) ?>" class="text-decoration-none text-dark<?= $sort === 'destination' ? ' text-primary' : '' ?>" style="cursor:pointer">Destination <?= $sort === 'destination' ? ($sortDir === 'ASC' ? '<i class="bi bi-arrow-up"></i>' : '<i class="bi bi-arrow-down"></i>') : '' ?></a></th>
-                                <th><a href="<?= buildSortUrl('duration', $sort, $sortDir, $baseParams) ?>" class="text-decoration-none text-dark<?= $sort === 'duration' ? ' text-primary' : '' ?>" style="cursor:pointer">Duration <?= $sort === 'duration' ? ($sortDir === 'ASC' ? '<i class="bi bi-arrow-up"></i>' : '<i class="bi bi-arrow-down"></i>') : '' ?></a></th>
-                                <th><a href="<?= buildSortUrl('mileage', $sort, $sortDir, $baseParams) ?>" class="text-decoration-none text-dark<?= $sort === 'mileage' ? ' text-primary' : '' ?>" style="cursor:pointer">Mileage <?= $sort === 'mileage' ? ($sortDir === 'ASC' ? '<i class="bi bi-arrow-up"></i>' : '<i class="bi bi-arrow-down"></i>') : '' ?></a></th>
+                                <th><a href="<?= buildSortUrl('id', $sort, $sortDir, $baseParams) ?>" class="no-underline text-base-content<?= $sort === 'id' ? ' text-primary' : '' ?>" style="cursor:pointer">ID <?= $sort === 'id' ? ($sortDir === 'ASC' ? '<i class="bi bi-arrow-up"></i>' : '<i class="bi bi-arrow-down"></i>') : '' ?></a></th>
+                                <th><a href="<?= buildSortUrl('completed_date', $sort, $sortDir, $baseParams) ?>" class="no-underline text-base-content<?= $sort === 'completed_date' ? ' text-primary' : '' ?>" style="cursor:pointer">Completed Date <?= $sort === 'completed_date' ? ($sortDir === 'ASC' ? '<i class="bi bi-arrow-up"></i>' : '<i class="bi bi-arrow-down"></i>') : '' ?></a></th>
+                                <th><a href="<?= buildSortUrl('plate_number', $sort, $sortDir, $baseParams) ?>" class="no-underline text-base-content<?= $sort === 'plate_number' ? ' text-primary' : '' ?>" style="cursor:pointer">Vehicle <?= $sort === 'plate_number' ? ($sortDir === 'ASC' ? '<i class="bi bi-arrow-up"></i>' : '<i class="bi bi-arrow-down"></i>') : '' ?></a></th>
+                                <th><a href="<?= buildSortUrl('driver_name', $sort, $sortDir, $baseParams) ?>" class="no-underline text-base-content<?= $sort === 'driver_name' ? ' text-primary' : '' ?>" style="cursor:pointer">Driver <?= $sort === 'driver_name' ? ($sortDir === 'ASC' ? '<i class="bi bi-arrow-up"></i>' : '<i class="bi bi-arrow-down"></i>') : '' ?></a></th>
+                                <th><a href="<?= buildSortUrl('requester_name', $sort, $sortDir, $baseParams) ?>" class="no-underline text-base-content<?= $sort === 'requester_name' ? ' text-primary' : '' ?>" style="cursor:pointer">Requester <?= $sort === 'requester_name' ? ($sortDir === 'ASC' ? '<i class="bi bi-arrow-up"></i>' : '<i class="bi bi-arrow-down"></i>') : '' ?></a></th>
+                                <th><a href="<?= buildSortUrl('destination', $sort, $sortDir, $baseParams) ?>" class="no-underline text-base-content<?= $sort === 'destination' ? ' text-primary' : '' ?>" style="cursor:pointer">Destination <?= $sort === 'destination' ? ($sortDir === 'ASC' ? '<i class="bi bi-arrow-up"></i>' : '<i class="bi bi-arrow-down"></i>') : '' ?></a></th>
+                                <th><a href="<?= buildSortUrl('duration', $sort, $sortDir, $baseParams) ?>" class="no-underline text-base-content<?= $sort === 'duration' ? ' text-primary' : '' ?>" style="cursor:pointer">Duration <?= $sort === 'duration' ? ($sortDir === 'ASC' ? '<i class="bi bi-arrow-up"></i>' : '<i class="bi bi-arrow-down"></i>') : '' ?></a></th>
+                                <th><a href="<?= buildSortUrl('mileage', $sort, $sortDir, $baseParams) ?>" class="no-underline text-base-content<?= $sort === 'mileage' ? ' text-primary' : '' ?>" style="cursor:pointer">Mileage <?= $sort === 'mileage' ? ($sortDir === 'ASC' ? '<i class="bi bi-arrow-up"></i>' : '<i class="bi bi-arrow-down"></i>') : '' ?></a></th>
                                 <th>Passengers</th>
                                 <?php if (in_array($role, [ROLE_MOTORPOOL, ROLE_ADMIN])): ?>
                                 <th>Dispatch</th>
@@ -384,48 +384,48 @@ if ($endDate) $baseParams['end_date'] = $endDate;
                                 <td><strong>#<?= $trip->id ?></strong></td>
                                 <td>
                                     <div class="small">
-                                        <i class="bi bi-calendar3 me-1"></i>
+                                        <i class="bi bi-calendar3 mr-1"></i>
                                         <?= formatDate($trip->actual_arrival_datetime) ?>
                                     </div>
                                 </td>
                                 <td>
                                     <?php if ($trip->plate_number): ?>
-                                        <div class="fw-medium"><?= e($trip->plate_number) ?></div>
-                                        <small class="text-muted"><?= e($trip->make . ' ' . $trip->vehicle_model) ?></small>
+                                        <div class="font-medium"><?= e($trip->plate_number) ?></div>
+                                        <small class="text-base-content/60"><?= e($trip->make . ' ' . $trip->vehicle_model) ?></small>
                                     <?php else: ?>
-                                        <span class="text-muted">-</span>
+                                        <span class="text-base-content/60">-</span>
                                     <?php endif; ?>
                                 </td>
                                 <td>
                                     <?php if ($trip->driver_name): ?>
-                                        <div class="fw-medium"><?= e($trip->driver_name) ?></div>
+                                        <div class="font-medium"><?= e($trip->driver_name) ?></div>
                                         <?php if ($trip->driver_license): ?>
-                                        <small class="text-muted"><?= e($trip->driver_license) ?></small>
+                                        <small class="text-base-content/60"><?= e($trip->driver_license) ?></small>
                                         <?php endif; ?>
                                     <?php else: ?>
-                                        <span class="text-muted">-</span>
+                                        <span class="text-base-content/60">-</span>
                                     <?php endif; ?>
                                 </td>
                                 <td>
-                                    <div class="fw-medium"><?= e($trip->requester_name) ?></div>
-                                    <small class="text-muted"><?= e($trip->department_name) ?></small>
+                                    <div class="font-medium"><?= e($trip->requester_name) ?></div>
+                                    <small class="text-base-content/60"><?= e($trip->department_name) ?></small>
                                 </td>
                                 <td>
                                     <div><?= e($trip->destination) ?></div>
-                                    <small class="text-muted"><?= truncate($trip->purpose, 30) ?></small>
+                                    <small class="text-base-content/60"><?= truncate($trip->purpose, 30) ?></small>
                                 </td>
                                 <td>
                                     <?php if ($trip->actual_duration): ?>
                                         <?= floor($trip->actual_duration / 60) ?>h <?= ($trip->actual_duration % 60) ?>m
                                     <?php else: ?>
-                                        <span class="text-muted">-</span>
+                                        <span class="text-base-content/60">-</span>
                                     <?php endif; ?>
                                 </td>
                                 <td>
                                     <?php if ($trip->mileage_actual): ?>
-                                        <span class="fw-medium text-primary"><?= number_format($trip->mileage_actual) ?> km</span>
+                                        <span class="font-medium text-primary"><?= number_format($trip->mileage_actual) ?> km</span>
                                     <?php else: ?>
-                                        <span class="text-muted">-</span>
+                                        <span class="text-base-content/60">-</span>
                                     <?php endif; ?>
                                 </td>
                                 <td>
@@ -438,26 +438,26 @@ if ($endDate) $baseParams['end_date'] = $endDate;
                                             <i class="bi bi-box-arrow-right text-success"></i>
                                             <?= date('M/d H:i', strtotime($trip->actual_dispatch_datetime)) ?>
                                         </small>
-                                        <br><small class="text-muted">by <?= e($trip->dispatch_guard_name) ?></small>
+                                        <br><small class="text-base-content/60">by <?= e($trip->dispatch_guard_name) ?></small>
                                     <?php else: ?>
-                                        <span class="text-muted">-</span>
+                                        <span class="text-base-content/60">-</span>
                                     <?php endif; ?>
                                 </td>
                                 <td>
                                     <?php if ($trip->actual_arrival_datetime): ?>
                                         <small>
-                                            <i class="bi bi-box-arrow-in-left text-danger"></i>
+                                            <i class="bi bi-box-arrow-in-left text-error"></i>
                                             <?= date('M/d H:i', strtotime($trip->actual_arrival_datetime)) ?>
                                         </small>
-                                        <br><small class="text-muted">by <?= e($trip->arrival_guard_name) ?></small>
+                                        <br><small class="text-base-content/60">by <?= e($trip->arrival_guard_name) ?></small>
                                     <?php else: ?>
-                                        <span class="text-muted">-</span>
+                                        <span class="text-base-content/60">-</span>
                                     <?php endif; ?>
                                 </td>
                                 <?php endif; ?>
                                 <td>
                                     <a href="<?= APP_URL ?>/?page=requests&action=view&id=<?= $trip->id ?>"
-                                       class="btn btn-sm btn-outline-primary">
+                                       class="loka-btn-outline-primary loka-btn-sm">
                                         <i class="bi bi-eye"></i> View
                                     </a>
                                 </td>
@@ -567,7 +567,7 @@ if ($endDate) $baseParams['end_date'] = $endDate;
 
                     <!-- Pagination Info -->
                     <div class="text-center mt-2">
-                        <span class="text-muted small">
+                        <span class="text-base-content/60 text-sm">
                             Showing <?= ($totalCount > 0 ? ($page - 1) * $limit + 1 : 0) ?>-<?= min($page * $limit, $totalCount) ?> of <?= $totalCount ?> trips
                             (Page <?= $page ?> of <?= $totalPages ?>)
                         </span>
@@ -594,13 +594,13 @@ function exportCompletedTrips() {
         if (cells.length > 0) {
             const id = cells[0].textContent.trim();
             const completedDate = cells[1].textContent.trim().replace('Calendar', '').trim();
-            const vehiclePlate = cells[2].querySelector('.fw-medium')?.textContent.trim() || '';
-            const vehicleModel = cells[2].querySelector('.text-muted')?.textContent.trim() || '';
-            const driver = cells[3].querySelector('.fw-medium')?.textContent.trim() || '';
-            const requester = cells[4].querySelector('.fw-medium')?.textContent.trim() || '';
-            const department = cells[4].querySelector('.text-muted')?.textContent.trim() || '';
+            const vehiclePlate = cells[2].querySelector('.font-medium')?.textContent.trim() || '';
+            const vehicleModel = cells[2].querySelector('.text-base-content\\/60')?.textContent.trim() || '';
+            const driver = cells[3].querySelector('.font-medium')?.textContent.trim() || '';
+            const requester = cells[4].querySelector('.font-medium')?.textContent.trim() || '';
+            const department = cells[4].querySelector('.text-base-content\\/60')?.textContent.trim() || '';
             const destination = cells[5].querySelector('div')?.textContent.trim() || '';
-            const purpose = cells[5].querySelector('.text-muted')?.textContent.trim() || '';
+            const purpose = cells[5].querySelector('.text-base-content\\/60')?.textContent.trim() || '';
             const duration = cells[6].textContent.trim();
             const mileage = cells[7].textContent.trim();
             const passengers = cells[8].textContent.trim();

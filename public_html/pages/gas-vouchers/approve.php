@@ -266,12 +266,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 require_once INCLUDES_PATH . '/header.php';
 ?>
 
-<div class="container-fluid py-4">
-    <div class="row justify-content-center">
-        <div class="col-lg-8 col-xl-7">
+<div class="w-full px-4 sm:px-6 lg:px-8">
+    <div class="grid grid-cols-12 gap-4 justify-center">
+        <div class="col-span-12 lg:col-span-8 xl:col-span-7">
 
             <!-- Page Header -->
-            <div class="d-flex justify-content-between align-items-center mb-4">
+            <div class="flex justify-between items-center mb-4">
                 <div>
                     <h4 class="mb-1"><i class="bi bi-check-circle me-2"></i>Process Gas Voucher</h4>
                     <nav aria-label="breadcrumb">
@@ -283,59 +283,59 @@ require_once INCLUDES_PATH . '/header.php';
                         </ol>
                     </nav>
                 </div>
-                <a href="<?= APP_URL ?>/?page=gas-vouchers&action=view&id=<?= $voucher->id ?>" class="btn btn-outline-secondary">
+                <a href="<?= APP_URL ?>/?page=gas-vouchers&action=view&id=<?= $voucher->id ?>" class="loka-btn-secondary">
                     <i class="bi bi-arrow-left me-1"></i>Back
                 </a>
             </div>
 
             <?php if (!empty($errors)): ?>
-            <div class="alert alert-danger">
+            <div class="loka-alert loka-alert-danger">
                 <?php foreach ($errors as $err): ?><div><?= e($err) ?></div><?php endforeach; ?>
             </div>
             <?php endif; ?>
 
             <!-- Voucher Summary Card -->
-            <div class="card mb-4 border-primary">
-                <div class="card-header bg-primary text-white">
+            <div class="loka-loka-card mb-4 border-primary">
+                <div class="px-6 py-4 border-b border-base-200 bg-primary text-white">
                     <h6 class="mb-0"><i class="bi bi-fuel-pump me-2"></i>Voucher Summary</h6>
                 </div>
-                <div class="card-body">
-                    <div class="row g-3">
-                        <div class="col-sm-4">
-                            <small class="text-muted">Voucher No.</small>
+                <div class="p-6">
+                    <div class="grid grid-cols-12 gap-3">
+                        <div class="col-span-12 sm:col-span-4">
+                            <small class="text-base-content/60">Voucher No.</small>
                             <div class="fw-bold fs-5"><?= e($voucher->voucher_no) ?></div>
                         </div>
-                        <div class="col-sm-4">
-                            <small class="text-muted">Request Date</small>
+                        <div class="col-span-12 sm:col-span-4">
+                            <small class="text-base-content/60">Request Date</small>
                             <div><?= e(date('M d, Y', strtotime($voucher->request_date))) ?></div>
                         </div>
-                        <div class="col-sm-4">
-                            <small class="text-muted">Requested By</small>
+                        <div class="col-span-12 sm:col-span-4">
+                            <small class="text-base-content/60">Requested By</small>
                             <div><?= e($voucher->requester_name) ?></div>
                         </div>
-                        <div class="col-sm-4">
-                            <small class="text-muted">Driver / Bearer</small>
+                        <div class="col-span-12 sm:col-span-4">
+                            <small class="text-base-content/60">Driver / Bearer</small>
                             <div class="fw-semibold"><?= e($voucher->driver_name) ?></div>
                         </div>
-                        <div class="col-sm-4">
-                            <small class="text-muted">Vehicle Plate</small>
+                        <div class="col-span-12 sm:col-span-4">
+                            <small class="text-base-content/60">Vehicle Plate</small>
                             <div><span class="badge bg-dark"><?= e($voucher->vehicle_plate) ?></span></div>
                         </div>
-                        <div class="col-sm-4">
-                            <small class="text-muted">Fuel</small>
+                        <div class="col-span-12 sm:col-span-4">
+                            <small class="text-base-content/60">Fuel</small>
                             <div><?= e($voucher->quantity) ?> <?= e($voucher->unit) ?> – <?= e($voucher->fuel_type) ?></div>
                         </div>
-                        <div class="col-sm-6">
-                            <small class="text-muted">Fund Source</small>
+                        <div class="col-span-12 sm:col-span-6">
+                            <small class="text-base-content/60">Fund Source</small>
                             <div><span class="badge bg-secondary"><?= e($voucher->fund_source) ?></span></div>
                         </div>
-                        <div class="col-12">
-                            <small class="text-muted">Purpose</small>
+                        <div class="col-span-12">
+                            <small class="text-base-content/60">Purpose</small>
                             <div><?= e($voucher->purpose) ?></div>
                         </div>
                         <?php if ($voucher->other_items || $voucher->other_qty || $voucher->other_unit): ?>
-                        <div class="col-12">
-                            <small class="text-muted">Other Items</small>
+                        <div class="col-span-12">
+                            <small class="text-base-content/60">Other Items</small>
                             <div>
                                 <?php if ($voucher->other_qty || $voucher->other_unit): ?>
                                     <strong><?= e($voucher->other_qty) ?> <?= e($voucher->other_unit) ?></strong> - 
@@ -350,29 +350,29 @@ require_once INCLUDES_PATH . '/header.php';
 
             <!-- Current Stage Banner -->
             <?php if ($canReview): ?>
-            <div class="alert alert-warning">
+            <div class="loka-alert loka-alert-warning">
                 <i class="bi bi-person-badge me-2"></i>
                 <strong>Step 1 – Review:</strong> As OIC, Motor Pool Unit, you are reviewing this voucher before it goes for final approval.
             </div>
             <?php elseif ($canApprove): ?>
-            <div class="alert alert-info">
+            <div class="loka-alert loka-alert-info">
                 <i class="bi bi-person-check me-2"></i>
                 <strong>Step 2 – Final Approval:</strong> As Chief, Admin. and Finance Division, you are authorizing the bearer to secure fuel/items.
             </div>
             <?php endif; ?>
 
             <!-- Decision Form -->
-            <div class="card">
-                <div class="card-header">
+            <div class="loka-card">
+                <div class="px-6 py-4 border-b border-base-200">
                     <h6 class="mb-0"><i class="bi bi-clipboard-check me-2"></i>Your Decision</h6>
                 </div>
-                <div class="card-body">
-                    <div class="mb-4 d-flex justify-content-between align-items-center bg-light p-3 rounded border">
+                <div class="p-6">
+                    <div class="mb-4 flex items-center justify-between bg-base-200 p-3 rounded border">
                         <div>
                             <strong>Need to change something?</strong>
-                            <div class="text-muted small">You can correct the fund source, quantity, or purpose before approving.</div>
+                            <div class="text-base-content/60 small">You can correct the fund source, quantity, or purpose before approving.</div>
                         </div>
-                        <a href="<?= APP_URL ?>/?page=gas-vouchers&action=edit&id=<?= $voucher->id ?>" class="btn btn-outline-primary btn-sm">
+                        <a href="<?= APP_URL ?>/?page=gas-vouchers&action=edit&id=<?= $voucher->id ?>" class="loka-btn-outline-primary loka-btn-sm">
                             <i class="bi bi-pencil me-1"></i>Edit Voucher Fields
                         </a>
                     </div>
@@ -382,8 +382,8 @@ require_once INCLUDES_PATH . '/header.php';
 
                         <?php if ($canReview): ?>
                         <div class="mb-4">
-                            <label class="form-label fw-semibold">Reviewed By (OIC, Motor Pool Unit) <span class="text-danger">*</span></label>
-                            <select name="reviewed_by" class="form-select" required>
+                            <label class="loka-form-label fw-semibold">Reviewed By (OIC, Motor Pool Unit) <span class="text-error">*</span></label>
+                            <select name="reviewed_by" class="loka-form-input" required>
                                 <option value="">-- Select Reviewer --</option>
                                 <?php foreach ($motorpoolHeads as $mp): ?>
                                 <option value="<?= $mp->id ?>" <?= 
@@ -397,8 +397,8 @@ require_once INCLUDES_PATH . '/header.php';
                         </div>
                         <?php elseif ($canApprove): ?>
                         <div class="mb-4">
-                            <label class="form-label fw-semibold">Approved By (Chief, Admin. and Finance) <span class="text-danger">*</span></label>
-                            <select name="approved_by" class="form-select" required>
+                            <label class="loka-form-label fw-semibold">Approved By (Chief, Admin. and Finance) <span class="text-error">*</span></label>
+                            <select name="approved_by" class="loka-form-input" required>
                                 <option value="">-- Select Approver --</option>
                                 <?php foreach ($chiefFinanceUsers as $cf): ?>
                                 <option value="<?= $cf->id ?>" <?= 
@@ -413,28 +413,28 @@ require_once INCLUDES_PATH . '/header.php';
                         <?php endif; ?>
 
                         <div class="mb-4">
-                            <label class="form-label fw-semibold">Notes / Comments</label>
-                            <textarea name="notes" class="form-control" rows="3"
+                            <label class="loka-form-label fw-semibold">Notes / Comments</label>
+                            <textarea name="notes" class="loka-form-input" rows="3"
                                       placeholder="Optional notes. Required if rejecting." maxlength="500"></textarea>
                         </div>
 
-                        <div class="d-flex gap-3 flex-wrap">
+                        <div class="flex gap-3 flex-wrap">
                             <?php if ($canReview): ?>
                             <button type="submit" name="decision" value="review_approve"
-                                    class="btn btn-success flex-fill"
+                                    class="bg-success text-success-content hover:bg-success/90 px-4 py-2 text-sm font-medium rounded-xl inline-flex items-center gap-2 transition-colors flex-fill"
                                     onclick="return confirm('Approve this voucher for final review?')">
                                 <i class="bi bi-check-circle me-1"></i>Approve for Final Review
                             </button>
                             <?php elseif ($canApprove): ?>
                             <button type="submit" name="decision" value="final_approve"
-                                    class="btn btn-success flex-fill"
+                                    class="bg-success text-success-content hover:bg-success/90 px-4 py-2 text-sm font-medium rounded-xl inline-flex items-center gap-2 transition-colors flex-fill"
                                     onclick="return confirm('Authorize this gas voucher?')">
                                 <i class="bi bi-check2-all me-1"></i>Authorize Voucher
                             </button>
                             <?php endif; ?>
 
                             <button type="submit" name="decision" value="reject"
-                                    class="btn btn-danger flex-fill"
+                                    class="bg-error text-error-content hover:bg-error/90 px-4 py-2 text-sm font-medium rounded-xl inline-flex items-center gap-2 transition-colors flex-fill"
                                     onclick="return confirm('Are you sure you want to reject this voucher?')">
                                 <i class="bi bi-x-circle me-1"></i>Reject
                             </button>

@@ -32,15 +32,15 @@ require_once INCLUDES_PATH . '/header.php';
                     </h2>
                     <div class="join">
                         <a href="<?= APP_URL ?>/?page=notifications&view=inbox"
-                           class="btn btn-sm join-item <?= $view === 'inbox' ? 'btn-primary' : 'btn-outline btn-primary' ?>">
+                           class="loka-btn-primary loka-btn-sm join-item <?= $view === 'inbox' ? '' : 'loka-btn-outline-primary' ?>">
                             <i class="bi bi-inbox mr-1"></i>Inbox
                         </a>
                         <a href="<?= APP_URL ?>/?page=notifications&view=all"
-                           class="btn btn-sm join-item <?= $view === 'all' ? 'btn-primary' : 'btn-outline btn-primary' ?>">
+                           class="loka-btn-primary loka-btn-sm join-item <?= $view === 'all' ? '' : 'loka-btn-outline-primary' ?>">
                             <i class="bi bi-list-check mr-1"></i>All
                         </a>
                         <a href="<?= APP_URL ?>/?page=notifications&view=archive"
-                           class="btn btn-sm join-item <?= $view === 'archive' ? 'btn-primary' : 'btn-outline btn-primary' ?>">
+                           class="loka-btn-primary loka-btn-sm join-item <?= $view === 'archive' ? '' : 'loka-btn-outline-primary' ?>">
                             <i class="bi bi-archive mr-1"></i>Archive
                         </a>
                     </div>
@@ -50,7 +50,7 @@ require_once INCLUDES_PATH . '/header.php';
             <div>
                 <?php if (empty($notifications)): ?>
                 <div class="py-12">
-                    <div class="text-center text-muted">
+                    <div class="text-center text-base-content/60">
                         <i class="bi bi-bell-slash text-4xl mb-3 block"></i>
                         <h5 class="text-base-content/60">No notifications in <?= ucfirst($view) ?></h5>
                         <p class="text-sm text-base-content/40">You're all caught up!</p>
@@ -88,7 +88,7 @@ require_once INCLUDES_PATH . '/header.php';
 
                         <!-- Per-notification dropdown (DaisyUI) -->
                         <div class="ml-3 dropdown dropdown-end">
-                            <div tabindex="0" role="button" class="btn btn-sm btn-ghost btn-square">
+                            <div tabindex="0" role="button" class="loka-btn-ghost loka-btn-sm">
                                 <i class="bi bi-three-dots-vertical"></i>
                             </div>
                             <ul tabindex="0" class="dropdown-content menu bg-base-100 rounded-box z-[1] w-44 p-2 shadow-lg">

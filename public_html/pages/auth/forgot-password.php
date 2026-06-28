@@ -48,7 +48,8 @@ $pageTitle = 'Forgot Password';
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= e($pageTitle) ?> - <?= APP_NAME ?></title>
-    <!-- Bootstrap Icons -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@3.9.0/dist/full.css" rel="stylesheet" type="text/css" />
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.2/font/bootstrap-icons.css" rel="stylesheet">
     <!-- Custom CSS -->
     <style>
@@ -451,8 +452,8 @@ $pageTitle = 'Forgot Password';
                     </div>
 
                     <?php if (!empty($errors)): ?>
-                    <div class="alert alert-modern alert-danger-modern">
-                        <div class="d-flex align-items-center mb-2">
+                    <div class="loka-alert loka-alert-danger">
+                        <div class="flex items-center mb-2">
                             <i class="bi bi-exclamation-triangle-fill me-2"></i>
                             <strong>Error</strong>
                         </div>
@@ -473,17 +474,17 @@ $pageTitle = 'Forgot Password';
                         <?= csrfField() ?>
 
                         <!-- Email -->
-                        <div class="form-group">
-                            <label for="email" class="form-label">Email Address</label>
+                        <div class="mb-4">
+                            <label for="email" class="loka-form-label">Email Address</label>
                             <div style="position: relative;">
                                 <i class="bi bi-envelope input-icon"></i>
-                                <input type="email" 
-                                       class="form-control" 
-                                       id="email" 
+                                <input type="email"
+                                       class="loka-form-input"
+                                       id="email"
                                        name="email"
                                        value="<?= e(post('email', '')) ?>"
                                        placeholder="Enter your email"
-                                       required 
+                                       required
                                        autofocus>
                             </div>
                         </div>

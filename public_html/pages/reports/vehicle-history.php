@@ -32,7 +32,7 @@ if ($vehicleId) {
          WHERE v.id = ? AND v.deleted_at IS NULL",
         [$vehicleId]
     );
-    
+
     $trips = db()->fetchAll(
         "SELECT r.id, r.start_datetime, r.end_datetime, r.purpose, r.destination,
                 r.status, r.passenger_count, r.actual_dispatch_datetime, r.actual_arrival_datetime,
@@ -45,7 +45,7 @@ if ($vehicleId) {
          LEFT JOIN departments d ON r.department_id = d.id
          LEFT JOIN drivers dr ON r.driver_id = dr.id
          LEFT JOIN users dr_user ON dr.user_id = dr_user.id
-         WHERE r.vehicle_id = ? 
+         WHERE r.vehicle_id = ?
          AND r.start_datetime BETWEEN ? AND ?
          AND r.deleted_at IS NULL
          ORDER BY r.start_datetime DESC",
@@ -72,7 +72,7 @@ if (!empty($trips)) {
 require_once INCLUDES_PATH . '/header.php';
 ?>
 
-<div class="container-fluid py-4">
+<div class="w-full px-4 py-4 sm:px-6 lg:px-8">
     <div class="mb-4">
         <h4 class="mb-1">Vehicle History Report</h4>
         <nav aria-label="breadcrumb">
@@ -87,12 +87,12 @@ require_once INCLUDES_PATH . '/header.php';
     <!-- Filters -->
     <div class="card mb-4">
         <div class="card-body">
-            <form method="GET" class="row g-3 align-items-end">
+            <form method="GET" class="grid grid-cols-12 gap-3 items-end">
                 <input type="hidden" name="page" value="reports">
                 <input type="hidden" name="action" value="vehicle-history">
-                <div class="col-12 col-md-3">
-                    <label class="form-label">Vehicle</label>
-                    <select class="form-select" name="vehicle_id" required>
+                <div class="col-span-12 md:col-span-3">
+                    <label class="loka-form-label">Vehicle</label>
+                    <select class="loka-form-input" name="vehicle_id" required>
                         <option value="">Select Vehicle...</option>
                         <?php foreach ($vehicles as $v): ?>
                         <option value="<?= $v->id ?>" <?= $vehicleId == $v->id ? 'selected' : '' ?>>
@@ -101,26 +101,26 @@ require_once INCLUDES_PATH . '/header.php';
                         <?php endforeach; ?>
                     </select>
                 </div>
-                <div class="col-6 col-md-2">
-                    <label class="form-label">Start Date</label>
-                    <input type="date" class="form-control" name="start_date" value="<?= e($startDate) ?>">
+                <div class="col-span-6 md:col-span-2">
+                    <label class="loka-form-label">Start Date</label>
+                    <input type="date" class="loka-form-input" name="start_date" value="<?= e($startDate) ?>">
                 </div>
-                <div class="col-6 col-md-2">
-                    <label class="form-label">End Date</label>
-                    <input type="date" class="form-control" name="end_date" value="<?= e($endDate) ?>">
+                <div class="col-span-6 md:col-span-2">
+                    <label class="loka-form-label">End Date</label>
+                    <input type="date" class="loka-form-input" name="end_date" value="<?= e($endDate) ?>">
                 </div>
-                <div class="col-12 col-md-2">
-                    <button type="submit" class="btn btn-primary">
+                <div class="col-span-12 md:col-span-2">
+                    <button type="submit" class="loka-btn-primary">
                         <i class="bi bi-search me-1"></i>Generate
                     </button>
                 </div>
                 <?php if ($vehicleId && !empty($trips)): ?>
-                <div class="col-12 col-md-3 text-end">
+                <div class="col-span-12 md:col-span-3 text-right">
                     <div class="btn-group">
-                        <a href="<?= APP_URL ?>/?page=reports&action=export-vehicle-csv&vehicle_id=<?= $vehicleId ?>&start_date=<?= $startDate ?>&end_date=<?= $endDate ?>" class="btn btn-outline-primary">
+                        <a href="<?= APP_URL ?>/?page=reports&action=export-vehicle-csv&vehicle_id=<?= $vehicleId ?>&start_date=<?= $startDate ?>&end_date=<?= $endDate ?>" class="loka-btn-outline-primary">
                             <i class="bi bi-file-earmark-csv me-1"></i>CSV
                         </a>
-                        <a href="<?= APP_URL ?>/?page=reports&action=export-vehicle-history&vehicle_id=<?= $vehicleId ?>&start_date=<?= $startDate ?>&end_date=<?= $endDate ?>" class="btn btn-outline-danger">
+                        <a href="<?= APP_URL ?>/?page=reports&action=export-vehicle-history&vehicle_id=<?= $vehicleId ?>&start_date=<?= $startDate ?>&end_date=<?= $endDate ?>" class="loka-btn-outline-error">
                             <i class="bi bi-file-earmark-pdf me-1"></i>PDF
                         </a>
                     </div>
@@ -132,13 +132,13 @@ require_once INCLUDES_PATH . '/header.php';
 
     <?php if ($vehicleInfo): ?>
     <!-- Vehicle Info -->
-    <div class="row g-4 mb-4">
-        <div class="col-md-4">
+    <div class="grid grid-cols-12 gap-4 mb-4">
+        <div class="col-span-12 md:col-span-4">
             <div class="card h-100">
                 <div class="card-body">
-                    <h6 class="text-muted mb-3">Vehicle Information</h6>
+                    <h6 class="text-base-content/60 mb-3">Vehicle Information</h6>
                     <h4 class="mb-1"><?= e($vehicleInfo->plate_number) ?></h4>
-                    <p class="text-muted mb-2"><?= e($vehicleInfo->make . ' ' . $vehicleInfo->model) ?> (<?= e($vehicleInfo->year) ?>)</p>
+                    <p class="text-base-content/60 mb-2"><?= e($vehicleInfo->make . ' ' . $vehicleInfo->model) ?> (<?= e($vehicleInfo->year) ?>)</p>
                     <span class="badge bg-primary"><?= e($vehicleInfo->type_name) ?></span>
                     <span class="badge bg-<?= $vehicleInfo->status === 'available' ? 'success' : ($vehicleInfo->status === 'in_use' ? 'warning' : 'secondary') ?>">
                         <?= ucfirst($vehicleInfo->status) ?>
@@ -146,37 +146,37 @@ require_once INCLUDES_PATH . '/header.php';
                 </div>
             </div>
         </div>
-        <div class="col-md-8">
-            <div class="row g-3">
-                <div class="col-md-3">
+        <div class="col-span-12 md:col-span-8">
+            <div class="grid grid-cols-12 gap-3">
+                <div class="col-span-6 md:col-span-3">
                     <div class="card bg-primary bg-opacity-10 h-100">
                         <div class="card-body text-center">
                             <h3 class="text-primary mb-0"><?= $stats->total_trips ?></h3>
-                            <small class="text-muted">Total Trips</small>
+                            <small class="text-base-content/60">Total Trips</small>
                         </div>
                     </div>
                 </div>
-                <div class="col-md-3">
+                <div class="col-span-6 md:col-span-3">
                     <div class="card bg-success bg-opacity-10 h-100">
                         <div class="card-body text-center">
                             <h3 class="text-success mb-0"><?= $stats->completed_trips ?></h3>
-                            <small class="text-muted">Completed</small>
+                            <small class="text-base-content/60">Completed</small>
                         </div>
                     </div>
                 </div>
-                <div class="col-md-3">
+                <div class="col-span-6 md:col-span-3">
                     <div class="card bg-info bg-opacity-10 h-100">
                         <div class="card-body text-center">
                             <h3 class="text-info mb-0"><?= number_format($stats->total_hours, 1) ?>h</h3>
-                            <small class="text-muted">Total Hours</small>
+                            <small class="text-base-content/60">Total Hours</small>
                         </div>
                     </div>
                 </div>
-                <div class="col-md-3">
+                <div class="col-span-6 md:col-span-3">
                     <div class="card bg-warning bg-opacity-10 h-100">
                         <div class="card-body text-center">
                             <h3 class="text-warning mb-0"><?= number_format($vehicleInfo->mileage ?? 0) ?></h3>
-                            <small class="text-muted">Current Mileage (km)</small>
+                            <small class="text-base-content/60">Current Mileage (km)</small>
                         </div>
                     </div>
                 </div>
@@ -191,12 +191,12 @@ require_once INCLUDES_PATH . '/header.php';
         </div>
         <div class="card-body">
             <?php if (empty($trips)): ?>
-            <div class="text-center py-4 text-muted">
+            <div class="text-center py-4 text-base-content/60">
                 <i class="bi bi-clipboard-x fs-1"></i>
                 <p class="mt-2">No trips found for this vehicle in the selected period.</p>
             </div>
             <?php else: ?>
-            <div class="table-responsive">
+            <div class="loka-table-responsive">
                 <table class="table table-hover">
                     <thead>
                         <tr>
@@ -220,23 +220,23 @@ require_once INCLUDES_PATH . '/header.php';
                             </td>
                             <td>
                                 <?= formatDateTime($trip->start_datetime) ?>
-                                <small class="text-muted d-block">to <?= formatDateTime($trip->end_datetime) ?></small>
+                                <small class="text-base-content/60 block">to <?= formatDateTime($trip->end_datetime) ?></small>
                             </td>
                             <td><?= e($trip->destination) ?></td>
                             <td><?= e(strlen($trip->purpose) > 40 ? substr($trip->purpose, 0, 40) . '...' : $trip->purpose) ?></td>
                             <td>
                                 <?= e($trip->requester_name) ?>
-                                <small class="text-muted d-block"><?= e($trip->department_name) ?></small>
+                                <small class="text-base-content/60 block"><?= e($trip->department_name) ?></small>
                             </td>
                             <td><?= e($trip->driver_name ?: '-') ?></td>
                             <td><?= requestStatusBadge($trip->status) ?></td>
                             <td>
                                 <?php if ($trip->actual_duration): ?>
                                     <?= floor($trip->actual_duration / 60) ?>h <?= $trip->actual_duration % 60 ?>m
-                                    <small class="text-success d-block">Actual</small>
+                                    <small class="text-success block">Actual</small>
                                 <?php else: ?>
                                     <?= floor($trip->planned_duration / 60) ?>h <?= $trip->planned_duration % 60 ?>m
-                                    <small class="text-muted d-block">Planned</small>
+                                    <small class="text-base-content/60 block">Planned</small>
                                 <?php endif; ?>
                             </td>
                         </tr>
@@ -249,7 +249,7 @@ require_once INCLUDES_PATH . '/header.php';
     </div>
     <?php else: ?>
     <div class="card">
-        <div class="card-body text-center py-5 text-muted">
+        <div class="card-body text-center py-5 text-base-content/60">
             <i class="bi bi-car-front fs-1"></i>
             <p class="mt-2">Select a vehicle to view its trip history.</p>
         </div>

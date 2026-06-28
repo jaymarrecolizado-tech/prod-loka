@@ -88,33 +88,33 @@ $pageTitle = 'Email Queue & Diagnostics';
 require_once INCLUDES_PATH . '/header.php';
 ?>
 
-<div class="container-fluid py-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
+<div class="w-full px-4 py-4 sm:px-6 lg:px-8">
+    <div class="flex justify-between items-center mb-4">
         <h1 class="h3 mb-0">
             <i class="bi bi-envelope-paper me-2"></i>Email Queue &amp; Diagnostics
         </h1>
-        <a href="<?= APP_URL ?>/?page=settings" class="btn btn-outline-secondary">
+        <a href="<?= APP_URL ?>/?page=settings" class="loka-btn-secondary">
             <i class="bi bi-arrow-left me-1"></i>Back to Settings
         </a>
     </div>
 
     <?php foreach ($messages as $msg): ?>
-    <div class="alert alert-success alert-dismissible">
+    <div class="loka-alert loka-alert-success">
         <?= $msg ?>
         <button type="button" class="btn-close" onclick="this.closest('.alert').remove()"></button>
     </div>
     <?php endforeach; ?>
 
     <?php foreach ($errors as $err): ?>
-    <div class="alert alert-danger alert-dismissible">
+    <div class="loka-alert loka-alert-danger">
         <?= $err ?>
         <button type="button" class="btn-close" onclick="this.closest('.alert').remove()"></button>
     </div>
     <?php endforeach; ?>
 
     <!-- ── SMTP Configuration Status ───────────────────────────────────── -->
-    <div class="card mb-4 border-<?= $smtpConfigured ? 'success' : 'danger' ?>">
-        <div class="card-header bg-<?= $smtpConfigured ? 'success' : 'danger' ?> text-white d-flex justify-content-between">
+    <div class="loka-card mb-4 border-<?= $smtpConfigured ? 'success' : 'danger' ?>">
+        <div class="px-6 py-4 border-b border-base-200 bg-<?= $smtpConfigured ? 'success' : 'danger' ?> text-white flex justify-between">
             <h5 class="mb-0">
                 <i class="bi bi-gear me-1"></i>SMTP Configuration Status
             </h5>
@@ -122,9 +122,9 @@ require_once INCLUDES_PATH . '/header.php';
                 <?= $smtpConfigured ? '✅ Configured' : '❌ Not Configured' ?>
             </span>
         </div>
-        <div class="card-body">
+        <div class="p-6">
             <?php if (!$smtpConfigured): ?>
-            <div class="alert alert-warning">
+            <div class="loka-alert loka-alert-warning">
                 <strong>⚠️ Email is not configured.</strong> Edit your <code>.env</code> file and set:
                 <ul class="mb-0 mt-2">
                     <li><code>SMTP_HOST</code> — e.g. <code>smtp.gmail.com</code></li>
@@ -160,50 +160,50 @@ require_once INCLUDES_PATH . '/header.php';
         </div>
     </div>
 
-    <div class="row mb-4">
+    <div class="grid grid-cols-12 gap-4 mb-4">
         <!-- ── Send Test Email ─────────────────────────────────────────── -->
-        <div class="col-md-6">
-            <div class="card h-100">
-                <div class="card-header"><h5 class="mb-0"><i class="bi bi-send me-1"></i>Send Test Email</h5></div>
-                <div class="card-body">
+        <div class="col-span-12 md:col-span-6">
+            <div class="loka-card h-100">
+                <div class="px-6 py-4 border-b border-base-200"><h5 class="mb-0"><i class="bi bi-send me-1"></i>Send Test Email</h5></div>
+                <div class="p-6">
                     <?php if ($smtpConfigured): ?>
                     <form method="post">
                         <?= csrfField() ?>
-                        <div class="input-group">
-                            <input type="email" name="test_email" class="form-control"
+                        <div class="flex items-center gap-2">
+                            <input type="email" name="test_email" class="loka-form-input"
                                    placeholder="recipient@example.com" required
                                    value="<?= e(postSafe('test_email')) ?>">
-                            <button type="submit" name="action" value="send_test" class="btn btn-primary">
+                            <button type="submit" name="action" value="send_test" class="loka-btn-primary">
                                 <i class="bi bi-send me-1"></i>Send Test
                             </button>
                         </div>
-                        <small class="text-muted">Bypasses queue — sends directly via SMTP to verify connectivity.</small>
+                        <small class="text-base-content/60">Bypasses queue — sends directly via SMTP to verify connectivity.</small>
                     </form>
                     <?php else: ?>
-                    <div class="text-muted">Configure SMTP above before sending test emails.</div>
+                    <div class="text-base-content/60">Configure SMTP above before sending test emails.</div>
                     <?php endif; ?>
                 </div>
             </div>
         </div>
 
         <!-- ── Queue Actions ───────────────────────────────────────────── -->
-        <div class="col-md-6">
-            <div class="card h-100">
-                <div class="card-header"><h5 class="mb-0"><i class="bi bi-play-circle me-1"></i>Queue Actions</h5></div>
-                <div class="card-body">
-                    <form method="post" class="d-flex flex-wrap gap-2">
+        <div class="col-span-12 md:col-span-6">
+            <div class="loka-card h-100">
+                <div class="px-6 py-4 border-b border-base-200"><h5 class="mb-0"><i class="bi bi-play-circle me-1"></i>Queue Actions</h5></div>
+                <div class="p-6">
+                    <form method="post" class="flex flex-wrap gap-2">
                         <?= csrfField() ?>
-                        <button type="submit" name="action" value="process" class="btn btn-primary" <?= !$smtpConfigured ? 'disabled' : '' ?>>
+                        <button type="submit" name="action" value="process" class="loka-btn-primary" <?= !$smtpConfigured ? 'disabled' : '' ?>>
                             <i class="bi bi-play-fill me-1"></i>Process Queue Now
                         </button>
-                        <button type="submit" name="action" value="retry_failed" class="btn btn-warning">
+                        <button type="submit" name="action" value="retry_failed" class="bg-warning text-warning-content hover:bg-warning/90 px-4 py-2 text-sm font-medium rounded-xl inline-flex items-center gap-2 transition-colors">
                             <i class="bi bi-arrow-repeat me-1"></i>Retry Failed
                         </button>
-                        <button type="submit" name="action" value="cleanup" class="btn btn-outline-secondary">
+                        <button type="submit" name="action" value="cleanup" class="loka-btn-secondary">
                             <i class="bi bi-trash me-1"></i>Cleanup Old
                         </button>
                     </form>
-                    <small class="text-muted d-block mt-2">
+                    <small class="text-base-content/60 block mt-2">
                         On <strong>WAMP/local dev</strong>: click "Process Queue Now" manually after submitting requests.
                         On <strong>production</strong>: a cron job runs every 2 minutes automatically.
                     </small>
@@ -213,27 +213,27 @@ require_once INCLUDES_PATH . '/header.php';
     </div>
 
     <!-- ── Stats Cards ─────────────────────────────────────────────────── -->
-    <div class="row mb-4">
-        <div class="col-6 col-md-3">
-            <div class="card bg-warning text-dark text-center p-3">
+    <div class="grid grid-cols-12 gap-4 mb-4">
+        <div class="col-span-6 md:col-span-3">
+            <div class="loka-card bg-warning text-dark text-center p-3">
                 <h2 class="mb-0"><?= $stats['pending'] ?></h2>
                 <small>Pending</small>
             </div>
         </div>
-        <div class="col-6 col-md-3">
-            <div class="card bg-info text-white text-center p-3">
+        <div class="col-span-6 md:col-span-3">
+            <div class="loka-card bg-info text-white text-center p-3">
                 <h2 class="mb-0"><?= $stats['processing'] ?></h2>
                 <small>Processing</small>
             </div>
         </div>
-        <div class="col-6 col-md-3">
-            <div class="card bg-success text-white text-center p-3">
+        <div class="col-span-6 md:col-span-3">
+            <div class="loka-card bg-success text-white text-center p-3">
                 <h2 class="mb-0"><?= $stats['sent'] ?></h2>
                 <small>Sent</small>
             </div>
         </div>
-        <div class="col-6 col-md-3">
-            <div class="card bg-danger text-white text-center p-3">
+        <div class="col-span-6 md:col-span-3">
+            <div class="loka-card bg-danger text-white text-center p-3">
                 <h2 class="mb-0"><?= $stats['failed'] ?></h2>
                 <small>Failed</small>
             </div>
@@ -241,15 +241,15 @@ require_once INCLUDES_PATH . '/header.php';
     </div>
 
     <!-- ── Recent Queue Items ───────────────────────────────────────────── -->
-    <div class="card">
-        <div class="card-header d-flex justify-content-between">
+    <div class="loka-card">
+        <div class="px-6 py-4 border-b border-base-200 flex justify-between">
             <h5 class="mb-0">Recent Queue (Last 30)</h5>
-            <button class="btn btn-sm btn-outline-secondary" onclick="location.reload()">
+            <button class="loka-btn-sm loka-btn-secondary" onclick="location.reload()">
                 <i class="bi bi-arrow-clockwise"></i> Refresh
             </button>
         </div>
-        <div class="card-body p-0">
-            <div class="table-responsive">
+        <div class="p-0">
+            <div class="loka-table-responsive">
                 <table class="table table-hover table-sm mb-0">
                     <thead class="table-light">
                         <tr>
@@ -289,7 +289,7 @@ require_once INCLUDES_PATH . '/header.php';
                         <?php endif; ?>
                         <?php endforeach; ?>
                         <?php if (empty($recentEmails)): ?>
-                        <tr><td colspan="8" class="text-center text-muted py-4">No emails in queue</td></tr>
+                        <tr><td colspan="8" class="text-center text-base-content/60 py-4">No emails in queue</td></tr>
                         <?php endif; ?>
                     </tbody>
                 </table>
@@ -298,9 +298,9 @@ require_once INCLUDES_PATH . '/header.php';
     </div>
 
     <!-- ── Gmail App Password Guide ─────────────────────────────────────── -->
-    <div class="card mt-4">
-        <div class="card-header"><h5 class="mb-0"><i class="bi bi-question-circle me-1"></i>Gmail Setup Guide</h5></div>
-        <div class="card-body">
+    <div class="loka-card mt-4">
+        <div class="px-6 py-4 border-b border-base-200"><h5 class="mb-0"><i class="bi bi-question-circle me-1"></i>Gmail Setup Guide</h5></div>
+        <div class="p-6">
             <p>To use Gmail as your SMTP server (recommended for testing):</p>
             <ol>
                 <li>Go to <a href="https://myaccount.google.com/security" target="_blank">Google Account Security</a></li>
@@ -310,7 +310,7 @@ require_once INCLUDES_PATH . '/header.php';
                 <li>Copy the 16-character password (no spaces) and paste it into <code>.env</code> as <code>SMTP_PASSWORD</code></li>
             </ol>
             <p>Your <code>.env</code> should look like:</p>
-            <pre class="bg-light p-3 rounded"><code>SMTP_HOST=smtp.gmail.com
+            <pre class="bg-base-200 p-3 rounded"><code>SMTP_HOST=smtp.gmail.com
 SMTP_PORT=587
 SMTP_ENCRYPTION=tls
 SMTP_USER=your.email@gmail.com
@@ -328,7 +328,7 @@ MAIL_ENABLED=true</code></pre>
                 <li>Arguments: <code><?= e(realpath(__DIR__ . '/../../cron/process_queue.php')) ?></code></li>
             </ol>
             <h6>Linux/Production Cron:</h6>
-            <pre class="bg-light p-2 rounded"><code>*/2 * * * * <?= e(PHP_BINARY) ?> <?= e(realpath(__DIR__ . '/../../cron/process_queue.php')) ?> >> /var/log/loka_email.log 2>&1</code></pre>
+            <pre class="bg-base-200 p-2 rounded"><code>*/2 * * * * <?= e(PHP_BINARY) ?> <?= e(realpath(__DIR__ . '/../../cron/process_queue.php')) ?> >> /var/log/loka_email.log 2>&1</code></pre>
         </div>
     </div>
 </div>

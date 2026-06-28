@@ -80,10 +80,7 @@ export default [
         URL: 'readonly',
         FormData: 'readonly',
         // Legacy globals (loaded via script tags)
-        $: 'readonly',
-        jQuery: 'readonly',
         flatpickr: 'readonly',
-        bootstrap: 'readonly',
         // Custom globals
         LOKA: 'readonly',
         API_BASE: 'readonly',

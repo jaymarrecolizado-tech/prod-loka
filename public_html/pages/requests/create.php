@@ -449,14 +449,14 @@ require_once INCLUDES_PATH . '/header.php';
                                                 placeholder="Enter location address..."
                                                 <?= $index === 0 ? 'required' : '' ?>>
                                          <?php if ($index > 0): ?>
-                                         <button type="button" class="btn btn-outline btn-error btn-sm remove-destination" title="Remove location">
+                                         <button type="button" class="loka-btn-outline-error loka-btn-sm remove-destination" title="Remove location">
                                              <i class="bi bi-trash"></i>
                                          </button>
                                          <?php endif; ?>
                                      </div>
                                      <?php endforeach; ?>
                                  </div>
-                                 <button type="button" class="btn btn-outline btn-primary btn-sm mt-2" id="addDestinationBtn">
+                                 <button type="button" class="loka-btn-outline-primary loka-btn-sm mt-2" id="addDestinationBtn">
                                      <i class="bi bi-plus-circle mr-1"></i>Add Another Location
                                  </button>
                                  <input type="hidden" name="destination" id="destinationCombined">
@@ -469,11 +469,11 @@ require_once INCLUDES_PATH . '/header.php';
                                         <div>
                                             <h6 class="mb-0 font-semibold"><i class="bi bi-people-fill mr-2"></i>Passengers</h6>
                                             <div id="passengerCountText" class="mt-1">
-                                                <span class="badge badge-primary">1</span>
+                                                 <span class="loka-badge loka-badge-primary">1</span>
                                                 <span class="ml-1 text-sm text-base-content/60">Passenger (Requester Included)</span>
                                             </div>
                                         </div>
-                                        <button type="button" class="btn btn-primary btn-sm" onclick="document.getElementById('passengerModal').showModal()">
+                                         <button type="button" class="loka-btn-primary loka-btn-sm" onclick="passengerManager.openModal()">
                                             <i class="bi bi-person-plus mr-1"></i>Add / Manage
                                         </button>
                                     </div>
@@ -539,7 +539,7 @@ require_once INCLUDES_PATH . '/header.php';
                                 <h6 class="font-semibold"><i class="bi bi-diagram-3 mr-2"></i>Approval Workflow</h6>
                                 <?php if (!empty($savedWorkflows)): ?>
                                 <div class="dropdown dropdown-end">
-                                    <div tabindex="0" role="button" class="btn btn-outline btn-primary btn-sm">
+                                    <div tabindex="0" role="button" class="loka-btn-outline-primary loka-btn-sm">
                                         <i class="bi bi-bookmark mr-1"></i>Load Saved
                                     </div>
                                     <ul tabindex="0" class="dropdown-content menu z-[1] w-64 rounded-xl border border-base-200 bg-base-100 p-1 shadow-lg">
@@ -554,7 +554,7 @@ require_once INCLUDES_PATH . '/header.php';
                                                 <span>
                                                     <?= e($wf->name) ?>
                                                     <?php if ($wf->is_default): ?>
-                                                    <span class="badge badge-success badge-sm ml-1">Default</span>
+                                                     <span class="loka-badge loka-badge-success badge-sm ml-1">Default</span>
                                                     <?php endif; ?>
                                                 </span>
                                             </a>
@@ -623,7 +623,7 @@ require_once INCLUDES_PATH . '/header.php';
                                             </label>
                                         </div>
                                         <div class="md:col-span-2">
-                                            <button type="button" class="btn btn-outline btn-success btn-sm w-full" id="saveWorkflowBtn">
+                                             <button type="button" class="loka-btn-outline-success loka-btn-sm w-full" id="saveWorkflowBtn">
                                                 <i class="bi bi-save"></i> Save
                                             </button>
                                         </div>
@@ -635,10 +635,10 @@ require_once INCLUDES_PATH . '/header.php';
                         <hr class="my-4 border-base-300">
                         
                         <div class="flex gap-2">
-                            <button type="submit" class="btn btn-primary">
+                            <button type="submit" class="loka-btn-primary">
                                 <i class="bi bi-send mr-1"></i>Submit Request
                             </button>
-                            <a href="<?= APP_URL ?>/?page=requests" class="btn btn-outline">Cancel</a>
+                            <a href="<?= APP_URL ?>/?page=requests" class="loka-btn-secondary">Cancel</a>
                         </div>
                     </form>
                 </div>
@@ -674,7 +674,7 @@ require_once INCLUDES_PATH . '/header.php';
                             <div class="flex items-center">
                                 <strong class="text-sm"><?= e($wf->name) ?></strong>
                                 <?php if ($wf->is_default): ?>
-                                <span class="badge badge-success badge-sm ml-2">Default</span>
+                                 <span class="loka-badge loka-badge-success badge-sm ml-2">Default</span>
                                 <?php endif; ?>
                             </div>
                             <p class="mt-0.5 text-xs text-base-content/60">
@@ -688,7 +688,7 @@ require_once INCLUDES_PATH . '/header.php';
                             <?= csrfField() ?>
                             <input type="hidden" name="action" value="delete_workflow">
                             <input type="hidden" name="workflow_id" value="<?= $wf->id ?>">
-                            <button type="submit" class="btn btn-outline btn-error btn-sm">
+                            <button type="submit" class="loka-btn-outline-error loka-btn-sm">
                                 <i class="bi bi-trash"></i>
                             </button>
                         </form>
@@ -798,7 +798,7 @@ require_once INCLUDES_PATH . '/header.php';
                     <div class="flex gap-2">
                         <input type="text" class="loka-form-input flex-1" id="guestName" 
                                placeholder="Enter guest name...">
-                        <button type="button" class="btn btn-outline btn-primary" id="addGuestBtn">
+                        <button type="button" class="loka-btn-outline-primary" id="addGuestBtn">
                             <i class="bi bi-plus-lg mr-1"></i>Add Guest
                         </button>
                     </div>
@@ -827,7 +827,7 @@ require_once INCLUDES_PATH . '/header.php';
             </div>
             <div class="p-5 border-t border-base-200">
                 <form method="dialog">
-                    <button type="submit" class="btn btn-primary w-full rounded-xl py-2.5">
+                    <button type="submit" class="loka-btn-primary w-full rounded-xl py-2.5">
                         Confirm Selection
                     </button>
                 </form>
@@ -868,6 +868,14 @@ ob_start();
             
             // Initialize selected passengers from page load (if any checkboxes are checked)
             this.loadInitialSelections();
+        }
+        
+        openModal() {
+            const modal = document.getElementById('passengerModal');
+            if (modal) {
+                modal.showModal();
+                this.initializeModal();
+            }
         }
         
         setupEventDelegation() {
@@ -918,13 +926,8 @@ ob_start();
                 return;
             }
             
-            // When modal is shown
-            modal.addEventListener('shown.bs.modal', () => {
-                this.initializeModal();
-            });
-            
-            // When modal is hidden, preserve state but reset UI
-            modal.addEventListener('hidden.bs.modal', () => {
+            // When dialog is closed (via X, Escape, or .close())
+            modal.addEventListener('close', () => {
                 this.modalInitialized = false;
             });
         }
@@ -1230,8 +1233,8 @@ ob_start();
                 const iconColor = isGuest ? 'text-success' : 'text-secondary';
                 const iconBg = isGuest ? 'bg-success' : 'bg-secondary';
                 
-                html += '<li class="mb-2 py-2 px-3 bg-white border border-light rounded d-flex justify-content-between align-items-center shadow-sm">' +
-                    '<div class="d-flex align-items-center">' +
+                html += '<li class="mb-2 py-2 px-3 bg-white border border-base-200 rounded-xl flex justify-between items-center shadow-sm">' +
+                    '<div class="flex items-center">' +
                         '<div class="' + iconBg + ' bg-opacity-10 p-1 rounded-circle me-2" style="width: 28px; height: 28px; display: flex; align-items: center; justify-content: center;">' +
                             '<i class="bi ' + icon + ' ' + iconColor + '" style="font-size: 0.8rem;"></i>' +
                         '</div>' +
@@ -1324,14 +1327,14 @@ ob_start();
             const row = document.createElement('div');
             row.className = 'destination-row mb-2';
             row.innerHTML = `
-                <div class="input-group">
-                    <span class="input-group-text bg-primary text-white" style="min-width: 45px;">
+                <div class="flex items-center gap-2">
+                    <span class="px-3 py-2.5 bg-primary text-white rounded-xl text-sm font-medium" style="min-width: 45px;">
                         <i class="bi bi-geo-alt"></i> ${index + 1}
                     </span>
-                    <input type="text" class="form-control destination-input" 
+                    <input type="text" class="loka-form-input flex-1 destination-input" 
                            name="destinations[]" 
                            placeholder="Enter location address...">
-                    <button type="button" class="btn btn-outline-danger remove-destination" title="Remove location">
+                    <button type="button" class="loka-btn-outline-error loka-btn-sm" title="Remove location">
                         <i class="bi bi-trash"></i>
                     </button>
                 </div>

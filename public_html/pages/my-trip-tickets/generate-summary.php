@@ -173,7 +173,7 @@ require_once INCLUDES_PATH . '/header.php';
     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
             <h1 class="text-2xl font-bold">
-                <i class="bi bi-file-earmark-spreadsheet me-2"></i>Generate Vehicle Summary
+                <i class="bi bi-file-earmark-spreadsheet mr-2"></i>Generate Vehicle Summary
             </h1>
             <nav class="text-sm breadcrumbs mt-1">
                 <ul>
@@ -184,18 +184,18 @@ require_once INCLUDES_PATH . '/header.php';
             </nav>
         </div>
         <a href="?page=my-trip-tickets" class="loka-btn-secondary">
-            <i class="bi bi-arrow-left me-1"></i>Back
+            <i class="bi bi-arrow-left mr-1"></i>Back
         </a>
     </div>
 
     <div class="flex justify-center">
         <div class="w-full max-w-2xl">
             <div class="loka-card">
-                <div class="card-body">
-                    <h5 class="card-title">Filter Parameters</h5>
+                <div class="p-6">
+                    <div class="font-bold text-lg mb-4">Filter Parameters</div>
 
                     <?php if (!empty($errors)): ?>
-                        <div class="alert alert-error">
+                        <div class="loka-alert loka-alert-danger">
                             <ul class="list-disc list-inside">
                                 <?php foreach ($errors as $err): ?>
                                     <li><?= e($err) ?></li>
@@ -210,7 +210,7 @@ require_once INCLUDES_PATH . '/header.php';
                         <input type="hidden" name="action" value="generate-summary">
                         <input type="hidden" name="print" value="1">
 
-                        <div class="form-control mb-4">
+                        <div class="flex flex-col gap-1.5 mb-4">
                             <label class="label">
                                 <span class="label-text font-medium">Vehicle <span class="text-error">*</span></span>
                             </label>
@@ -225,13 +225,13 @@ require_once INCLUDES_PATH . '/header.php';
                         </div>
 
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                            <div class="form-control">
+                            <div class="flex flex-col gap-1.5">
                                 <label class="label">
                                     <span class="label-text font-medium">Date From <span class="text-error">*</span></span>
                                 </label>
                                 <input type="date" class="input input-bordered w-full" name="date_from" value="<?= $dateFrom ?>" required>
                             </div>
-                            <div class="form-control">
+                            <div class="flex flex-col gap-1.5">
                                 <label class="label">
                                     <span class="label-text font-medium">Date To <span class="text-error">*</span></span>
                                 </label>
@@ -239,7 +239,7 @@ require_once INCLUDES_PATH . '/header.php';
                             </div>
                         </div>
 
-                        <div class="form-control mb-4">
+                        <div class="flex flex-col gap-1.5 mb-4">
                             <label class="label">
                                 <span class="label-text font-medium">Template Style</span>
                             </label>
@@ -253,8 +253,8 @@ require_once INCLUDES_PATH . '/header.php';
                         </div>
 
                         <div class="mt-4">
-                            <button type="submit" class="btn btn-success w-full">
-                                <i class="bi bi-printer me-2"></i>Generate & Print Ticket
+                            <button type="submit" class="bg-success text-success-content hover:bg-success/90 px-4 py-2 text-sm font-medium rounded-xl inline-flex items-center gap-2 transition-colors w-full">
+                                <i class="bi bi-printer mr-2"></i>Generate & Print Ticket
                             </button>
                         </div>
                     </form>

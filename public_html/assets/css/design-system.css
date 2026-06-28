@@ -18,11 +18,6 @@
     @apply shadow-elevated;
   }
 
-  /* Glassmorphism panel */
-  .loka-glass {
-    @apply bg-white/80 backdrop-blur-xl;
-  }
-
   /* Modern KPI stat card */
   .loka-stat-card {
     @apply loka-card p-5 sm:p-6;
@@ -71,6 +66,43 @@
     @apply bg-base-200;
   }
 
+  /* Button base */
+  .loka-btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2 text-sm font-medium transition-colors;
+  }
+
+  .loka-btn-primary {
+    @apply loka-btn bg-primary text-primary-content hover:bg-primary/90;
+  }
+
+  .loka-btn-secondary {
+    @apply loka-btn bg-base-200 text-base-content hover:bg-base-300;
+  }
+
+  .loka-btn-success {
+    @apply loka-btn bg-success text-success-content hover:bg-success/90;
+  }
+
+  .loka-btn-warning {
+    @apply loka-btn bg-warning text-warning-content hover:bg-warning/90;
+  }
+
+  .loka-btn-ghost {
+    @apply loka-btn bg-transparent text-base-content hover:bg-base-200;
+  }
+
+  .loka-btn-sm {
+    @apply px-3 py-1.5 text-xs;
+  }
+
+  .loka-btn-outline-primary {
+    @apply loka-btn border border-primary bg-transparent text-primary hover:bg-primary/10;
+  }
+
+  .loka-btn-outline-error {
+    @apply loka-btn border border-error bg-transparent text-error hover:bg-error/10;
+  }
+
   /* Avatar */
   .loka-avatar {
     @apply flex h-9 w-9 items-center justify-center rounded-full text-sm font-semibold text-white shadow-sm;
@@ -97,19 +129,6 @@
   .loka-nav-link.active::before {
     content: '';
     @apply absolute left-0 top-1/2 h-6 w-1 -translate-y-1/2 rounded-r-full bg-primary;
-  }
-
-  /* Table card wrapper */
-  .loka-table-card {
-    @apply loka-card overflow-hidden;
-  }
-
-  .loka-table-card .loka-table-header {
-    @apply flex items-center justify-between border-b border-base-200 px-5 py-4;
-  }
-
-  .loka-table-card .loka-table-header h5 {
-    @apply font-semibold text-base-content;
   }
 
   /* Modern badge (no conflict with Bootstrap) */
@@ -209,10 +228,6 @@
   }
 
   /* ===== FORM COMPONENTS ===== */
-  .loka-form-group {
-    @apply mb-4;
-  }
-
   .loka-form-label {
     @apply mb-1.5 block text-sm font-medium text-base-content;
   }
@@ -255,10 +270,6 @@
     @apply absolute right-0 z-[1050] mt-2 min-w-[12rem] overflow-hidden rounded-xl border border-base-200 bg-white shadow-elevated;
   }
 
-  .loka-dropdown-divider {
-    @apply my-1 border-t border-base-200;
-  }
-
   /* ===== NAVBAR COMPONENTS ===== */
   .loka-navbar {
     @apply fixed left-0 right-0 top-0 z-[1030] flex items-center bg-primary px-4;
@@ -293,51 +304,4 @@
     @apply absolute -right-0.5 -top-0.5 flex h-5 w-5 items-center justify-center rounded-full bg-danger text-[10px] font-bold text-white;
   }
 
-  /* ===== STAT CARD COMPONENTS ===== */
-  .loka-stat-card-row {
-    @apply mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4;
-  }
-
-  .loka-stat-card-icon {
-    @apply flex h-12 w-12 items-center justify-center rounded-xl text-xl;
-  }
-
-  /* ===== RESPONSIVE PAGE WRAPPER ===== */
-  .loka-content-wrapper {
-    @apply min-h-screen pt-[var(--navbar-height)] pl-[var(--sidebar-width)] transition-all duration-300;
-  }
-
-  .loka-content-wrapper.sidebar-collapsed {
-    @apply pl-0;
-  }
-
-  @media (max-width: 991.98px) {
-    .loka-content-wrapper {
-      @apply pl-0;
-    }
-  }
-}
-
-@layer utilities {
-  /* Text balance for headings */
-  .loka-text-balance {
-    text-wrap: balance;
-  }
-
-  /* Hide scrollbar but keep functionality */
-  .loka-scrollbar-none {
-    -ms-overflow-style: none;
-    scrollbar-width: none;
-  }
-
-  .loka-scrollbar-none::-webkit-scrollbar {
-    display: none;
-  }
-
-  /* Smooth width transitions */
-  .loka-transition-width {
-    transition-property: width, margin-left, margin-right;
-    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-    transition-duration: 200ms;
-  }
 }

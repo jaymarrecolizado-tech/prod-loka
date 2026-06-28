@@ -79,7 +79,8 @@ $pageTitle = 'Reset Password';
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= e($pageTitle) ?> - <?= APP_NAME ?></title>
-    <!-- Bootstrap Icons -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@3.9.0/dist/full.css" rel="stylesheet" type="text/css" />
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.2/font/bootstrap-icons.css" rel="stylesheet">
     <style>
         * {
@@ -593,8 +594,8 @@ $pageTitle = 'Reset Password';
                     </div>
 
                     <?php if (!empty($errors)): ?>
-                    <div class="alert alert-modern alert-danger-modern">
-                        <div class="d-flex align-items-center mb-2">
+                    <div class="loka-alert loka-alert-danger">
+                        <div class="flex items-center mb-2">
                             <i class="bi bi-exclamation-triangle-fill me-2"></i>
                             <strong>Error</strong>
                         </div>
@@ -625,15 +626,15 @@ $pageTitle = 'Reset Password';
                         <?= csrfField() ?>
 
                         <!-- New Password -->
-                        <div class="form-group">
-                            <label for="password" class="form-label">New Password</label>
+                        <div class="mb-4">
+                            <label for="password" class="loka-form-label">New Password</label>
                             <div style="position: relative;">
                                 <i class="bi bi-lock input-icon"></i>
-                                <input type="password" 
-                                       class="form-control" 
-                                       id="password" 
+                                <input type="password"
+                                       class="loka-form-input"
+                                       id="password"
                                        name="password"
-                                       placeholder="Enter new password" 
+                                       placeholder="Enter new password"
                                        required
                                        autofocus>
                                 <button type="button" 
@@ -650,15 +651,15 @@ $pageTitle = 'Reset Password';
                         </div>
 
                         <!-- Confirm Password -->
-                        <div class="form-group">
-                            <label for="confirm_password" class="form-label">Confirm Password</label>
+                        <div class="mb-4">
+                            <label for="confirm_password" class="loka-form-label">Confirm Password</label>
                             <div style="position: relative;">
                                 <i class="bi bi-lock-fill input-icon"></i>
-                                <input type="password" 
-                                       class="form-control" 
-                                       id="confirm_password" 
+                                <input type="password"
+                                       class="loka-form-input"
+                                       id="confirm_password"
                                        name="confirm_password"
-                                       placeholder="Confirm your password" 
+                                       placeholder="Confirm your password"
                                        required>
                                 <button type="button" 
                                         class="password-toggle" 

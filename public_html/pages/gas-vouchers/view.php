@@ -86,7 +86,7 @@ require_once INCLUDES_PATH . '/header.php';
         </div>
 
         <!-- Status Banner -->
-        <div class="alert alert-<?= gasVoucherStatusColor($voucher->status) ?> mb-6">
+        <div class="loka-alert loka-alert-<?= gasVoucherStatusColor($voucher->status) ?> mb-6">
             <i class="bi bi-info-circle-fill text-lg"></i>
             <div>
                 <strong>Status: <?= gasVoucherStatusLabel($voucher->status) ?></strong>

@@ -368,16 +368,16 @@ require_once INCLUDES_PATH . '/header.php';
     <div class="flex justify-between items-center mb-4">
         <div>
             <h1 class="text-2xl font-bold mb-1"><i class="bi bi-file-earmark-text mr-2"></i>Trip Tickets</h1>
-            <p class="text-gray-500 mb-0">Manage trip completion tickets and documentation</p>
+            <p class="text-base-content/60 mb-0">Manage trip completion tickets and documentation</p>
         </div>
         <div>
             <?php if (isGuard()): ?>
-                <button type="button" class="btn btn-success" onclick="document.getElementById('createTicketModal').showModal()">
+                <button type="button" class="bg-success text-success-content hover:bg-success/90 px-4 py-2 text-sm font-medium rounded-xl inline-flex items-center gap-2 transition-colors" onclick="document.getElementById('createTicketModal').showModal()">
                     <i class="bi bi-plus-circle mr-1"></i>Create Trip Ticket
                 </button>
             <?php endif; ?>
             <?php if (isMotorpool()): ?>
-                <a href="?page=reports" class="btn btn-outline">
+                <a href="?page=reports" class="loka-btn-secondary">
                     <i class="bi bi-bar-chart mr-1"></i>View Reports
                 </a>
             <?php endif; ?>
@@ -394,7 +394,7 @@ require_once INCLUDES_PATH . '/header.php';
                     </div>
                 </div>
                 <div class="flex-grow ml-3">
-                    <h6 class="text-gray-500 mb-1">Total Tickets</h6>
+                    <h6 class="text-base-content/60 mb-1">Total Tickets</h6>
                     <h3 class="text-2xl font-bold mb-0"><?= $totalTickets ?></h3>
                 </div>
             </div>
@@ -407,7 +407,7 @@ require_once INCLUDES_PATH . '/header.php';
                     </div>
                 </div>
                 <div class="flex-grow ml-3">
-                    <h6 class="text-gray-500 mb-1">Pending Review</h6>
+                    <h6 class="text-base-content/60 mb-1">Pending Review</h6>
                     <h3 class="text-2xl font-bold mb-0"><?= $pendingTickets ?></h3>
                 </div>
             </div>
@@ -420,7 +420,7 @@ require_once INCLUDES_PATH . '/header.php';
                     </div>
                 </div>
                 <div class="flex-grow ml-3">
-                    <h6 class="text-gray-500 mb-1">Approved</h6>
+                    <h6 class="text-base-content/60 mb-1">Approved</h6>
                     <h3 class="text-2xl font-bold mb-0"><?= $approvedTickets ?></h3>
                 </div>
             </div>
@@ -433,7 +433,7 @@ require_once INCLUDES_PATH . '/header.php';
                     </div>
                 </div>
                 <div class="flex-grow ml-3">
-                    <h6 class="text-gray-500 mb-1">Action Required</h6>
+                    <h6 class="text-base-content/60 mb-1">Action Required</h6>
                     <h3 class="text-2xl font-bold mb-0 small"><?= $totalTickets - $pendingTickets - $approvedTickets ?></h3>
                 </div>
             </div>
@@ -459,7 +459,7 @@ require_once INCLUDES_PATH . '/header.php';
                 </div>
                 <div class="md:col-span-3">
                     <label class="label"><span class="label-text">&nbsp;</span></label>
-                    <button type="submit" class="btn btn-primary w-full">
+                    <button type="submit" class="loka-btn-primary w-full">
                         <i class="bi bi-search mr-1"></i>Filter
                     </button>
                 </div>
@@ -471,15 +471,15 @@ require_once INCLUDES_PATH . '/header.php';
     <div class="bg-base-100 rounded-lg shadow-sm">
         <div class="border-b border-base-200 p-4 flex justify-between items-center">
             <h5 class="font-bold mb-0">Trip Tickets (<?= count($tickets) ?>)</h5>
-            <button type="button" class="btn btn-outline btn-sm" onclick="exportTickets()">
+                    <button type="button" class="loka-btn-secondary loka-btn-sm" onclick="exportTickets()">
                 <i class="bi bi-file-earmark-excel mr-1"></i>Export
             </button>
         </div>
         <div class="p-5">
             <?php if (empty($tickets)): ?>
                 <div class="text-center py-5">
-                    <i class="bi bi-inbox text-5xl text-gray-400"></i>
-                    <p class="text-gray-500 mt-3">No trip tickets found.</p>
+                    <i class="bi bi-inbox text-5xl text-base-content/40"></i>
+                    <p class="text-base-content/60 mt-3">No trip tickets found.</p>
                 </div>
             <?php else: ?>
                 <div class="overflow-x-auto">
@@ -505,7 +505,7 @@ require_once INCLUDES_PATH . '/header.php';
                                     <td><strong>TT-<?= $ticket->request_id ?></strong></td>
                                     <td>
                                         <small>(Ref: VRF-<?= $ticket->request_id ?>)</small><br>
-                                        <small class="text-gray-500"><?= e($ticket->trip_destination) ?></small>
+                                        <small class="text-base-content/60"><?= e($ticket->trip_destination) ?></small>
                                     </td>
                                     <td>
                                         <?php
@@ -537,14 +537,14 @@ require_once INCLUDES_PATH . '/header.php';
                                     <td>
                                         <?php if ($ticket->driver_name): ?>
                                             <?= e($ticket->driver_name) ?><br>
-                                            <small class="text-gray-500"><?= e($ticket->driver_license) ?></small>
+                                            <small class="text-base-content/60"><?= e($ticket->driver_license) ?></small>
                                         <?php else: ?>
-                                            <span class="text-gray-500">-</span>
+                                            <span class="text-base-content/60">-</span>
                                         <?php endif; ?>
                                     </td>
                                     <td>
                                         <?= e($ticket->destination) ?><br>
-                                        <small class="text-gray-500"><?= truncate($ticket->purpose, 30) ?></small>
+                                        <small class="text-base-content/60"><?= truncate($ticket->purpose, 30) ?></small>
                                     </td>
                                     <td>
                                         <small>
@@ -580,7 +580,7 @@ require_once INCLUDES_PATH . '/header.php';
                                             <?= ucfirst($ticket->status) ?>
                                         </span>
                                         <?php if ($ticket->reviewed_by_name): ?>
-                                            <br><small class="text-gray-500">by <?= e($ticket->reviewed_by_name) ?></small>
+                                            <br><small class="text-base-content/60">by <?= e($ticket->reviewed_by_name) ?></small>
                                         <?php endif; ?>
                                     </td>
                                     <td>
@@ -593,7 +593,7 @@ require_once INCLUDES_PATH . '/header.php';
                                         <?php if (!empty($docs)): ?>
                                             <?= implode(' ', $docs) ?>
                                         <?php else: ?>
-                                            <span class="text-gray-500">None</span>
+                                            <span class="text-base-content/60">None</span>
                                         <?php endif; ?>
                                     </td>
                                     <td>
@@ -608,7 +608,7 @@ require_once INCLUDES_PATH . '/header.php';
                                                 Resolved
                                             </span>
                                         <?php else: ?>
-                                            <span class="text-gray-500">-</span>
+                                            <span class="text-base-content/60">-</span>
                                         <?php endif; ?>
                                     </td>
                                     <td>
@@ -618,14 +618,14 @@ require_once INCLUDES_PATH . '/header.php';
                                         </small>
                                     </td>
                                     <td>
-                                        <a href="?page=trip-tickets&action=view&id=<?= $ticket->id ?>" class="btn btn-outline btn-sm">
+                                        <a href="?page=trip-tickets&action=view&id=<?= $ticket->id ?>" class="loka-btn-outline-primary loka-btn-sm">
                                             <i class="bi bi-eye mr-1"></i>View
                                         </a>
                                         <?php if (isMotorpool() && $ticket->status === 'submitted'): ?>
-                                            <button type="button" class="btn btn-success btn-sm ml-1" onclick="approveTicket(<?= $ticket->id ?>)">
+                                            <button type="button" class="bg-success text-success-content hover:bg-success/90 px-4 py-2 text-sm font-medium rounded-xl inline-flex items-center gap-2 transition-colors loka-btn-sm ml-1" onclick="approveTicket(<?= $ticket->id ?>)">
                                                 <i class="bi bi-check-lg mr-1"></i>
                                             </button>
-                                            <button type="button" class="btn btn-warning btn-sm ml-1" onclick="rejectTicket(<?= $ticket->id ?>)">
+                                            <button type="button" class="bg-warning text-warning-content hover:bg-warning/90 px-4 py-2 text-sm font-medium rounded-xl inline-flex items-center gap-2 transition-colors loka-btn-sm ml-1" onclick="rejectTicket(<?= $ticket->id ?>)">
                                                 <i class="bi bi-x-lg mr-1"></i>
                                             </button>
                                         <?php endif; ?>
@@ -645,7 +645,7 @@ require_once INCLUDES_PATH . '/header.php';
 <dialog id="createTicketModal" class="modal">
     <div class="modal-box w-11/12 max-w-3xl">
         <form method="dialog">
-            <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
+            <button class="loka-btn-sm rounded-full loka-btn-ghost absolute right-2 top-2">✕</button>
         </form>
         <h3 class="font-bold text-lg mb-4">
             <i class="bi bi-file-earmark-plus mr-2"></i>Create Trip Ticket
@@ -684,7 +684,7 @@ require_once INCLUDES_PATH . '/header.php';
                             </option>
                         <?php endforeach; ?>
                     </select>
-                    <small class="text-gray-500">Select from your recent completed trips</small>
+                    <small class="text-base-content/60">Select from your recent completed trips</small>
                 </div>
                 <div>
                     <label class="label"><span class="label-text">Trip Type <span class="text-error">*</span></span></label>
@@ -702,7 +702,7 @@ require_once INCLUDES_PATH . '/header.php';
             <div class="mb-3 hidden" id="tripTypeOtherRowModal">
                 <label class="label"><span class="label-text">Specify Trip Type <span class="text-error">*</span></span></label>
                 <input type="text" class="input input-bordered w-full" name="trip_type_other" placeholder="Please specify the type of trip...">
-                <small class="text-gray-500">Required when "Other" is selected as trip type</small>
+                <small class="text-base-content/60">Required when "Other" is selected as trip type</small>
             </div>
 
             <!-- Date & Time -->
@@ -710,12 +710,12 @@ require_once INCLUDES_PATH . '/header.php';
                 <div>
                     <label class="label"><span class="label-text">Start Date <span class="text-error">*</span></span></label>
                     <input type="datetime-local" class="input input-bordered w-full" name="start_date" required>
-                    <small class="text-gray-500">Actual departure time</small>
+                    <small class="text-base-content/60">Actual departure time</small>
                 </div>
                 <div>
                     <label class="label"><span class="label-text">End Date <span class="text-error">*</span></span></label>
                     <input type="datetime-local" class="input input-bordered w-full" name="end_date" required>
-                    <small class="text-gray-500">Actual arrival time</small>
+                    <small class="text-base-content/60">Actual arrival time</small>
                 </div>
             </div>
 
@@ -770,17 +770,17 @@ require_once INCLUDES_PATH . '/header.php';
                 <div>
                     <label class="label"><span class="label-text">Travel Order (TO)</span></label>
                     <input type="file" class="file-input file-input-bordered w-full" name="travel_order" accept=".pdf,.jpg,.png">
-                    <small class="text-gray-500">Optional</small>
+                    <small class="text-base-content/60">Optional</small>
                 </div>
                 <div>
                     <label class="label"><span class="label-text">OB Slip</span></label>
                     <input type="file" class="file-input file-input-bordered w-full" name="ob_slip" accept=".pdf,.jpg,.png">
-                    <small class="text-gray-500">Optional</small>
+                    <small class="text-base-content/60">Optional</small>
                 </div>
                 <div>
                     <label class="label"><span class="label-text">Other Documents</span></label>
                     <input type="file" class="file-input file-input-bordered w-full" name="other_documents" accept=".pdf,.zip" multiple>
-                    <small class="text-gray-500">Optional</small>
+                    <small class="text-base-content/60">Optional</small>
                 </div>
             </div>
 
@@ -818,14 +818,14 @@ require_once INCLUDES_PATH . '/header.php';
                 <textarea class="textarea textarea-bordered w-full" name="guard_notes" rows="3" placeholder="Any additional observations..." maxlength="500"></textarea>
             </div>
 
-            <div class="alert alert-info">
+            <div class="loka-alert loka-alert-info">
                 <i class="bi bi-info-circle mr-2"></i>
                 <strong>Note:</strong> Documents will be uploaded after creating the ticket. You can then attach TO/OB slips and other documentation.
             </div>
         </form>
         <div class="modal-action">
             <button type="button" class="btn" onclick="document.getElementById('createTicketModal').close()">Cancel</button>
-            <button type="button" class="btn btn-success" onclick="createTicket()">
+            <button type="button" class="bg-success text-success-content hover:bg-success/90 px-4 py-2 text-sm font-medium rounded-xl inline-flex items-center gap-2 transition-colors" onclick="createTicket()">
                 <i class="bi bi-plus-circle mr-1"></i>Create Ticket
             </button>
         </div>

@@ -106,15 +106,15 @@ require_once INCLUDES_PATH . '/header.php';
                     <form method="GET" action="">
                         <input type="hidden" name="page" value="admin-reports">
                         <input type="hidden" name="type" value="<?= $type ?>">
-                        <div class="form-control mb-3">
-                            <label class="label"><span class="label-text">Start Date</span></label>
-                            <input type="date" class="input input-bordered w-full" name="start_date" value="<?= e($startDate) ?>" required>
-                        </div>
-                        <div class="form-control mb-3">
-                            <label class="label"><span class="label-text">End Date</span></label>
-                            <input type="date" class="input input-bordered w-full" name="end_date" value="<?= e($endDate) ?>" required>
-                        </div>
-                        <button type="submit" class="btn btn-primary w-full">
+                    <div class="mb-4">
+                        <label class="loka-form-label">Start Date</label>
+                        <input type="date" class="loka-form-input w-full" name="start_date" value="<?= e($startDate) ?>" required>
+                    </div>
+                    <div class="mb-4">
+                        <label class="loka-form-label">End Date</label>
+                        <input type="date" class="loka-form-input w-full" name="end_date" value="<?= e($endDate) ?>" required>
+                    </div>
+                    <button type="submit" class="loka-btn-primary w-full">
                             <i class="bi bi-filter"></i> Apply Filter
                         </button>
                     </form>
@@ -133,7 +133,7 @@ require_once INCLUDES_PATH . '/header.php';
                 <div class="p-4">
                     <p class="text-base-content/50 mb-4"><?= e($availableReports[$type]['description']) ?></p>
 
-                    <div class="alert alert-info mb-4">
+                    <div class="loka-alert loka-alert-info mb-4">
                         <i class="bi bi-info-circle"></i>
                         <span>Date Range: <strong><?= e($startDate) ?></strong> to <strong><?= e($endDate) ?></strong></span>
                     </div>
@@ -144,14 +144,14 @@ require_once INCLUDES_PATH . '/header.php';
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
                         <div>
                             <a href="?page=export&format=csv&type=<?= $type ?>&start_date=<?= $startDate ?>&end_date=<?= $endDate ?>"
-                               class="btn btn-success btn-lg w-full">
+                               class="bg-success text-success-content hover:bg-success/90 text-base px-6 py-3 font-medium rounded-xl inline-flex items-center gap-2 transition-colors w-full">
                                 <i class="bi bi-filetype-csv"></i> Download CSV
                             </a>
                             <small class="text-base-content/50 block text-center mt-1">Opens in Excel, Google Sheets</small>
                         </div>
                         <div>
                             <a href="?page=export&format=pdf&type=<?= $type ?>&start_date=<?= $startDate ?>&end_date=<?= $endDate ?>"
-                               class="btn btn-error btn-lg w-full">
+                               class="bg-error text-error-content hover:bg-error/90 text-base px-6 py-3 font-medium rounded-xl inline-flex items-center gap-2 transition-colors w-full">
                                 <i class="bi bi-filetype-pdf"></i> Download PDF
                             </a>
                             <small class="text-base-content/50 block text-center mt-1">Best for printing and sharing</small>

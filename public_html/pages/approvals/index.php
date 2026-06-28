@@ -131,9 +131,9 @@ $processedTotalPages = ceil($processedRequestsCount / $recordsPerPage);
 require_once INCLUDES_PATH . '/header.php';
 ?>
 
-<div class="container-fluid py-4">
+<div class="w-full px-4 py-4 sm:px-6 lg:px-8">
     <!-- Page Header with Pending Count Badge -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="flex justify-between items-center mb-4">
         <div>
             <h4 class="mb-1"><?= $queueType ?> Approval Queue</h4>
             <nav aria-label="breadcrumb">
@@ -186,11 +186,11 @@ require_once INCLUDES_PATH . '/header.php';
             <div class="empty-state">
                 <i class="bi bi-inbox"></i>
                 <h5>No pending approvals</h5>
-                <p class="text-muted">All caught up! No requests awaiting your approval.</p>
+                <p class="text-base-content/60">All caught up! No requests awaiting your approval.</p>
             </div>
             <?php else: ?>
-            <div class="table-responsive">
-                <table class="table table-hover">
+            <div class="loka-table-responsive">
+                <table class="loka-table">
                     <thead>
                         <tr>
                             <th>ID</th>
@@ -218,32 +218,32 @@ require_once INCLUDES_PATH . '/header.php';
                             <td><?= truncate($request->purpose, 30) ?></td>
                             <td>
                                 <div><?= formatDateTime($request->start_datetime) ?></div>
-                                <small class="text-muted">to <?= formatDateTime($request->end_datetime) ?></small>
+                                <small class="text-base-content/60">to <?= formatDateTime($request->end_datetime) ?></small>
                             </td>
                             <td>
                                 <?php if ($request->vehicle_plate): ?>
                                     <div class="fw-medium"><?= e($request->vehicle_plate) ?></div>
-                                    <small class="text-muted"><?= e($request->vehicle_make . ' ' . $request->vehicle_model) ?></small>
+                                    <small class="text-base-content/60"><?= e($request->vehicle_make . ' ' . $request->vehicle_model) ?></small>
                                 <?php else: ?>
-                                    <span class="text-muted">Not assigned</span>
+                                    <span class="text-base-content/60">Not assigned</span>
                                 <?php endif; ?>
                             </td>
                             <td>
                                 <?php if ($request->status === 'revision'): ?>
-                                <div class="d-flex align-items-center gap-1">
+                                <div class="flex items-center gap-1">
                                     <span class="badge bg-warning text-dark"><i class="bi bi-pencil-square me-1"></i>Revision</span>
                                     <span class="text-warning">Needs Update</span>
                                 </div>
                                 <?php elseif ($request->status === 'pending'): ?>
-                                <div class="d-flex align-items-center gap-1">
+                                <div class="flex items-center gap-1">
                                     <span class="badge bg-info" title="Department Approval">Dept</span>
                                     <span class="text-warning" title="Waiting for your action">
                                         <i class="bi bi-clock-history"></i> Pending
                                     </span>
                                 </div>
                                 <?php else: ?>
-                                <div class="d-flex flex-column gap-1">
-                                    <div class="d-flex align-items-center gap-1">
+                                <div class="flex flex-col gap-1">
+                                    <div class="flex items-center gap-1">
                                         <span class="badge bg-light text-dark" title="Department Approval">Dept</span>
                                         <?php if ($request->dept_status === 'approved'): ?>
                                         <span class="text-success" title="Department approved"><i class="bi bi-check-circle"></i> Done</span>
@@ -255,7 +255,7 @@ require_once INCLUDES_PATH . '/header.php';
                                         <span class="text-secondary"><i class="bi bi-dash-circle"></i> -</span>
                                         <?php endif; ?>
                                     </div>
-                                    <div class="d-flex align-items-center gap-1">
+                                    <div class="flex items-center gap-1">
                                         <span class="badge bg-primary" title="Motorpool Approval">MP</span>
                                         <span class="text-warning" title="Waiting for your action">
                                             <i class="bi bi-clock-history"></i> Pending
@@ -266,8 +266,8 @@ require_once INCLUDES_PATH . '/header.php';
                             </td>
                             <td><?= formatDateTime($request->created_at) ?></td>
                             <td>
-                                <a href="<?= APP_URL ?>/?page=approvals&action=view&id=<?= $request->id ?>" 
-                                   class="btn btn-sm btn-primary">
+                                <a href="<?= APP_URL ?>/?page=approvals&action=view&id=<?= $request->id ?>"
+                                   class="loka-btn-primary loka-btn-sm">
                                     <i class="bi bi-eye me-1"></i>Review
                                 </a>
                             </td>
@@ -280,25 +280,19 @@ require_once INCLUDES_PATH . '/header.php';
             <!-- Pagination -->
             <?php if ($pendingTotalPages > 1): ?>
             <nav aria-label="Pending approvals pagination" class="mt-4">
-                <ul class="pagination justify-content-center mb-0">
-                    <li class="page-item <?= $pendingPage <= 1 ? 'disabled' : '' ?>">
-                        <a class="page-link" href="<?= APP_URL ?>/?page=approvals&tab=pending&p_pending=<?= $pendingPage - 1 ?>">
-                            <i class="bi bi-chevron-left"></i> Previous
-                        </a>
-                    </li>
+                <div class="join justify-center mb-0">
+                    <a class="join-item btn btn-sm <?= $pendingPage <= 1 ? 'btn-disabled' : '' ?>" href="<?= APP_URL ?>/?page=approvals&tab=pending&p_pending=<?= $pendingPage - 1 ?>">
+                        <i class="bi bi-chevron-left"></i> Previous
+                    </a>
                     <?php for ($i = 1; $i <= $pendingTotalPages; $i++): ?>
-                    <li class="page-item <?= $i === $pendingPage ? 'active' : '' ?>">
-                        <a class="page-link" href="<?= APP_URL ?>/?page=approvals&tab=pending&p_pending=<?= $i ?>"><?= $i ?></a>
-                    </li>
+                    <a class="join-item btn btn-sm <?= $i === $pendingPage ? 'btn-primary' : '' ?>" href="<?= APP_URL ?>/?page=approvals&tab=pending&p_pending=<?= $i ?>"><?= $i ?></a>
                     <?php endfor; ?>
-                    <li class="page-item <?= $pendingPage >= $pendingTotalPages ? 'disabled' : '' ?>">
-                        <a class="page-link" href="<?= APP_URL ?>/?page=approvals&tab=pending&p_pending=<?= $pendingPage + 1 ?>">
-                            Next <i class="bi bi-chevron-right"></i>
-                        </a>
-                    </li>
-                </ul>
+                    <a class="join-item btn btn-sm <?= $pendingPage >= $pendingTotalPages ? 'btn-disabled' : '' ?>" href="<?= APP_URL ?>/?page=approvals&tab=pending&p_pending=<?= $pendingPage + 1 ?>">
+                        Next <i class="bi bi-chevron-right"></i>
+                    </a>
+                </div>
             </nav>
-            <div class="text-center text-muted small mt-2">
+            <div class="text-center text-base-content/60 text-sm mt-2">
                 Showing <?= (($pendingPage - 1) * $recordsPerPage) + 1 ?> to <?= min($pendingPage * $recordsPerPage, $pendingRequestsCount) ?> of <?= $pendingRequestsCount ?> pending requests
             </div>
             <?php endif; ?>
@@ -314,10 +308,10 @@ require_once INCLUDES_PATH . '/header.php';
             <div class="empty-state">
                 <i class="bi bi-clipboard-check"></i>
                 <h5>No processed requests</h5>
-                <p class="text-muted">You haven't processed any requests yet.</p>
+                <p class="text-base-content/60">You haven't processed any requests yet.</p>
             </div>
             <?php else: ?>
-            <div class="table-responsive">
+                <div class="loka-table-responsive">
                 <table class="loka-table data-table">
                     <thead>
                         <tr>
@@ -350,8 +344,8 @@ require_once INCLUDES_PATH . '/header.php';
                             <td><?= formatDateTime($request->action_date) ?></td>
                             <td><?= requestStatusBadge($request->status) ?></td>
                             <td>
-                                <a href="<?= APP_URL ?>/?page=requests&action=view&id=<?= $request->id ?>" 
-                                   class="btn btn-sm btn-outline-primary">
+                                <a href="<?= APP_URL ?>/?page=requests&action=view&id=<?= $request->id ?>"
+                                   class="loka-btn-outline-primary loka-btn-sm">
                                     <i class="bi bi-eye"></i>
                                 </a>
                             </td>
@@ -364,25 +358,19 @@ require_once INCLUDES_PATH . '/header.php';
             <!-- Pagination -->
             <?php if ($processedTotalPages > 1): ?>
             <nav aria-label="Processed approvals pagination" class="mt-4">
-                <ul class="pagination justify-content-center mb-0">
-                    <li class="page-item <?= $processedPage <= 1 ? 'disabled' : '' ?>">
-                        <a class="page-link" href="<?= APP_URL ?>/?page=approvals&tab=processed&p_processed=<?= $processedPage - 1 ?>">
-                            <i class="bi bi-chevron-left"></i> Previous
-                        </a>
-                    </li>
+                <div class="join justify-center mb-0">
+                    <a class="join-item btn btn-sm <?= $processedPage <= 1 ? 'btn-disabled' : '' ?>" href="<?= APP_URL ?>/?page=approvals&tab=processed&p_processed=<?= $processedPage - 1 ?>">
+                        <i class="bi bi-chevron-left"></i> Previous
+                    </a>
                     <?php for ($i = 1; $i <= $processedTotalPages; $i++): ?>
-                    <li class="page-item <?= $i === $processedPage ? 'active' : '' ?>">
-                        <a class="page-link" href="<?= APP_URL ?>/?page=approvals&tab=processed&p_processed=<?= $i ?>"><?= $i ?></a>
-                    </li>
+                    <a class="join-item btn btn-sm <?= $i === $processedPage ? 'btn-primary' : '' ?>" href="<?= APP_URL ?>/?page=approvals&tab=processed&p_processed=<?= $i ?>"><?= $i ?></a>
                     <?php endfor; ?>
-                    <li class="page-item <?= $processedPage >= $processedTotalPages ? 'disabled' : '' ?>">
-                        <a class="page-link" href="<?= APP_URL ?>/?page=approvals&tab=processed&p_processed=<?= $processedPage + 1 ?>">
-                            Next <i class="bi bi-chevron-right"></i>
-                        </a>
-                    </li>
-                </ul>
+                    <a class="join-item btn btn-sm <?= $processedPage >= $processedTotalPages ? 'btn-disabled' : '' ?>" href="<?= APP_URL ?>/?page=approvals&tab=processed&p_processed=<?= $processedPage + 1 ?>">
+                        Next <i class="bi bi-chevron-right"></i>
+                    </a>
+                </div>
             </nav>
-            <div class="text-center text-muted small mt-2">
+            <div class="text-center text-base-content/60 text-sm mt-2">
                 Showing <?= (($processedPage - 1) * $recordsPerPage) + 1 ?> to <?= min($processedPage * $recordsPerPage, $processedRequestsCount) ?> of <?= $processedRequestsCount ?> processed requests
             </div>
             <?php endif; ?>

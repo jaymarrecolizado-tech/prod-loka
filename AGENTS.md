@@ -1079,64 +1079,36 @@ Frontend builds to `assets/dist/` directory. Always run `npm run build` before d
 ## UI Modernization (Bootstrap → Tailwind/DaisyUI)
 
 ### Status
-- **Bootstrap CSS/JS**: Fully removed from main app (no CDN, no conditionals)
+- **Bootstrap CSS/JS**: Fully removed — no CDN, no npm dependency, no conditionals
 - **TailwindCSS + DaisyUI**: Primary styling framework for all pages
-- **DataTable**: jQuery DataTables used globally (migration pending)
-- **Bootstrap Icons**: Kept unconditional (used across all pages for iconography)
+- **DataTable**: Vanilla JS implementation (`vanillaDataTable()` in `app.js`) — no jQuery dependency
+- **Bootstrap Icons**: Kept (icon font only, not CSS framework)
+- **jQuery**: Not used anywhere — fully removed
 
-### Migrated Pages (Fully Tailwind/DaisyUI)
-| Page | File | Notes |
-|------|------|-------|
-| Header/Navbar | `includes/header.php` | DaisyUI `dropdown dropdown-end`; Bootstrap removed |
-| Sidebar | `includes/sidebar.php` | Uses `loka-sidebar`, `loka-nav-link` |
-| Dashboard | `pages/dashboard/index.php` | Fully migrated |
-| Requests List | `pages/requests/index.php` | Fully migrated |
-| Requests View | `pages/requests/view.php` | Fully migrated; 3 action modals use DaisyUI `<dialog>` |
-| Requests Create | `pages/requests/create.php` | Fully migrated; passengerModal DaisyUI `<dialog>`, saved workflows DaisyUI dropdown |
-| Requests Edit | `pages/requests/edit.php` | Fully migrated; `<dialog>` modal |
-| Requests Cancel | `pages/requests/cancel.php` | Fully migrated |
-| Approvals View | `pages/approvals/view.php` | `<details>/<summary>` replaces accordion |
-| Vehicles List | `pages/vehicles/index.php` | Fully migrated |
-| Vehicles Edit | `pages/vehicles/edit.php` | Fully migrated |
-| Drivers List | `pages/drivers/index.php` | Fully migrated |
-| Drivers Edit | `pages/drivers/edit.php` | Fully migrated |
-| Guard Index | `pages/guard/index.php` | Fully migrated; dispatch/arrival modals DaisyUI `<dialog>` |
-| Notifications | `pages/notifications/index.php` | DaisyUI `dropdown dropdown-end` |
-| Gas Vouchers View | `pages/gas-vouchers/view.php` | Fully migrated |
-| Gas Vouchers List | `pages/gas-vouchers/index.php` | Fully migrated |
-| Gas Vouchers Create | `pages/gas-vouchers/create.php` | Fully migrated |
-| My Trip Tickets | `pages/my-trip-tickets/index.php` | Fully migrated |
-| Generate Summary | `pages/my-trip-tickets/generate-summary.php` | Fully migrated |
-| Trip Tickets | `pages/trip-tickets/index.php` | Fully migrated; `<dialog>` modal |
-| Settings | `pages/settings/index.php` | Fully migrated |
-| Profile | `pages/profile/index.php` | Fully migrated |
-| Admin Clear DB | `pages/admin/clear_database.php` | Fully migrated; Tailwind/DaisyUI CDN |
-| Admin Reports | `pages/admin/reports.php` | Fully migrated; Tailwind/DaisyUI via header.php |
-| Auth: Forgot Password | `pages/auth/forgot-password.php` | Standalone; Tailwind utility CSS block |
-| Auth: Reset Password | `pages/auth/reset-password.php` | Standalone; Tailwind utility CSS block |
-| Auth: Login | `pages/auth/login.php` | Self-contained; no migration needed |
+### All Pages Migrated
+Every page in the application uses Tailwind/DaisyUI component classes (`loka-*`). No Bootstrap CSS classes remain in HTML template markup.
 
-### Remaining Bootstrap CSS/JS References
-- **`assets/js/app.js:419`**: Print function injects Bootstrap 5.3 CSS via JS for print styling (intentional, functional)
-- **`dataTables.bootstrap5.min.css`**: Removed — DataTables now uses plain styling
-- **`dataTables.bootstrap5.min.js`**: Removed — DataTables now uses plain styling
-
-### Component Classes (design-system.css)
-- `.loka-navbar`, `.loka-navbar-start`, `.loka-navbar-center`, `.loka-navbar-end`
+**Component Classes (design-system.css):**
+- `.loka-navbar`, `.loka-navbar-toggle`, `.loka-navbar-actions`, `.loka-navbar-notification`
 - `.loka-sidebar`, `.loka-sidebar-content`, `.loka-sidebar-overlay`
 - `.loka-card`, `.loka-badge`, `.loka-table`, `.loka-table-responsive`
-- `.loka-btn-primary`, `.loka-btn-secondary`, `.loka-btn-success`
-- `.loka-alert-success`, `.loka-alert-error`, `.loka-alert-warning`
+- `.loka-btn`, `.loka-btn-primary`, `.loka-btn-secondary`, `.loka-btn-success`, `.loka-btn-warning`, `.loka-btn-ghost`
+- `.loka-btn-outline-primary`, `.loka-btn-outline-error`
+- `.loka-btn-sm`, `.loka-btn-icon`
+- `.loka-alert`, `.loka-alert-success`, `.loka-alert-danger`, `.loka-alert-warning`, `.loka-alert-info`
+- `.loka-form-label`, `.loka-form-input`
 - `.loka-avatar`, `.loka-avatar-sm`, `.loka-avatar-lg`
-- `.loka-dropdown`, `.loka-dropdown-content`, `.loka-dropdown-item`
-- `.loka-modal`, `.loka-modal-box`, `.loka-modal-backdrop`
+- `.loka-dropdown`
+- `.loka-nav-link`, `.loka-section-label`, `.loka-page`, `.loka-page-header`, `.loka-empty`
+
+**DaisyUI classes in use:** `btn`, `btn-primary`, `btn-disabled`, `join`, `join-item`, `dropdown`, `dropdown-end`, `dropdown-content`, `dialog`, `modal`, `modal-box`, `checkbox`, `switch`, `input`, `input-bordered`, `select`, `select-bordered`, `textarea`, `textarea-bordered`, `loading`, `tooltip`, `table-zebra`, `table-hover`, `badge`, `badge-primary`, `badge-secondary`, `badge-success`, `badge-error`, `badge-warning`, `badge-info`, `badge-neutral`
 
 ### Next Steps
-1. Replace jQuery DataTables with vanilla JS or Vue `DataTable.vue`
-2. Dark mode implementation (`darkMode: 'class'` already configured in Tailwind)
-3. Replace jQuery with vanilla JS (remove jQuery dependency)
+1. ~~Dark mode implementation~~ ✅ Implemented — toggle in header, localStorage persistence, system preference fallback
+2. ~~Clean up `style.css`~~ ✅ Removed 100+ lines of unused Bootstrap shim CSS rules
+3. ~~Remove `jQuery: 'readonly'` from `eslint.config.js`~~ ✅ Removed along with `$` and `bootstrap` globals
 
 ---
 
-**Last Updated:** 2026-06-25
+**Last Updated:** 2026-06-28
 **Application Version:** 2.5.1

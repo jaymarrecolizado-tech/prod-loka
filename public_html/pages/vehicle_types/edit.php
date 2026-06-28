@@ -59,65 +59,65 @@ if (isPost()) {
 require_once INCLUDES_PATH . '/header.php';
 ?>
 
-<div class="container-fluid py-4">
+<div class="loka-page">
     <!-- Page Header -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="loka-page-header">
         <div>
-            <h4 class="mb-1"><i class="bi bi-car-front me-2"></i>Edit Vehicle Type</h4>
-            <p class="text-muted mb-0">Update vehicle type information</p>
+            <h1 class="text-2xl font-bold text-base-content"><i class="bi bi-car-front me-2"></i>Edit Vehicle Type</h1>
+            <p class="text-sm text-base-content/60">Update vehicle type information</p>
         </div>
     </div>
 
-    <div class="row">
-        <div class="col-lg-8">
-            <div class="card">
-                <div class="card-body">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div class="lg:col-span-2">
+            <div class="loka-card">
+                <div class="p-6">
                     <form method="POST">
                         <?= csrfField() ?>
 
-                        <div class="mb-3">
-                            <label for="name" class="form-label">Name <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" id="name" name="name"
+                        <div class="mb-4">
+                            <label for="name" class="loka-form-label">Name <span class="text-error">*</span></label>
+                            <input type="text" class="loka-form-input" id="name" name="name"
                                    required maxlength="50"
                                    value="<?= e($vehicleType->name) ?>"
                                    placeholder="e.g., Sedan, SUV, Van, Bus">
-                            <small class="text-muted">A unique name for this vehicle type</small>
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="passenger_capacity" class="form-label">Passenger Capacity <span class="text-danger">*</span></label>
-                            <input type="number" class="form-control" id="passenger_capacity" name="passenger_capacity"
-                                   required min="1" max="50" value="<?= $vehicleType->passenger_capacity ?>">
-                            <small class="text-muted">Number of passengers this vehicle type can accommodate (including driver)</small>
+                            <span class="text-xs text-base-content/50">A unique name for this vehicle type</span>
                         </div>
 
                         <div class="mb-4">
-                            <label for="description" class="form-label">Description</label>
-                            <textarea class="form-control" id="description" name="description"
-                                      rows="3" maxlength="500"
-                                      placeholder="Optional description of this vehicle type..."><?= e($vehicleType->description) ?></textarea>
-                            <small class="text-muted">Additional details about this vehicle type</small>
+                            <label for="passenger_capacity" class="loka-form-label">Passenger Capacity <span class="text-error">*</span></label>
+                            <input type="number" class="loka-form-input" id="passenger_capacity" name="passenger_capacity"
+                                   required min="1" max="50" value="<?= $vehicleType->passenger_capacity ?>">
+                            <span class="text-xs text-base-content/50">Number of passengers this vehicle type can accommodate (including driver)</span>
                         </div>
 
-                        <div class="d-flex gap-2">
-                            <button type="submit" class="btn btn-primary">
+                        <div class="mb-4">
+                            <label for="description" class="loka-form-label">Description</label>
+                            <textarea class="loka-form-input" id="description" name="description"
+                                      rows="3" maxlength="500"
+                                      placeholder="Optional description of this vehicle type..."><?= e($vehicleType->description) ?></textarea>
+                            <span class="text-xs text-base-content/50">Additional details about this vehicle type</span>
+                        </div>
+
+                        <div class="border-t border-base-200 my-6"></div>
+
+                        <div class="flex gap-2">
+                            <button type="submit" class="loka-btn-primary">
                                 <i class="bi bi-check-lg me-1"></i>Update Vehicle Type
                             </button>
-                            <a href="<?= APP_URL ?>/?page=vehicle_types" class="btn btn-outline-secondary">Cancel</a>
+                            <a href="<?= APP_URL ?>/?page=vehicle_types" class="loka-btn-secondary">Cancel</a>
                         </div>
                     </form>
                 </div>
             </div>
         </div>
 
-        <div class="col-lg-4">
-            <div class="card">
-                <div class="card-header">
-                    <h6 class="mb-0"><i class="bi bi-info-circle me-1"></i>Help</h6>
-                </div>
-                <div class="card-body">
-                    <p class="small mb-2">Editing vehicle types will affect how vehicles are displayed and assigned.</p>
-                    <ul class="small mb-0">
+        <div class="lg:col-span-1">
+            <div class="loka-card">
+                <div class="p-6">
+                    <h5 class="text-lg font-semibold text-base-content mb-4"><i class="bi bi-info-circle me-1"></i>Help</h5>
+                    <p class="text-sm text-base-content/60 mb-2">Editing vehicle types will affect how vehicles are displayed and assigned.</p>
+                    <ul class="text-sm text-base-content/60">
                         <li><strong>Name:</strong> Must be unique across all vehicle types</li>
                         <li><strong>Capacity:</strong> Used for trip validation</li>
                         <li><strong>Vehicles:</strong> <?= db()->fetchColumn("SELECT COUNT(*) FROM vehicles WHERE vehicle_type_id = ? AND deleted_at IS NULL", [$id]) ?> vehicle(s) currently using this type</li>

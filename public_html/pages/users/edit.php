@@ -80,27 +80,21 @@ $pageTitle = 'Edit User';
 require_once INCLUDES_PATH . '/header.php';
 ?>
 
-<div class="container-fluid py-4">
-    <div class="mb-4">
-        <h4 class="mb-1">Edit User: <?= e($user->name) ?></h4>
-        <nav aria-label="breadcrumb">
-            <ol class="breadcrumb mb-0">
-                <li class="breadcrumb-item"><a href="<?= APP_URL ?>">Dashboard</a></li>
-                <li class="breadcrumb-item"><a href="<?= APP_URL ?>/?page=users">Users</a></li>
-                <li class="breadcrumb-item active">Edit</li>
-            </ol>
-        </nav>
+<div class="loka-page">
+    <div class="loka-page-header">
+        <div>
+            <h1 class="text-2xl font-bold text-base-content">Edit User: <?= e($user->name) ?></h1>
+            <p class="text-sm text-base-content/60">Update user account details</p>
+        </div>
     </div>
 
-    <div class="row">
-        <div class="col-lg-8">
-            <div class="card">
-                <div class="card-header">
-                    <h5 class="mb-0"><i class="bi bi-pencil me-2"></i>Edit User</h5>
-                </div>
-                <div class="card-body">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div class="lg:col-span-2">
+            <div class="loka-card">
+                <h5 class="text-lg font-semibold text-base-content mb-4"><i class="bi bi-pencil me-2"></i>Edit User</h5>
+                <div class="p-6">
                     <?php if (!empty($errors)): ?>
-                        <div class="alert alert-danger">
+                        <div class="loka-alert loka-alert-danger">
                             <ul class="mb-0"><?php foreach ($errors as $e): ?>
                                     <li><?= e($e) ?></li><?php endforeach; ?>
                             </ul>
@@ -108,38 +102,38 @@ require_once INCLUDES_PATH . '/header.php';
 
                     <form method="POST">
                         <?= csrfField() ?>
-                        <div class="row g-3">
-                            <div class="col-md-6">
-                                <label class="form-label">Full Name <span class="text-danger">*</span></label>
-                                <input type="text" class="form-control" name="name"
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="loka-form-label">Full Name <span class="text-error">*</span></label>
+                                <input type="text" class="loka-form-input" name="name"
                                     value="<?= e(post('name', $user->name)) ?>" required>
                             </div>
-                            <div class="col-md-6">
-                                <label class="form-label">Email <span class="text-danger">*</span></label>
-                                <input type="email" class="form-control" name="email"
+                            <div>
+                                <label class="loka-form-label">Email <span class="text-error">*</span></label>
+                                <input type="email" class="loka-form-input" name="email"
                                     value="<?= e(post('email', $user->email)) ?>" required>
                             </div>
-                            <div class="col-md-6">
-                                <label class="form-label">New Password</label>
-                                <input type="password" class="form-control" name="password" minlength="8">
-                                <small class="text-muted">Leave blank to keep current password</small>
+                            <div>
+                                <label class="loka-form-label">New Password</label>
+                                <input type="password" class="loka-form-input" name="password" minlength="8">
+                                <small class="text-xs text-base-content/50">Leave blank to keep current password</small>
                             </div>
-                            <div class="col-md-6">
-                                <label class="form-label">Phone</label>
-                                <input type="text" class="form-control" name="phone"
+                            <div>
+                                <label class="loka-form-label">Phone</label>
+                                <input type="text" class="loka-form-input" name="phone"
                                     value="<?= e(post('phone', $user->phone)) ?>">
                             </div>
-                            <div class="col-md-6">
-                                <label class="form-label">Role</label>
-                                <select class="form-select" name="role">
+                            <div>
+                                <label class="loka-form-label">Role</label>
+                                <select class="select select-bordered w-full bg-base-100" name="role">
                                     <?php foreach (ROLE_LABELS as $key => $info): ?>
                                         <option value="<?= $key ?>" <?= post('role', $user->role) === $key ? 'selected' : '' ?>><?= e($info['label']) ?></option>
                                     <?php endforeach; ?>
                                 </select>
                             </div>
-                            <div class="col-md-6">
-                                <label class="form-label">Department</label>
-                                <select class="form-select" name="department_id">
+                            <div>
+                                <label class="loka-form-label">Department</label>
+                                <select class="select select-bordered w-full bg-base-100" name="department_id">
                                     <option value="">No department</option>
                                     <?php foreach ($departments as $dept): ?>
                                         <option value="<?= $dept->id ?>" <?= post('department_id', $user->department_id) == $dept->id ? 'selected' : '' ?>><?= e($dept->name) ?>
@@ -148,10 +142,10 @@ require_once INCLUDES_PATH . '/header.php';
                                 </select>
                             </div>
                         </div>
-                        <hr class="my-4">
-                        <button type="submit" class="btn btn-primary"><i class="bi bi-check-lg me-1"></i>Save
+                        <div class="border-t border-base-200 my-6"></div>
+                        <button type="submit" class="loka-btn-primary"><i class="bi bi-check-lg me-1"></i>Save
                             Changes</button>
-                        <a href="<?= APP_URL ?>/?page=users" class="btn btn-outline-secondary">Cancel</a>
+                        <a href="<?= APP_URL ?>/?page=users" class="loka-btn-secondary">Cancel</a>
                     </form>
                 </div>
             </div>

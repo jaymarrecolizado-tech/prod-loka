@@ -76,13 +76,13 @@ require_once INCLUDES_PATH . '/header.php';
     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
             <h1 class="text-2xl font-bold">
-                <i class="bi bi-file-earmark-text me-2"></i>My Trip Tickets
+                <i class="bi bi-file-earmark-text mr-2"></i>My Trip Tickets
             </h1>
             <p class="text-base-content/60 mt-1">View and manage trip tickets</p>
         </div>
         <div class="flex gap-2">
             <a href="?page=my-trip-tickets&action=generate-summary" class="loka-btn-secondary">
-                <i class="bi bi-file-earmark-spreadsheet me-1"></i>Generate Vehicle Summary
+                <i class="bi bi-file-earmark-spreadsheet mr-1"></i>Generate Vehicle Summary
             </a>
         </div>
     </div>
@@ -90,7 +90,7 @@ require_once INCLUDES_PATH . '/header.php';
     <!-- Stats Cards -->
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <div class="loka-card">
-            <div class="card-body">
+            <div class="p-6">
                 <div class="flex items-center">
                     <div class="bg-primary/10 rounded-lg p-3">
                         <i class="bi bi-files text-primary text-xl"></i>
@@ -103,7 +103,7 @@ require_once INCLUDES_PATH . '/header.php';
             </div>
         </div>
         <div class="loka-card">
-            <div class="card-body">
+            <div class="p-6">
                 <div class="flex items-center">
                     <div class="bg-warning/10 rounded-lg p-3">
                         <i class="bi bi-clock text-warning text-xl"></i>
@@ -116,7 +116,7 @@ require_once INCLUDES_PATH . '/header.php';
             </div>
         </div>
         <div class="loka-card">
-            <div class="card-body">
+            <div class="p-6">
                 <div class="flex items-center">
                     <div class="bg-info/10 rounded-lg p-3">
                         <i class="bi bi-arrow-counterclockwise text-info text-xl"></i>
@@ -129,7 +129,7 @@ require_once INCLUDES_PATH . '/header.php';
             </div>
         </div>
         <div class="loka-card">
-            <div class="card-body">
+            <div class="p-6">
                 <div class="flex items-center">
                     <div class="bg-success/10 rounded-lg p-3">
                         <i class="bi bi-check-circle text-success text-xl"></i>
@@ -145,7 +145,7 @@ require_once INCLUDES_PATH . '/header.php';
 
     <!-- Filters -->
     <div class="loka-card">
-        <div class="card-body">
+        <div class="p-6">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                     <label class="label">
@@ -157,15 +157,15 @@ require_once INCLUDES_PATH . '/header.php';
                             All (<?= $stats['all'] ?>)
                         </a>
                         <a href="?page=my-trip-tickets&status=submitted"
-                            class="join-item btn btn-sm btn-warning <?= $statusFilter === 'submitted' ? 'btn-active' : '' ?>">
+                            class="join-item btn btn-sm bg-warning text-warning-content <?= $statusFilter === 'submitted' ? 'btn-active' : '' ?>">
                             Pending (<?= $stats['submitted'] ?>)
                         </a>
                         <a href="?page=my-trip-tickets&status=reviewed"
-                            class="join-item btn btn-sm btn-info <?= $statusFilter === 'reviewed' ? 'btn-active' : '' ?>">
+                            class="join-item btn btn-sm bg-info text-info-content <?= $statusFilter === 'reviewed' ? 'btn-active' : '' ?>">
                             Reviewed (<?= $stats['reviewed'] ?>)
                         </a>
                         <a href="?page=my-trip-tickets&status=approved"
-                            class="join-item btn btn-sm btn-success <?= $statusFilter === 'approved' ? 'btn-active' : '' ?>">
+                            class="join-item btn btn-sm bg-success text-success-content <?= $statusFilter === 'approved' ? 'btn-active' : '' ?>">
                             Approved (<?= $stats['approved'] ?>)
                         </a>
                     </div>
@@ -178,11 +178,11 @@ require_once INCLUDES_PATH . '/header.php';
                         <input type="hidden" name="page" value="my-trip-tickets">
                         <input type="text" name="search" class="input input-bordered input-sm flex-1"
                             placeholder="Search destination or purpose..." value="<?= e($search) ?>">
-                        <button type="submit" class="btn btn-primary btn-sm">
+                        <button type="submit" class="loka-btn-primary loka-btn-sm">
                             <i class="bi bi-search"></i>
                         </button>
                         <?php if ($search): ?>
-                            <a href="?page=my-trip-tickets" class="btn btn-outline btn-sm">
+                            <a href="?page=my-trip-tickets" class="loka-btn-secondary loka-btn-sm">
                                 <i class="bi bi-x-lg"></i>
                             </a>
                         <?php endif; ?>
@@ -194,11 +194,11 @@ require_once INCLUDES_PATH . '/header.php';
 
     <!-- Trip Tickets List -->
     <div class="loka-card">
-        <div class="card-body">
-            <h5 class="card-title">
-                <i class="bi bi-list-ul me-2"></i>
-                My Trip Tickets
-            </h5>
+                    <div class="p-6">
+                        <div class="font-bold text-lg mb-4">
+                            <i class="bi bi-list-ul mr-2"></i>
+                            My Trip Tickets
+                        </div>
             <?php if (empty($tripTickets)): ?>
                 <div class="text-center py-12">
                     <i class="bi bi-inbox text-4xl text-base-content/30"></i>
@@ -210,8 +210,8 @@ require_once INCLUDES_PATH . '/header.php';
                         <?php else: ?>
                             You haven't created any trip tickets yet.
                             <br>
-                            <a href="?page=my-trips" class="btn btn-primary btn-sm mt-3">
-                                <i class="bi bi-calendar3 me-1"></i>View My Trips
+                            <a href="?page=my-trips" class="loka-btn-primary loka-btn-sm mt-3">
+                                <i class="bi bi-calendar3 mr-1"></i>View My Trips
                             </a>
                         <?php endif; ?>
                     </p>
@@ -277,7 +277,7 @@ require_once INCLUDES_PATH . '/header.php';
                                     </td>
                                     <td>
                                         <div class="text-sm">
-                                            <i class="bi bi-calendar3 me-1"></i>
+                                            <i class="bi bi-calendar3 mr-1"></i>
                                             <?= formatDate($tt->start_date, 'M/d/Y') ?>
                                         </div>
                                     </td>
@@ -297,15 +297,15 @@ require_once INCLUDES_PATH . '/header.php';
                                     <td>
                                         <div class="join">
                                             <a href="?page=trip-tickets&action=view&id=<?= $tt->id ?>"
-                                                class="join-item btn btn-xs btn-outline btn-primary" title="View Ticket">
+                                                class="join-item btn btn-xs loka-btn-outline-primary text-xs" title="View Ticket">
                                                 <i class="bi bi-eye"></i>
                                             </a>
                                             <a href="?page=trip-tickets&action=export-pdf&id=<?= $tt->id ?>"
-                                                class="join-item btn btn-xs btn-outline btn-error" title="Export PDF">
+                                                class="join-item btn btn-xs loka-btn-outline-error text-xs" title="Export PDF">
                                                 <i class="bi bi-file-earmark-pdf"></i>
                                             </a>
                                             <a href="?page=trip-tickets&action=export-excel&id=<?= $tt->id ?>"
-                                                class="join-item btn btn-xs btn-outline btn-success" title="Export Excel">
+                                                class="join-item btn btn-xs bg-transparent border border-success text-success hover:bg-success/10 px-3 py-1 text-xs font-medium rounded-xl inline-flex items-center gap-1 transition-colors" title="Export Excel">
                                                 <i class="bi bi-file-earmark-excel"></i>
                                             </a>
                                         </div>

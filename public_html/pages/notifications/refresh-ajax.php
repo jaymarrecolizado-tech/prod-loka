@@ -30,7 +30,7 @@ ob_start();
 
 if (empty($notifications)): ?>
     <div class="py-12">
-        <div class="text-center text-muted">
+        <div class="text-center text-base-content/60">
             <i class="bi bi-bell-slash text-4xl mb-3 block"></i>
             <h5 class="text-base-content/60">No notifications in <?= $view ?></h5>
             <p class="text-sm text-base-content/40">You're all caught up!</p>
@@ -68,7 +68,7 @@ if (empty($notifications)): ?>
 
             <!-- Per-notification dropdown (DaisyUI) -->
             <div class="ml-3 dropdown dropdown-end">
-                <div tabindex="0" role="button" class="btn btn-sm btn-ghost btn-square">
+                <div tabindex="0" role="button" class="loka-btn-ghost loka-btn-sm">
                     <i class="bi bi-three-dots-vertical"></i>
                 </div>
                 <ul tabindex="0" class="dropdown-content menu bg-base-100 rounded-box z-[1] w-44 p-2 shadow-lg">

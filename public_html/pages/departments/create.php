@@ -43,41 +43,42 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 require_once INCLUDES_PATH . '/header.php';
 ?>
 
-<div class="container-fluid py-4">
-    <div class="mb-4">
-        <h4 class="mb-1">Add Department</h4>
-        <nav aria-label="breadcrumb"><ol class="breadcrumb mb-0"><li class="breadcrumb-item"><a href="<?= APP_URL ?>">Dashboard</a></li><li class="breadcrumb-item"><a href="<?= APP_URL ?>/?page=departments">Departments</a></li><li class="breadcrumb-item active">Add</li></ol></nav>
+<div class="loka-page">
+    <div class="loka-page-header">
+        <div>
+            <h1 class="text-2xl font-bold text-base-content">Add Department</h1>
+        </div>
     </div>
     
-    <div class="row">
-        <div class="col-lg-6">
-            <div class="card">
-                <div class="card-header"><h5 class="mb-0"><i class="bi bi-building me-2"></i>Department Details</h5></div>
-                <div class="card-body">
-                    <?php if (!empty($errors)): ?><div class="alert alert-danger"><ul class="mb-0"><?php foreach ($errors as $e): ?><li><?= e($e) ?></li><?php endforeach; ?></ul></div><?php endif; ?>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="lg:col-span-1">
+            <div class="loka-card">
+                <div class="p-6">
+                    <h5 class="text-lg font-semibold text-base-content mb-4"><i class="bi bi-building me-2"></i>Department Details</h5>
+                    <?php if (!empty($errors)): ?><div class="loka-alert loka-alert-danger"><ul class="mb-0"><?php foreach ($errors as $e): ?><li><?= e($e) ?></li><?php endforeach; ?></ul></div><?php endif; ?>
                     
                     <form method="POST">
                         <?= csrfField() ?>
-                        <div class="mb-3">
-                            <label class="form-label">Name <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" name="name" value="<?= e(post('name', '')) ?>" required>
+                        <div class="mb-4">
+                            <label class="loka-form-label">Name <span class="text-error">*</span></label>
+                            <input type="text" class="loka-form-input" name="name" value="<?= e(post('name', '')) ?>" required>
                         </div>
-                        <div class="mb-3">
-                            <label class="form-label">Description</label>
-                            <textarea class="form-control" name="description" rows="3" maxlength="500"><?= e(post('description', '')) ?></textarea>
+                        <div class="mb-4">
+                            <label class="loka-form-label">Description</label>
+                            <textarea class="loka-form-input" name="description" rows="3" maxlength="500"><?= e(post('description', '')) ?></textarea>
                         </div>
-                        <div class="mb-3">
-                            <label class="form-label">Department Head</label>
-                            <select class="form-select" name="head_user_id">
+                        <div class="mb-4">
+                            <label class="loka-form-label">Department Head</label>
+                            <select class="select select-bordered w-full bg-base-100" name="head_user_id">
                                 <option value="">Select head...</option>
                                 <?php foreach ($users as $user): ?>
                                 <option value="<?= $user->id ?>" <?= post('head_user_id') == $user->id ? 'selected' : '' ?>><?= e($user->name) ?></option>
                                 <?php endforeach; ?>
                             </select>
                         </div>
-                        <hr class="my-4">
-                        <button type="submit" class="btn btn-primary"><i class="bi bi-check-lg me-1"></i>Create Department</button>
-                        <a href="<?= APP_URL ?>/?page=departments" class="btn btn-outline-secondary">Cancel</a>
+                        <hr class="border-t border-base-200 my-6">
+                        <button type="submit" class="loka-btn-primary"><i class="bi bi-check-lg me-1"></i>Create Department</button>
+                        <a href="<?= APP_URL ?>/?page=departments" class="loka-btn-secondary">Cancel</a>
                     </form>
                 </div>
             </div>

@@ -1306,7 +1306,7 @@ function clearAppCache(): void
 function fileUrl(string $filePath, ?string $label = null, ?string $class = null): string
 {
     if (empty($filePath)) {
-        return $label ? '<span class="text-muted">N/A</span>' : '';
+        return $label ? '<span class="text-base-content/60">N/A</span>' : '';
     }
 
     $url = '?page=file-view&file=' . urlencode($filePath);
@@ -1329,13 +1329,13 @@ function fileUrl(string $filePath, ?string $label = null, ?string $class = null)
 function fileDownloadLink(string $filePath, ?string $fileName = null): string
 {
     if (empty($filePath)) {
-        return '<span class="text-muted">No file</span>';
+        return '<span class="text-base-content/60">No file</span>';
     }
 
     $displayFileName = $fileName ?? basename($filePath);
     $url = '?page=file-view&file=' . urlencode($filePath);
 
-    return '<a href="' . e($url) . '" target="_blank" class="btn btn-sm btn-outline-primary me-1">
+    return '<a href="' . e($url) . '" target="_blank" class="loka-btn-outline-primary loka-btn-sm me-1">
         <i class="bi bi-download me-1"></i>' . e($displayFileName) . '
     </a>';
 }

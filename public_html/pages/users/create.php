@@ -86,27 +86,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 require_once INCLUDES_PATH . '/header.php';
 ?>
 
-<div class="container-fluid py-4">
-    <div class="mb-4">
-        <h4 class="mb-1">Add User</h4>
-        <nav aria-label="breadcrumb">
-            <ol class="breadcrumb mb-0">
-                <li class="breadcrumb-item"><a href="<?= APP_URL ?>">Dashboard</a></li>
-                <li class="breadcrumb-item"><a href="<?= APP_URL ?>/?page=users">Users</a></li>
-                <li class="breadcrumb-item active">Add</li>
-            </ol>
-        </nav>
+<div class="loka-page">
+    <div class="loka-page-header">
+        <div>
+            <h1 class="text-2xl font-bold text-base-content">Add User</h1>
+            <p class="text-sm text-base-content/60">Create a new user account</p>
+        </div>
     </div>
 
-    <div class="row">
-        <div class="col-lg-8">
-            <div class="card">
-                <div class="card-header">
-                    <h5 class="mb-0"><i class="bi bi-person-plus me-2"></i>User Details</h5>
-                </div>
-                <div class="card-body">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div class="lg:col-span-2">
+            <div class="loka-card">
+                <h5 class="text-lg font-semibold text-base-content mb-4"><i class="bi bi-person-plus me-2"></i>User Details</h5>
+                <div class="p-6">
                     <?php if (!empty($errors)): ?>
-                        <div class="alert alert-danger">
+                        <div class="loka-alert loka-alert-danger">
                             <ul class="mb-0"><?php foreach ($errors as $e): ?>
                                     <li><?= e($e) ?></li><?php endforeach; ?>
                             </ul>
@@ -114,31 +108,31 @@ require_once INCLUDES_PATH . '/header.php';
 
                     <form method="POST">
                         <?= csrfField() ?>
-                        <div class="row g-3">
-                            <div class="col-md-6">
-                                <label class="form-label">Full Name <span class="text-danger">*</span></label>
-                                <input type="text" class="form-control" name="name" value="<?= e(post('name', '')) ?>"
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="loka-form-label">Full Name <span class="text-error">*</span></label>
+                                <input type="text" class="loka-form-input" name="name" value="<?= e(post('name', '')) ?>"
                                     required>
                             </div>
-                            <div class="col-md-6">
-                                <label class="form-label">Email <span class="text-danger">*</span></label>
-                                <input type="email" class="form-control" name="email"
+                            <div>
+                                <label class="loka-form-label">Email <span class="text-error">*</span></label>
+                                <input type="email" class="loka-form-input" name="email"
                                     value="<?= e(post('email', '')) ?>" required>
                             </div>
-                            <div class="col-md-6">
-                                <label class="form-label">Password <span class="text-danger">*</span></label>
-                                <input type="password" class="form-control" name="password" required
+                            <div>
+                                <label class="loka-form-label">Password <span class="text-error">*</span></label>
+                                <input type="password" class="loka-form-input" name="password" required
                                     minlength="<?= PASSWORD_MIN_LENGTH ?>">
-                                <small class="text-muted"><?= e($security->getPasswordRequirements()) ?></small>
+                                <small class="text-xs text-base-content/50"><?= e($security->getPasswordRequirements()) ?></small>
                             </div>
-                            <div class="col-md-6">
-                                <label class="form-label">Phone</label>
-                                <input type="text" class="form-control" name="phone"
+                            <div>
+                                <label class="loka-form-label">Phone</label>
+                                <input type="text" class="loka-form-input" name="phone"
                                     value="<?= e(post('phone', '')) ?>">
                             </div>
-                            <div class="col-md-6">
-                                <label class="form-label">Role <span class="text-danger">*</span></label>
-                                <select class="form-select" name="role" required>
+                            <div>
+                                <label class="loka-form-label">Role <span class="text-error">*</span></label>
+                                <select class="select select-bordered w-full bg-base-100" name="role" required>
                                     <option value="">Select role...</option>
                                     <?php foreach (ROLE_LABELS as $key => $info): ?>
                                         <option value="<?= $key ?>" <?= post('role') === $key ? 'selected' : '' ?>>
@@ -146,9 +140,9 @@ require_once INCLUDES_PATH . '/header.php';
                                     <?php endforeach; ?>
                                 </select>
                             </div>
-                            <div class="col-md-6">
-                                <label class="form-label">Department</label>
-                                <select class="form-select" name="department_id">
+                            <div>
+                                <label class="loka-form-label">Department</label>
+                                <select class="select select-bordered w-full bg-base-100" name="department_id">
                                     <option value="">No department</option>
                                     <?php foreach ($departments as $dept): ?>
                                         <option value="<?= $dept->id ?>" <?= post('department_id') == $dept->id ? 'selected' : '' ?>><?= e($dept->name) ?></option>
@@ -156,10 +150,10 @@ require_once INCLUDES_PATH . '/header.php';
                                 </select>
                             </div>
                         </div>
-                        <hr class="my-4">
-                        <button type="submit" class="btn btn-primary"><i class="bi bi-check-lg me-1"></i>Create
+                        <div class="border-t border-base-200 my-6"></div>
+                        <button type="submit" class="loka-btn-primary"><i class="bi bi-check-lg me-1"></i>Create
                             User</button>
-                        <a href="<?= APP_URL ?>/?page=users" class="btn btn-outline-secondary">Cancel</a>
+                        <a href="<?= APP_URL ?>/?page=users" class="loka-btn-secondary">Cancel</a>
                     </form>
                 </div>
             </div>

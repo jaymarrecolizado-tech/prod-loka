@@ -484,7 +484,7 @@ switch ($page) {
         // 404 page
         http_response_code(404);
         require_once INCLUDES_PATH . '/header.php';
-        echo '<div class="container-fluid py-4"><div class="alert alert-danger">Page not found.</div></div>';
+        echo '<div class="w-full px-4 py-4 sm:px-6 lg:px-8"><div class="loka-alert loka-alert-danger">Page not found.</div></div>';
         require_once INCLUDES_PATH . '/footer.php';
         break;
 }

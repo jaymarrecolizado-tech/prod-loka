@@ -131,16 +131,16 @@ require_once INCLUDES_PATH . '/header.php';
             <?php endif; ?>
 
             <?php if ($request->user_id === userId() && !in_array($request->status, [STATUS_COMPLETED, STATUS_CANCELLED])): ?>
-                <button type="button" class="btn btn-outline btn-error" onclick="document.getElementById('cancelRequestModal').showModal()">
+                <button type="button" class="loka-btn-outline-error" onclick="document.getElementById('cancelRequestModal').showModal()">
                     <i class="bi bi-x-circle mr-1"></i>Cancel Request
                 </button>
             <?php endif; ?>
 
             <?php if (isMotorpool() && $request->status === STATUS_APPROVED): ?>
-                <button type="button" class="btn btn-warning" onclick="document.getElementById('overrideModal').showModal()">
+                <button type="button" class="bg-warning text-warning-content hover:bg-warning/90 px-4 py-2 text-sm font-medium rounded-xl inline-flex items-center gap-2 transition-colors" onclick="document.getElementById('overrideModal').showModal()">
                     <i class="bi bi-pencil-square mr-1"></i>Override Vehicle/Driver
                 </button>
-                <button type="button" class="btn btn-success" onclick="document.getElementById('completeModal').showModal()">
+                <button type="button" class="bg-success text-success-content hover:bg-success/90 px-4 py-2 text-sm font-medium rounded-xl inline-flex items-center gap-2 transition-colors" onclick="document.getElementById('completeModal').showModal()">
                     <i class="bi bi-check-circle mr-1"></i>Complete Trip
                 </button>
             <?php endif; ?>
@@ -204,7 +204,7 @@ require_once INCLUDES_PATH . '/header.php';
                                         <?php if ($canceller): ?>
                                             <?= e($canceller->name) ?>
                                             <?php if ($isAdminOverride): ?>
-                                            <span class="badge badge-warning ml-2">Admin Override</span>
+                                            <span class="loka-badge loka-badge-warning ml-2">Admin Override</span>
                                             <?php endif; ?>
                                         <?php else: ?>
                                             System
@@ -217,7 +217,7 @@ require_once INCLUDES_PATH . '/header.php';
                                 </div>
                                 <div class="md:col-span-2">
                                     <label class="text-sm text-base-content/50">Reason for Cancellation</label>
-                                    <div class="alert alert-warning mt-1">
+                                    <div class="loka-alert loka-alert-warning mt-1">
                                         <i class="bi bi-chat-left-quote mr-2"></i>
                                         <?= nl2br(e($cancellationReason)) ?>
                                     </div>
@@ -262,11 +262,11 @@ require_once INCLUDES_PATH . '/header.php';
                             ?>
                             <label class="text-sm text-base-content/50">Passengers (<?= $actualPassengerCount ?>)</label>
                             <div class="flex flex-wrap gap-1 mt-1">
-                                <span class="badge badge-primary">
+                                <span class="loka-badge loka-badge-primary">
                                     <i class="bi bi-person-fill mr-1"></i><?= e($request->requester_name) ?> (Requester)
                                 </span>
                                 <?php foreach ($passengers as $passenger): ?>
-                                    <span class="badge badge-<?= $passenger->user_id ? 'secondary' : 'info' ?>">
+                                    <span class="loka-badge <?= $passenger->user_id ? 'loka-badge-secondary' : 'loka-badge-info' ?>">
                                         <i class="bi bi-person<?= $passenger->user_id ? '' : '-plus' ?> mr-1"></i>
                                         <?= e($passenger->name ?: $passenger->guest_name) ?>
                                         <?= $passenger->user_id ? '' : ' <span class="text-xs">(Guest)</span>' ?>
@@ -428,13 +428,13 @@ require_once INCLUDES_PATH . '/header.php';
                                             </td>
                                             <td>
                                                 <?php if ($ah->action === 'assigned'): ?>
-                                                    <span class="badge badge-success">Assigned</span>
+                                                    <span class="loka-badge loka-badge-success">Assigned</span>
                                                 <?php elseif ($ah->action === 'overridden'): ?>
-                                                    <span class="badge badge-warning">Overridden</span>
+                                                    <span class="loka-badge loka-badge-warning">Overridden</span>
                                                 <?php elseif ($ah->action === 'released'): ?>
-                                                    <span class="badge badge-secondary">Released</span>
+                                                    <span class="loka-badge loka-badge-secondary">Released</span>
                                                 <?php elseif ($ah->action === 'completed'): ?>
-                                                    <span class="badge badge-primary">Completed</span>
+                                                    <span class="loka-badge loka-badge-primary">Completed</span>
                                                 <?php endif; ?>
                                             </td>
                                             <td>
@@ -564,9 +564,9 @@ require_once INCLUDES_PATH . '/header.php';
                                 <div class="flex gap-3">
                                     <div>
                                         <?php if ($approval->status === 'approved'): ?>
-                                            <span class="badge badge-success badge-lg rounded-full p-2"><i class="bi bi-check-lg"></i></span>
+                                            <span class="loka-badge loka-badge-success badge-lg rounded-full p-2"><i class="bi bi-check-lg"></i></span>
                                         <?php else: ?>
-                                            <span class="badge badge-error badge-lg rounded-full p-2"><i class="bi bi-x-lg"></i></span>
+                                            <span class="loka-badge loka-badge-error badge-lg rounded-full p-2"><i class="bi bi-x-lg"></i></span>
                                         <?php endif; ?>
                                     </div>
                                     <div>
@@ -606,7 +606,7 @@ require_once INCLUDES_PATH . '/header.php';
                         <div class="text-sm text-base-content/50"><?= e($request->requester_phone) ?></div>
                     <?php endif; ?>
                     <div class="mt-2">
-                        <span class="badge badge-ghost"><?= e($request->department_name) ?></span>
+                        <span class="loka-badge loka-badge-ghost"><?= e($request->department_name) ?></span>
                     </div>
                 </div>
             </div>
@@ -622,14 +622,14 @@ require_once INCLUDES_PATH . '/header.php';
                     <div class="flex items-center gap-3 mb-3">
                         <div>
                             <?php if (in_array($request->status, [STATUS_PENDING])): ?>
-                                <span class="badge badge-warning badge-lg rounded-full p-2"><i class="bi bi-hourglass"></i></span>
+                                <span class="loka-badge loka-badge-warning badge-lg rounded-full p-2"><i class="bi bi-hourglass"></i></span>
                             <?php elseif (in_array($request->status, [STATUS_REJECTED, STATUS_CANCELLED])): ?>
-                                <span class="badge badge-error badge-lg rounded-full p-2"><i class="bi bi-x"></i></span>
+                                <span class="loka-badge loka-badge-error badge-lg rounded-full p-2"><i class="bi bi-x"></i></span>
                             <?php else: ?>
-                                <span class="badge badge-success badge-lg rounded-full p-2"><i class="bi bi-check"></i></span>
+                                <span class="loka-badge loka-badge-success badge-lg rounded-full p-2"><i class="bi bi-check"></i></span>
                             <?php endif; ?>
                         </div>
-                        <div class="flex-grow-1">
+                        <div class="grow">
                             <div class="font-medium">Department Approval</div>
                             <?php if ($request->approver_name): ?>
                                 <small class="text-primary block"><i class="bi bi-person-check mr-1"></i><?= e($request->approver_name) ?></small>
@@ -650,16 +650,16 @@ require_once INCLUDES_PATH . '/header.php';
                     <div class="flex items-center gap-3">
                         <div>
                             <?php if (in_array($request->status, [STATUS_PENDING_MOTORPOOL])): ?>
-                                <span class="badge badge-warning badge-lg rounded-full p-2"><i class="bi bi-hourglass"></i></span>
+                                <span class="loka-badge loka-badge-warning badge-lg rounded-full p-2"><i class="bi bi-hourglass"></i></span>
                             <?php elseif (in_array($request->status, [STATUS_APPROVED, STATUS_COMPLETED])): ?>
-                                <span class="badge badge-success badge-lg rounded-full p-2"><i class="bi bi-check"></i></span>
+                                <span class="loka-badge loka-badge-success badge-lg rounded-full p-2"><i class="bi bi-check"></i></span>
                             <?php elseif (in_array($request->status, [STATUS_REJECTED])): ?>
-                                <span class="badge badge-error badge-lg rounded-full p-2"><i class="bi bi-x"></i></span>
+                                <span class="loka-badge loka-badge-error badge-lg rounded-full p-2"><i class="bi bi-x"></i></span>
                             <?php else: ?>
-                                <span class="badge badge-secondary badge-lg rounded-full p-2"><i class="bi bi-dash"></i></span>
+                                <span class="loka-badge loka-badge-secondary badge-lg rounded-full p-2"><i class="bi bi-dash"></i></span>
                             <?php endif; ?>
                         </div>
-                        <div class="flex-grow-1">
+                        <div class="grow">
                             <div class="font-medium">Motorpool Approval</div>
                             <?php if ($request->motorpool_head_name): ?>
                                 <small class="text-primary block"><i class="bi bi-person-check mr-1"></i><?= e($request->motorpool_head_name) ?></small>
@@ -699,7 +699,7 @@ require_once INCLUDES_PATH . '/header.php';
                 </div>
 
                 <div class="p-6 space-y-4">
-                    <div class="alert alert-warning">
+                    <div class="loka-alert loka-alert-warning">
                         <i class="bi bi-exclamation-triangle mr-2"></i>
                         <strong>Warning:</strong> Overriding will reassign the vehicle and/or driver for this approved trip. 
                         This may create conflicts with other scheduled trips. Use with caution.
@@ -772,9 +772,9 @@ require_once INCLUDES_PATH . '/header.php';
 
                 <div class="p-6 border-t border-base-200 flex justify-end gap-2">
                     <form method="dialog">
-                        <button type="submit" class="btn btn-secondary">Cancel</button>
+                        <button type="submit" class="loka-btn-secondary">Cancel</button>
                     </form>
-                    <button type="submit" class="btn btn-warning">
+                    <button type="submit" class="bg-warning text-warning-content hover:bg-warning/90 px-4 py-2 text-sm font-medium rounded-xl inline-flex items-center gap-2 transition-colors">
                         <i class="bi bi-pencil-square mr-1"></i>Confirm Override
                     </button>
                 </div>
@@ -830,9 +830,9 @@ require_once INCLUDES_PATH . '/header.php';
 
                 <div class="p-6 border-t border-base-200 flex justify-end gap-2">
                     <form method="dialog">
-                        <button type="submit" class="btn btn-secondary">Cancel</button>
+                        <button type="submit" class="loka-btn-secondary">Cancel</button>
                     </form>
-                    <button type="submit" class="btn btn-success">
+                    <button type="submit" class="bg-success text-success-content hover:bg-success/90 px-4 py-2 text-sm font-medium rounded-xl inline-flex items-center gap-2 transition-colors">
                         <i class="bi bi-check-lg mr-1"></i>Mark Complete
                     </button>
                 </div>
@@ -874,7 +874,7 @@ require_once INCLUDES_PATH . '/header.php';
                     </div>
                 </div>
 
-                <div class="alert alert-error flex items-start">
+                <div class="loka-alert loka-alert-danger flex items-start">
                     <i class="bi bi-exclamation-triangle-fill shrink-0 mr-2 mt-1"></i>
                     <div>
                         <strong>This action cannot be undone!</strong>
@@ -887,7 +887,7 @@ require_once INCLUDES_PATH . '/header.php';
                 </div>
 
                 <?php if ($request->status === STATUS_APPROVED): ?>
-                <div class="alert alert-warning">
+                <div class="loka-alert loka-alert-warning">
                     <i class="bi bi-info-circle-fill mr-2"></i>
                     <strong>Attention:</strong> This request has already been approved.
                     <?php if ($request->vehicle_plate): ?>
@@ -911,11 +911,11 @@ require_once INCLUDES_PATH . '/header.php';
             </div>
             <div class="p-6 border-t border-base-200 flex justify-end gap-2">
                 <form method="dialog">
-                    <button type="button" class="btn btn-outline btn-lg">
+                    <button type="button" class="loka-btn-secondary text-base px-6 py-3">
                         <i class="bi bi-x-lg mr-1"></i>No, Keep Request
                     </button>
                 </form>
-                <button type="submit" class="btn btn-error btn-lg">
+                <button type="submit" class="bg-error text-error-content hover:bg-error/90 px-6 py-3 text-base font-medium rounded-xl inline-flex items-center gap-2 transition-colors">
                     <i class="bi bi-check-lg mr-1"></i>Yes, Cancel Request
                 </button>
             </div>
