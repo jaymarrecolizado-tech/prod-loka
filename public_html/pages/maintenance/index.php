@@ -144,35 +144,27 @@ require_once INCLUDES_PATH . '/header.php';
 
     <div class="loka-card">
         <div class="px-6 py-4 border-b border-base-200 bg-white">
-            <ul class="nav nav-tabs card-header-tabs">
-                <li class="nav-item">
-                    <a class="nav-link <?= $filter === 'all' && !$status ? 'active' : '' ?>" 
-                       href="<?= APP_URL ?>/?page=maintenance">
-                        <i class="bi bi-list-ul me-1"></i>All
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link <?= $status === 'pending' ? 'active' : '' ?>" 
-                       href="<?= APP_URL ?>/?page=maintenance&status=pending">
-                        <i class="bi bi-clock me-1"></i>Pending
-                        <?php if ($stats['pending'] > 0): ?>
-                            <span class="loka-badge bg-warning ms-1"><?= $stats['pending'] ?></span>
-                        <?php endif; ?>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link <?= $filter === 'overdue' ? 'active' : '' ?>" 
-                       href="<?= APP_URL ?>/?page=maintenance&filter=overdue">
-                        <i class="bi bi-exclamation-triangle me-1"></i>Overdue
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link <?= $status === 'completed' ? 'active' : '' ?>" 
-                       href="<?= APP_URL ?>/?page=maintenance&status=completed">
-                        <i class="bi bi-check-circle me-1"></i>Completed
-                    </a>
-                </li>
-            </ul>
+            <div role="tablist" class="tabs tabs-bordered">
+                <a role="tab" class="tab <?= $filter === 'all' && !$status ? 'tab-active' : '' ?>"
+                   href="<?= APP_URL ?>/?page=maintenance">
+                    <i class="bi bi-list-ul me-1"></i>All
+                </a>
+                <a role="tab" class="tab <?= $status === 'pending' ? 'tab-active' : '' ?>"
+                   href="<?= APP_URL ?>/?page=maintenance&status=pending">
+                    <i class="bi bi-clock me-1"></i>Pending
+                    <?php if ($stats['pending'] > 0): ?>
+                        <span class="loka-badge bg-warning ms-1"><?= $stats['pending'] ?></span>
+                    <?php endif; ?>
+                </a>
+                <a role="tab" class="tab <?= $filter === 'overdue' ? 'tab-active' : '' ?>"
+                   href="<?= APP_URL ?>/?page=maintenance&filter=overdue">
+                    <i class="bi bi-exclamation-triangle me-1"></i>Overdue
+                </a>
+                <a role="tab" class="tab <?= $status === 'completed' ? 'tab-active' : '' ?>"
+                   href="<?= APP_URL ?>/?page=maintenance&status=completed">
+                    <i class="bi bi-check-circle me-1"></i>Completed
+                </a>
+            </div>
         </div>
         <div class="p-6">
             <?php if (empty($maintenanceRequests)): ?>

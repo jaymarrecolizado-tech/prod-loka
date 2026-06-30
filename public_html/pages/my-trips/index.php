@@ -198,29 +198,23 @@ require_once INCLUDES_PATH . '/header.php';
 
     <div class="loka-card">
         <div class="px-6 py-4 border-b border-base-200 bg-white">
-            <ul class="nav nav-tabs card-header-tabs">
-                <li class="nav-item">
-                    <a class="nav-link <?= $filter === 'upcoming' ? 'active' : '' ?>" 
-                       href="<?= APP_URL ?>/?page=my-trips">
-                        <i class="bi bi-calendar-event mr-1"></i>Upcoming
-                        <?php if ($stats['upcoming'] > 0): ?>
-                            <span class="loka-badge bg-primary ml-1"><?= $stats['upcoming'] ?></span>
-                        <?php endif; ?>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link <?= $filter === 'past' ? 'active' : '' ?>" 
-                       href="<?= APP_URL ?>/?page=my-trips&filter=past">
-                        <i class="bi bi-clock-history mr-1"></i>Past Trips
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link <?= $filter === 'all' ? 'active' : '' ?>" 
-                       href="<?= APP_URL ?>/?page=my-trips&filter=all">
-                        <i class="bi bi-list-ul mr-1"></i>All Trips
-                    </a>
-                </li>
-            </ul>
+            <div role="tablist" class="tabs tabs-bordered">
+                <a role="tab" class="tab <?= $filter === 'upcoming' ? 'tab-active' : '' ?>"
+                   href="<?= APP_URL ?>/?page=my-trips">
+                    <i class="bi bi-calendar-event mr-1"></i>Upcoming
+                    <?php if ($stats['upcoming'] > 0): ?>
+                        <span class="loka-badge bg-primary ml-1"><?= $stats['upcoming'] ?></span>
+                    <?php endif; ?>
+                </a>
+                <a role="tab" class="tab <?= $filter === 'past' ? 'tab-active' : '' ?>"
+                   href="<?= APP_URL ?>/?page=my-trips&filter=past">
+                    <i class="bi bi-clock-history mr-1"></i>Past Trips
+                </a>
+                <a role="tab" class="tab <?= $filter === 'all' ? 'tab-active' : '' ?>"
+                   href="<?= APP_URL ?>/?page=my-trips&filter=all">
+                    <i class="bi bi-list-ul mr-1"></i>All Trips
+                </a>
+            </div>
         </div>
         <div class="p-6">
             <?php if (empty($trips)): ?>

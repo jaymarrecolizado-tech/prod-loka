@@ -159,24 +159,20 @@ require_once INCLUDES_PATH . '/header.php';
     </div>
     
     <!-- Tabs -->
-    <ul class="nav nav-tabs mb-4">
-        <li class="nav-item">
-            <a class="nav-link <?= $tab === 'pending' ? 'active' : '' ?>" href="<?= APP_URL ?>/?page=approvals&tab=pending&p_pending=1">
-                <i class="bi bi-hourglass-split me-1"></i>Pending
-                <?php if ($pendingRequestsCount > 0): ?>
-                <span class="loka-badge bg-warning ms-1"><?= $pendingRequestsCount ?></span>
-                <?php endif; ?>
-            </a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link <?= $tab === 'processed' ? 'active' : '' ?>" href="<?= APP_URL ?>/?page=approvals&tab=processed&p_processed=1">
-                <i class="bi bi-check-circle me-1"></i>Processed
-                <?php if ($processedRequestsCount > 0): ?>
-                <span class="loka-badge bg-secondary ms-1"><?= $processedRequestsCount ?></span>
-                <?php endif; ?>
-            </a>
-        </li>
-    </ul>
+    <div role="tablist" class="tabs tabs-bordered mb-4">
+        <a role="tab" class="tab <?= $tab === 'pending' ? 'tab-active' : '' ?>" href="<?= APP_URL ?>/?page=approvals&tab=pending&p_pending=1">
+            <i class="bi bi-hourglass-split me-1"></i>Pending
+            <?php if ($pendingRequestsCount > 0): ?>
+            <span class="loka-badge bg-warning ms-1"><?= $pendingRequestsCount ?></span>
+            <?php endif; ?>
+        </a>
+        <a role="tab" class="tab <?= $tab === 'processed' ? 'tab-active' : '' ?>" href="<?= APP_URL ?>/?page=approvals&tab=processed&p_processed=1">
+            <i class="bi bi-check-circle me-1"></i>Processed
+            <?php if ($processedRequestsCount > 0): ?>
+            <span class="loka-badge bg-secondary ms-1"><?= $processedRequestsCount ?></span>
+            <?php endif; ?>
+        </a>
+    </div>
     
     <?php if ($tab === 'pending'): ?>
     <!-- Pending Approvals -->
