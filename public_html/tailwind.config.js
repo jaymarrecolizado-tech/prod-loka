@@ -96,24 +96,44 @@ export default {
     themes: [
       {
         // Navy Cyan — sleek dark theme matching login screen palette
-        // Deep navy backgrounds with cyan/blue accents from login page.
         loka: {
-          'primary': '#00d4ff',           // cyan — login page accent
-          'primary-content': '#0a0e1a',   // navy — dark text on primary
-          'secondary': '#2e6af6',         // blue-bright — secondary actions
+          'primary': '#00d4ff',           // cyan
+          'primary-content': '#0a0e1a',
+          'secondary': '#2e6af6',         // blue-bright
           'secondary-content': '#eef4ff',
-          'accent': '#1e4db7',            // blue-mid — subtle accent
+          'accent': '#1e4db7',            // blue-mid
           'accent-content': '#eef4ff',
-          'neutral': '#0c1f4a',           // blue-dark — dark panels
+          'neutral': '#0c1f4a',
           'neutral-content': '#eef4ff',
-          'base-100': '#0a0e1a',          // navy — page background
-          'base-200': '#0d1526',          // navy2 — cards / surfaces
-          'base-300': '#162033',          // borders — visible but subtle
-          'base-content': '#eef4ff',      // white — body text
+          'base-100': '#0a0e1a',          // navy — page bg
+          'base-200': '#0d1526',          // navy2 — cards
+          'base-300': '#162033',          // borders
+          'base-content': '#eef4ff',
           'info': '#00d4ff',
-          'success': '#00f5e4',           // cyan2 — approvals
-          'warning': '#f5c518',           // gold — alerts
-          'error': '#e82333',             // red — errors
+          'success': '#00f5e4',
+          'warning': '#f5c518',
+          'error': '#e82333',
+        },
+      },
+      {
+        // Ghost White — soft, warm light theme with saddle undertones
+        'loka-light': {
+          'primary': '#2563eb',           // blue-600 — primary actions
+          'primary-content': '#ffffff',
+          'secondary': '#64748b',         // slate-500
+          'secondary-content': '#ffffff',
+          'accent': '#0891b2',            // cyan-600
+          'accent-content': '#ffffff',
+          'neutral': '#334155',           // slate-700
+          'neutral-content': '#f8fafc',
+          'base-100': '#f8f7f4',          // ghost white — page bg
+          'base-200': '#f0efeb',          // cards — slightly darker
+          'base-300': '#e0ded8',          // borders — visible
+          'base-content': '#1e293b',      // slate-800 — body text
+          'info': '#0ea5e9',
+          'success': '#16a34a',
+          'warning': '#d97706',
+          'error': '#dc2626',
         },
       },
     ],

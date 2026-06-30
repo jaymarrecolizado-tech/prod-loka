@@ -14,6 +14,37 @@
     
     <!-- Custom JS -->
     <?= viteEntryJsTags('app') ?>
+
+    <!-- Theme Toggle Script -->
+    <script>
+    (function() {
+        var btn = document.getElementById('themeToggle');
+        var iconDark = document.getElementById('themeIconDark');
+        var iconLight = document.getElementById('themeIconLight');
+        var html = document.documentElement;
+
+        function updateIcons(theme) {
+            if (theme === 'loka-light') {
+                iconDark.classList.add('hidden');
+                iconLight.classList.remove('hidden');
+            } else {
+                iconDark.classList.remove('hidden');
+                iconLight.classList.add('hidden');
+            }
+        }
+
+        // Set initial icons
+        updateIcons(html.getAttribute('data-theme'));
+
+        btn.addEventListener('click', function() {
+            var current = html.getAttribute('data-theme');
+            var next = current === 'loka' ? 'loka-light' : 'loka';
+            html.setAttribute('data-theme', next);
+            localStorage.setItem('loka_theme', next);
+            updateIcons(next);
+        });
+    })();
+    </script>
     
     <?php if (isset($pageScripts)): ?>
     <?= $pageScripts ?>

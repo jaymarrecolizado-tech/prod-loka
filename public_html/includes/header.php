@@ -1,10 +1,18 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="loka">
+<html lang="en" data-theme="<?= $_COOKIE['loka_theme'] ?? 'loka' ?>">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <meta name="description" content="LOKA Fleet Management System">
     <title><?= e($pageTitle ?? 'Dashboard') ?> - <?= APP_NAME ?></title>
+
+    <!-- Apply saved theme immediately to prevent flash -->
+    <script>
+    (function() {
+        var t = localStorage.getItem('loka_theme');
+        if (t) document.documentElement.setAttribute('data-theme', t);
+    })();
+    </script>
 
     <!-- Bootstrap Icons -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.2/font/bootstrap-icons.css" rel="stylesheet">
@@ -40,6 +48,12 @@
 
         <!-- Right Side -->
         <div class="loka-navbar-actions">
+            <!-- Theme Toggle -->
+            <button class="loka-navbar-notification" type="button" id="themeToggle" aria-label="Toggle theme" title="Toggle dark/light mode">
+                <i class="bi bi-moon-stars-fill text-lg" id="themeIconDark"></i>
+                <i class="bi bi-sun-fill text-lg hidden" id="themeIconLight"></i>
+            </button>
+
             <!-- Notifications (DaisyUI dropdown) -->
             <div class="dropdown dropdown-end">
                 <div tabindex="0" role="button" class="loka-navbar-notification" id="notificationDropdown">

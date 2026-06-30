@@ -16,6 +16,12 @@
     --sidebar-text: #8899bb;
 }
 
+/* Light theme overrides */
+[data-theme="loka-light"] {
+    --sidebar-bg: #1e293b;
+    --sidebar-text: #cbd5e1;
+}
+
 /* ===== LAYOUT ===== */
 body {
     overflow-x: hidden;

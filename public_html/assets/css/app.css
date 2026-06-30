@@ -12,6 +12,12 @@
   --sidebar-text: #8899bb;
 }
 
+/* Light theme overrides */
+[data-theme="loka-light"] {
+  --sidebar-bg: #1e293b;
+  --sidebar-text: #cbd5e1;
+}
+
 /* ===================================================
    LOKA Design System
    All components are plain CSS to avoid @apply
