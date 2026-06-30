@@ -1,11 +1,11 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="loka">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <meta name="description" content="LOKA Fleet Management System">
     <title><?= e($pageTitle ?? 'Dashboard') ?> - <?= APP_NAME ?></title>
-    
+
     <!-- Bootstrap Icons -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.2/font/bootstrap-icons.css" rel="stylesheet">
 
@@ -40,11 +40,6 @@
 
         <!-- Right Side -->
         <div class="loka-navbar-actions">
-            <!-- Dark Mode Toggle -->
-            <button class="loka-navbar-notification" type="button" id="darkModeToggle" aria-label="Toggle dark mode">
-                <i class="bi bi-moon text-lg" id="darkModeIcon"></i>
-            </button>
-
             <!-- Notifications (DaisyUI dropdown) -->
             <div class="dropdown dropdown-end">
                 <div tabindex="0" role="button" class="loka-navbar-notification" id="notificationDropdown">
@@ -127,44 +122,3 @@
                 <button type="button" class="btn-close ms-auto" onclick="this.closest('[role=alert]').remove()" aria-label="Close">×</button>
             </div>
             <?php endif; ?>
-
-    <!-- Dark Mode Toggle Script -->
-    <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const html = document.documentElement;
-        const darkModeToggle = document.getElementById('darkModeToggle');
-        const darkModeIcon = document.getElementById('darkModeIcon');
-        const storageKey = 'theme';
-
-        function setTheme(dark) {
-            if (dark) {
-                html.classList.add('dark');
-                darkModeIcon.classList.remove('bi-moon');
-                darkModeIcon.classList.add('bi-sun');
-            } else {
-                html.classList.remove('dark');
-                darkModeIcon.classList.remove('bi-sun');
-                darkModeIcon.classList.add('bi-moon');
-            }
-        }
-
-        function initTheme() {
-            const stored = localStorage.getItem(storageKey);
-            if (stored === 'dark') {
-                setTheme(true);
-            } else if (stored === 'light') {
-                setTheme(false);
-            } else {
-                setTheme(window.matchMedia('(prefers-color-scheme: dark)').matches);
-            }
-        }
-
-        initTheme();
-
-        darkModeToggle.addEventListener('click', function() {
-            const isDark = html.classList.toggle('dark');
-            localStorage.setItem(storageKey, isDark ? 'dark' : 'light');
-            setTheme(isDark);
-        });
-    });
-    </script>

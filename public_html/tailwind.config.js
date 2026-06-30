@@ -7,7 +7,6 @@ export default {
     './assets/js/**/*.vue',
     './assets/js/**/*.js',
   ],
-  darkMode: 'class',
   theme: {
     extend: {
       colors: {
@@ -94,8 +93,30 @@ export default {
   plugins: [require('@tailwindcss/forms'), require('@tailwindcss/typography'), require('daisyui')],
 
   daisyui: {
-    themes: ['light', 'dark'],
-    darkTheme: 'dark',
+    themes: [
+      {
+        // Soft bluish "smoke" light theme — modern off-white with a cool tint.
+        loka: {
+          'primary': '#0ea5e9',
+          'primary-content': '#ffffff',
+          'secondary': '#64748b',
+          'secondary-content': '#ffffff',
+          'accent': '#0284c7',
+          'accent-content': '#ffffff',
+          'neutral': '#1e293b',
+          'neutral-content': '#f1f5f9',
+          'base-100': '#f4f7fb', // page bg: soft bluish smoke (was pure #ffffff)
+          'base-200': '#e8eef6', // subtle raised surface / hover
+          'base-300': '#d9e3f0', // borders, dividers
+          'base-content': '#1f2a3d',
+          'info': '#0ea5e9',
+          'success': '#16a34a',
+          'warning': '#d97706',
+          'error': '#dc2626',
+        },
+      },
+    ],
+    darkTheme: false,
     base: true,
     styled: true,
     utils: true,
