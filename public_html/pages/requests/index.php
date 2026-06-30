@@ -198,14 +198,11 @@ require_once INCLUDES_PATH . '/header.php';
                     <?php foreach ($requests as $req): ?>
                     <tr>
                         <td>
-                            <span class="font-mono text-xs font-semibold text-primary"><?= e($req->control_no ?? 'N/A') ?></span>
+                            <span class="font-mono text-xs font-semibold text-primary">#<?= e($req->id) ?></span>
                         </td>
                         <td>
                             <div class="max-w-[200px]">
                                 <p class="font-medium text-sm text-base-content truncate" title="<?= e($req->purpose) ?>"><?= e($req->purpose) ?></p>
-                                <?php if (!empty($req->vehicle_type_name)): ?>
-                                <span class="loka-badge loka-badge-sm bg-base-200 text-base-content/70 mt-1"><?= e($req->vehicle_type_name) ?></span>
-                                <?php endif; ?>
                             </div>
                         </td>
                         <td>
@@ -219,20 +216,20 @@ require_once INCLUDES_PATH . '/header.php';
                             </div>
                         </td>
                         <td>
-                            <?php if ($req->date_needed): ?>
-                            <p class="text-sm text-base-content"><?= date('M d, Y', strtotime($req->date_needed)) ?></p>
-                            <p class="text-xs text-base-content/60"><?= date('h:i A', strtotime($req->date_needed)) ?></p>
+                            <?php if (!empty($req->start_datetime)): ?>
+                            <p class="text-sm text-base-content"><?= date('M d, Y', strtotime($req->start_datetime)) ?></p>
+                            <p class="text-xs text-base-content/60"><?= date('h:i A', strtotime($req->start_datetime)) ?></p>
                             <?php else: ?>
                             <span class="text-sm text-base-content/40">—</span>
                             <?php endif; ?>
                         </td>
                         <td>
                             <div class="max-w-[180px]">
-                                <p class="text-sm text-base-content truncate" title="<?= e($req->origin ?? '') ?> → <?= e($req->destination ?? '') ?>"><?= e($req->origin ?? 'N/A') ?> → <?= e($req->destination ?? 'N/A') ?></p>
+                                <p class="text-sm text-base-content truncate" title="<?= e($req->destination ?? '') ?>"><?= e($req->destination ?? 'N/A') ?></p>
                             </div>
                         </td>
                         <td class="text-center">
-                            <span class="loka-badge loka-badge-sm bg-base-200 text-base-content"><?= (int)($req->passengers ?? 1) ?></span>
+                            <span class="loka-badge loka-badge-sm bg-base-200 text-base-content"><?= (int)($req->passenger_count ?? 0) ?></span>
                         </td>
                         <td>
                             <?php
