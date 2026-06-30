@@ -95,7 +95,9 @@ export default {
   daisyui: {
     themes: [
       {
-        // Soft bluish "smoke" light theme — modern off-white with a cool tint.
+        // Blue "smoke" light theme — a saturated cool blue-gray that gives the
+        // eyes relief from pure white. Cards/inputs stay a touch lighter than
+        // the page bg so content separates cleanly.
         loka: {
           'primary': '#0ea5e9',
           'primary-content': '#ffffff',
@@ -105,10 +107,10 @@ export default {
           'accent-content': '#ffffff',
           'neutral': '#1e293b',
           'neutral-content': '#f1f5f9',
-          'base-100': '#f4f7fb', // page bg: soft bluish smoke (was pure #ffffff)
-          'base-200': '#e8eef6', // subtle raised surface / hover
-          'base-300': '#d9e3f0', // borders, dividers
-          'base-content': '#1f2a3d',
+          'base-100': '#dde6f0', // page bg: blue smoke (cool, noticeably non-white)
+          'base-200': '#e4ebf3', // cards / surfaces (lighter than bg for lift)
+          'base-300': '#cbd7e4', // borders, dividers, table headers
+          'base-content': '#1e293b', // slate-800 body text for strong contrast
           'info': '#0ea5e9',
           'success': '#16a34a',
           'warning': '#d97706',

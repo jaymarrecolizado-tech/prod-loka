@@ -201,7 +201,7 @@ $pageTitle = 'Forgot Password';
         }
 
         .form-control:focus {
-            background: #ffffff;
+            background: #e4ebf3;
             border-color: #667eea;
             box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
         }

@@ -1,5 +1,5 @@
 <template>
-  <div class="flex min-h-screen items-center justify-center bg-gray-50">
+  <div class="flex min-h-screen items-center justify-center bg-base-100">
     <div class="text-center">
       <h1 class="text-9xl font-bold text-gray-200">404</h1>
       <p class="mt-4 text-2xl font-semibold text-gray-600">Page not found</p>

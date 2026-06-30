@@ -291,7 +291,7 @@ require_once INCLUDES_PATH . '/header.php';
     <!-- Calendar View -->
     <?php if ($view === 'calendar'): ?>
     <div class="loka-card">
-        <div class="px-6 py-4 border-b border-base-200 bg-white">
+        <div class="px-6 py-4 border-b border-base-200 bg-base-200">
             <h6 class="mb-0">
                 <i class="bi bi-calendar3 me-2"></i>
                 <?= date('F Y', strtotime($month . '-01')) ?>

@@ -1233,7 +1233,7 @@ ob_start();
                 const iconColor = isGuest ? 'text-success' : 'text-secondary';
                 const iconBg = isGuest ? 'bg-success' : 'bg-secondary';
                 
-                html += '<li class="mb-2 py-2 px-3 bg-white border border-base-200 rounded-xl flex justify-between items-center shadow-sm">' +
+                html += '<li class="mb-2 py-2 px-3 bg-base-200 border border-base-200 rounded-xl flex justify-between items-center shadow-sm">' +
                     '<div class="flex items-center">' +
                         '<div class="' + iconBg + ' bg-opacity-10 p-1 rounded-circle me-2" style="width: 28px; height: 28px; display: flex; align-items: center; justify-content: center;">' +
                             '<i class="bi ' + icon + ' ' + iconColor + '" style="font-size: 0.8rem;"></i>' +

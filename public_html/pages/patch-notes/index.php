@@ -261,7 +261,7 @@ require_once INCLUDES_PATH . '/header.php';
     <div class="patch-notes-timeline">
         <?php foreach (array_reverse($patchNotes) as $note): ?>
         <div class="loka-card mb-4 patch-note-item">
-            <div class="px-6 py-4 border-b border-base-200 bg-white flex justify-between items-center">
+            <div class="px-6 py-4 border-b border-base-200 bg-base-200 flex justify-between items-center">
                 <div class="flex items-center">
                     <div class="version-badge me-3">
                         <span class="loka-badge bg-primary fs-6">v<?= e($note['version']) ?></span>

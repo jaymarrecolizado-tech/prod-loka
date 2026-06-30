@@ -849,7 +849,7 @@ require_once INCLUDES_PATH . '/header.php';
                             '</div>' +
                         '</li>';
 
-                        modalHtml += '<li class="py-2 px-3 bg-white border border-base-200 rounded-lg flex justify-between items-center shadow-sm">' +
+                        modalHtml += '<li class="py-2 px-3 bg-base-200 border border-base-200 rounded-lg flex justify-between items-center shadow-sm">' +
                             '<div class="flex items-center">' +
                                 '<div class="' + iconBg + ' bg-opacity-10 p-1 rounded-full mr-2 w-7 h-7 flex items-center justify-center">' +
                                     '<i class="bi ' + icon + ' ' + iconColor + '" style="font-size: 0.8rem;"></i>' +

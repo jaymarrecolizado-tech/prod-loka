@@ -52,12 +52,12 @@ $pageTitle = 'Verify Gas Voucher';
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdn.jsdelivr.net/npm/daisyui@3.9.0/dist/full.css" rel="stylesheet" type="text/css" />
     <style>
-        body { background-color: #f3f4f6; }
+        body { background-color: #dde6f0; }
     </style>
 </head>
 <body class="min-h-screen flex items-center justify-center p-4">
 
-<div class="max-w-md w-full bg-white dark:bg-gray-800 rounded-2xl shadow-xl overflow-hidden mt-6 mb-6">
+<div class="max-w-md w-full bg-base-200 rounded-2xl shadow-xl overflow-hidden mt-6 mb-6">
     <!-- Header -->
     <div class="bg-blue-800 text-white p-6 text-center">
         <h1 class="text-2xl font-bold tracking-wider">LOKA SYSTEM</h1>
@@ -87,7 +87,7 @@ $pageTitle = 'Verify Gas Voucher';
             </div>
 
             <div class="space-y-4">
-                <div class="p-4 bg-gray-50 dark:bg-gray-700 rounded-xl border border-gray-100 dark:border-gray-600 shadow-sm flex justify-between items-center">
+                <div class="p-4 bg-base-100 rounded-xl border border-base-300 shadow-sm flex justify-between items-center">
                     <div>
                         <p class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide font-semibold mb-1">Voucher Number</p>
                         <p class="text-lg font-bold text-red-600"><?= e($voucher->voucher_no) ?></p>

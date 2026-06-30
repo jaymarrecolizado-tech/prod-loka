@@ -197,7 +197,7 @@ require_once INCLUDES_PATH . '/header.php';
     </div>
 
     <div class="loka-card">
-        <div class="px-6 py-4 border-b border-base-200 bg-white">
+        <div class="px-6 py-4 border-b border-base-200 bg-base-200">
             <div role="tablist" class="tabs tabs-bordered">
                 <a role="tab" class="tab <?= $filter === 'upcoming' ? 'tab-active' : '' ?>"
                    href="<?= APP_URL ?>/?page=my-trips">

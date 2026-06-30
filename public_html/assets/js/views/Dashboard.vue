@@ -10,7 +10,7 @@
       <div
         v-for="stat in stats"
         :key="stat.label"
-        class="rounded-lg border-l-4 bg-white p-6 shadow"
+        class="rounded-lg border-l-4 bg-base-200 p-6 shadow"
         :class="stat.borderColor"
       >
         <div class="flex items-center justify-between">
@@ -24,7 +24,7 @@
     </div>
 
     <!-- Recent Activity -->
-    <div class="rounded-lg bg-white p-6 shadow">
+    <div class="rounded-lg bg-base-200 p-6 shadow">
       <h2 class="mb-4 text-lg font-semibold text-gray-900">Recent Activity</h2>
       <p class="text-gray-500">Loading recent activity...</p>
     </div>
