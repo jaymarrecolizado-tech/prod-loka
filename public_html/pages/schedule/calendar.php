@@ -112,25 +112,26 @@ require_once INCLUDES_PATH . '/header.php';
     font-size: 0.85rem;
 }
 .calendar-day {
-    background: white;
+    background: hsl(var(--b1));
+    border: 1px solid hsl(var(--b3));
     min-height: 100px;
     padding: 8px;
     position: relative;
     transition: all 0.2s;
 }
 .calendar-day:hover {
-    background: #f8f9fa;
+    background: hsl(var(--b2));
 }
 .calendar-day.other-month {
-    background: #f8f9fa;
-    color: #adb5bd;
+    background: hsl(var(--b2));
+    color: hsl(var(--bc) / 0.4);
 }
 .calendar-day.today {
-    background: #e7f1ff;
+    background: hsl(var(--p) / 0.1);
 }
 .calendar-day.today .day-number {
-    background: #0d6efd;
-    color: white;
+    background: hsl(var(--p));
+    color: hsl(var(--pc));
 }
 .day-number {
     display: inline-flex;

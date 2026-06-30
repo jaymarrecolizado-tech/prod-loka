@@ -95,26 +95,26 @@ export default {
   daisyui: {
     themes: [
       {
-        // Blue "smoke" light theme — a saturated cool blue-gray that gives the
-        // eyes relief from pure white. Cards/inputs stay a touch lighter than
-        // the page bg so content separates cleanly.
+        // Midnight Slate — dark, modern, high-contrast fleet dashboard theme
+        // Deep slate backgrounds with sky-blue accents. Cards sit slightly
+        // lighter than the page bg so content separates cleanly.
         loka: {
-          'primary': '#0ea5e9',
-          'primary-content': '#ffffff',
-          'secondary': '#64748b',
-          'secondary-content': '#ffffff',
-          'accent': '#0284c7',
-          'accent-content': '#ffffff',
-          'neutral': '#1e293b',
-          'neutral-content': '#f1f5f9',
-          'base-100': '#dde6f0', // page bg: blue smoke (cool, noticeably non-white)
-          'base-200': '#e4ebf3', // cards / surfaces (lighter than bg for lift)
-          'base-300': '#cbd7e4', // borders, dividers, table headers
-          'base-content': '#1e293b', // slate-800 body text for strong contrast
-          'info': '#0ea5e9',
-          'success': '#16a34a',
-          'warning': '#d97706',
-          'error': '#dc2626',
+          'primary': '#38bdf8',           // sky-400 — vibrant accent
+          'primary-content': '#0f172a',   // slate-900 — dark text on primary
+          'secondary': '#64748b',         // slate-500 — subtle elements
+          'secondary-content': '#f1f5f9', // slate-100
+          'accent': '#7dd3fc',            // sky-300 — lighter accent
+          'accent-content': '#0f172a',
+          'neutral': '#1e293b',           // slate-800 — dark panels
+          'neutral-content': '#f1f5f9',   // slate-100
+          'base-100': '#0f172a',          // slate-900 — page background
+          'base-200': '#1e293b',          // slate-800 — cards / surfaces
+          'base-300': '#334155',          // slate-700 — borders / dividers
+          'base-content': '#e2e8f0',      // slate-200 — body text
+          'info': '#38bdf8',
+          'success': '#34d399',           // emerald-400
+          'warning': '#fbbf24',           // amber-400
+          'error': '#f87171',             // rose-400
         },
       },
     ],

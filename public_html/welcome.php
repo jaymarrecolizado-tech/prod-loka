@@ -16,12 +16,13 @@
             margin: 0;
         }
         .container {
-            background: white;
+            background: #1e293b;
+            color: #e2e8f0;
             max-width: 800px;
             width: 100%;
             padding: 40px;
             border-radius: 16px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
             text-align: center;
         }
         .logo {
@@ -29,12 +30,12 @@
             margin-bottom: 20px;
         }
         h1 {
-            color: #0d6efd;
+            color: #38bdf8;
             margin: 0 0 10px 0;
             font-size: 2.5em;
         }
         .subtitle {
-            color: #6c757d;
+            color: #94a3b8;
             margin-bottom: 30px;
             font-size: 1.2em;
         }
@@ -200,7 +201,7 @@
         </div>
 
         <h3>📋 Quick Links</h3>
-        <div style="text-align: left; background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;">
+        <div style="text-align: left; background: #0f172a; padding: 20px; border-radius: 8px; margin: 20px 0; border: 1px solid #334155;">
             <p><strong>📊 Dashboard:</strong>
                <a href="/projects/LOKA/?page=dashboard" target="_blank">http://localhost/projects/LOKA/?page=dashboard</a>
             </p>

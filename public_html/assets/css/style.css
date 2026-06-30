@@ -12,7 +12,7 @@
 :root {
     --sidebar-width: 16rem;
     --navbar-height: 56px;
-    --sidebar-bg: #1e293b;   /* slate-800 — professional dark sidebar */
+    --sidebar-bg: #0b1120;   /* deep slate — dark sidebar */
     --sidebar-text: #94a3b8; /* slate-400 */
 }
 
@@ -93,7 +93,7 @@ body {
 
 .ts-wrapper .ts-control {
     border-radius: 0.75rem;
-    border-color: hsl(var(--bc) / 0.2);
+    border-color: hsl(var(--b3));
     background: hsl(var(--b1));
     padding: 0.5rem 0.75rem;
     min-height: 42px;
@@ -128,9 +128,9 @@ body {
 }
 
 .ts-dropdown {
-    border: 1px solid hsl(var(--bc) / 0.15);
+    border: 1px solid hsl(var(--b3));
     border-radius: 0.75rem;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
     margin-top: 4px;
     background: hsl(var(--b1));
 }
@@ -149,8 +149,8 @@ body {
 /* ===== FLATPICKR INTEGRATION ===== */
 .flatpickr-calendar {
     border-radius: 0.75rem;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
-    border: 1px solid hsl(var(--bc) / 0.15);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+    border: 1px solid hsl(var(--b3));
 }
 
 /* ===== VANILLA DATATABLE ===== */
