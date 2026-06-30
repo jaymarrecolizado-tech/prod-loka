@@ -198,41 +198,41 @@ require_once INCLUDES_PATH . '/header.php';
                     <?php foreach ($requests as $req): ?>
                     <tr>
                         <td>
-                            <span class="font-mono text-xs font-semibold text-primary"><?= e($req['control_no'] ?? 'N/A') ?></span>
+                            <span class="font-mono text-xs font-semibold text-primary"><?= e($req->control_no ?? 'N/A') ?></span>
                         </td>
                         <td>
                             <div class="max-w-[200px]">
-                                <p class="font-medium text-sm text-base-content truncate" title="<?= e($req['purpose']) ?>"><?= e($req['purpose']) ?></p>
-                                <?php if (!empty($req['vehicle_type_name'])): ?>
-                                <span class="loka-badge loka-badge-sm bg-base-200 text-base-content/70 mt-1"><?= e($req['vehicle_type_name']) ?></span>
+                                <p class="font-medium text-sm text-base-content truncate" title="<?= e($req->purpose) ?>"><?= e($req->purpose) ?></p>
+                                <?php if (!empty($req->vehicle_type_name)): ?>
+                                <span class="loka-badge loka-badge-sm bg-base-200 text-base-content/70 mt-1"><?= e($req->vehicle_type_name) ?></span>
                                 <?php endif; ?>
                             </div>
                         </td>
                         <td>
                             <div class="flex items-center gap-2">
                                 <div class="loka-avatar loka-avatar-sm">
-                                    <?= strtoupper(substr($req['name'] ?? 'U', 0, 1)) ?>
+                                    <?= strtoupper(substr($req->name ?? 'U', 0, 1)) ?>
                                 </div>
                                 <div>
-                                    <p class="text-sm font-medium text-base-content"><?= e($req['name'] ?? 'Unknown') ?></p>
+                                    <p class="text-sm font-medium text-base-content"><?= e($req->name ?? 'Unknown') ?></p>
                                 </div>
                             </div>
                         </td>
                         <td>
-                            <?php if ($req['date_needed']): ?>
-                            <p class="text-sm text-base-content"><?= date('M d, Y', strtotime($req['date_needed'])) ?></p>
-                            <p class="text-xs text-base-content/60"><?= date('h:i A', strtotime($req['date_needed'])) ?></p>
+                            <?php if ($req->date_needed): ?>
+                            <p class="text-sm text-base-content"><?= date('M d, Y', strtotime($req->date_needed)) ?></p>
+                            <p class="text-xs text-base-content/60"><?= date('h:i A', strtotime($req->date_needed)) ?></p>
                             <?php else: ?>
                             <span class="text-sm text-base-content/40">—</span>
                             <?php endif; ?>
                         </td>
                         <td>
                             <div class="max-w-[180px]">
-                                <p class="text-sm text-base-content truncate" title="<?= e($req['origin'] ?? '') ?> → <?= e($req['destination'] ?? '') ?>"><?= e($req['origin'] ?? 'N/A') ?> → <?= e($req['destination'] ?? 'N/A') ?></p>
+                                <p class="text-sm text-base-content truncate" title="<?= e($req->origin ?? '') ?> → <?= e($req->destination ?? '') ?>"><?= e($req->origin ?? 'N/A') ?> → <?= e($req->destination ?? 'N/A') ?></p>
                             </div>
                         </td>
                         <td class="text-center">
-                            <span class="loka-badge loka-badge-sm bg-base-200 text-base-content"><?= (int)($req['passengers'] ?? 1) ?></span>
+                            <span class="loka-badge loka-badge-sm bg-base-200 text-base-content"><?= (int)($req->passengers ?? 1) ?></span>
                         </td>
                         <td>
                             <?php
@@ -250,17 +250,17 @@ require_once INCLUDES_PATH . '/header.php';
                                 'cancelled' => 'Cancelled',
                                 'completed' => 'Completed',
                             ];
-                            $cls = $statusClasses[$req['status']] ?? 'bg-base-200 text-base-content';
-                            $lbl = $statusLabels[$req['status'] ?? 'pending'] ?? ucfirst($req['status']);
+                            $cls = $statusClasses[$req->status] ?? 'bg-base-200 text-base-content';
+                            $lbl = $statusLabels[$req->status ?? 'pending'] ?? ucfirst($req->status);
                             ?>
                             <span class="loka-badge <?= $cls ?>"><?= $lbl ?></span>
                         </td>
                         <td>
-                            <p class="text-sm text-base-content"><?= date('M d', strtotime($req['created_at'])) ?></p>
-                            <p class="text-xs text-base-content/60"><?= date('h:i A', strtotime($req['created_at'])) ?></p>
+                            <p class="text-sm text-base-content"><?= date('M d', strtotime($req->created_at)) ?></p>
+                            <p class="text-xs text-base-content/60"><?= date('h:i A', strtotime($req->created_at)) ?></p>
                         </td>
                         <td class="text-center">
-                            <a href="?page=requests&action=view&id=<?= $req['id'] ?>" class="loka-btn-icon text-primary hover:bg-primary/10" title="View">
+                            <a href="?page=requests&action=view&id=<?= $req->id ?>" class="loka-btn-icon text-primary hover:bg-primary/10" title="View">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
                             </a>
                         </td>
