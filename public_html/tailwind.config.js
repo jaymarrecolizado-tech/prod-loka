@@ -95,26 +95,25 @@ export default {
   daisyui: {
     themes: [
       {
-        // Midnight Slate — dark, modern, high-contrast fleet dashboard theme
-        // Deep slate backgrounds with sky-blue accents. Cards sit slightly
-        // lighter than the page bg so content separates cleanly.
+        // Navy Cyan — sleek dark theme matching login screen palette
+        // Deep navy backgrounds with cyan/blue accents from login page.
         loka: {
-          'primary': '#38bdf8',           // sky-400 — vibrant accent
-          'primary-content': '#0f172a',   // slate-900 — dark text on primary
-          'secondary': '#475569',         // slate-600 — more visible secondary
-          'secondary-content': '#f1f5f9', // slate-100
-          'accent': '#7dd3fc',            // sky-300 — lighter accent
-          'accent-content': '#0f172a',
-          'neutral': '#1e293b',           // slate-800 — dark panels
-          'neutral-content': '#f1f5f9',   // slate-100
-          'base-100': '#111927',          // slightly lighter than pure slate-900
-          'base-200': '#1a2536',          // cards — visible lift from page bg
-          'base-300': '#293548',          // borders — clearly visible
-          'base-content': '#e2e8f0',      // slate-200 — body text
-          'info': '#38bdf8',
-          'success': '#34d399',           // emerald-400
-          'warning': '#fbbf24',           // amber-400
-          'error': '#f87171',             // rose-400
+          'primary': '#00d4ff',           // cyan — login page accent
+          'primary-content': '#0a0e1a',   // navy — dark text on primary
+          'secondary': '#2e6af6',         // blue-bright — secondary actions
+          'secondary-content': '#eef4ff',
+          'accent': '#1e4db7',            // blue-mid — subtle accent
+          'accent-content': '#eef4ff',
+          'neutral': '#0c1f4a',           // blue-dark — dark panels
+          'neutral-content': '#eef4ff',
+          'base-100': '#0a0e1a',          // navy — page background
+          'base-200': '#0d1526',          // navy2 — cards / surfaces
+          'base-300': '#162033',          // borders — visible but subtle
+          'base-content': '#eef4ff',      // white — body text
+          'info': '#00d4ff',
+          'success': '#00f5e4',           // cyan2 — approvals
+          'warning': '#f5c518',           // gold — alerts
+          'error': '#e82333',             // red — errors
         },
       },
     ],

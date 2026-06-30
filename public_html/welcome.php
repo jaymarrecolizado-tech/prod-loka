@@ -7,7 +7,7 @@
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: #0a0e1a;
             min-height: 100vh;
             display: flex;
             align-items: center;
@@ -16,13 +16,14 @@
             margin: 0;
         }
         .container {
-            background: #1e293b;
-            color: #e2e8f0;
+            background: #0d1526;
+            color: #eef4ff;
             max-width: 800px;
             width: 100%;
             padding: 40px;
             border-radius: 16px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+            border: 1px solid #162033;
             text-align: center;
         }
         .logo {
@@ -30,29 +31,29 @@
             margin-bottom: 20px;
         }
         h1 {
-            color: #38bdf8;
+            color: #00d4ff;
             margin: 0 0 10px 0;
             font-size: 2.5em;
         }
         .subtitle {
-            color: #94a3b8;
+            color: #8899bb;
             margin-bottom: 30px;
             font-size: 1.2em;
         }
         .info-box {
-            background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
-            border-left: 5px solid #2196f3;
+            background: rgba(0,212,255,0.08);
+            border-left: 5px solid #00d4ff;
             padding: 20px;
             border-radius: 8px;
             margin: 25px 0;
             text-align: left;
         }
         .info-box strong {
-            color: #0d47a1;
+            color: #00d4ff;
         }
         .url-box {
-            background: #f8f9fa;
-            border: 2px solid #0d6efd;
+            background: #0a0e1a;
+            border: 2px solid #2e6af6;
             padding: 15px;
             border-radius: 8px;
             margin: 20px 0;

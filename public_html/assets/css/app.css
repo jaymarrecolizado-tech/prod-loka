@@ -8,8 +8,8 @@
 :root {
   --sidebar-width: 16rem;
   --navbar-height: 56px;
-  --sidebar-bg: #0c1220;
-  --sidebar-text: #94a3b8;
+  --sidebar-bg: #080c16;
+  --sidebar-text: #8899bb;
 }
 
 /* ===================================================
@@ -246,7 +246,7 @@ body {
   border-radius: 9999px;
   font-size: 0.875rem;
   font-weight: 600;
-  color: #0f172a;
+  color: #0a0e1a;
   background: hsl(var(--p));
   box-shadow: 0 1px 3px rgba(0,0,0,.3);
   flex-shrink: 0;
