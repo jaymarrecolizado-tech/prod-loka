@@ -12,8 +12,8 @@
 :root {
     --sidebar-width: 16rem;
     --navbar-height: 56px;
-    --sidebar-bg: #0b1120;   /* deep slate — dark sidebar */
-    --sidebar-text: #94a3b8; /* slate-400 */
+    --sidebar-bg: #0c1220;
+    --sidebar-text: #94a3b8;
 }
 
 /* ===== LAYOUT ===== */

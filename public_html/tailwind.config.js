@@ -101,15 +101,15 @@ export default {
         loka: {
           'primary': '#38bdf8',           // sky-400 — vibrant accent
           'primary-content': '#0f172a',   // slate-900 — dark text on primary
-          'secondary': '#64748b',         // slate-500 — subtle elements
+          'secondary': '#475569',         // slate-600 — more visible secondary
           'secondary-content': '#f1f5f9', // slate-100
           'accent': '#7dd3fc',            // sky-300 — lighter accent
           'accent-content': '#0f172a',
           'neutral': '#1e293b',           // slate-800 — dark panels
           'neutral-content': '#f1f5f9',   // slate-100
-          'base-100': '#0f172a',          // slate-900 — page background
-          'base-200': '#1e293b',          // slate-800 — cards / surfaces
-          'base-300': '#334155',          // slate-700 — borders / dividers
+          'base-100': '#111927',          // slightly lighter than pure slate-900
+          'base-200': '#1a2536',          // cards — visible lift from page bg
+          'base-300': '#293548',          // borders — clearly visible
           'base-content': '#e2e8f0',      // slate-200 — body text
           'info': '#38bdf8',
           'success': '#34d399',           // emerald-400

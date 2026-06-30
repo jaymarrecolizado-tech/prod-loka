@@ -8,7 +8,7 @@
 :root {
   --sidebar-width: 16rem;
   --navbar-height: 56px;
-  --sidebar-bg: #0b1120;
+  --sidebar-bg: #0c1220;
   --sidebar-text: #94a3b8;
 }
 
@@ -181,10 +181,11 @@ body {
 .loka-btn-primary:hover { opacity: 0.88; color: hsl(var(--pc)); }
 
 .loka-btn-secondary {
-  background: hsl(var(--b2));
+  background: hsl(var(--b3));
   color: hsl(var(--bc));
+  border: 1px solid hsl(var(--b3));
 }
-.loka-btn-secondary:hover { background: hsl(var(--b3)); color: hsl(var(--bc)); }
+.loka-btn-secondary:hover { background: hsl(var(--p) / 0.15); color: hsl(var(--p)); border-color: hsl(var(--p) / 0.3); }
 
 .loka-btn-success {
   background: hsl(var(--su));
@@ -202,7 +203,7 @@ body {
   background: transparent;
   color: hsl(var(--bc));
 }
-.loka-btn-ghost:hover { background: hsl(var(--b2)); }
+.loka-btn-ghost:hover { background: hsl(var(--b3)); }
 
 .loka-btn-sm {
   padding: 0.35rem 0.75rem;
@@ -219,21 +220,21 @@ body {
   transition: background 0.15s;
   cursor: pointer;
 }
-.loka-btn-icon:hover { background: hsl(var(--b2)); }
+.loka-btn-icon:hover { background: hsl(var(--b3)); }
 
 .loka-btn-outline-primary {
   background: transparent;
   border: 1.5px solid hsl(var(--p));
   color: hsl(var(--p));
 }
-.loka-btn-outline-primary:hover { background: hsl(var(--p) / 0.1); }
+.loka-btn-outline-primary:hover { background: hsl(var(--p) / 0.2); }
 
 .loka-btn-outline-error {
   background: transparent;
   border: 1.5px solid hsl(var(--er));
   color: hsl(var(--er));
 }
-.loka-btn-outline-error:hover { background: hsl(var(--er) / 0.1); }
+.loka-btn-outline-error:hover { background: hsl(var(--er) / 0.2); }
 
 /* ===== AVATAR ===== */
 .loka-avatar {
@@ -384,7 +385,7 @@ body {
 }
 
 .loka-table tbody tr:hover td {
-  background: hsl(var(--b2) / 0.6);
+  background: hsl(var(--b3) / 0.5);
 }
 
 .loka-table-responsive {
@@ -428,12 +429,12 @@ body {
   font-weight: 700;
 }
 
-.status-pending   { background: hsl(var(--wa) / 0.15); color: hsl(var(--wa)); }
-.status-approved  { background: hsl(var(--su) / 0.15); color: hsl(var(--su)); }
-.status-rejected  { background: hsl(var(--er) / 0.15); color: hsl(var(--er)); }
-.status-completed { background: hsl(var(--p)  / 0.15); color: hsl(var(--p)); }
-.status-cancelled { background: hsl(var(--b3));         color: hsl(var(--bc) / 0.55); }
-.status-draft     { background: hsl(var(--b2));         color: hsl(var(--bc) / 0.55); }
+.status-pending   { background: hsl(var(--wa) / 0.2); color: hsl(var(--wa)); }
+.status-approved  { background: hsl(var(--su) / 0.2); color: hsl(var(--su)); }
+.status-rejected  { background: hsl(var(--er) / 0.2); color: hsl(var(--er)); }
+.status-completed { background: hsl(var(--p)  / 0.2); color: hsl(var(--p)); }
+.status-cancelled { background: hsl(var(--b3));         color: hsl(var(--bc) / 0.6); }
+.status-draft     { background: hsl(var(--b3));         color: hsl(var(--bc) / 0.6); }
 
 /* ===== NAVBAR ===== */
 .loka-navbar {
