@@ -82,8 +82,8 @@ require_once INCLUDES_PATH . '/header.php';
     </div>
 
     <!-- Filters -->
-    <div class="card mb-4">
-        <div class="card-body">
+    <div class="loka-card mb-4">
+        <div class="loka-card-body">
             <form method="GET" class="grid grid-cols-12 gap-3 items-end">
                 <input type="hidden" name="page" value="reports">
                 <input type="hidden" name="action" value="trips">
@@ -120,40 +120,40 @@ require_once INCLUDES_PATH . '/header.php';
     <!-- Stats Cards -->
     <div class="grid grid-cols-12 gap-3 mb-4">
         <div class="col-span-6 md:col-span-2">
-            <div class="card bg-primary bg-opacity-10">
-                <div class="card-body text-center py-2">
+            <div class="loka-card bg-primary bg-opacity-10">
+                <div class="loka-card-body text-center py-2">
                     <h4 class="text-primary mb-0"><?= $stats->total ?></h4>
                     <small class="text-base-content/60">Total</small>
                 </div>
             </div>
         </div>
         <div class="col-span-6 md:col-span-2">
-            <div class="card bg-success bg-opacity-10">
-                <div class="card-body text-center py-2">
+            <div class="loka-card bg-success bg-opacity-10">
+                <div class="loka-card-body text-center py-2">
                     <h4 class="text-success mb-0"><?= $stats->approved ?></h4>
                     <small class="text-base-content/60">Approved</small>
                 </div>
             </div>
         </div>
         <div class="col-span-6 md:col-span-2">
-            <div class="card bg-info bg-opacity-10">
-                <div class="card-body text-center py-2">
+            <div class="loka-card bg-info bg-opacity-10">
+                <div class="loka-card-body text-center py-2">
                     <h4 class="text-info mb-0"><?= $stats->completed ?></h4>
                     <small class="text-base-content/60">Completed</small>
                 </div>
             </div>
         </div>
         <div class="col-span-6 md:col-span-2">
-            <div class="card bg-danger bg-opacity-10">
-                <div class="card-body text-center py-2">
+            <div class="loka-card bg-danger bg-opacity-10">
+                <div class="loka-card-body text-center py-2">
                     <h4 class="text-danger mb-0"><?= $stats->rejected ?></h4>
                     <small class="text-base-content/60">Rejected</small>
                 </div>
             </div>
         </div>
         <div class="col-span-6 md:col-span-2">
-            <div class="card bg-warning bg-opacity-10">
-                <div class="card-body text-center py-2">
+            <div class="loka-card bg-warning bg-opacity-10">
+                <div class="loka-card-body text-center py-2">
                     <h4 class="text-warning mb-0"><?= $stats->pending ?></h4>
                     <small class="text-base-content/60">Pending</small>
                 </div>
@@ -162,11 +162,11 @@ require_once INCLUDES_PATH . '/header.php';
     </div>
 
     <!-- Requests Table -->
-    <div class="card">
-        <div class="card-header">
+    <div class="loka-card">
+        <div class="px-4 md:px-6 pt-4 md:pt-6">
             <h5 class="mb-0"><i class="bi bi-list-ul me-2"></i>Trip Requests</h5>
         </div>
-        <div class="card-body p-0">
+        <div class="loka-card-body p-0">
             <?php if (empty($requests)): ?>
             <div class="text-center py-5 text-base-content/60">
                 <i class="bi bi-clipboard-x fs-1"></i>

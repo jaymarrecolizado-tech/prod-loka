@@ -118,8 +118,8 @@ if ($isPrint) {
 </head>
 <body>
     <div class="max-w-[600px] mx-auto mb-5">
-        <div class="card bg-base-100 shadow-sm">
-            <div class="card-body">
+        <div class="loka-card shadow-sm">
+            <div class="loka-card-body">
                 <div class="bg-primary text-primary-content rounded-t-lg px-4 py-3">
                     <h5 class="font-bold"><i class="bi bi-printer me-2"></i>Test Travel Order Template</h5>
                 </div>

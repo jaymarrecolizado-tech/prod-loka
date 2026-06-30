@@ -180,8 +180,8 @@ require_once INCLUDES_PATH . '/header.php';
     
     <?php if ($tab === 'pending'): ?>
     <!-- Pending Approvals -->
-    <div class="card table-card">
-        <div class="card-body">
+    <div class="loka-card">
+        <div class="p-4 md:p-6">
             <?php if (empty($pendingRequests)): ?>
             <div class="empty-state">
                 <i class="bi bi-inbox"></i>
@@ -302,8 +302,8 @@ require_once INCLUDES_PATH . '/header.php';
     
     <?php else: ?>
     <!-- Processed Approvals -->
-    <div class="card table-card">
-        <div class="card-body">
+    <div class="loka-card">
+        <div class="p-4 md:p-6">
             <?php if (empty($processedRequests)): ?>
             <div class="empty-state">
                 <i class="bi bi-clipboard-check"></i>

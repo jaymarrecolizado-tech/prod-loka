@@ -93,6 +93,11 @@ body {
   box-shadow: 0 8px 20px rgba(0,0,0,.08), 0 2px 6px rgba(0,0,0,.04);
 }
 
+/* Inner padding wrapper for .loka-card (utility classes like p-0 can override) */
+.loka-card-body {
+  padding: 1.25rem 1.5rem;
+}
+
 .loka-stat-card {
   background: hsl(var(--b1));
   border: 1px solid hsl(var(--b2));

@@ -24,9 +24,9 @@ require_once INCLUDES_PATH . '/header.php';
     <div class="grid grid-cols-12 gap-4">
         <!-- Vehicle History -->
         <div class="col-span-12 md:col-span-6 lg:col-span-4">
-            <a href="<?= APP_URL ?>/?page=reports&action=vehicle-history" class="text-decoration-none">
-                <div class="card h-100 report-card">
-                    <div class="card-body text-center py-5">
+            <a href="<?= APP_URL ?>/?page=reports&action=vehicle-history" class="no-underline">
+                <div class="loka-card h-full">
+                    <div class="loka-card-body text-center py-5">
                         <div class="mb-3">
                             <i class="bi bi-car-front text-primary" style="font-size: 3.5rem;"></i>
                         </div>
@@ -40,9 +40,9 @@ require_once INCLUDES_PATH . '/header.php';
 
         <!-- Driver Report -->
         <div class="col-span-12 md:col-span-6 lg:col-span-4">
-            <a href="<?= APP_URL ?>/?page=reports&action=driver" class="text-decoration-none">
-                <div class="card h-100 report-card">
-                    <div class="card-body text-center py-5">
+            <a href="<?= APP_URL ?>/?page=reports&action=driver" class="no-underline">
+                <div class="loka-card h-full">
+                    <div class="loka-card-body text-center py-5">
                         <div class="mb-3">
                             <i class="bi bi-person-badge text-success" style="font-size: 3.5rem;"></i>
                         </div>
@@ -56,9 +56,9 @@ require_once INCLUDES_PATH . '/header.php';
 
         <!-- Trip Requests Report -->
         <div class="col-span-12 md:col-span-6 lg:col-span-4">
-            <a href="<?= APP_URL ?>/?page=reports&action=trips" class="text-decoration-none">
-                <div class="card h-100 report-card">
-                    <div class="card-body text-center py-5">
+            <a href="<?= APP_URL ?>/?page=reports&action=trips" class="no-underline">
+                <div class="loka-card h-full">
+                    <div class="loka-card-body text-center py-5">
                         <div class="mb-3">
                             <i class="bi bi-journal-text text-info" style="font-size: 3.5rem;"></i>
                         </div>
@@ -73,9 +73,9 @@ require_once INCLUDES_PATH . '/header.php';
         <?php if (isAdmin()): ?>
         <!-- Admin Reports -->
         <div class="col-span-12 md:col-span-6 lg:col-span-4">
-            <a href="<?= APP_URL ?>/?page=admin-reports" class="text-decoration-none">
-                <div class="card h-100 report-card">
-                    <div class="card-body text-center py-5">
+            <a href="<?= APP_URL ?>/?page=admin-reports" class="no-underline">
+                <div class="loka-card h-full">
+                    <div class="loka-card-body text-center py-5">
                         <div class="mb-3">
                             <i class="bi bi-bar-chart-fill text-warning" style="font-size: 3.5rem;"></i>
                         </div>

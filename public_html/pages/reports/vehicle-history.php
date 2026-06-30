@@ -85,8 +85,8 @@ require_once INCLUDES_PATH . '/header.php';
     </div>
 
     <!-- Filters -->
-    <div class="card mb-4">
-        <div class="card-body">
+    <div class="loka-card mb-4">
+        <div class="loka-card-body">
             <form method="GET" class="grid grid-cols-12 gap-3 items-end">
                 <input type="hidden" name="page" value="reports">
                 <input type="hidden" name="action" value="vehicle-history">
@@ -134,8 +134,8 @@ require_once INCLUDES_PATH . '/header.php';
     <!-- Vehicle Info -->
     <div class="grid grid-cols-12 gap-4 mb-4">
         <div class="col-span-12 md:col-span-4">
-            <div class="card h-100">
-                <div class="card-body">
+            <div class="loka-card h-full">
+                <div class="loka-card-body">
                     <h6 class="text-base-content/60 mb-3">Vehicle Information</h6>
                     <h4 class="mb-1"><?= e($vehicleInfo->plate_number) ?></h4>
                     <p class="text-base-content/60 mb-2"><?= e($vehicleInfo->make . ' ' . $vehicleInfo->model) ?> (<?= e($vehicleInfo->year) ?>)</p>
@@ -149,32 +149,32 @@ require_once INCLUDES_PATH . '/header.php';
         <div class="col-span-12 md:col-span-8">
             <div class="grid grid-cols-12 gap-3">
                 <div class="col-span-6 md:col-span-3">
-                    <div class="card bg-primary bg-opacity-10 h-100">
-                        <div class="card-body text-center">
+                    <div class="loka-card bg-primary bg-opacity-10 h-full">
+                        <div class="loka-card-body text-center">
                             <h3 class="text-primary mb-0"><?= $stats->total_trips ?></h3>
                             <small class="text-base-content/60">Total Trips</small>
                         </div>
                     </div>
                 </div>
                 <div class="col-span-6 md:col-span-3">
-                    <div class="card bg-success bg-opacity-10 h-100">
-                        <div class="card-body text-center">
+                    <div class="loka-card bg-success bg-opacity-10 h-full">
+                        <div class="loka-card-body text-center">
                             <h3 class="text-success mb-0"><?= $stats->completed_trips ?></h3>
                             <small class="text-base-content/60">Completed</small>
                         </div>
                     </div>
                 </div>
                 <div class="col-span-6 md:col-span-3">
-                    <div class="card bg-info bg-opacity-10 h-100">
-                        <div class="card-body text-center">
+                    <div class="loka-card bg-info bg-opacity-10 h-full">
+                        <div class="loka-card-body text-center">
                             <h3 class="text-info mb-0"><?= number_format($stats->total_hours, 1) ?>h</h3>
                             <small class="text-base-content/60">Total Hours</small>
                         </div>
                     </div>
                 </div>
                 <div class="col-span-6 md:col-span-3">
-                    <div class="card bg-warning bg-opacity-10 h-100">
-                        <div class="card-body text-center">
+                    <div class="loka-card bg-warning bg-opacity-10 h-full">
+                        <div class="loka-card-body text-center">
                             <h3 class="text-warning mb-0"><?= number_format($vehicleInfo->mileage ?? 0) ?></h3>
                             <small class="text-base-content/60">Current Mileage (km)</small>
                         </div>
@@ -185,11 +185,11 @@ require_once INCLUDES_PATH . '/header.php';
     </div>
 
     <!-- Trip History Table -->
-    <div class="card">
-        <div class="card-header">
+    <div class="loka-card">
+        <div class="px-4 md:px-6 pt-4 md:pt-6">
             <h5 class="mb-0"><i class="bi bi-clock-history me-2"></i>Trip History</h5>
         </div>
-        <div class="card-body">
+        <div class="loka-card-body">
             <?php if (empty($trips)): ?>
             <div class="text-center py-4 text-base-content/60">
                 <i class="bi bi-clipboard-x fs-1"></i>
@@ -248,8 +248,8 @@ require_once INCLUDES_PATH . '/header.php';
         </div>
     </div>
     <?php else: ?>
-    <div class="card">
-        <div class="card-body text-center py-5 text-base-content/60">
+    <div class="loka-card">
+        <div class="loka-card-body text-center py-5 text-base-content/60">
             <i class="bi bi-car-front fs-1"></i>
             <p class="mt-2">Select a vehicle to view its trip history.</p>
         </div>

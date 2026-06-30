@@ -92,8 +92,8 @@ require_once INCLUDES_PATH . '/header.php';
 
     <!-- Statistics Cards -->
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
-        <div class="card border-0 shadow-sm">
-                <div class="card-body">
+        <div class="loka-card">
+                <div class="loka-card-body">
                     <div class="flex items-center">
                         <div class="flex-shrink-0">
                             <div class="bg-primary bg-opacity-10 rounded p-3">
@@ -108,8 +108,8 @@ require_once INCLUDES_PATH . '/header.php';
                 </div>
             </div>
         </div>
-        <div class="card border-0 shadow-sm">
-                <div class="card-body">
+        <div class="loka-card">
+                <div class="loka-card-body">
                     <div class="flex items-center">
                         <div class="flex-shrink-0">
                             <div class="bg-success bg-opacity-10 rounded p-3">
@@ -124,8 +124,8 @@ require_once INCLUDES_PATH . '/header.php';
                 </div>
             </div>
         </div>
-        <div class="card border-0 shadow-sm">
-                <div class="card-body">
+        <div class="loka-card">
+                <div class="loka-card-body">
                     <div class="flex items-center">
                         <div class="flex-shrink-0">
                             <div class="bg-info bg-opacity-10 rounded p-3">
@@ -140,8 +140,8 @@ require_once INCLUDES_PATH . '/header.php';
                 </div>
             </div>
         </div>
-        <div class="card border-0 shadow-sm">
-                <div class="card-body">
+        <div class="loka-card">
+                <div class="loka-card-body">
                     <div class="flex items-center">
                         <div class="flex-shrink-0">
                             <div class="bg-warning bg-opacity-10 rounded p-3">
@@ -159,8 +159,8 @@ require_once INCLUDES_PATH . '/header.php';
     </div>
 
     <!-- Filters -->
-    <div class="card mb-4">
-        <div class="card-body">
+    <div class="loka-card mb-4">
+        <div class="loka-card-body">
             <form method="GET" class="flex flex-wrap items-end gap-3">
                 <input type="hidden" name="page" value="guard">
                 <input type="hidden" name="action" value="completed">
@@ -186,14 +186,14 @@ require_once INCLUDES_PATH . '/header.php';
     </div>
 
     <!-- Completed Trips Table -->
-    <div class="card">
-        <div class="card-header flex justify-between items-center">
+    <div class="loka-card">
+        <div class="px-4 md:px-6 pt-4 md:pt-6 flex justify-between items-center">
             <h5 class="mb-0">Completed Trips (<?= count($trips) ?>)</h5>
             <button type="button" class="bg-success text-success-content hover:bg-success/90 px-4 py-2 text-sm font-medium rounded-xl inline-flex items-center gap-2 transition-colors" onclick="exportCompletedTrips()">
                 <i class="bi bi-file-earmark-excel me-1"></i>Export to CSV
             </button>
         </div>
-        <div class="card-body">
+        <div class="loka-card-body">
             <?php if (empty($trips)): ?>
                 <div class="text-center py-5">
                     <i class="bi bi-calendar-x fs-1 text-base-content/60"></i>

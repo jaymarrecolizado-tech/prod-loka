@@ -49,8 +49,8 @@ require_once INCLUDES_PATH . '/header.php';
     </div>
 
     <!-- Filters -->
-    <div class="card table-card mb-4">
-        <div class="card-body">
+    <div class="loka-card mb-4">
+        <div class="p-4 md:p-6">
             <form method="GET" class="grid grid-cols-12 gap-3 items-end">
                 <input type="hidden" name="page" value="audit">
                 <div class="col-span-6 md:col-span-2">
@@ -83,8 +83,8 @@ require_once INCLUDES_PATH . '/header.php';
     </div>
 
     <!-- Logs Table -->
-    <div class="card table-card">
-        <div class="card-body">
+    <div class="loka-card">
+        <div class="p-4 md:p-6">
             <div class="loka-table-responsive">
                 <table class="loka-table data-table">
                     <thead>
