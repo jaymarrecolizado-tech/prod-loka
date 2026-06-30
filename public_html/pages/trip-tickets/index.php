@@ -679,7 +679,7 @@ require_once INCLUDES_PATH . '/header.php';
                         ?>
                         <?php foreach ($completedTrips as $trip): ?>
                             <option value="<?= $trip->id ?>">
-                                <?= '#'.$trip->id.' - '.$trip->destination.' ('.formatDate($trip->actual_arrival_datetime, 'M/d').') ?>
+                                <?= '#'.$trip->id.' - '.$trip->destination.' ('.formatDate($trip->actual_arrival_datetime, 'M/d').')' ?>
                                 - <?= e($trip->driver_name) ?>
                             </option>
                         <?php endforeach; ?>
