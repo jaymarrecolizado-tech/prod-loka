@@ -469,54 +469,46 @@ if ($endDate) $baseParams['end_date'] = $endDate;
 
                 <!-- Pagination -->
                 <?php if ($totalPages > 1): ?>
-                <nav class="mt-3" aria-label="Trips pagination">
-                    <ul class="pagination justify-content-center">
-                        <?php
-                        // Build base query string for pagination
-                        $queryParams = [
-                            'page' => 'completed-trips',
-                            'p' => null, // Will be set per link
-                            'per_page' => $limit
-                        ];
-                        if ($showAll !== '1') $queryParams['all'] = $showAll;
-                        if ($startDate) $queryParams['start_date'] = $startDate;
-                        if ($endDate) $queryParams['end_date'] = $endDate;
-                        if ($search) $queryParams['search'] = $search;
+                <nav class="mt-3 flex flex-col items-center gap-2" aria-label="Trips pagination">
+                    <?php
+                    // Build base query string for pagination
+                    $queryParams = [
+                        'page' => 'completed-trips',
+                        'p' => null, // Will be set per link
+                        'per_page' => $limit
+                    ];
+                    if ($showAll !== '1') $queryParams['all'] = $showAll;
+                    if ($startDate) $queryParams['start_date'] = $startDate;
+                    if ($endDate) $queryParams['end_date'] = $endDate;
+                    if ($search) $queryParams['search'] = $search;
 
-                        function buildPageUrl($params, $pageNum) {
-                            $params['p'] = $pageNum;
-                            return '?' . http_build_query(array_filter($params));
-                        }
-                        ?>
+                    function buildPageUrl($params, $pageNum) {
+                        $params['p'] = $pageNum;
+                        return '?' . http_build_query(array_filter($params));
+                    }
+                    ?>
 
+                    <div class="join">
                         <!-- First Page & Previous -->
                         <?php if ($page > 1): ?>
-                        <li class="page-item">
-                            <a class="page-link" href="<?= buildPageUrl($queryParams, 1) ?>" aria-label="First">
-                                <i class="bi bi-chevron-bar-left"></i>
-                            </a>
-                        </li>
-                        <li class="page-item">
-                            <a class="page-link" href="<?= buildPageUrl($queryParams, $page - 1) ?>" aria-label="Previous">
-                                <i class="bi bi-chevron-left"></i>
-                            </a>
-                        </li>
+                        <a class="join-item btn btn-sm" href="<?= buildPageUrl($queryParams, 1) ?>" aria-label="First" title="First page">
+                            <i class="bi bi-chevron-bar-left"></i>
+                        </a>
+                        <a class="join-item btn btn-sm" href="<?= buildPageUrl($queryParams, $page - 1) ?>" aria-label="Previous" title="Previous page">
+                            <i class="bi bi-chevron-left"></i>
+                        </a>
                         <?php else: ?>
-                        <li class="page-item disabled">
-                            <span class="page-link"><i class="bi bi-chevron-bar-left"></i></span>
-                        </li>
-                        <li class="page-item disabled">
-                            <span class="page-link"><i class="bi bi-chevron-left"></i></span>
-                        </li>
+                        <button class="join-item btn btn-sm btn-disabled" disabled><i class="bi bi-chevron-bar-left"></i></button>
+                        <button class="join-item btn btn-sm btn-disabled" disabled><i class="bi bi-chevron-left"></i></button>
                         <?php endif; ?>
 
                         <!-- Page Numbers -->
                         <?php
                         // Always show first page
                         if ($page > 3) {
-                            echo '<li class="page-item"><a class="page-link" href="' . buildPageUrl($queryParams, 1) . '">1</a></li>';
+                            echo '<a class="join-item btn btn-sm" href="' . buildPageUrl($queryParams, 1) . '">1</a>';
                             if ($page > 4) {
-                                echo '<li class="page-item disabled"><span class="page-link">...</span></li>';
+                                echo '<button class="join-item btn btn-sm btn-disabled" disabled>...</button>';
                             }
                         }
 
@@ -526,47 +518,37 @@ if ($endDate) $baseParams['end_date'] = $endDate;
 
                         for ($i = $startPage; $i <= $endPage; $i++):
                         ?>
-                        <li class="page-item <?= $i === $page ? 'active' : '' ?>">
-                            <?php if ($i === $page): ?>
-                                <span class="page-link"><?= $i ?></span>
-                            <?php else: ?>
-                                <a class="page-link" href="<?= buildPageUrl($queryParams, $i) ?>"><?= $i ?></a>
-                            <?php endif; ?>
-                        </li>
+                        <?php if ($i === $page): ?>
+                            <button class="join-item btn btn-sm btn-primary" disabled><?= $i ?></button>
+                        <?php else: ?>
+                            <a class="join-item btn btn-sm" href="<?= buildPageUrl($queryParams, $i) ?>"><?= $i ?></a>
+                        <?php endif; ?>
                         <?php endfor; ?>
 
                         <!-- Always show last page -->
                         <?php if ($page < $totalPages - 2) {
                             if ($page < $totalPages - 3) {
-                                echo '<li class="page-item disabled"><span class="page-link">...</span></li>';
+                                echo '<button class="join-item btn btn-sm btn-disabled" disabled>...</button>';
                             }
-                            echo '<li class="page-item"><a class="page-link" href="' . buildPageUrl($queryParams, $totalPages) . '">' . $totalPages . '</a></li>';
+                            echo '<a class="join-item btn btn-sm" href="' . buildPageUrl($queryParams, $totalPages) . '">' . $totalPages . '</a>';
                         } ?>
 
                         <!-- Next & Last Page -->
                         <?php if ($page < $totalPages): ?>
-                        <li class="page-item">
-                            <a class="page-link" href="<?= buildPageUrl($queryParams, $page + 1) ?>" aria-label="Next">
-                                <i class="bi bi-chevron-right"></i>
-                            </a>
-                        </li>
-                        <li class="page-item">
-                            <a class="page-link" href="<?= buildPageUrl($queryParams, $totalPages) ?>" aria-label="Last">
-                                <i class="bi bi-chevron-bar-right"></i>
-                            </a>
-                        </li>
+                        <a class="join-item btn btn-sm" href="<?= buildPageUrl($queryParams, $page + 1) ?>" aria-label="Next" title="Next page">
+                            <i class="bi bi-chevron-right"></i>
+                        </a>
+                        <a class="join-item btn btn-sm" href="<?= buildPageUrl($queryParams, $totalPages) ?>" aria-label="Last" title="Last page">
+                            <i class="bi bi-chevron-bar-right"></i>
+                        </a>
                         <?php else: ?>
-                        <li class="page-item disabled">
-                            <span class="page-link"><i class="bi bi-chevron-right"></i></span>
-                        </li>
-                        <li class="page-item disabled">
-                            <span class="page-link"><i class="bi bi-chevron-bar-right"></i></span>
-                        </li>
+                        <button class="join-item btn btn-sm btn-disabled" disabled><i class="bi bi-chevron-right"></i></button>
+                        <button class="join-item btn btn-sm btn-disabled" disabled><i class="bi bi-chevron-bar-right"></i></button>
                         <?php endif; ?>
-                    </ul>
+                    </div>
 
                     <!-- Pagination Info -->
-                    <div class="text-center mt-2">
+                    <div class="text-center">
                         <span class="text-base-content/60 text-sm">
                             Showing <?= ($totalCount > 0 ? ($page - 1) * $limit + 1 : 0) ?>-<?= min($page * $limit, $totalCount) ?> of <?= $totalCount ?> trips
                             (Page <?= $page ?> of <?= $totalPages ?>)
