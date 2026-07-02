@@ -35,7 +35,7 @@ $monthEnd = date('Y-m-t', $firstDay);
 
 $approvedRequests = db()->fetchAll(
     "SELECT r.id, r.start_datetime, r.end_datetime, r.destination, r.purpose,
-            r.vehicle_id, u.name as requester_name, v.plate_number
+            r.vehicle_id, r.status, u.name as requester_name, v.plate_number
      FROM requests r
      JOIN users u ON r.user_id = u.id
      LEFT JOIN vehicles v ON r.vehicle_id = v.id AND v.deleted_at IS NULL
@@ -98,14 +98,14 @@ require_once INCLUDES_PATH . '/header.php';
     display: grid;
     grid-template-columns: repeat(7, 1fr);
     gap: 1px;
-    background: #dee2e6;
-    border: 1px solid #dee2e6;
+    background: hsl(var(--b3));
+    border: 1px solid hsl(var(--b3));
     border-radius: 8px;
     overflow: hidden;
 }
 .calendar-header {
-    background: #0d6efd;
-    color: white;
+    background: hsl(var(--p));
+    color: hsl(var(--pc));
     padding: 12px 8px;
     text-align: center;
     font-weight: 600;
@@ -159,12 +159,14 @@ require_once INCLUDES_PATH . '/header.php';
     text-decoration: none;
 }
 .event-pill.approved {
-    background: #d1e7dd;
-    color: #0f5132;
+    background: hsl(var(--su) / 0.15);
+    color: hsl(var(--sc));
+    border-left: 3px solid hsl(var(--su));
 }
 .event-pill.pending {
-    background: #fff3cd;
-    color: #664d03;
+    background: hsl(var(--wa) / 0.15);
+    color: hsl(var(--wc));
+    border-left: 3px solid hsl(var(--wa));
 }
 .event-pill:hover {
     opacity: 0.8;
@@ -189,10 +191,10 @@ require_once INCLUDES_PATH . '/header.php';
     margin-right: 6px;
 }
 .calendar-day.fully-booked {
-    background: #fff5f5;
+    background: hsl(var(--er) / 0.08);
 }
 .calendar-day.partially-booked {
-    background: #fffbeb;
+    background: hsl(var(--wa) / 0.08);
 }
 </style>
 
@@ -244,19 +246,19 @@ require_once INCLUDES_PATH . '/header.php';
             <span>Available</span>
         </div>
         <div class="legend-item">
-            <span class="legend-dot" style="background: #fff3cd;"></span>
+            <span class="legend-dot bg-warning"></span>
             <span>Partially Booked</span>
         </div>
         <div class="legend-item">
-            <span class="legend-dot" style="background: #f8d7da;"></span>
+            <span class="legend-dot bg-error"></span>
             <span>Fully Booked</span>
         </div>
         <div class="legend-item">
-            <span class="legend-dot" style="background: #d1e7dd;"></span>
+            <span class="legend-dot bg-success"></span>
             <span>Approved Trip</span>
         </div>
         <div class="legend-item">
-            <span class="legend-dot" style="background: #fff3cd;"></span>
+            <span class="legend-dot bg-warning"></span>
             <span>Pending Motorpool</span>
         </div>
     </div>
@@ -292,20 +294,33 @@ require_once INCLUDES_PATH . '/header.php';
             $currentDate = sprintf('%04d-%02d-%02d', $year, $month, $day);
             $isToday = $currentDate === $today;
             $dayEvents = $busyDays[$day] ?? [];
-            $bookedCount = count(array_unique(array_map(fn($e) => $e->vehicle_id, $dayEvents)));
-            
+            // Count DISTINCT vehicles actually assigned to trips this day.
+            // Unassigned trips (vehicle_id IS NULL) don't occupy a vehicle.
+            $bookedVehicleIds = array_filter(array_map(fn($e) => $e->vehicle_id, $dayEvents));
+            $bookedCount = count(array_unique($bookedVehicleIds));
+
             $dayClass = 'calendar-day';
             if ($isToday) $dayClass .= ' today';
-            if ($bookedCount > 0 && $bookedCount < $totalVehicles) $dayClass .= ' partially-booked';
-            if ($bookedCount >= $totalVehicles) $dayClass .= ' fully-booked';
+            // Only color the day when we actually have a fleet to measure against.
+            if ($totalVehicles > 0) {
+                if ($bookedCount >= $totalVehicles) $dayClass .= ' fully-booked';
+                elseif ($bookedCount > 0) $dayClass .= ' partially-booked';
+            }
         ?>
         <div class="<?= $dayClass ?>">
             <span class="day-number"><?= $day ?></span>
-            
+
             <?php if ($totalVehicles > 0): ?>
-            <span class="loka-badge availability-badge <?= $bookedCount >= $totalVehicles ? 'bg-danger' : ($bookedCount > 0 ? 'bg-warning text-dark' : 'bg-success') ?>">
+            <?php
+                if ($bookedCount >= $totalVehicles && $totalVehicles > 0) $badgeCls = 'bg-error';
+                elseif ($bookedCount > 0) $badgeCls = 'bg-warning';
+                else $badgeCls = 'bg-success';
+            ?>
+            <span class="loka-badge availability-badge <?= $badgeCls ?>">
                 <?= $totalVehicles - $bookedCount ?>/<?= $totalVehicles ?> free
             </span>
+            <?php else: ?>
+            <span class="loka-badge availability-badge bg-base-300">No fleet</span>
             <?php endif; ?>
             
             <div class="day-events">
@@ -317,7 +332,7 @@ require_once INCLUDES_PATH . '/header.php';
                         break;
                     }
                     $shown++;
-                    $eventClass = $event->vehicle_id ? 'approved' : 'pending';
+                    $eventClass = $event->status === 'approved' ? 'approved' : 'pending';
                 ?>
                 <a href="<?= APP_URL ?>/?page=requests&action=view&id=<?= $event->id ?>" 
                    class="event-pill <?= $eventClass ?>" 
@@ -350,13 +365,13 @@ require_once INCLUDES_PATH . '/header.php';
         <div class="p-6 p-0">
             <?php if (empty($approvedRequests)): ?>
             <div class="text-center py-4 text-base-content/60">
-                <i class="bi bi-calendar-check fs-1 d-block mb-2"></i>
+                <i class="bi bi-calendar-check text-4xl block mb-2"></i>
                 No scheduled trips this month
             </div>
             <?php else: ?>
             <div class="loka-table-responsive">
                 <table class="loka-table table-hover mb-0">
-                    <thead class="table-light">
+                    <thead class="bg-base-200">
                         <tr>
                             <th>Date Range</th>
                             <th>Requester</th>
@@ -369,7 +384,7 @@ require_once INCLUDES_PATH . '/header.php';
                         <?php foreach ($approvedRequests as $req): ?>
                         <tr>
                             <td>
-                                <div class="fw-medium"><?= date('M j', strtotime($req->start_datetime)) ?></div>
+                                <div class="font-medium"><?= date('M j', strtotime($req->start_datetime)) ?></div>
                                 <small class="text-base-content/60">
                                     <?= date('g:i A', strtotime($req->start_datetime)) ?> - 
                                     <?= date('M j, g:i A', strtotime($req->end_datetime)) ?>
@@ -385,10 +400,10 @@ require_once INCLUDES_PATH . '/header.php';
                                 <?php endif; ?>
                             </td>
                             <td>
-                                <?php if ($req->vehicle_id): ?>
+                                <?php if ($req->status === 'approved'): ?>
                                 <span class="loka-badge bg-success">Approved</span>
                                 <?php else: ?>
-                                <span class="loka-badge bg-warning text-dark">Pending Motorpool</span>
+                                <span class="loka-badge bg-warning">Pending Motorpool</span>
                                 <?php endif; ?>
                             </td>
                         </tr>
