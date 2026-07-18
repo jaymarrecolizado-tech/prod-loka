@@ -1408,6 +1408,69 @@ function gasVoucherStatusLabel(string $status): string
 }
 
 /**
+ * HMAC secret used to sign gas voucher verification links.
+ */
+function gasVoucherVerifySecret(): string
+{
+    $key = getenv('APP_KEY') ?: ($_ENV['APP_KEY'] ?? '');
+    $key = is_string($key) ? trim($key) : '';
+    return $key !== '' ? $key : 'LOKA_SECRET';
+}
+
+/**
+ * Truncated HMAC for voucher QR links (keeps QR modules sparse enough to scan).
+ */
+function gasVoucherVerifyHash(object $voucher): string
+{
+    return substr(hash_hmac(
+        'sha256',
+        $voucher->id . '-' . $voucher->voucher_no,
+        gasVoucherVerifySecret()
+    ), 0, 16);
+}
+
+/**
+ * Build a signed public verification URL for a gas voucher (encoded in QR).
+ */
+function gasVoucherVerifyUrl(object $voucher): string
+{
+    $hash = gasVoucherVerifyHash($voucher);
+
+    $base = rtrim((string) SITE_URL, '/');
+    if ($base === '') {
+        $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
+        $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
+        $base = $scheme . '://' . $host . rtrim((string) APP_URL, '/');
+    }
+
+    return $base . '/?page=verify-voucher&id=' . (int) $voucher->id . '&hash=' . urlencode($hash);
+}
+
+/**
+ * Validate a gas voucher verification hash from a scanned QR link.
+ * Accepts the current 16-char token or a legacy full SHA-256 hex digest.
+ */
+function gasVoucherVerifyHashValid(object $voucher, string $hash): bool
+{
+    if ($hash === '') {
+        return false;
+    }
+
+    $full = hash_hmac(
+        'sha256',
+        $voucher->id . '-' . $voucher->voucher_no,
+        gasVoucherVerifySecret()
+    );
+    $short = substr($full, 0, 16);
+
+    if (hash_equals($short, $hash)) {
+        return true;
+    }
+
+    return hash_equals($full, $hash);
+}
+
+/**
  * Require the user to have at least ONE of the given roles.
  * Accepts either a single role string or an array of role strings.
  *

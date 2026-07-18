@@ -35,9 +35,62 @@ if ($voucher->requested_by_user_id != userId() && !isAdmin() && !isApprover() &&
     redirectWith('/?page=gas-vouchers', 'danger', 'Access denied.');
 }
 
-// QR Verification Code Logic
-$verifyHash = hash_hmac('sha256', $voucher->id . '-' . $voucher->voucher_no, getenv('APP_KEY') ?: 'LOKA_SECRET');
-$verifyUrl = SITE_URL . '/?page=verify-voucher&id=' . $voucher->id . '&hash=' . $verifyHash;
+// QR Verification — gas stations scan this to confirm authenticity
+$verifyUrl = gasVoucherVerifyUrl($voucher);
+$siteLooksLocal = (bool) preg_match('#://(localhost|127\.0\.0\.1)([:/]|$)#i', $verifyUrl);
+
+// Crisp QR with quiet zone: prefer PNG (solid white pad); SVG fallback
+require_once BASE_PATH . '/vendor/tecnickcom/tcpdf/tcpdf_barcodes_2d.php';
+$qrBarcode = new TCPDF2DBarcode($verifyUrl, 'QRCODE,M');
+$qrHtml = '';
+$pngRaw = function_exists('imagecreate') ? $qrBarcode->getBarcodePngData(6, 6, [0, 0, 0]) : false;
+
+if (is_string($pngRaw) && $pngRaw !== '' && function_exists('imagecreatefromstring')) {
+    $src = @imagecreatefromstring($pngRaw);
+    if ($src !== false) {
+        // TCPDF marks white as transparent — flatten onto opaque white + quiet zone
+        $sw = imagesx($src);
+        $sh = imagesy($src);
+        $pad = (int) max(28, round(min($sw, $sh) * 0.14));
+        $flat = imagecreatetruecolor($sw, $sh);
+        $whiteFlat = imagecolorallocate($flat, 255, 255, 255);
+        imagefilledrectangle($flat, 0, 0, $sw, $sh, $whiteFlat);
+        imagecopy($flat, $src, 0, 0, 0, 0, $sw, $sh);
+        imagedestroy($src);
+
+        $dst = imagecreatetruecolor($sw + ($pad * 2), $sh + ($pad * 2));
+        $white = imagecolorallocate($dst, 255, 255, 255);
+        imagefilledrectangle($dst, 0, 0, $sw + ($pad * 2), $sh + ($pad * 2), $white);
+        imagecopy($dst, $flat, $pad, $pad, 0, 0, $sw, $sh);
+        imagedestroy($flat);
+        ob_start();
+        imagepng($dst);
+        $padded = ob_get_clean();
+        imagedestroy($dst);
+        $qrHtml = '<img class="qr-img" alt="Verify QR" width="148" height="148" src="data:image/png;base64,'
+            . base64_encode($padded) . '">';
+    }
+}
+
+if ($qrHtml === '') {
+    $qrSvg = $qrBarcode->getBarcodeSVGcode(4, 4, 'black');
+    $qrSvg = preg_replace('/<\?xml[^>]*\?>\s*/i', '', $qrSvg);
+    $qrSvg = preg_replace('/<!DOCTYPE[^>]*>\s*/i', '', $qrSvg);
+    // Inject viewBox so the SVG scales correctly when CSS sets width/height.
+    // Without viewBox the browser clips the content instead of scaling it,
+    // making the QR code unscannable on mobile devices.
+    if (preg_match('/<svg[^>]+width="([\d.]+)"[^>]+height="([\d.]+)"/i', $qrSvg, $svgDims)) {
+        $svgW = $svgDims[1];
+        $svgH = $svgDims[2];
+        $qrSvg = preg_replace(
+            '/<svg([^>]+)>/i',
+            '<svg$1 viewBox="0 0 ' . $svgW . ' ' . $svgH . '">',
+            $qrSvg,
+            1
+        );
+    }
+    $qrHtml = '<div class="qr-svg-pad">' . $qrSvg . '</div>';
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -217,8 +270,52 @@ $verifyUrl = SITE_URL . '/?page=verify-voucher&id=' . $voucher->id . '&hash=' . 
             .signatures-grid td { padding: 4px !important; }
             .sig-label { margin-bottom: 25px !important; }
             .distribution { margin-top: 5px !important; font-size: 8pt !important; }
-            img[src*="qr"] { width: 70px !important; height: 70px !important; }
+            .qr-block .qr-img { width: 128px !important; height: 128px !important; }
+            .qr-block .qr-svg-pad svg { width: 96px !important; height: 96px !important; }
             .qr-container { margin-top: 0 !important; }
+        }
+
+        .qr-block {
+            text-align: center;
+            display: inline-block;
+            background: #fff;
+            /* Border wraps labels; QR itself sits in a white quiet zone */
+            border: 1px solid #999;
+            padding: 6px 8px 8px;
+        }
+        .qr-block .qr-img {
+            width: 148px;
+            height: 148px;
+            display: block;
+            margin: 0 auto;
+            image-rendering: -webkit-optimize-contrast; /* iOS Safari: crisp pixels */
+            image-rendering: pixelated;
+            image-rendering: crisp-edges;
+            background: #fff;
+        }
+        .qr-block .qr-svg-pad {
+            display: block;
+            background: #fff;
+            padding: 14px; /* quiet zone — do not put text here */
+            line-height: 0;
+        }
+        .qr-block .qr-svg-pad svg {
+            width: 112px;
+            height: 112px;
+            display: block;
+            margin: 0 auto;
+            shape-rendering: crispEdges;
+        }
+        .qr-block .qr-label {
+            font-size: 8pt;
+            font-weight: bold;
+            margin-top: 8px; /* clear gap below quiet zone */
+            letter-spacing: 0.3px;
+        }
+        .qr-block .qr-sub {
+            font-size: 6.5pt;
+            color: #444;
+            margin-top: 2px;
         }
     </style>
 </head>
@@ -230,6 +327,13 @@ $verifyUrl = SITE_URL . '/?page=verify-voucher&id=' . $voucher->id . '&hash=' . 
         🖨️ Print Voucher
     </button>
     <a href="javascript:history.back()" style="margin-left:15px;color:#666;text-decoration:none;">← Back to App</a>
+    <div style="margin-top:10px;padding:8px 12px;background:#e7f1ff;border:1px solid #9ec5fe;border-radius:6px;display:inline-block;max-width:720px;font-size:13px;color:#084298;text-align:left;">
+        <strong>Phone scan tip:</strong> Join the same Wi‑Fi as this PC, then scan again.<br>
+        Verify link: <code style="word-break:break-all;"><?= e($verifyUrl) ?></code>
+        <?php if ($siteLooksLocal): ?>
+        <br><span style="color:#664d03;">⚠ Still using localhost — phones cannot open this. Set <code>SITE_URL</code> in <code>.env</code> to your LAN IP or public domain.</span>
+        <?php endif; ?>
+    </div>
 </div>
 
 <?php for ($copy = 1; $copy <= 2; $copy++): ?>
@@ -293,9 +397,14 @@ $verifyUrl = SITE_URL . '/?page=verify-voucher&id=' . $voucher->id . '&hash=' . 
         </tr>
         
         <!-- Articles Data -->
+        <?php
+        $isFullTank = (strcasecmp((string) $voucher->unit, 'FULL TANK') === 0) || (float) $voucher->quantity <= 0;
+        $printQty = $isFullTank ? '—' : e($voucher->quantity);
+        $printUnit = $isFullTank ? 'FULL TANK' : e($voucher->unit);
+        ?>
         <tr>
-            <td class="center" style="font-weight:bold; font-size:12pt; padding:12px;"><?= e($voucher->quantity) ?></td>
-            <td class="center" style="font-weight:bold; font-size:12pt; padding:12px;"><?= e($voucher->unit) ?></td>
+            <td class="center" style="font-weight:bold; font-size:12pt; padding:12px;"><?= $printQty ?></td>
+            <td class="center" style="font-weight:bold; font-size:12pt; padding:12px;"><?= $printUnit ?></td>
             <td colspan="2" style="font-weight:bold; font-size:11pt; padding:12px; vertical-align:middle; color:#000;">
                 <?= e($voucher->fuel_type) ?>
             </td>
@@ -353,11 +462,12 @@ $verifyUrl = SITE_URL . '/?page=verify-voucher&id=' . $voucher->id . '&hash=' . 
     
         </div>
         <div class="qr-container" style="text-align: right;">
-            
-        <img src="<?= APP_URL ?>/?page=qr&data=<?= urlencode($verifyUrl) ?>" style="width: 90px; height: 90px; mix-blend-mode: multiply; margin-right: 5px;">
-        <div style="font-size: 7.5pt; margin-top: 2px; color: #333; font-weight: bold;">Scan to Verify
+            <div class="qr-block">
+                <?= $qrHtml ?>
+                <div class="qr-label">SCAN TO VERIFY</div>
+                <div class="qr-sub"><?= e($voucher->voucher_no) ?></div>
+            </div>
         </div>
-    </div>
     </div>
 
 </div>
