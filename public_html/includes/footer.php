@@ -3,8 +3,11 @@
 
     </div>
     
-    <!-- Chart.js (deferred) -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js" defer></script>
+    <!-- Chart.js then dashboard charts (order matters) -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+    <?php if (!empty($GLOBALS['loka_dashboard_charts_js'])): ?>
+    <script src="<?= APP_URL ?>/assets/js/charts/dashboard.js"></script>
+    <?php endif; ?>
     
     <!-- Flatpickr JS -->
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>

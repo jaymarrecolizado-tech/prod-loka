@@ -243,17 +243,40 @@
     }
   }
 
-  // Initialize when DOM is ready
+  // Chart.js is deferred in footer and may load after this file — wait for it
+  function bootCharts(attempt) {
+    attempt = attempt || 0
+    if (typeof Chart === 'undefined') {
+      if (attempt < 80) {
+        setTimeout(function () {
+          bootCharts(attempt + 1)
+        }, 50)
+      } else {
+        console.error('LOKA dashboard: Chart.js failed to load')
+      }
+      return
+    }
+    try {
+      initCharts()
+    } catch (err) {
+      console.error('LOKA dashboard: chart init failed', err)
+    }
+  }
+
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initCharts)
+    document.addEventListener('DOMContentLoaded', function () {
+      bootCharts(0)
+    })
   } else {
-    initCharts()
+    bootCharts(0)
   }
 
   // Rebuild charts on resize (debounced)
   var resizeTimer
   window.addEventListener('resize', function () {
     clearTimeout(resizeTimer)
-    resizeTimer = setTimeout(initCharts, 250)
+    resizeTimer = setTimeout(function () {
+      if (typeof Chart !== 'undefined') initCharts()
+    }, 250)
   })
 })()

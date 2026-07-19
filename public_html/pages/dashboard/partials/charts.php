@@ -69,7 +69,10 @@
 </div>
 
 <script>
-    window.dashboardAnalytics = <?= json_encode($dash['analytics']) ?>;
+    window.dashboardAnalytics = <?= json_encode($dash['analytics'], JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>;
 </script>
-<script src="<?= ASSETS_PATH ?>/js/charts/dashboard.js" defer></script>
+<?php /* Loaded after Chart.js in footer via $GLOBALS so Chart is defined first */ ?>
+<?php
+$GLOBALS['loka_dashboard_charts_js'] = true;
+?>
 <?php endif; ?>
