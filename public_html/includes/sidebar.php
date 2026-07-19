@@ -88,9 +88,9 @@
             </li>
             <?php endif; ?>
 
+            <?php if (isApprover()): ?>
             <li class="loka-section-label mt-3">Fleet Management</li>
 
-            <?php if (isApprover()): ?>
             <!-- Vehicles -->
             <li>
                 <a class="loka-nav-link <?= activeMenu('vehicles') ?>" href="<?= APP_URL ?>/?page=vehicles">
@@ -216,9 +216,6 @@
             </li>
             <?php endif; ?>
 
-            <?php if (!isApprover() && !isMotorpool() && !isAdmin()): ?>
-            <li class="loka-section-label mt-3">Fleet Management</li>
-            <?php endif; ?>
             <li>
                 <a class="loka-nav-link <?= activeMenu('patch-notes') ?>" href="<?= APP_URL ?>/?page=patch-notes">
                     <i class="bi bi-newspaper w-5 text-center flex-shrink-0"></i>
