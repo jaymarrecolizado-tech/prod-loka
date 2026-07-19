@@ -269,7 +269,7 @@ require_once INCLUDES_PATH . '/header.php';
                         </div>
                         <div class="md:col-span-2">
                             <?php 
-                            // Calculate actual passenger count: requester (1) + passengers in table
+                            // Requester + companions (same formula as create/edit / countRequestPassengers)
                             $actualPassengerCount = count($passengers) + 1;
                             ?>
                             <label class="text-sm text-base-content/50">Passengers (<?= $actualPassengerCount ?>)</label>

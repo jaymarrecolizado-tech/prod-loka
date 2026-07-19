@@ -823,91 +823,72 @@ function notifyPassengers(int $requestId, string $type, string $title, string $m
 }
 
 /**
- * Batch notify all passengers - More efficient for large groups
- * Creates notifications and queues emails in optimized batches
- * 
- * @param int $requestId The request ID
- * @param string $type Notification type key
- * @param string $title Notification title
- * @param string $message Notification message
- * @param string|null $link Optional link
- * @return int Number of passengers notified
+ * Prefix passenger-facing copy so recipients know they are on the trip.
+ */
+function passengerInvolvementMessage(int $requestId, string $detail): string
+{
+    $detail = trim($detail);
+    return "You are listed as a passenger on this trip (Request #{$requestId})."
+        . ($detail !== '' ? "\n\n" . $detail : '');
+}
+
+/**
+ * Notify all linked user-passengers (in-app + email + SMS via notify()).
+ * Guests without user accounts cannot receive email/SMS.
+ *
+ * @return int Number of passenger users notified
  */
 function notifyPassengersBatch(int $requestId, string $type, string $title, string $message, ?string $link = null): int
 {
-    // Single query to get all passengers
     $passengers = db()->fetchAll(
         "SELECT rp.user_id, u.email, u.name, u.phone
          FROM request_passengers rp
          LEFT JOIN users u ON rp.user_id = u.id
-         WHERE rp.request_id = ? AND rp.user_id IS NOT NULL 
+         WHERE rp.request_id = ? AND rp.user_id IS NOT NULL
          AND u.status = 'active' AND u.deleted_at IS NULL",
         [$requestId]
     );
-    
+
     if (empty($passengers)) {
-        error_log("NOTIFY PASSENGERS BATCH: Request #{$requestId} - No passengers to notify");
+        error_log("NOTIFY PASSENGERS BATCH: Request #{$requestId} - No passenger users to notify");
         return 0;
     }
-    
-    // Batch insert notifications in a transaction
-    db()->beginTransaction();
-    $notified = 0;
-    $now = date(DATETIME_FORMAT);
-    
-    foreach ($passengers as $passenger) {
-        try {
-            db()->insert('notifications', [
-                'user_id' => $passenger->user_id,
-                'type' => $type,
-                'title' => $title,
-                'message' => $message,
-                'link' => $link,
-                'is_read' => 0,
-                'created_at' => $now
-            ]);
-            $notified++;
-        } catch (Exception $e) {
-            error_log("NOTIFY PASSENGERS BATCH ERROR: Failed to create notification for user {$passenger->user_id}: " . $e->getMessage());
-        }
+
+    // Ensure wording always states passenger involvement
+    $body = $message;
+    if (stripos($message, 'passenger') === false && stripos($message, 'You are listed') === false) {
+        $body = passengerInvolvementMessage($requestId, $message);
     }
-    
-    db()->commit();
-    
-    // Queue emails in batch AFTER transaction commits
-    $queue = new EmailQueue();
-    $emailsQueued = 0;
-    $smsQueued = 0;
-    
+
+    $notified = 0;
     foreach ($passengers as $passenger) {
-        if ($passenger->email) {
-            try {
-                $templateKey = isset(MAIL_TEMPLATES[$type]) ? $type : 'default';
-                
-                $queue->queueTemplate($passenger->email, $templateKey, [
-                    'message' => $message,
-                    'link' => $link,
-                    'link_text' => 'View Details'
-                ], $passenger->name, 5, $requestId);
-                
-                $emailsQueued++;
-            } catch (Exception $e) {
-                error_log("NOTIFY PASSENGERS BATCH ERROR: Failed to queue email for {$passenger->email}: " . $e->getMessage());
-            }
+        $userId = (int) $passenger->user_id;
+        if ($userId <= 0) {
+            continue;
         }
 
-        // SMS per passenger (missing phone only skips that person + warns requester)
-        if (function_exists('smsNotifyUser')) {
-            try {
-                smsNotifyUser((int) $passenger->user_id, $type, $title, $message, $link, $requestId);
-                $smsQueued++;
-            } catch (Throwable $e) {
-                error_log("NOTIFY PASSENGERS BATCH SMS ERROR: user {$passenger->user_id}: " . $e->getMessage());
-            }
+        $hasEmail = !empty($passenger->email);
+        $hasPhone = !empty($passenger->phone) && function_exists('normalizePhoneE164')
+            && normalizePhoneE164((string) $passenger->phone) !== null;
+
+        try {
+            // Always create in-app + attempt email/SMS (same path as requester/driver)
+            notify($userId, $type, $title, $body, $link, $requestId);
+            $notified++;
+        } catch (Throwable $e) {
+            error_log("NOTIFY PASSENGERS BATCH ERROR: user {$userId}: " . $e->getMessage());
+        }
+
+        if (!$hasEmail && !$hasPhone && function_exists('smsNotifyRequesterMissingPhone')) {
+            smsNotifyRequesterMissingPhone(
+                $requestId,
+                $userId,
+                (string) ($passenger->name ?? ('User #' . $userId))
+            );
         }
     }
-    
-    error_log("NOTIFY PASSENGERS BATCH: Request #{$requestId} - Notified {$notified} passengers, queued {$emailsQueued} emails, SMS attempts {$smsQueued} (type: {$type})");
+
+    error_log("NOTIFY PASSENGERS BATCH: Request #{$requestId} - Notified {$notified} passengers (type: {$type})");
     return $notified;
 }
 
@@ -1389,6 +1370,19 @@ function clearUserCache(): void
 {
     $cache = cache();
     $cache->deletePattern(Cache::KEY_USERS);
+    // Driver dropdowns join users — keep lists in sync when users change
+    clearDriverCache();
+}
+
+/**
+ * Clear driver-related cache
+ * Call this when driver profiles are created/updated/deleted
+ */
+function clearDriverCache(): void
+{
+    $cache = cache();
+    // Exact key used by getActiveDrivers() (works for hashed file cache)
+    $cache->delete(Cache::KEY_DRIVERS . 'active');
     $cache->deletePattern(Cache::KEY_DRIVERS);
 }
 
@@ -1635,4 +1629,42 @@ function canGuardViewActiveTrip(object $request): bool
     }
 
     return in_array($request->status, [STATUS_APPROVED, STATUS_COMPLETED], true);
+}
+
+/**
+ * Total passengers for a request = companions in request_passengers + requester.
+ */
+function countRequestPassengers(int $requestId): int
+{
+    $companions = (int) db()->fetchColumn(
+        "SELECT COUNT(*) FROM request_passengers WHERE request_id = ?",
+        [$requestId]
+    );
+    return $companions + 1;
+}
+
+/**
+ * Normalize passenger POST payload (passengers[] and/or passengers_json backup).
+ *
+ * @return list<string>
+ */
+function normalizeRequestPassengerIdsFromPost(): array
+{
+    $passengerIds = $_POST['passengers'] ?? [];
+    if (!is_array($passengerIds)) {
+        $passengerIds = [];
+    }
+
+    if ($passengerIds === [] && !empty($_POST['passengers_json'])) {
+        $decoded = json_decode((string) $_POST['passengers_json'], true);
+        if (is_array($decoded)) {
+            $passengerIds = $decoded;
+        }
+    }
+
+    $passengerIds = array_values(array_filter($passengerIds, static function ($p) {
+        return trim((string) $p) !== '';
+    }));
+
+    return array_map(static fn($p) => trim((string) $p), $passengerIds);
 }

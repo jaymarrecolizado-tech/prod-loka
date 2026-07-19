@@ -44,14 +44,14 @@ $availableVehicles = db()->fetchAll(
      ORDER BY vt.name, v.plate_number"
 );
 
-// Get all active employees for passenger selection (exclude current user)
+// Get all active employees for passenger selection (exclude the request owner / requester)
 $employees = db()->fetchAll(
     "SELECT u.id, u.name, u.email, d.name as department_name 
      FROM users u 
      LEFT JOIN departments d ON u.department_id = d.id
      WHERE u.status = 'active' AND u.deleted_at IS NULL AND u.id != ?
      ORDER BY u.name",
-    [userId()]
+    [(int) $request->user_id]
 );
 
 // Get department approvers (approver or admin role in any department)
@@ -63,14 +63,8 @@ $approvers = db()->fetchAll(
      ORDER BY u.name"
 );
 
-// Get all active drivers
-$allDrivers = db()->fetchAll(
-    "SELECT d.*, u.name as driver_name, u.phone as driver_phone
-     FROM drivers d
-     JOIN users u ON d.user_id = u.id
-     WHERE d.deleted_at IS NULL AND u.status = 'active' AND u.deleted_at IS NULL
-     ORDER BY u.name"
-);
+// Get all active drivers (same cached helper as create; invalidated on driver CRUD)
+$allDrivers = getActiveDrivers();
 
 // Get motorpool heads
 $motorpoolHeads = db()->fetchAll(
@@ -97,18 +91,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $endDatetime = postSafe('end_datetime', '', 20);
     $purpose = postSafe('purpose', '', 500);
     $destinationRaw = $_POST['destinations'] ?? [];
-    $passengerIds = $_POST['passengers'] ?? [];
+    $passengerIds = normalizeRequestPassengerIdsFromPost();
     
     // Process destinations - filter empty values and combine
     $destinations = array_filter(array_map('trim', $destinationRaw), function($d) {
         return !empty($d);
     });
     $destination = implode(' → ', $destinations);
-    
-    // Count passengers properly - filter out empty values
-    $passengerIds = array_filter($passengerIds, function($p) {
-        return !empty(trim($p));
-    });
     
     // Passenger count = selected passengers + requester (1)
     $passengerCount = count($passengerIds) + 1;
@@ -252,8 +241,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $deferredNotifications[] = [
                         'user_id' => (int) $val,
                         'type' => 'added_to_request',
-                        'title' => 'Added to Vehicle Request',
-                        'message' => currentUser()->name . ' has added you as a passenger for a trip to ' . $destination . ' on ' . date('M j, Y', strtotime($startDatetime)) . '.',
+                        'title' => 'You are a passenger on a trip request',
+                        'message' => passengerInvolvementMessage(
+                            (int) $requestId,
+                            currentUser()->name . ' added you as a passenger for a trip to ' . $destination
+                            . ' on ' . date('M j, Y g:i A', strtotime($startDatetime))
+                            . '. You will get email and SMS updates when this trip changes.'
+                        ),
                         'link' => '/?page=requests&action=view&id=' . $requestId
                     ];
                 } else {
@@ -265,16 +259,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
             }
             
-            // Recalculate actual passenger count from database (requester + passengers)
-            $actualPassengerCount = db()->fetch(
-                "SELECT COUNT(*) + 1 as count FROM request_passengers WHERE request_id = ?",
-                [$requestId]
-            )->count;
-            
-            // Update passenger_count with actual count
+            // Recalculate from DB (requester + companions) so stored count matches lists/views
+            $actualPassengerCount = countRequestPassengers((int) $requestId);
             db()->update('requests', [
                 'passenger_count' => $actualPassengerCount
             ], 'id = ?', [$requestId]);
+            $passengerCount = $actualPassengerCount;
 
             // Check if details changed - notify existing passengers
             $detailsChanged = (

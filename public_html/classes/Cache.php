@@ -119,11 +119,22 @@ class Cache
                 }
             }
         } else {
-            // File-based: glob matching files
-            $patternHash = md5($fullPattern);
-            $files = glob($this->fileCacheDir . $patternHash . '*.json');
+            // File cache names are md5(key) — match via stored key metadata (or legacy exact hash)
+            $files = glob($this->fileCacheDir . '*.json') ?: [];
             foreach ($files as $file) {
-                if (@unlink($file)) {
+                $raw = @file_get_contents($file);
+                $data = $raw !== false ? json_decode($raw) : null;
+                $storedKey = is_object($data) ? ($data->key ?? null) : null;
+
+                $matches = false;
+                if (is_string($storedKey) && str_starts_with($storedKey, $fullPattern)) {
+                    $matches = true;
+                } elseif ($storedKey === null && basename($file) === md5($fullPattern) . '.json') {
+                    // legacy entries without key metadata (prefix-only key, rare)
+                    $matches = true;
+                }
+
+                if ($matches && @unlink($file)) {
                     $count++;
                 }
             }
@@ -246,6 +257,7 @@ class Cache
         $file = $this->getFilePath($key);
 
         $data = [
+            'key' => $this->prefixKey($key),
             'value' => $value,
             'expires' => time() + $ttl,
             'created' => time()

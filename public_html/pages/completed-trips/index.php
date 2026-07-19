@@ -154,11 +154,7 @@ $totalPassengers = 0;
 foreach ($allTripsForStats as $t) {
     if ($t->mileage_actual) $totalDistance += $t->mileage_actual;
     if ($t->actual_duration) $totalHours += $t->actual_duration / 60;
-    $passengerCount = db()->fetchColumn(
-        "SELECT COUNT(*) FROM request_passengers WHERE request_id = ?",
-        [$t->id]
-    );
-    $totalPassengers += $passengerCount;
+    $totalPassengers += (int) ($t->passenger_count ?? countRequestPassengers((int) $t->id));
 }
 
 require_once INCLUDES_PATH . '/header.php';
@@ -374,10 +370,7 @@ $baseParams = tableSortQueryParams($sortState, $baseParams);
                         <tbody>
                             <?php foreach ($trips as $trip): ?>
                             <?php
-                            $passengerCount = db()->fetchColumn(
-                                "SELECT COUNT(*) FROM request_passengers WHERE request_id = ?",
-                                [$trip->id]
-                            );
+                            $passengerCount = (int) ($trip->passenger_count ?? countRequestPassengers((int) $trip->id));
                             ?>
                             <tr>
                                 <td><strong>#<?= $trip->id ?></strong></td>

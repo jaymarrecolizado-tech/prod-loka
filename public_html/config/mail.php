@@ -114,8 +114,8 @@ define('MAIL_TEMPLATES', [
     
     // Passenger notifications
     'added_to_request' => [
-        'subject' => 'You Have Been Added to a Vehicle Request',
-        'template' => 'You have been added as a passenger to a vehicle request.'
+        'subject' => 'You Are a Passenger on a Trip Request',
+        'template' => 'You are listed as a passenger on a vehicle trip request. Open the link for destination, schedule, and status updates.'
     ],
     'removed_from_request' => [
         'subject' => 'Removed from Vehicle Request',
@@ -200,8 +200,8 @@ define('MAIL_TEMPLATES', [
     
     // Department approval stage
     'department_approved' => [
-        'subject' => 'Request Approved by Department',
-        'template' => 'Your vehicle request has been approved by the department approver and is now awaiting motorpool assignment.'
+        'subject' => 'Trip Approved — Awaiting Vehicle Assignment',
+        'template' => 'A vehicle trip was approved by the department and is awaiting motorpool assignment.'
     ],
     'pending_motorpool_approval' => [
         'subject' => 'Request Awaiting Your Approval',
@@ -215,7 +215,7 @@ define('MAIL_TEMPLATES', [
     ],
     'trip_fully_approved' => [
         'subject' => 'Trip Fully Approved',
-        'template' => 'The trip you are part of has been fully approved!'
+        'template' => 'A vehicle trip has been fully approved. Check LOKA for vehicle, driver, and schedule details.'
     ],
     'trip_rejected' => [
         'subject' => 'Trip Rejected',

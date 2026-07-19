@@ -140,18 +140,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && post('action') !== 'save_workflow' 
     $endDatetime = postSafe('end_datetime', '', 20);
     $purpose = postSafe('purpose', '', 500);
     $destinationRaw = $_POST['destinations'] ?? [];
-    $passengerIds = $_POST['passengers'] ?? [];
+    $passengerIds = normalizeRequestPassengerIdsFromPost();
     
     // Process destinations - filter empty values and combine
     $destinations = array_filter(array_map('trim', $destinationRaw), function($d) {
         return !empty($d);
     });
     $destination = implode(' → ', $destinations);
-    
-    // Count passengers properly - filter out empty values
-    $passengerIds = array_filter($passengerIds, function($p) {
-        return !empty(trim($p));
-    });
     
     // Passenger count = selected passengers + requester (1)
     $passengerCount = count($passengerIds) + 1;
@@ -290,16 +285,12 @@ if ($startDatetime && $endDatetime) {
                 }
             }
             
-            // Recalculate actual passenger count from database (requester + passengers)
-            $actualPassengerCount = db()->fetch(
-                "SELECT COUNT(*) + 1 as count FROM request_passengers WHERE request_id = ?",
-                [$requestId]
-            )->count;
-            
-            // Update passenger_count with actual count
+            // Recalculate from DB (requester + companions) so stored count matches lists/views
+            $actualPassengerCount = countRequestPassengers((int) $requestId);
             db()->update('requests', [
                 'passenger_count' => $actualPassengerCount
             ], 'id = ?', [$requestId]);
+            $passengerCount = $actualPassengerCount;
             
             // Create approval workflow record
             db()->insert('approval_workflow', [
@@ -368,12 +359,17 @@ if ($startDatetime && $endDatetime) {
                 notify($notif['user_id'], $notif['type'], $notif['title'], $notif['message'], $notif['link']);
             }
             
-            // Notify passengers using batch function
+            // Notify linked passengers (in-app + email + SMS) that they are on this trip
             notifyPassengersBatch(
                 $requestId,
                 'added_to_request',
-                'Added to Vehicle Request',
-                currentUser()->name . ' has added you as a passenger for a trip to ' . $destination . ' on ' . date('M j, Y', strtotime($startDatetime)) . '. The request is now awaiting approval.',
+                'You are a passenger on a trip request',
+                passengerInvolvementMessage(
+                    (int) $requestId,
+                    currentUser()->name . ' added you as a passenger for a trip to ' . $destination
+                    . ' on ' . date('M j, Y g:i A', strtotime($startDatetime))
+                    . '. The request is awaiting approval. You will get updates by email and SMS when the trip status changes.'
+                ),
                 '/?page=requests&action=view&id=' . $requestId
             );
             
@@ -804,6 +800,7 @@ require_once INCLUDES_PATH . '/header.php';
                                 $isSelected = in_array($emp->id, $selectedPassengers);
                             ?>
                             <label class="flex cursor-pointer items-center justify-between gap-3 border-b border-base-200 py-2 px-2 employee-item" 
+                                   data-display-name="<?= e($emp->name) ?>"
                                    data-name="<?= strtolower(e($emp->name)) ?>"
                                    data-department="<?= strtolower(e($emp->department_name ?? '')) ?>"
                                    data-email="<?= strtolower(e($emp->email ?? '')) ?>"
@@ -1015,7 +1012,7 @@ ob_start();
             }
             
             if (noEmployeesFound) {
-                noEmployeesFound.classList.add('d-none');
+                noEmployeesFound.classList.add('hidden', 'd-none');
             }
         }
         
@@ -1068,37 +1065,48 @@ ob_start();
                 }
             });
             
-            // Show/hide no results message
+            // Show/hide no results message (Tailwind `hidden` + legacy `d-none`)
             if (visibleCount === 0 && searchTerm.trim()) {
                 if (noEmployeesFound) {
-                    noEmployeesFound.classList.remove('d-none');
+                    noEmployeesFound.classList.remove('hidden', 'd-none');
                 }
                 employeeList.style.display = 'none';
             } else {
                 if (noEmployeesFound) {
-                    noEmployeesFound.classList.add('d-none');
+                    noEmployeesFound.classList.add('hidden', 'd-none');
                 }
-                employeeList.style.display = 'block';
+                employeeList.style.display = '';
             }
         }
         
+        getEmployeeDisplayName(item, checkbox) {
+            if (!item) return checkbox?.value || 'Employee';
+            const fromData = (item.getAttribute('data-display-name') || '').trim();
+            if (fromData) return fromData;
+            const nameEl = item.querySelector('.font-medium, .fw-medium');
+            if (nameEl && nameEl.textContent.trim()) {
+                return nameEl.textContent.trim();
+            }
+            return checkbox?.value || 'Employee';
+        }
+
         handleCheckboxChange(checkbox) {
             if (!checkbox.dataset.type || checkbox.dataset.type !== 'employee') return;
             
             const item = checkbox.closest('.employee-item');
             if (!item) return;
             
-            const nameEl = item.querySelector('label .fw-medium');
-            if (!nameEl) return;
+            const name = this.getEmployeeDisplayName(item, checkbox);
+            if (!name) return;
             
             if (checkbox.checked) {
-                this.selectedPassengers.set(checkbox.value, {
+                this.selectedPassengers.set(String(checkbox.value), {
                     type: 'employee',
-                    name: nameEl.textContent.trim(),
+                    name: name,
                     department: checkbox.dataset.department || 'No Dept'
                 });
             } else {
-                this.selectedPassengers.delete(checkbox.value);
+                this.selectedPassengers.delete(String(checkbox.value));
             }
             
             this.updateDisplay();
@@ -1170,11 +1178,11 @@ ob_start();
                 if (checkbox.dataset.type === 'employee') {
                     const item = checkbox.closest('.employee-item');
                     if (item) {
-                        const nameEl = item.querySelector('label .fw-medium');
-                        if (nameEl) {
-                            this.selectedPassengers.set(checkbox.value, {
+                        const name = this.getEmployeeDisplayName(item, checkbox);
+                        if (name) {
+                            this.selectedPassengers.set(String(checkbox.value), {
                                 type: 'employee',
-                                name: nameEl.textContent.trim(),
+                                name: name,
                                 department: checkbox.dataset.department || 'No Dept'
                             });
                         }

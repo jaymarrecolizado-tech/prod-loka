@@ -1,25 +1,19 @@
 <?php
 /**
  * LOKA - Process Approval Action (Hardened Version)
- * 
+ *
  * Two-stage approval workflow with race condition protection:
  * Stage 1: Assigned Approver reviews and approves (REGARDLESS of department)
  * Stage 2: Assigned Motorpool Head assigns vehicle/driver and gives final approval
- * 
+ *
  * Actions: Approve | Reject (with reason) | Request Revision (can resubmit)
- * 
+ *
  * SECURITY FIXES:
  * - FOR UPDATE row-level locking prevents concurrent approval processing
  * - Notifications deferred until AFTER commit to prevent orphaned emails
  * - State machine validation prevents invalid status transitions
-// Add this right after the opening PHP tag and before requireRole():
-<?php
-require_once dirname(__DIR__) . '/../config/constants.php';
-require_once dirname(__DIR__) . '/../config/mail.php';
-require_once dirname(__DIR__) . '/../config/database.php';
-require_once dirname(__DIR__) . '/../includes/functions.php';
-?>
  * - Admin override audit trail
+ * - AJAX clients get JSON before slow email/SMS so the UI does not spin forever
  */
 
 requireRole(ROLE_APPROVER);
@@ -603,57 +597,10 @@ try {
 
     db()->commit();
 
-    // =====================================================
-    // SEND NOTIFICATIONS AFTER SUCCESSFUL COMMIT
-    // This prevents orphaned emails if transaction fails
-    // =====================================================
-
-    // Send queued notifications
-    foreach ($notificationsToSend as $notif) {
-        notify($notif['user_id'], $notif['type'], $notif['title'], $notif['message'], $notif['link']);
-    }
-    
-    // Send passenger notifications based on action type
-    $passengerType = null;
-    $passengerTitle = null;
-    $passengerMessage = null;
-    
-    if ($approvalAction === 'revision') {
-        $passengerType = 'trip_revision';
-        $passengerTitle = 'Trip Sent Back for Revision';
-        $revisionBy = $approvalType === 'department' 
-            ? ($request->approver_name ?: 'Department Approver')
-            : ($request->motorpool_name ?: 'Motorpool Head');
-        $passengerMessage = "The trip to {$request->destination} on " . formatDate($request->start_datetime) . " has been sent back for revision.\n\nReason: {$comments}";
-    } elseif ($approvalAction === 'reject') {
-        $passengerType = 'trip_rejected';
-        $passengerTitle = 'Trip Rejected';
-        $rejectedBy = $approvalType === 'department' 
-            ? ($request->approver_name ?: 'Department Approver')
-            : ($request->motorpool_name ?: 'Motorpool Head');
-        $passengerMessage = "The trip to {$request->destination} on " . formatDate($request->start_datetime) . " has been rejected.\n\nReason: {$comments}";
-    } elseif ($approvalType === 'department') {
-        $passengerType = 'department_approved';
-        $passengerTitle = 'Trip Approved by Approver';
-        $passengerMessage = "The trip to {$request->destination} on " . formatDate($request->start_datetime) . " has been approved by the assigned approver and is now awaiting vehicle assignment.";
-    } else {
-        $passengerType = 'trip_fully_approved';
-        $passengerTitle = 'Trip Fully Approved';
-        $vehicle = $vehicleId ? db()->fetch("SELECT plate_number, make, model FROM vehicles WHERE id = ?", [$vehicleId]) : null;
-        $driver = $driverId ? db()->fetch("SELECT d.*, u.name as driver_name FROM drivers d JOIN users u ON d.user_id = u.id WHERE d.id = ?", [$driverId]) : null;
-        $vehicleInfo = $vehicle ? "{$vehicle->plate_number} - {$vehicle->make} {$vehicle->model}" : 'TBA';
-        $driverInfo = $driver ? $driver->driver_name : 'TBA';
-        $passengerMessage = "The trip to {$request->destination} on " . formatDate($request->start_datetime) . " has been fully approved!\n\nVehicle: {$vehicleInfo}\nDriver: {$driverInfo}";
-    }
-    
-    if ($passengerType) {
-        notifyPassengersBatch($requestId, $passengerType, $passengerTitle, $passengerMessage, '/?page=requests&action=view&id=' . $requestId);
-    }
-
-    // Generate message based on action
+    // User-facing message first — AJAX UI must not wait on SMTP/SMS
     if ($approvalAction === 'approve') {
-        $message = $approvalType === 'department' 
-            ? 'Request approved and forwarded to motorpool.' 
+        $message = $approvalType === 'department'
+            ? 'Request approved and forwarded to motorpool.'
             : 'Request fully approved!';
     } elseif ($approvalAction === 'revision') {
         $message = 'Request sent back for revision. Requester can update and resubmit.';
@@ -661,13 +608,91 @@ try {
         $message = 'Request rejected.';
     }
 
-    if (isset($_POST['ajax']) && $_POST['ajax'] == '1') {
-        header('Content-Type: application/json');
-        echo json_encode(['success' => true, 'message' => $message]);
+    $isAjax = isset($_POST['ajax']) && (string) $_POST['ajax'] === '1';
+    if ($isAjax) {
+        // Finish the browser request immediately (XAMPP/Apache needs Content-Length + close)
+        while (ob_get_level() > 0) {
+            @ob_end_clean();
+        }
+        $payload = json_encode(['success' => true, 'message' => $message], JSON_UNESCAPED_UNICODE);
+        ignore_user_abort(true);
+        header('Content-Type: application/json; charset=utf-8');
+        header('Connection: close');
+        header('Content-Length: ' . strlen($payload));
+        echo $payload;
+        if (function_exists('fastcgi_finish_request')) {
+            @fastcgi_finish_request();
+        } else {
+            @flush();
+        }
+    }
+
+    // =====================================================
+    // SEND NOTIFICATIONS AFTER SUCCESSFUL COMMIT (+ after AJAX response)
+    // =====================================================
+
+    foreach ($notificationsToSend as $notif) {
+        try {
+            notify($notif['user_id'], $notif['type'], $notif['title'], $notif['message'], $notif['link']);
+        } catch (Throwable $e) {
+            error_log('Approval notify failed: ' . $e->getMessage());
+        }
+    }
+
+    $passengerType = null;
+    $passengerTitle = null;
+    $passengerMessage = null;
+
+    if ($approvalAction === 'revision') {
+        $passengerType = 'trip_revision';
+        $passengerTitle = 'Passenger update: trip sent for revision';
+        $passengerMessage = passengerInvolvementMessage(
+            (int) $requestId,
+            "Destination: {$request->destination}\nDate: " . formatDate($request->start_datetime)
+            . "\nStatus: sent back for revision.\nReason: {$comments}"
+        );
+    } elseif ($approvalAction === 'reject') {
+        $passengerType = 'trip_rejected';
+        $passengerTitle = 'Passenger update: trip rejected';
+        $passengerMessage = passengerInvolvementMessage(
+            (int) $requestId,
+            "Destination: {$request->destination}\nDate: " . formatDate($request->start_datetime)
+            . "\nStatus: rejected.\nReason: {$comments}"
+        );
+    } elseif ($approvalType === 'department') {
+        $passengerType = 'department_approved';
+        $passengerTitle = 'Passenger update: trip approved — awaiting vehicle';
+        $passengerMessage = passengerInvolvementMessage(
+            (int) $requestId,
+            "Destination: {$request->destination}\nDate: " . formatDate($request->start_datetime)
+            . "\nStatus: approved by the department approver and now awaiting vehicle/driver assignment."
+        );
+    } else {
+        $passengerType = 'trip_fully_approved';
+        $passengerTitle = 'Passenger update: trip fully approved';
+        $vehicle = $vehicleId ? db()->fetch("SELECT plate_number, make, model FROM vehicles WHERE id = ?", [$vehicleId]) : null;
+        $driver = $driverId ? db()->fetch("SELECT d.*, u.name as driver_name FROM drivers d JOIN users u ON d.user_id = u.id WHERE d.id = ?", [$driverId]) : null;
+        $vehicleInfo = $vehicle ? "{$vehicle->plate_number} - {$vehicle->make} {$vehicle->model}" : 'TBA';
+        $driverInfo = $driver ? $driver->driver_name : 'TBA';
+        $passengerMessage = passengerInvolvementMessage(
+            (int) $requestId,
+            "Destination: {$request->destination}\nDate: " . formatDate($request->start_datetime)
+            . "\nStatus: fully approved.\nVehicle: {$vehicleInfo}\nDriver: {$driverInfo}"
+        );
+    }
+
+    if ($passengerType) {
+        try {
+            notifyPassengersBatch($requestId, $passengerType, $passengerTitle, $passengerMessage, '/?page=requests&action=view&id=' . $requestId);
+        } catch (Throwable $e) {
+            error_log('Approval passenger notify failed: ' . $e->getMessage());
+        }
+    }
+
+    if ($isAjax) {
         exit;
     }
 
-    // Redirect to processed tab so user can see their action
     redirectWith('/?page=approvals&tab=processed&p_processed=1', 'success', $message);
 
 } catch (Exception $e) {

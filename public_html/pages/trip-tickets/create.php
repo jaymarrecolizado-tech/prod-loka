@@ -107,11 +107,8 @@ if ($request->actual_dispatch_datetime && $request->actual_arrival_datetime) {
     $durationMinutes = floor(($diff % 3600) / 60);
 }
 
-// Get passengers count
-$passengers = db()->fetchColumn(
-    "SELECT COUNT(*) FROM request_passengers WHERE request_id = ?",
-    [$requestId]
-);
+// Total passengers = requester + companions (same as requests.passenger_count)
+$passengers = (int) ($request->passenger_count ?? countRequestPassengers((int) $requestId));
 
 // Pre-select vehicle plate if available
 $plateNumber = '';

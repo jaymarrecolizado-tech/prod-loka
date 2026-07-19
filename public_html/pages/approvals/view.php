@@ -1215,129 +1215,153 @@ require_once INCLUDES_PATH . '/header.php';
             }
         }
         
-        // Track which button was clicked
-        let clickedAction = null;
-        
-        // Function to validate and submit form
+        let isSubmitting = false;
+
+        function setActionLoading(submitBtn, loading) {
+            [approveBtn, rejectBtn, revisionBtn].forEach((btn) => {
+                if (!btn) return;
+                btn.disabled = loading;
+                const text = btn.querySelector('.btn-text');
+                const spin = btn.querySelector('.btn-loading');
+                if (btn === submitBtn) {
+                    if (text) text.classList.toggle('hidden', loading);
+                    if (spin) spin.classList.toggle('hidden', !loading);
+                } else {
+                    if (text) text.classList.remove('hidden');
+                    if (spin) spin.classList.add('hidden');
+                }
+            });
+        }
+
         function validateAndSubmit(action) {
+            if (!approvalForm || isSubmitting) return;
+
             const actionInput = document.getElementById('approvalActionInput');
-            if (actionInput) {
-                actionInput.value = action;
-            }
-            
-            const formActionUrl = approvalForm.action;
+            if (actionInput) actionInput.value = action;
+
             const formData = new FormData(approvalForm);
             formData.set('approval_action', action);
-            
+
             const submitBtn = action === 'approve' ? approveBtn : (action === 'revision' ? revisionBtn : rejectBtn);
-            const btnText = submitBtn.querySelector('.btn-text');
-            const btnLoading = submitBtn.querySelector('.btn-loading');
-            const comments = formData.get('comments')?.trim() || '';
-            
-            // Validate comments for rejection or revision
+            if (!submitBtn) return;
+
+            const comments = (formData.get('comments') || '').toString().trim();
+
             if ((action === 'reject' || action === 'revision') && !comments) {
-                const msg = action === 'revision' 
-                    ? 'Please explain what needs to be revised.' 
+                const msg = action === 'revision'
+                    ? 'Please explain what needs to be revised.'
                     : 'Please provide a reason for rejection.';
-                showToast(msg, 'warning');
-                document.getElementById('comments').classList.add('input-error');
-                document.getElementById('comments').focus();
+                if (typeof showToast === 'function') showToast(msg, 'warning');
+                else alert(msg);
+                const commentsEl = document.getElementById('comments');
+                if (commentsEl) {
+                    commentsEl.classList.add('input-error');
+                    commentsEl.focus();
+                }
                 return;
             }
-            
-            // Validate vehicle/driver for motorpool approval
+
             const approvalType = '<?= $approvalType ?>';
             if (action === 'approve' && approvalType === 'motorpool') {
                 const vehicleId = formData.get('vehicle_id');
                 const driverId = formData.get('driver_id');
-                const vehicleSelect = document.getElementById('vehicle_id');
-                const driverSelect = document.getElementById('driver_id');
-                
                 if (!vehicleId || !driverId) {
-                    showToast('Please select both a vehicle and driver for approval.', 'warning');
+                    if (typeof showToast === 'function') {
+                        showToast('Please select both a vehicle and driver for approval.', 'warning');
+                    } else {
+                        alert('Please select both a vehicle and driver for approval.');
+                    }
                     if (!vehicleId && vehicleSelect) vehicleSelect.classList.add('input-error');
                     if (!driverId && driverSelect) driverSelect.classList.add('input-error');
                     return;
                 }
             }
-            
-            // Clear validation classes
-            document.querySelectorAll('.input-error').forEach(el => el.classList.remove('input-error'));
-            
-            // Disable buttons and show loading
-            approveBtn.disabled = true;
-            rejectBtn.disabled = true;
-            if (revisionBtn) revisionBtn.disabled = true;
-            btnText.classList.add('hidden');
-            btnLoading.classList.remove('hidden');
-            
-            // Add AJAX header
+
+            document.querySelectorAll('.input-error').forEach((el) => el.classList.remove('input-error'));
+
+            isSubmitting = true;
+            setActionLoading(submitBtn, true);
             formData.append('ajax', '1');
-            
-            fetch(formActionUrl, {
+
+            const controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
+            const timeoutId = controller
+                ? setTimeout(() => controller.abort(), 25000)
+                : null;
+
+            fetch(approvalForm.action, {
                 method: 'POST',
-                body: formData
+                body: formData,
+                credentials: 'same-origin',
+                signal: controller ? controller.signal : undefined,
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
             })
-            .then(response => {
+            .then(async (response) => {
                 const contentType = response.headers.get('content-type') || '';
+                const raw = await response.text();
+                let data = null;
                 if (contentType.includes('application/json')) {
-                    return response.json();
+                    try { data = JSON.parse(raw); } catch (e) { data = null; }
+                } else if (raw && raw.trim().startsWith('{')) {
+                    try { data = JSON.parse(raw); } catch (e) { data = null; }
                 }
-                return response.text().then(() => null);
+
+                if (!response.ok) {
+                    const msg = (data && data.message)
+                        ? data.message
+                        : (raw && raw.length < 200 ? raw : 'Request failed. Please refresh and try again.');
+                    throw new Error(msg);
+                }
+
+                return data;
             })
-            .then(data => {
-                clickedAction = null;
-                
+            .then((data) => {
                 const success = data && typeof data === 'object' ? !!data.success : true;
                 const message = data && typeof data === 'object' && data.message
                     ? data.message
-                    : (action === 'approve' ? 'Request approved successfully!' : (action === 'revision' ? 'Request sent for revision.' : 'Request rejected.'));
-                
-                if (success) {
-                    showToast(message, 'success');
-                    setTimeout(() => {
-                        window.location.href = '<?= APP_URL ?>/?page=approvals&tab=processed&p_processed=1';
-                    }, 1500);
-                } else {
-                    showToast(data.message || 'An error occurred. Please try again.', 'danger');
-                    if (approveBtn) approveBtn.disabled = false;
-                    if (rejectBtn) rejectBtn.disabled = false;
-                    if (revisionBtn) revisionBtn.disabled = false;
-                    if (btnText) btnText.classList.remove('hidden');
-                    if (btnLoading) btnLoading.classList.add('hidden');
+                    : (action === 'approve'
+                        ? 'Request approved successfully!'
+                        : (action === 'revision' ? 'Request sent for revision.' : 'Request rejected.'));
+
+                if (!success) {
+                    throw new Error(data && data.message ? data.message : 'An error occurred. Please try again.');
                 }
+
+                if (typeof showToast === 'function') showToast(message, 'success');
+                window.location.href = '<?= APP_URL ?>/?page=approvals&tab=processed&p_processed=1';
             })
-            .catch(error => {
-                console.error('Error:', error);
-                clickedAction = null;
-                showToast('An error occurred. Please try again.', 'danger');
-                if (approveBtn) approveBtn.disabled = false;
-                if (rejectBtn) rejectBtn.disabled = false;
-                if (revisionBtn) revisionBtn.disabled = false;
-                if (btnText) btnText.classList.remove('hidden');
-                if (btnLoading) btnLoading.classList.add('hidden');
+            .catch((error) => {
+                console.error('Approval action error:', error);
+                const msg = (error && error.name === 'AbortError')
+                    ? 'The server took too long. Refresh the page — the action may have completed.'
+                    : (error && error.message ? error.message : 'An error occurred. Please try again.');
+                if (typeof showToast === 'function') showToast(msg, 'danger');
+                else alert(msg);
+                isSubmitting = false;
+                setActionLoading(submitBtn, false);
+            })
+            .finally(() => {
+                if (timeoutId) clearTimeout(timeoutId);
             });
         }
-        
-        // Handle button clicks
+
         if (approveBtn) {
-            approveBtn.addEventListener('click', function(e) {
+            approveBtn.addEventListener('click', function (e) {
                 e.preventDefault();
                 toggleAssignmentFields('approve');
                 validateAndSubmit('approve');
             });
         }
-        
+
         if (revisionBtn) {
-            revisionBtn.addEventListener('click', function(e) {
+            revisionBtn.addEventListener('click', function (e) {
                 e.preventDefault();
                 toggleAssignmentFields('revision');
                 validateAndSubmit('revision');
             });
         }
-        
+
         if (rejectBtn) {
-            rejectBtn.addEventListener('click', function(e) {
+            rejectBtn.addEventListener('click', function (e) {
                 e.preventDefault();
                 toggleAssignmentFields('reject');
                 validateAndSubmit('reject');

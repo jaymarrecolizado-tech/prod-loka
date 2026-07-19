@@ -53,6 +53,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         ]);
         
         auditLog('driver_created', 'driver', $driverId);
+        clearDriverCache();
         redirectWith('/?page=drivers', 'success', 'Driver added successfully.');
     }
 }

@@ -21,6 +21,7 @@ try {
 
     db()->softDelete('drivers', 'id = ?', [$driverId]);
     auditLog('driver_deleted', 'driver', $driverId, (array) $driver);
+    clearDriverCache();
 
     redirectWith('/?page=drivers', 'success', 'Driver deleted successfully.');
 } catch (Exception $e) {

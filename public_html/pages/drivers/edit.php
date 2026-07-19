@@ -77,6 +77,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                 auditLog('driver_updated', 'driver', $driverId);
                 db()->commit();
+                clearDriverCache();
                 redirectWith('/?page=drivers', 'success', 'Driver updated successfully.');
             }
         } catch (Exception $e) {
