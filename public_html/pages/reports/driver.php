@@ -3,22 +3,37 @@
  * LOKA - Driver Report
  */
 
-requireRole(ROLE_APPROVER);
+$driverScoped = isDriver() && !canAccessOpsReports();
+if (!$driverScoped && !canAccessOpsReports()) {
+    requireRole(ROLE_APPROVER);
+}
 
 $pageTitle = 'Driver Report';
+$myDriverId = currentDriverId();
 
 $driverId = get('driver_id');
 $startDate = get('start_date', date('Y-m-01'));
 $endDate = get('end_date', date('Y-m-t'));
 
-// Get all drivers for dropdown
-$drivers = db()->fetchAll(
-    "SELECT d.id, u.name, u.phone, d.license_number, d.status
-     FROM drivers d
-     JOIN users u ON d.user_id = u.id
-     WHERE d.deleted_at IS NULL AND u.deleted_at IS NULL
-     ORDER BY u.name"
-);
+// Drivers only see themselves; ops see all
+if ($driverScoped && $myDriverId) {
+    $driverId = (string) $myDriverId;
+    $drivers = db()->fetchAll(
+        "SELECT d.id, u.name, u.phone, d.license_number, d.status
+         FROM drivers d
+         JOIN users u ON d.user_id = u.id
+         WHERE d.id = ? AND d.deleted_at IS NULL AND u.deleted_at IS NULL",
+        [$myDriverId]
+    );
+} else {
+    $drivers = db()->fetchAll(
+        "SELECT d.id, u.name, u.phone, d.license_number, d.status
+         FROM drivers d
+         JOIN users u ON d.user_id = u.id
+         WHERE d.deleted_at IS NULL AND u.deleted_at IS NULL
+         ORDER BY u.name"
+    );
+}
 
 // Get driver trip history
 $trips = [];
@@ -46,11 +61,11 @@ if ($driverId) {
          JOIN users u ON r.user_id = u.id
          LEFT JOIN departments d ON r.department_id = d.id
          LEFT JOIN vehicles v ON r.vehicle_id = v.id
-         WHERE r.driver_id = ?
+         WHERE (r.driver_id = ? OR r.requested_driver_id = ?)
          AND r.start_datetime BETWEEN ? AND ?
          AND r.deleted_at IS NULL
          ORDER BY r.start_datetime DESC",
-        [$driverId, $startDate, $endDate . ' 23:59:59']
+        [$driverId, $driverId, $startDate, $endDate . ' 23:59:59']
     );
 }
 
@@ -94,6 +109,10 @@ require_once INCLUDES_PATH . '/header.php';
                 <input type="hidden" name="action" value="driver">
                 <div class="col-span-12 md:col-span-3">
                     <label class="loka-form-label">Driver</label>
+                    <?php if ($driverScoped): ?>
+                        <input type="hidden" name="driver_id" value="<?= (int) $myDriverId ?>">
+                        <input type="text" class="loka-form-input" value="<?= e($drivers[0]->name ?? 'You') ?>" readonly>
+                    <?php else: ?>
                     <select class="loka-form-input" name="driver_id" required>
                         <option value="">Select Driver...</option>
                         <?php foreach ($drivers as $d): ?>
@@ -102,6 +121,7 @@ require_once INCLUDES_PATH . '/header.php';
                         </option>
                         <?php endforeach; ?>
                     </select>
+                    <?php endif; ?>
                 </div>
                 <div class="col-span-6 md:col-span-2">
                     <label class="loka-form-label">Start Date</label>

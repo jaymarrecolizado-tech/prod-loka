@@ -318,21 +318,60 @@ function isGuard(): bool
  */
 function isDriver(): bool
 {
+    return currentDriverId() !== null;
+}
+
+/**
+ * Active driver profile id for the logged-in user, or null.
+ */
+function currentDriverId(): ?int
+{
     if (!isLoggedIn()) {
-        return false;
+        return null;
     }
 
-    static $isDriver = null;
-
-    if ($isDriver === null) {
-        $result = db()->fetch(
+    static $driverId = false; // false = not loaded
+    if ($driverId === false) {
+        $row = db()->fetch(
             "SELECT id FROM drivers WHERE user_id = ? AND deleted_at IS NULL LIMIT 1",
             [userId()]
         );
-        $isDriver = $result !== false;
+        $driverId = $row ? (int) $row->id : null;
     }
 
-    return $isDriver;
+    return $driverId;
+}
+
+/**
+ * Drivers may use gas vouchers (own), my trips, and scoped history reports.
+ */
+function canAccessGasVouchers(): bool
+{
+    if (isGuard() && !isDriver()) {
+        return false;
+    }
+    return isDriver()
+        || hasRole(ROLE_REQUESTER)
+        || isApprover()
+        || isMotorpool()
+        || isAdmin()
+        || isChiefAdminFinance();
+}
+
+/**
+ * Full ops reports (all vehicles/drivers/trips).
+ */
+function canAccessOpsReports(): bool
+{
+    return isApprover() || isMotorpool() || isAdmin();
+}
+
+/**
+ * Driver-scoped reports only (own history + vehicles they drove).
+ */
+function canAccessDriverReports(): bool
+{
+    return isDriver() || canAccessOpsReports() || isChiefAdminFinance();
 }
 
 /**

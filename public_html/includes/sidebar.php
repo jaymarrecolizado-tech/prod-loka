@@ -11,7 +11,7 @@
                 </a>
             </li>
 
-            <?php if (isDriver() && !isGuard()): ?>
+            <?php if (isDriver()): ?>
             <li>
                 <a class="loka-nav-link <?= activeMenu('my-trips') ?>" href="<?= APP_URL ?>/?page=my-trips">
                     <i class="bi bi-truck w-5 text-center flex-shrink-0"></i>
@@ -38,8 +38,9 @@
                 </a>
             </li>
 
-            <!-- Gas Vouchers -->
-            <?php if (hasRole(ROLE_REQUESTER) || isApprover() || isMotorpool() || isAdmin() || isChiefAdminFinance()): ?>
+            <?php endif; ?>
+
+            <?php if (canAccessGasVouchers()): ?>
             <li>
                 <a class="loka-nav-link <?= activeMenu('gas-vouchers') ?>" href="<?= APP_URL ?>/?page=gas-vouchers">
                     <i class="bi bi-fuel-pump w-5 text-center flex-shrink-0"></i>
@@ -47,7 +48,6 @@
                     <?= sidebarBadgeHtml(badgeCountPendingGasVouchers()) ?>
                 </a>
             </li>
-            <?php endif; ?>
             <?php endif; ?>
 
             <!-- Schedule Calendar -->
@@ -135,7 +135,7 @@
             </li>
             <?php endif; ?>
 
-            <?php if (isApprover() || isChiefAdminFinance()): ?>
+            <?php if (canAccessDriverReports()): ?>
             <li class="loka-section-label mt-3">Reports</li>
 
             <li>

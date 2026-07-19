@@ -3,28 +3,59 @@
  * LOKA - Vehicle History Report
  */
 
-requireRole(ROLE_APPROVER);
+$driverScoped = isDriver() && !canAccessOpsReports();
+if (!$driverScoped && !canAccessOpsReports()) {
+    requireRole(ROLE_APPROVER);
+}
 
 $pageTitle = 'Vehicle History Report';
+$myDriverId = currentDriverId();
 
 $vehicleId = get('vehicle_id');
 $startDate = get('start_date', date('Y-m-01'));
 $endDate = get('end_date', date('Y-m-t'));
 
-// Get all vehicles for dropdown
-$vehicles = db()->fetchAll(
-    "SELECT v.id, v.plate_number, v.make, v.model, vt.name as type_name
-     FROM vehicles v
-     LEFT JOIN vehicle_types vt ON v.vehicle_type_id = vt.id
-     WHERE v.deleted_at IS NULL
-     ORDER BY v.plate_number"
-);
+// Vehicles for dropdown (drivers: only vehicles they have driven)
+if ($driverScoped && $myDriverId) {
+    $vehicles = db()->fetchAll(
+        "SELECT DISTINCT v.id, v.plate_number, v.make, v.model, vt.name as type_name
+         FROM vehicles v
+         LEFT JOIN vehicle_types vt ON v.vehicle_type_id = vt.id
+         JOIN requests r ON r.vehicle_id = v.id AND r.deleted_at IS NULL
+         WHERE v.deleted_at IS NULL
+           AND (r.driver_id = ? OR r.requested_driver_id = ?)
+         ORDER BY v.plate_number",
+        [$myDriverId, $myDriverId]
+    );
+} else {
+    $vehicles = db()->fetchAll(
+        "SELECT v.id, v.plate_number, v.make, v.model, vt.name as type_name
+         FROM vehicles v
+         LEFT JOIN vehicle_types vt ON v.vehicle_type_id = vt.id
+         WHERE v.deleted_at IS NULL
+         ORDER BY v.plate_number"
+    );
+}
 
 // Get vehicle trip history
 $trips = [];
 $vehicleInfo = null;
 
 if ($vehicleId) {
+    // Drivers may only open vehicles they have driven
+    if ($driverScoped && $myDriverId) {
+        $allowed = false;
+        foreach ($vehicles as $v) {
+            if ((int) $v->id === (int) $vehicleId) {
+                $allowed = true;
+                break;
+            }
+        }
+        if (!$allowed) {
+            redirectWith('/?page=reports&action=vehicle-history', 'danger', 'You can only view vehicles you have driven.');
+        }
+    }
+
     $vehicleInfo = db()->fetch(
         "SELECT v.*, vt.name as type_name, vt.passenger_capacity
          FROM vehicles v
@@ -33,8 +64,7 @@ if ($vehicleId) {
         [$vehicleId]
     );
 
-    $trips = db()->fetchAll(
-        "SELECT r.id, r.start_datetime, r.end_datetime, r.purpose, r.destination,
+    $tripSql = "SELECT r.id, r.start_datetime, r.end_datetime, r.purpose, r.destination,
                 r.status, r.passenger_count, r.actual_dispatch_datetime, r.actual_arrival_datetime,
                 u.name as requester_name, d.name as department_name,
                 dr_user.name as driver_name,
@@ -47,10 +77,15 @@ if ($vehicleId) {
          LEFT JOIN users dr_user ON dr.user_id = dr_user.id
          WHERE r.vehicle_id = ?
          AND r.start_datetime BETWEEN ? AND ?
-         AND r.deleted_at IS NULL
-         ORDER BY r.start_datetime DESC",
-        [$vehicleId, $startDate, $endDate . ' 23:59:59']
-    );
+         AND r.deleted_at IS NULL";
+    $tripParams = [$vehicleId, $startDate, $endDate . ' 23:59:59'];
+    if ($driverScoped && $myDriverId) {
+        $tripSql .= " AND (r.driver_id = ? OR r.requested_driver_id = ?)";
+        $tripParams[] = $myDriverId;
+        $tripParams[] = $myDriverId;
+    }
+    $tripSql .= " ORDER BY r.start_datetime DESC";
+    $trips = db()->fetchAll($tripSql, $tripParams);
 }
 
 // Stats

@@ -294,6 +294,37 @@ switch ($page) {
             break;
         }
 
+        // Drivers: own history reports only (no full trip ops reports)
+        $driverReportActions = [
+            'index', 'vehicle-history', 'driver',
+            'export-vehicle-history', 'export-vehicle-csv',
+            'export-driver', 'export-driver-csv',
+        ];
+        if (isDriver() && !canAccessOpsReports()) {
+            if ($action === 'index' || $action === '') {
+                require_once PAGES_PATH . '/reports/index.php';
+            } elseif (in_array($action, $driverReportActions, true)) {
+                if ($action === 'vehicle-history') {
+                    require_once PAGES_PATH . '/reports/vehicle-history.php';
+                } elseif ($action === 'driver') {
+                    require_once PAGES_PATH . '/reports/driver.php';
+                } elseif ($action === 'export-vehicle-history') {
+                    require_once PAGES_PATH . '/reports/export-vehicle-history.php';
+                } elseif ($action === 'export-vehicle-csv') {
+                    require_once PAGES_PATH . '/reports/export-vehicle-csv.php';
+                } elseif ($action === 'export-driver') {
+                    require_once PAGES_PATH . '/reports/export-driver.php';
+                } elseif ($action === 'export-driver-csv') {
+                    require_once PAGES_PATH . '/reports/export-driver-csv.php';
+                } else {
+                    require_once PAGES_PATH . '/reports/index.php';
+                }
+            } else {
+                redirectWith('/?page=reports', 'danger', 'You can only view your own driver and vehicle history reports.');
+            }
+            break;
+        }
+
         if (isChiefAdminFinance() && !isApprover() && !isMotorpool() && !isAdmin()) {
             // CAF hub: show reports index (gas card only) without approver gate
             require_once PAGES_PATH . '/reports/index.php';
@@ -486,9 +517,13 @@ switch ($page) {
         break;
 
     case 'gas-vouchers':
-        denyGuardAccess();
+        if (isGuard() && !isDriver()) {
+            denyGuardAccess();
+        }
+        if (!canAccessGasVouchers()) {
+            redirectWith('/?page=dashboard', 'danger', 'You do not have permission to access this page.');
+        }
         if ($action === 'create' || $action === 'edit') {
-            requireAnyRole([ROLE_REQUESTER, ROLE_APPROVER, ROLE_MOTORPOOL, ROLE_ADMIN, ROLE_CHIEF_ADMIN_FINANCE]);
             require_once PAGES_PATH . '/gas-vouchers/create.php';
         } elseif ($action === 'view') {
             require_once PAGES_PATH . '/gas-vouchers/view.php';
@@ -503,7 +538,6 @@ switch ($page) {
             requireAnyRole([ROLE_ADMIN, ROLE_CHIEF_ADMIN_FINANCE]);
             require_once PAGES_PATH . '/gas-vouchers/update-payment.php';
         } else {
-            requireAnyRole([ROLE_REQUESTER, ROLE_APPROVER, ROLE_MOTORPOOL, ROLE_ADMIN, ROLE_CHIEF_ADMIN_FINANCE]);
             require_once PAGES_PATH . '/gas-vouchers/index.php';
         }
         break;

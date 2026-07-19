@@ -3,13 +3,20 @@
  * LOKA - Export Driver Report to PDF (Complete)
  */
 
-requireRole(ROLE_APPROVER);
+$driverScoped = isDriver() && !canAccessOpsReports();
+if (!$driverScoped && !canAccessOpsReports()) {
+    requireRole(ROLE_APPROVER);
+}
 
 require_once BASE_PATH . '/vendor/tecnickcom/tcpdf/tcpdf.php';
 
 $driverId = get('driver_id');
 $startDate = get('start_date', date('Y-m-01'));
 $endDate = get('end_date', date('Y-m-t'));
+
+if ($driverScoped) {
+    $driverId = (string) currentDriverId();
+}
 
 if (!$driverId) {
     redirectWith('/?page=reports&action=driver', 'danger', 'Please select a driver.');
@@ -44,11 +51,11 @@ $trips = db()->fetchAll(
      LEFT JOIN vehicles v ON r.vehicle_id = v.id
      LEFT JOIN users dispatch_g ON r.dispatch_guard_id = dispatch_g.id
      LEFT JOIN users arrival_g ON r.arrival_guard_id = arrival_g.id
-     WHERE r.driver_id = ? 
+     WHERE (r.driver_id = ? OR r.requested_driver_id = ?)
      AND r.start_datetime BETWEEN ? AND ?
      AND r.deleted_at IS NULL
      ORDER BY r.start_datetime DESC",
-    [$driverId, $startDate, $endDate . ' 23:59:59']
+    [$driverId, $driverId, $startDate, $endDate . ' 23:59:59']
 );
 
 $filename = 'driver_report_' . preg_replace('/[^a-zA-Z0-9]/', '_', $driverInfo->name) . '_' . $startDate . '_to_' . $endDate;

@@ -3,16 +3,33 @@
  * LOKA - Export Vehicle History to PDF (Complete)
  */
 
-requireRole(ROLE_APPROVER);
+$driverScoped = isDriver() && !canAccessOpsReports();
+if (!$driverScoped && !canAccessOpsReports()) {
+    requireRole(ROLE_APPROVER);
+}
 
 require_once BASE_PATH . '/vendor/tecnickcom/tcpdf/tcpdf.php';
 
 $vehicleId = get('vehicle_id');
 $startDate = get('start_date', date('Y-m-01'));
 $endDate = get('end_date', date('Y-m-t'));
+$myDriverId = currentDriverId();
 
 if (!$vehicleId) {
     redirectWith('/?page=reports&action=vehicle-history', 'danger', 'Please select a vehicle.');
+}
+
+if ($driverScoped && $myDriverId) {
+    $allowed = db()->fetch(
+        "SELECT r.id FROM requests r
+         WHERE r.vehicle_id = ? AND r.deleted_at IS NULL
+           AND (r.driver_id = ? OR r.requested_driver_id = ?)
+         LIMIT 1",
+        [$vehicleId, $myDriverId, $myDriverId]
+    );
+    if (!$allowed) {
+        redirectWith('/?page=reports&action=vehicle-history', 'danger', 'You can only export vehicles you have driven.');
+    }
 }
 
 $vehicleInfo = db()->fetch(
@@ -45,9 +62,12 @@ $trips = db()->fetchAll(
      LEFT JOIN users arrival_g ON r.arrival_guard_id = arrival_g.id
      WHERE r.vehicle_id = ? 
      AND r.start_datetime BETWEEN ? AND ?
-     AND r.deleted_at IS NULL
-     ORDER BY r.start_datetime DESC",
-    [$vehicleId, $startDate, $endDate . ' 23:59:59']
+     AND r.deleted_at IS NULL"
+        . ($driverScoped && $myDriverId ? " AND (r.driver_id = ? OR r.requested_driver_id = ?)" : "")
+        . " ORDER BY r.start_datetime DESC",
+    $driverScoped && $myDriverId
+        ? [$vehicleId, $startDate, $endDate . ' 23:59:59', $myDriverId, $myDriverId]
+        : [$vehicleId, $startDate, $endDate . ' 23:59:59']
 );
 
 $filename = 'vehicle_history_' . $vehicleInfo->plate_number . '_' . $startDate . '_to_' . $endDate;

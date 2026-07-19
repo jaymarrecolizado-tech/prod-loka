@@ -3,14 +3,16 @@
  * LOKA - Reports Page
  */
 
-$canOpsReports = isApprover() || isMotorpool() || isAdmin();
+$canOpsReports = canAccessOpsReports();
 $canGasReport = $canOpsReports || isChiefAdminFinance();
-if (!$canGasReport) {
+$canDriverReports = isDriver() && !$canOpsReports;
+if (!$canGasReport && !$canDriverReports) {
     requireRole(ROLE_APPROVER);
 }
 
 $pageTitle = 'Reports';
-$cafOnly = isChiefAdminFinance() && !$canOpsReports;
+$cafOnly = isChiefAdminFinance() && !$canOpsReports && !$canDriverReports;
+$driverOnly = $canDriverReports;
 
 require_once INCLUDES_PATH . '/header.php';
 ?>
@@ -55,7 +57,11 @@ require_once INCLUDES_PATH . '/header.php';
                             <i class="bi bi-car-front text-primary" style="font-size: 3.5rem;"></i>
                         </div>
                         <h5>Vehicle History</h5>
-                        <p class="text-base-content/60 mb-3">View trip history and utilization for each vehicle with export options</p>
+                        <p class="text-base-content/60 mb-3">
+                            <?= $driverOnly
+                                ? 'History for vehicles you have driven (your trips only)'
+                                : 'View trip history and utilization for each vehicle with export options' ?>
+                        </p>
                         <span class="loka-badge bg-primary">PDF Export</span>
                     </div>
                 </div>
@@ -71,13 +77,18 @@ require_once INCLUDES_PATH . '/header.php';
                             <i class="bi bi-person-badge text-success" style="font-size: 3.5rem;"></i>
                         </div>
                         <h5>Driver Report</h5>
-                        <p class="text-base-content/60 mb-3">View trip history and statistics for each driver with export options</p>
+                        <p class="text-base-content/60 mb-3">
+                            <?= $driverOnly
+                                ? 'Your personal trip history and driving statistics'
+                                : 'View trip history and statistics for each driver with export options' ?>
+                        </p>
                         <span class="loka-badge bg-success">PDF Export</span>
                     </div>
                 </div>
             </a>
         </div>
 
+        <?php if (!$driverOnly): ?>
         <!-- Trip Requests Report -->
         <div class="col-span-12 md:col-span-6 lg:col-span-4">
             <a href="<?= APP_URL ?>/?page=reports&action=trips" class="no-underline">
@@ -93,6 +104,7 @@ require_once INCLUDES_PATH . '/header.php';
                 </div>
             </a>
         </div>
+        <?php endif; ?>
 
         <?php if (isAdmin()): ?>
         <!-- Admin Reports -->

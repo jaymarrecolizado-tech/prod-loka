@@ -3,11 +3,18 @@
  * LOKA - Export Driver Report to CSV (Complete)
  */
 
-requireRole(ROLE_APPROVER);
+$driverScoped = isDriver() && !canAccessOpsReports();
+if (!$driverScoped && !canAccessOpsReports()) {
+    requireRole(ROLE_APPROVER);
+}
 
 $driverId = get('driver_id');
 $startDate = get('start_date', date('Y-m-01'));
 $endDate = get('end_date', date('Y-m-t'));
+
+if ($driverScoped) {
+    $driverId = (string) currentDriverId();
+}
 
 if (!$driverId) {
     redirectWith('/?page=reports&action=driver', 'danger', 'Please select a driver.');
@@ -42,11 +49,11 @@ $trips = db()->fetchAll(
      LEFT JOIN vehicles v ON r.vehicle_id = v.id
      LEFT JOIN users dispatch_g ON r.dispatch_guard_id = dispatch_g.id
      LEFT JOIN users arrival_g ON r.arrival_guard_id = arrival_g.id
-     WHERE r.driver_id = ? 
+     WHERE (r.driver_id = ? OR r.requested_driver_id = ?)
      AND r.start_datetime BETWEEN ? AND ?
      AND r.deleted_at IS NULL
      ORDER BY r.start_datetime DESC",
-    [$driverId, $startDate, $endDate . ' 23:59:59']
+    [$driverId, $driverId, $startDate, $endDate . ' 23:59:59']
 );
 
 header('Content-Type: text/csv; charset=utf-8');

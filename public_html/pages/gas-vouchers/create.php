@@ -3,7 +3,9 @@
  * LOKA - Gas Voucher Create / Edit Page
  */
 
-requireAnyRole([ROLE_REQUESTER, ROLE_APPROVER, ROLE_MOTORPOOL, ROLE_ADMIN, ROLE_CHIEF_ADMIN_FINANCE]);
+if (!canAccessGasVouchers()) {
+    redirectWith('/?page=dashboard', 'danger', 'You do not have permission to access this page.');
+}
 
 
 $isEdit  = (get('action') === 'edit');
