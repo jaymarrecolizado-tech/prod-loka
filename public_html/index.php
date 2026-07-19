@@ -386,8 +386,8 @@ switch ($page) {
 
     case 'security':
         requireAllFather();
-        if ($action === 'rate-limits' || $action === 'index') {
-            require_once PAGES_PATH . '/security/rate-limits.php';
+        if ($action === 'summary') {
+            require_once PAGES_PATH . '/security/summary.php';
         } else {
             require_once PAGES_PATH . '/security/rate-limits.php';
         }

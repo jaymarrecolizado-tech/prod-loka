@@ -201,12 +201,34 @@
             </li>
             <?php endif; ?>
 
-            <?php if (isAllFather()): ?>
-            <li>
-                <a class="loka-nav-link <?= activeMenu('security') ?>" href="<?= APP_URL ?>/?page=security&action=rate-limits">
+            <?php if (isAllFather()):
+                $secAction = get('action', 'rate-limits');
+                if ($secAction === 'index' || $secAction === '') {
+                    $secAction = 'rate-limits';
+                }
+                $secOpen = get('page') === 'security';
+            ?>
+            <li class="loka-nav-group <?= $secOpen ? 'is-open' : '' ?>">
+                <div class="loka-nav-link loka-nav-group-label <?= $secOpen ? 'active' : '' ?>">
                     <i class="bi bi-shield-lock w-5 text-center flex-shrink-0"></i>
                     <span>Rate Limits</span>
-                </a>
+                </div>
+                <ul class="loka-nav-submenu">
+                    <li>
+                        <a class="loka-nav-link loka-nav-sublink <?= ($secOpen && $secAction === 'rate-limits') ? 'active' : '' ?>"
+                           href="<?= APP_URL ?>/?page=security&action=rate-limits">
+                            <i class="bi bi-unlock w-5 text-center flex-shrink-0"></i>
+                            <span>Lockouts</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a class="loka-nav-link loka-nav-sublink <?= ($secOpen && $secAction === 'summary') ? 'active' : '' ?>"
+                           href="<?= APP_URL ?>/?page=security&action=summary">
+                            <i class="bi bi-bar-chart-line w-5 text-center flex-shrink-0"></i>
+                            <span>Summary</span>
+                        </a>
+                    </li>
+                </ul>
             </li>
             <?php endif; ?>
 

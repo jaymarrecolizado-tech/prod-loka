@@ -125,10 +125,12 @@ require_once INCLUDES_PATH . '/header.php';
 ?>
 
 <div class="w-full px-4 sm:px-6 lg:px-8">
-    <div class="mb-4">
+    <div class="mb-2">
         <h4 class="mb-1"><i class="bi bi-shield-lock me-2"></i>Rate Limits & Lockouts</h4>
         <p class="text-base-content/60 mb-0">All Father only — unlock accounts and clear login throttles</p>
     </div>
+
+    <?php require __DIR__ . '/partials/subnav.php'; ?>
 
     <?php if ($flash): ?>
         <div class="loka-alert loka-alert-<?= e($flash[0]) ?> mb-4"><?= e($flash[1]) ?></div>
