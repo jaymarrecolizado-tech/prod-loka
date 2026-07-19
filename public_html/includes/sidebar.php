@@ -26,6 +26,7 @@
                 <a class="loka-nav-link <?= activeMenu('requests') ?>" href="<?= APP_URL ?>/?page=requests">
                     <i class="bi bi-file-earmark-text w-5 text-center flex-shrink-0"></i>
                     <span>Requests</span>
+                    <?= sidebarBadgeHtml(badgeCountRequestsNeedingRevision(), true) ?>
                 </a>
             </li>
 
@@ -43,12 +44,7 @@
                 <a class="loka-nav-link <?= activeMenu('gas-vouchers') ?>" href="<?= APP_URL ?>/?page=gas-vouchers">
                     <i class="bi bi-fuel-pump w-5 text-center flex-shrink-0"></i>
                     <span>Gas Vouchers</span>
-                    <?php
-                    $pendingGv = badgeCountPendingGasVouchers();
-                    if ($pendingGv > 0):
-                    ?>
-                    <span class="loka-nav-badge"><?= $pendingGv ?></span>
-                    <?php endif; ?>
+                    <?= sidebarBadgeHtml(badgeCountPendingGasVouchers()) ?>
                 </a>
             </li>
             <?php endif; ?>
@@ -67,6 +63,7 @@
                 <a class="loka-nav-link <?= activeMenu('guard') ?>" href="<?= APP_URL ?>/?page=guard">
                     <i class="bi bi-shield-check w-5 text-center flex-shrink-0"></i>
                     <span>Guard Dashboard</span>
+                    <?= sidebarBadgeHtml(badgeCountGuardOps(), true) ?>
                 </a>
             </li>
             <?php endif; ?>
@@ -77,12 +74,7 @@
                 <a class="loka-nav-link <?= activeMenu('my-trip-tickets') ?>" href="<?= APP_URL ?>/?page=my-trip-tickets">
                     <i class="bi bi-journal-check w-5 text-center flex-shrink-0"></i>
                     <span>My Trip Tickets</span>
-                    <?php
-                    $pendingTicketsCount = badgeCountSubmittedTripTickets();
-                    if ($pendingTicketsCount > 0):
-                    ?>
-                    <span class="loka-nav-badge"><?= $pendingTicketsCount ?></span>
-                    <?php endif; ?>
+                    <?= sidebarBadgeHtml(badgeCountSubmittedTripTickets()) ?>
                 </a>
             </li>
 
@@ -91,12 +83,7 @@
                 <a class="loka-nav-link <?= activeMenu('approvals') ?>" href="<?= APP_URL ?>/?page=approvals">
                     <i class="bi bi-check-circle w-5 text-center flex-shrink-0"></i>
                     <span>Approvals</span>
-                    <?php
-                    $pendingCount = badgeCountPendingApprovals();
-                    if ($pendingCount > 0):
-                    ?>
-                    <span class="loka-nav-badge loka-nav-badge-urgent"><?= $pendingCount ?></span>
-                    <?php endif; ?>
+                    <?= sidebarBadgeHtml(badgeCountPendingApprovals(), true) ?>
                 </a>
             </li>
             <?php endif; ?>
@@ -109,6 +96,7 @@
                 <a class="loka-nav-link <?= activeMenu('vehicles') ?>" href="<?= APP_URL ?>/?page=vehicles">
                     <i class="bi bi-car-front w-5 text-center flex-shrink-0"></i>
                     <span>Vehicles</span>
+                    <?= sidebarBadgeHtml(badgeCountVehiclesAttention()) ?>
                 </a>
             </li>
 
@@ -135,12 +123,7 @@
                 <a class="loka-nav-link <?= activeMenu('maintenance') ?>" href="<?= APP_URL ?>/?page=maintenance">
                     <i class="bi bi-wrench w-5 text-center flex-shrink-0"></i>
                     <span>Maintenance</span>
-                    <?php
-                    $pendingMaintenance = badgeCountPendingMaintenance();
-                    if ($pendingMaintenance > 0):
-                    ?>
-                    <span class="loka-nav-badge"><?= $pendingMaintenance ?></span>
-                    <?php endif; ?>
+                    <?= sidebarBadgeHtml(badgeCountPendingMaintenance()) ?>
                 </a>
             </li>
             <!-- Maintenance Schedule -->
@@ -219,6 +202,7 @@
                            href="<?= APP_URL ?>/?page=security&action=rate-limits">
                             <i class="bi bi-unlock w-5 text-center flex-shrink-0"></i>
                             <span>Lockouts</span>
+                            <?= sidebarBadgeHtml(badgeCountSecurityLockouts(), true) ?>
                         </a>
                     </li>
                     <li>

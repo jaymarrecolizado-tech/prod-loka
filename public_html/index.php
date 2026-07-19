@@ -132,6 +132,8 @@ $publicPages = ['login', 'logout', 'forgot-password', 'reset-password', 'qr', 'v
 // Route handling
 if (!in_array($page, $publicPages)) {
     requireAuth();
+    // Clear sidebar counters for items the user is now viewing
+    badgeMarkSeenForCurrentPage($page, $action);
 }
 
 // Page routing

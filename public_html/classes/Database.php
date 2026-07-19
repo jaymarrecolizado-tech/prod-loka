@@ -37,6 +37,7 @@ class Database
         'gas_vouchers',
         'vehicle_observations',
         'vehicle_observation_photos',
+        'user_badge_acks',
     ];
 
     private function __construct()
