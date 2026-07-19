@@ -33,6 +33,7 @@ require_once __DIR__ . '/database.php';
 require_once __DIR__ . '/constants.php';
 require_once __DIR__ . '/security.php';
 require_once __DIR__ . '/mail.php';
+require_once __DIR__ . '/sms.php';
 
 // Load classes (before session.php which needs Security class)
 require_once __DIR__ . '/../classes/Database.php';
@@ -41,12 +42,15 @@ require_once __DIR__ . '/../classes/Cache.php';
 require_once __DIR__ . '/../classes/Auth.php';
 require_once __DIR__ . '/../classes/Mailer.php';
 require_once __DIR__ . '/../classes/EmailQueue.php';
+require_once __DIR__ . '/../classes/SmsGateway.php';
+require_once __DIR__ . '/../classes/SmsQueue.php';
 
 // Load session (needs Security class)
 require_once __DIR__ . '/session.php';
 
 // Load helpers
 require_once __DIR__ . '/../includes/functions.php';
+require_once __DIR__ . '/../includes/sms.php';
 
 // Initialize Security
 $security = Security::getInstance();

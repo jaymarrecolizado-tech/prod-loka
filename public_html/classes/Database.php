@@ -38,6 +38,7 @@ class Database
         'vehicle_observations',
         'vehicle_observation_photos',
         'user_badge_acks',
+        'sms_logs',
     ];
 
     private function __construct()

@@ -3,8 +3,22 @@
 
 **Branch:** `loka-smsnotifimplem7192026`  
 **Date:** July 19, 2026  
-**Status:** Discussion draft (aligned to current LOKA codebase)  
+**Status:** Implemented on branch `loka-smsnotifimplem7192026` (outbound queue + All Father UI)  
 **Supersedes:** Original generic Node/React/PostgreSQL plan (kept ideas for gateway infra only)
+
+### Locked decisions (so far)
+
+| # | Decision |
+|---|----------|
+| 1 | MVP event allowlist (assigned, approved, dispatch, arrival/complete, reject/revision, cancel, gas voucher approve/reject) |
+| 2 | **Queue** + cron (like email), not sync-send in the HTTP request |
+| 3 | Recipients mirror email/in-app: requester, driver, **linked passenger users** (guests skipped) |
+| 4 | Global enable (no per-user opt-in in v1) — controlled by **All Father** UI |
+| 5 | **Option A (dual path):** (1) **Local first** — Docker SMS gateway on this Windows/XAMPP machine + your Android phone for testing; (2) **Then production** — same gateway stack on the **same Hostinger VPS** as LOKA + office phone/SIM in server room |
+| 6 | **Outbound only** — SMS exists solely to **notify travel participants** (requester, driver, linked passengers). No inbound/reply commands in scope |
+| 7 | Dev test with real Android phone + local Docker; then Hostinger |
+
+**Also locked:** All Father can **toggle SMS notifications** and edit **SMS settings** in-app (not `.env`-only).
 
 ---
 
@@ -77,8 +91,8 @@ Workflow page (approve / assign / dispatch / etc.)
                     └─────────────────────────────┘
 ```
 
-**Outbound (MVP):** LOKA → Gateway API → Phone → SMS to user.  
-**Inbound (Phase 2, optional):** reply SMS → webhook → log only first; commands later if needed.
+**Outbound only:** LOKA → Gateway API → Phone → SMS to travel participants.  
+**Inbound / reply SMS:** out of scope (not needed for notify-only).
 
 ---
 
@@ -88,29 +102,29 @@ Workflow page (approve / assign / dispatch / etc.)
 
 | Item | MVP (recommended) | Later |
 |------|-------------------|--------|
-| Channel | Outbound SMS only | Two-way reply commands |
-| Trigger | Mirror selected `notify()` events | Manual blast UI, templates editor |
-| Recipients | Users with non-empty `users.phone` | Guests (no account) — skip |
-| Delivery | Sync or short queue like email | Retry worker / cron |
-| Admin UI | Simple logs page (admin/motorpool) | Full React-style dashboard |
-| Preferences | Global on/off + per-event flags in `.env` or `settings` | Per-user SMS opt-in in profile |
-| Environments | Off in local unless `SMS_ENABLED=true` | Staging gateway phone |
+| Channel | **Outbound notify-only** (travel participants) | Inbound/replies (explicitly out of scope) |
+| Trigger | Allowlisted `notify()` event types | Manual blast UI, templates editor |
+| Recipients | Same as email for those events (requester / driver / linked passengers with phone) | Guests — skip |
+| Delivery | **Queue** + `cron/process_sms_queue.php` | Richer retry / delivery receipts |
+| Control UI | **All Father:** enable toggle + gateway settings | Per-user opt-in |
+| Ops UI | SMS logs + test send + health (All Father; optional admin read-only later) | Full analytics dashboard |
+| Infra | Local Docker (dev test) → then Hostinger VPS Docker (prod) + office Android phone | Second phone / multi-SIM |
 
-### 4.2 Which events should SMS? (proposed MVP set)
+### 4.2 Which events should SMS? (MVP — locked)
 
-Keep SMS **short and high-value** (cost + noise). In-app + email stay for everything else.
+SMS only when the event type is allowlisted **and** SMS is enabled by All Father. Who receives = whoever already gets `notify()` / `notifyDriver()` / `notifyPassengersBatch()` for that event (must have `users.phone`).
 
-| Event | Who gets SMS | Why |
-|-------|--------------|-----|
-| Driver assigned / requested | Driver | Must know they have a trip |
-| Trip fully approved | Requester (+ optional driver) | Trip is green-lit |
-| Guard dispatch | Requester + driver | Vehicle left |
-| Guard arrival / trip completed | Requester + driver | Trip done |
-| Request rejected / revision | Requester | Action needed |
-| Request cancelled | Driver (if assigned) + requester | Stop showing up |
-| Gas voucher approved / rejected | Requester | Finance-critical |
+| Event types (examples) | Typical recipients |
+|------------------------|--------------------|
+| `driver_assigned`, `driver_requested` | Driver (+ others if notify() already targets them) |
+| `request_fully_approved`, `trip_fully_approved` | Requester, passengers, driver as email does today |
+| `vehicle_dispatched`, `trip_started` | Requester, driver, passengers as email does |
+| `vehicle_arrived`, `trip_completed` | Same |
+| `request_rejected`, `request_revision`, `trip_rejected`, `trip_revision` | Same |
+| `request_cancelled`, `trip_cancelled_driver`, `trip_cancelled` | Same |
+| `gas_voucher_approved`, `gas_voucher_rejected` | Voucher requester |
 
-**Defer SMS for:** every passenger fan-out, “submitted to motorpool”, damage alerts (email/in-app enough unless you want motorpool on SMS), trip ticket review.
+**Defer / out of scope:** “submitted to motorpool” noise, damage alerts, trip ticket review, **any inbound SMS / reply commands**.
 
 ### 4.3 Message style
 
@@ -123,60 +137,72 @@ Keep SMS **short and high-value** (cost + noise). In-app + email stay for everyt
 
 - Missing/invalid phone → skip SMS, still create in-app + email.
 - Gateway down → log failure, **do not** block approve/dispatch.
-- `SMS_ENABLED=false` → no network calls (local XAMPP default).
+- SMS disabled (All Father toggle / missing settings) → no gateway calls (safe XAMPP default).
 
 ---
 
 ## 5. App integration design (PHP)
 
-### 5.1 Config (`.env` — same pattern as mail)
+### 5.1 Config: `.env` defaults + All Father overrides
+
+**`.env` (defaults / secrets fallback — never commit real passwords):**
 
 ```env
 SMS_ENABLED=false
-SMS_GATEWAY_URL=https://sms.yourdomain.com
+SMS_GATEWAY_URL=
 SMS_GATEWAY_USERNAME=
 SMS_GATEWAY_PASSWORD=
-SMS_WEBHOOK_SECRET=
 SMS_DEFAULT_COUNTRY_CODE=63
 SMS_TIMEOUT_SECONDS=15
 SMS_MAX_MESSAGE_LENGTH=320
-# Comma-separated notify() type keys that may also SMS
-SMS_EVENT_ALLOWLIST=driver_assigned,driver_requested,request_fully_approved,vehicle_dispatched,trip_started,vehicle_arrived,trip_completed,request_rejected,request_revision,request_cancelled,trip_cancelled_driver,gas_voucher_approved,gas_voucher_rejected
+SMS_EVENT_ALLOWLIST=driver_assigned,driver_requested,request_fully_approved,trip_fully_approved,vehicle_dispatched,trip_started,vehicle_arrived,trip_completed,request_rejected,request_revision,trip_rejected,trip_revision,request_cancelled,trip_cancelled_driver,gas_voucher_approved,gas_voucher_rejected
 ```
 
-Never commit real passwords. Do not overwrite existing `.env` without asking.
+**All Father UI (primary runtime control)** — e.g. `/?page=security&action=sms` or `/?page=settings&action=sms` gated by `isAllFather()`:
+
+| Setting | Purpose |
+|---------|---------|
+| Enable SMS notifications | Master on/off (writes `settings` key `sms_enabled`) |
+| Gateway URL | `https://sms.yourdomain.com` |
+| Gateway username / password | Basic auth to capcom6 |
+| Default country code | `63` |
+| Event allowlist | Checkboxes or comma list of notify types |
+| Test send | Send one SMS to a number + show result |
+
+Resolution order: **DB settings (All Father) override `.env` defaults** when present. Password fields: show “unchanged” if blank on save. Audit-log all SMS setting changes.
 
 ### 5.2 New files (proposed)
 
 | Path | Role |
 |------|------|
-| `public_html/includes/sms.php` or `classes/SmsGateway.php` | HTTP client to capcom6 `/message` |
-| `public_html/classes/SmsQueue.php` (optional) | Queue rows like `EmailQueue` |
-| `public_html/config/sms.php` | Load env + template map |
-| `database/migrations/0xx_sms_logs.php` | MySQL tables |
-| `public_html/pages/sms/index.php` | Admin log viewer (phase 1.5) |
-| `public_html/pages/webhooks/sms.php` | Inbound webhook (phase 2) |
-| `cron/process_sms_queue.php` | If we queue instead of sync-send |
+| `public_html/classes/SmsGateway.php` | HTTP client to capcom6 `/message` |
+| `public_html/classes/SmsQueue.php` | Queue rows like `EmailQueue` |
+| `public_html/config/sms.php` | Load env + settings + template map |
+| `public_html/includes/sms.php` | `smsEnabled()`, `smsNotifyUser()`, helpers |
+| `database/migrations/0xx_sms_*.php` | `sms_logs` (+ settings seeds) |
+| `public_html/pages/sms/settings.php` | All Father toggle + gateway settings |
+| `public_html/pages/sms/index.php` | Logs / health / test send |
+| `public_html/cron/process_sms_queue.php` | Drain queue to gateway |
 
 ### 5.3 Hook into `notify()`
 
 Minimal change in `includes/functions.php` after email queue:
 
 ```php
-// Pseudocode
+// Pseudocode — enqueue only; cron sends
 if (smsEnabled() && smsEventAllowed($type)) {
-    smsNotifyUser($userId, $type, $title, $message, $link, $requestId);
+    SmsQueue::queueForUser($userId, $type, $title, $message, $link, $requestId);
 }
 ```
 
-`smsNotifyUser()`:
-1. Load `users.phone`
+`SmsQueue::queueForUser()`:
+1. Load `users.phone`; skip if empty/invalid
 2. Normalize to E.164 (+63…)
-3. Render short SMS body from template map (not full email HTML)
-4. Insert `sms_logs` row (`pending` / `sent` / `failed`)
-5. Call gateway; update log
+3. Render short SMS body from template map
+4. Insert `sms_logs` with status `pending`
+5. Cron later calls gateway and updates `sent` / `failed`
 
-`notifyDriver()` already resolves to a user — no special path needed if the hook is inside `notify()`.
+`notifyDriver()` / `notifyPassengersBatch()` already call `notify()` — one hook covers requester, driver, and linked passengers.
 
 ### 5.4 MySQL schema (not PostgreSQL)
 
@@ -200,49 +226,66 @@ CREATE TABLE sms_logs (
   INDEX (gateway_message_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- Phase 2 only
-CREATE TABLE sms_incoming (
-  id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-  phone VARCHAR(20) NOT NULL,
-  message TEXT NOT NULL,
-  raw_payload TEXT NULL,
-  processed TINYINT(1) NOT NULL DEFAULT 0,
-  received_at DATETIME NOT NULL,
-  created_at DATETIME NOT NULL,
-  INDEX (processed, received_at)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 ```
+
+No `sms_incoming` table — inbound replies are out of scope.
 
 Follow existing migration numbering under `database/migrations/`.
 
-### 5.5 Admin UI (keep LOKA patterns)
+### 5.5 All Father + ops UI (LOKA patterns)
 
-- New page: `/?page=sms` (admin / motorpool / All Father).
-- Table of recent `sms_logs` + gateway health check button.
-- Optional “Send test SMS” to a number (admin only).
-- Sidebar under Administration — **not** a React SPA.
+- **Settings (All Father only):** enable toggle, gateway credentials, allowlist, test SMS.
+- **Logs:** recent `sms_logs`, status filters, gateway health.
+- Sidebar: under Rate Limits / Administration area for All Father (same pattern as rate-limit tools).
+- Not a React SPA.
 
-### 5.6 Webhook (phase 2)
+### 5.6 Inbound webhook
 
-- Route: `/?page=webhooks&action=sms` (no session; verify shared secret header).
-- MVP: store in `sms_incoming` only.
-- Commands like `OK` / `SOS` need careful product design against LOKA statuses (`requests`, guard actions) — **do not** invent a parallel `trips` table.
+**Not in scope.** SMS is notify-only for travel participants.
 
 ---
 
-## 6. Infrastructure (largely unchanged from original)
+## 6. Infrastructure — local test first, then Hostinger
 
-Still valid for Hostinger KVM2 + old phone:
+We support **both** environments with the same app code. Only All Father / `.env` gateway URL + credentials change.
 
-1. Docker run `capcom6/sms-gateway` (or current official image name — verify on GitHub before deploy).
-2. Nginx + Let’s Encrypt for `sms.yourdomain.com`.
-3. Android app in **Private Server** mode pointing at that URL.
-4. SIM with enough SMS load (Globe/Smart/DITO).
-5. Phone: stay awake, no battery optimization, always charging, solid Wi‑Fi.
+### 6.1 Path A — This machine (dev / proof of concept)
 
-**Local XAMPP:** do not require a phone. Keep `SMS_ENABLED=false` and unit-test with a mock/stub client, or point at a staging gateway when ready.
+| Piece | Where |
+|-------|--------|
+| LOKA | XAMPP (`localhost` / local `APP_URL`) |
+| SMS Gateway | **Docker Desktop** on this Windows PC |
+| Phone | Your Android + SIM, SMS Gateway app → Private Server |
 
-**Note:** Confirm exact API paths/auth against [capcom6/android-sms-gateway](https://github.com/capcom6/android-sms-gateway) docs at implementation time — image/config names change between releases.
+**Typical local flow**
+1. Install Docker Desktop on this PC.
+2. Run `capcom6/sms-gateway` (compose file we’ll add under e.g. `devops/sms-gateway/`).
+3. Point LOKA SMS settings at the local gateway (e.g. `http://host.docker.internal:3000` from container view, or `http://127.0.0.1:3000` from PHP on the host).
+4. Phone must **reach** the gateway:
+   - Same Wi‑Fi: use PC’s LAN IP, e.g. `http://192.168.x.x:3000` (HTTP OK for LAN tests), **or**
+   - Use a tunnel (Cloudflare Tunnel / ngrok) for HTTPS if the app requires it.
+5. All Father: enable SMS, send **test SMS** to your number.
+6. Exercise a real trip event (assign driver, etc.) and confirm queue → send.
+
+**Local tips**
+- Firewall: allow inbound TCP 3000 from LAN (or only the tunnel).
+- Phone and PC on the same Wi‑Fi simplifies testing.
+- When done testing, turn SMS **off** in All Father so XAMPP doesn’t keep trying to send.
+
+### 6.2 Path B — Hostinger (production)
+
+Same stack as before, after local works:
+
+1. Docker on Hostinger VPS + Nginx + Let’s Encrypt → `https://sms.yourdomain.com`.
+2. All Father: switch Gateway URL/credentials to production.
+3. Office Android phone in server room → Private Server → production URL.
+4. Cron on VPS for `process_sms_queue.php`.
+
+### 6.3 Shared notes
+
+- Verify image/API against [capcom6/android-sms-gateway](https://github.com/capcom6/android-sms-gateway) at implement time.
+- SIM needs load; don’t use a personal SIM you care about for spam tests.
+- Dev and prod should use **different** gateway passwords if possible.
 
 ---
 
@@ -250,13 +293,13 @@ Still valid for Hostinger KVM2 + old phone:
 
 | Phase | Work | Outcome |
 |-------|------|---------|
-| **0 – Decide** | Agree MVP event list, sync vs queue, inbound yes/no | This discussion |
-| **1 – Infra** | VPS gateway + phone connected + health OK | Can curl-send a test SMS |
-| **2 – Core PHP** | Config, SmsGateway client, `sms_logs`, hook in `notify()` | Real events SMS when enabled |
-| **3 – Templates** | Short bodies per allowlisted event type | Consistent, short messages |
-| **4 – Admin logs** | `pages/sms` list + test send + health | Ops visibility |
-| **5 – Hardening** | Rate limits, audit log, retries, monitoring scripts | Production-safe |
-| **6 – Optional inbound** | Webhook + `sms_incoming` | Reply logging / future commands |
+| **0 – Decide** | All scope questions locked | Ready to build |
+| **1 – Infra (local)** | Docker on this PC + your phone | Test SMS works on XAMPP |
+| **1b – Infra (prod)** | Hostinger Docker + office phone | Production SMS live |
+| **2 – Core PHP** | Queue, migration, `notify()` hook, templates | Events enqueue when enabled |
+| **3 – All Father UI** | Toggle + settings + test send + logs | Runtime control without editing `.env` |
+| **4 – Cron** | `process_sms_queue.php` (local Task Scheduler / VPS cron) | Pending → sent/failed |
+| **5 – Hardening** | Rate limits, audit log, retries, monitoring | Production-safe |
 
 Estimate for phases 2–4 (app only, gateway already up): **1–2 days**, not 4–6 hours of full-stack Node work.
 
@@ -264,14 +307,12 @@ Estimate for phases 2–4 (app only, gateway already up): **1–2 days**, not 4�
 
 ## 8. Security & ops checklist (LOKA)
 
-- [ ] Gateway credentials only in `.env` / VPS secrets
-- [ ] Gateway bound to localhost; public via Nginx HTTPS only
-- [ ] Webhook secret required (phase 2)
-- [ ] Admin-only SMS log / test send
+- [ ] Gateway credentials in DB/settings + `.env` fallback; All Father only can edit
+- [ ] Gateway bound to localhost on VPS; public via Nginx HTTPS only
+- [ ] SMS settings / test send: **All Father only**; audit log changes
 - [ ] Rate limit outbound (per user + global) to protect SIM
-- [ ] Never log full message bodies in PHP `error_log` in production if sensitive
 - [ ] Soft-fail: approve/dispatch never depends on SMS success
-- [ ] Separate DBs remain: no SMS tables in shared JSON files
+- [ ] Password fields not re-displayed in HTML after save
 
 ---
 
@@ -285,34 +326,32 @@ Estimate for phases 2–4 (app only, gateway already up): **1–2 days**, not 4�
 
 ---
 
-## 10. Discussion questions (please decide)
+## 10. Discussion questions — all locked
 
-1. **MVP event list** — OK with the table in §4.2, or add/remove events?
-2. **Sync vs queue** — Send SMS inside `notify()` immediately, or insert `sms_logs` + cron like email? (Queue is safer under slow gateway.)
-3. **Passenger SMS** — Never / only linked users / never guests?
-4. **Opt-in** — Global flag only, or per-user “Receive SMS” on profile?
-5. **Gateway hosting** — Same Hostinger VPS as LOKA, or separate small box + subdomain?
-6. **Inbound replies** — Skip for v1, or log-only webhook from day one?
-7. **Dev testing** — Mock client only on XAMPP, or a dedicated staging SIM/phone?
+1. MVP event allowlist  
+2. Queue + cron  
+3. Recipients = email audience (requester, driver, linked passengers)  
+4. Global enable via All Father settings  
+5. Local Docker + phone first → Hostinger VPS + office phone  
+6. **Outbound notify-only** (no inbound)  
+7. Real phone local testing, then production
 
 ---
 
-## 11. Suggested first build step (after decisions)
+## 11. Suggested first build step (after §10 done)
 
-1. Keep infra docs in this plan; implement **Phase 2** in repo:
-   - migration `sms_logs`
-   - `SmsGateway` + `config/sms.php`
-   - hook in `notify()` behind `SMS_ENABLED`
-2. Manual test page or CLI script: send one SMS to your number.
-3. Wire allowlisted events only.
-4. Add admin logs page.
+1. All Father SMS settings page + `settings` keys + migration `sms_logs`
+2. `SmsQueue` + hook in `notify()` + short templates
+3. Cron processor + gateway client
+4. Hostinger Docker + phone connect guide (step-by-step for you)
+5. Test send from All Father UI
 
-No production `.env` changes without your confirmation.
+No production secrets committed; confirm before changing live `.env`.
 
 ---
 
 ## 12. Summary
 
-Use the **Android private SMS gateway** idea from the original plan, but integrate it into LOKA the same way email works: **PHP + MySQL + `notify()` + optional queue**, short templates for high-value trip events, soft-fail, admin logs. Drop Node/React/Postgres/delivery/OB assumptions.
+Self-hosted **Android SMS gateway on Hostinger VPS** + phone in the office server room; LOKA queues SMS beside email via `notify()`; **All Father** turns SMS on/off and configures the gateway in the UI.
 
-**Branch:** `loka-smsnotifimplem7192026` — plan lives here; implementation starts after we lock §10 decisions.
+**Branch:** `loka-smsnotifimplem7192026` — scope locked; ready to implement when you say go.

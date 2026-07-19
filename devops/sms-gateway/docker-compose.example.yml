@@ -1,0 +1,30 @@
+# Example private SMS gateway stack for Hostinger VPS / advanced local use.
+# Copy to docker-compose.yml, edit secrets, then: docker compose up -d
+# Docs: https://docs.sms-gate.app/getting-started/private-server/
+
+services:
+  sms-db:
+    image: mariadb:11
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: CHANGE_ME_ROOT
+      MYSQL_DATABASE: sms
+      MYSQL_USER: sms
+      MYSQL_PASSWORD: CHANGE_ME_SMS
+    volumes:
+      - sms-db-data:/var/lib/mysql
+
+  sms-gateway:
+    image: ghcr.io/android-sms-gateway/server:latest
+    restart: unless-stopped
+    depends_on:
+      - sms-db
+    ports:
+      - "127.0.0.1:3000:3000"
+    volumes:
+      - ./config.yml:/app/config.yml:ro
+    environment:
+      TZ: Asia/Manila
+
+volumes:
+  sms-db-data:

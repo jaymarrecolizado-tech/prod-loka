@@ -32,6 +32,7 @@ require_once __DIR__ . '/config/database.php';
 require_once __DIR__ . '/config/constants.php';
 require_once __DIR__ . '/config/security.php';
 require_once __DIR__ . '/config/mail.php';
+require_once __DIR__ . '/config/sms.php';
 
 // Environment-based error reporting
 // Auto-detect production: check if not localhost and HTTPS is enabled
@@ -61,6 +62,8 @@ require_once __DIR__ . '/classes/Cache.php';
 require_once __DIR__ . '/classes/Auth.php';
 require_once __DIR__ . '/classes/Mailer.php';
 require_once __DIR__ . '/classes/EmailQueue.php';
+require_once __DIR__ . '/classes/SmsGateway.php';
+require_once __DIR__ . '/classes/SmsQueue.php';
 require_once __DIR__ . '/classes/NotificationService.php';
 
 // Load notification templates
@@ -71,6 +74,7 @@ require_once __DIR__ . '/config/session.php';
 
 // Load helpers
 require_once __DIR__ . '/includes/functions.php';
+require_once __DIR__ . '/includes/sms.php';
 
 // Initialize Security and send headers
 $security = Security::getInstance();
@@ -424,6 +428,8 @@ switch ($page) {
         requireAllFather();
         if ($action === 'summary') {
             require_once PAGES_PATH . '/security/summary.php';
+        } elseif ($action === 'sms') {
+            require_once PAGES_PATH . '/security/sms.php';
         } else {
             require_once PAGES_PATH . '/security/rate-limits.php';
         }

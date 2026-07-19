@@ -746,6 +746,15 @@ function notify(int $userId, string $type, string $title, string $message, ?stri
     } catch (Exception $e) {
         error_log("NOTIFY ERROR: Email queue failed for user #{$userId}: " . $e->getMessage());
     }
+
+    // Soft-fail SMS enqueue (does not affect in-app/email)
+    try {
+        if (function_exists('smsNotifyUser')) {
+            smsNotifyUser($userId, $type, $title, $message, $link, $requestId);
+        }
+    } catch (Throwable $e) {
+        error_log("NOTIFY ERROR: SMS queue failed for user #{$userId}: " . $e->getMessage());
+    }
 }
 
 /**

@@ -194,7 +194,7 @@
             <li class="loka-nav-group <?= $secOpen ? 'is-open' : '' ?>">
                 <div class="loka-nav-link loka-nav-group-label <?= $secOpen ? 'active' : '' ?>">
                     <i class="bi bi-shield-lock w-5 text-center flex-shrink-0"></i>
-                    <span>Rate Limits</span>
+                    <span>System Control</span>
                 </div>
                 <ul class="loka-nav-submenu">
                     <li>
@@ -210,6 +210,13 @@
                            href="<?= APP_URL ?>/?page=security&action=summary">
                             <i class="bi bi-bar-chart-line w-5 text-center flex-shrink-0"></i>
                             <span>Summary</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a class="loka-nav-link loka-nav-sublink <?= ($secOpen && $secAction === 'sms') ? 'active' : '' ?>"
+                           href="<?= APP_URL ?>/?page=security&action=sms">
+                            <i class="bi bi-phone w-5 text-center flex-shrink-0"></i>
+                            <span>SMS</span>
                         </a>
                     </li>
                 </ul>
