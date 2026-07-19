@@ -280,6 +280,24 @@ switch ($page) {
         break;
 
     case 'reports':
+        // Gas voucher report is available to CAF (+ ops); other report pages stay approver+
+        if (in_array($action, ['gas-vouchers', 'export-gas-vouchers-csv', 'export-gas-vouchers-pdf'], true)) {
+            if ($action === 'gas-vouchers') {
+                require_once PAGES_PATH . '/reports/gas-vouchers.php';
+            } elseif ($action === 'export-gas-vouchers-csv') {
+                require_once PAGES_PATH . '/reports/export-gas-vouchers-csv.php';
+            } else {
+                require_once PAGES_PATH . '/reports/export-gas-vouchers-pdf.php';
+            }
+            break;
+        }
+
+        if (isChiefAdminFinance() && !isApprover() && !isMotorpool() && !isAdmin()) {
+            // CAF hub: show reports index (gas card only) without approver gate
+            require_once PAGES_PATH . '/reports/index.php';
+            break;
+        }
+
         requireRole(ROLE_APPROVER);
         if ($action === 'vehicle-history') {
             require_once PAGES_PATH . '/reports/vehicle-history.php';

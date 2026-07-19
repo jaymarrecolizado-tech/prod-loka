@@ -60,8 +60,8 @@
                     <i class="bi bi-bell text-lg"></i>
                     <?php $unreadCount = unreadNotificationCount(); ?>
                     <?php if ($unreadCount > 0): ?>
-                    <span class="loka-navbar-notification-badge">
-                        <?= $unreadCount > 9 ? '9+' : $unreadCount ?>
+                    <span class="loka-navbar-notification-badge" title="<?= (int) $unreadCount ?> unread">
+                        <?= $unreadCount > 99 ? '99+' : (int) $unreadCount ?>
                     </span>
                     <?php endif; ?>
                 </div>

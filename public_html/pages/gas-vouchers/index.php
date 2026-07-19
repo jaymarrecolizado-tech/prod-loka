@@ -209,7 +209,6 @@ require_once INCLUDES_PATH . '/header.php';
                             <th>Fund Source</th>
                             <th>Purpose</th>
                             <?= tableSortTh('status', 'Status', $sort, $sortDir, $baseParams) ?>
-                            <th>Total Cost</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
@@ -246,13 +245,6 @@ require_once INCLUDES_PATH . '/header.php';
                             </td>
                             <td>
                                 <?= gasVoucherStatusBadge($v->status) ?>
-                            </td>
-                            <td>
-                                <?php if ($v->total_cost): ?>
-                                ₱<?= number_format($v->total_cost, 2) ?>
-                                <?php else: ?>
-                                <span class="text-base-content/30">—</span>
-                                <?php endif; ?>
                             </td>
                             <td>
                                 <div class="flex flex-wrap gap-1">

@@ -3,9 +3,14 @@
  * LOKA - Reports Page
  */
 
-requireRole(ROLE_APPROVER);
+$canOpsReports = isApprover() || isMotorpool() || isAdmin();
+$canGasReport = $canOpsReports || isChiefAdminFinance();
+if (!$canGasReport) {
+    requireRole(ROLE_APPROVER);
+}
 
 $pageTitle = 'Reports';
+$cafOnly = isChiefAdminFinance() && !$canOpsReports;
 
 require_once INCLUDES_PATH . '/header.php';
 ?>
@@ -22,6 +27,25 @@ require_once INCLUDES_PATH . '/header.php';
     </div>
 
     <div class="grid grid-cols-12 gap-4">
+        <?php if ($canGasReport): ?>
+        <!-- Gas Voucher Report -->
+        <div class="col-span-12 md:col-span-6 lg:col-span-4">
+            <a href="<?= APP_URL ?>/?page=reports&action=gas-vouchers" class="no-underline">
+                <div class="loka-card h-full">
+                    <div class="loka-card-body text-center py-5">
+                        <div class="mb-3">
+                            <i class="bi bi-fuel-pump text-warning" style="font-size: 3.5rem;"></i>
+                        </div>
+                        <h5>Gas Vouchers</h5>
+                        <p class="text-base-content/60 mb-3">Approval and payment analytics with CSV &amp; PDF export</p>
+                        <span class="loka-badge bg-warning text-dark">CSV & PDF + Charts</span>
+                    </div>
+                </div>
+            </a>
+        </div>
+        <?php endif; ?>
+
+        <?php if (!$cafOnly): ?>
         <!-- Vehicle History -->
         <div class="col-span-12 md:col-span-6 lg:col-span-4">
             <a href="<?= APP_URL ?>/?page=reports&action=vehicle-history" class="no-underline">
@@ -86,6 +110,7 @@ require_once INCLUDES_PATH . '/header.php';
                 </div>
             </a>
         </div>
+        <?php endif; ?>
         <?php endif; ?>
     </div>
 </div>

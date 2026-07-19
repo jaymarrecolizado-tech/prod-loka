@@ -98,7 +98,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $purpose      = postSafe('purpose', '', 1000);
     $chargeableAgainst = postSafe('chargeable_against', '', 100);
     $requestDate  = post('request_date', date('Y-m-d'));
-    $totalCost    = post('total_cost', '');
     $saro         = postSafe('saro_no', '', 50);
     $dateWithdrawn = post('date_withdrawn', '');
     $requestedReviewerId = (int) post('requested_reviewer_id', 0) ?: null;
@@ -143,7 +142,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'purpose'            => $purpose,
             'chargeable_against' => $chargeableAgainst ?: null,
             'request_date'       => $requestDate,
-            'total_cost'         => ($totalCost !== '' && $totalCost !== null) ? (float) $totalCost : null,
             'saro_no'            => $saro ?: null,
             'date_withdrawn'     => $dateWithdrawn ?: null,
             'status'             => $newStatus,

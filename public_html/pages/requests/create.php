@@ -6,6 +6,30 @@
 $pageTitle = 'New Request';
 $errors = [];
 
+// Prefill from Availability (or direct links): start_date / end_date as Y-m-d
+$prefillStart = '';
+$prefillEnd = '';
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    $startDateQ = trim((string) get('start_date', ''));
+    $endDateQ = trim((string) get('end_date', ''));
+    $startDtQ = trim((string) get('start_datetime', ''));
+    $endDtQ = trim((string) get('end_datetime', ''));
+
+    if ($startDtQ !== '' && preg_match('/^\d{4}-\d{2}-\d{2}/', $startDtQ)) {
+        $prefillStart = strlen($startDtQ) <= 10 ? $startDtQ . ' 08:00' : substr($startDtQ, 0, 16);
+    } elseif ($startDateQ !== '' && preg_match('/^\d{4}-\d{2}-\d{2}$/', $startDateQ)) {
+        $prefillStart = $startDateQ . ' 08:00';
+    }
+
+    if ($endDtQ !== '' && preg_match('/^\d{4}-\d{2}-\d{2}/', $endDtQ)) {
+        $prefillEnd = strlen($endDtQ) <= 10 ? $endDtQ . ' 17:00' : substr($endDtQ, 0, 16);
+    } elseif ($endDateQ !== '' && preg_match('/^\d{4}-\d{2}-\d{2}$/', $endDateQ)) {
+        $prefillEnd = $endDateQ . ' 17:00';
+    } elseif ($prefillStart !== '') {
+        $prefillEnd = substr($prefillStart, 0, 10) . ' 17:00';
+    }
+}
+
 // Get available vehicles for selection (cached)
 $availableVehicles = getAvailableVehicles();
 
@@ -408,13 +432,13 @@ require_once INCLUDES_PATH . '/header.php';
                             <div>
                                 <label for="start_datetime" class="loka-form-label">Start Date/Time <span class="text-error">*</span></label>
                                 <input type="text" class="loka-form-input" id="start_datetime" 
-                                       name="start_datetime" value="<?= e(post('start_datetime', '')) ?>" required>
+                                       name="start_datetime" value="<?= e(post('start_datetime', $prefillStart)) ?>" required>
                             </div>
                             
                             <div>
                                 <label for="end_datetime" class="loka-form-label">End Date/Time <span class="text-error">*</span></label>
                                 <input type="text" class="loka-form-input" id="end_datetime" 
-                                       name="end_datetime" value="<?= e(post('end_datetime', '')) ?>" required>
+                                       name="end_datetime" value="<?= e(post('end_datetime', $prefillEnd)) ?>" required>
                             </div>
                             
                             <!-- Purpose -->
@@ -1611,91 +1635,63 @@ ob_start();
         checkVehicleCapacity();
     }, 500);
     
-// Initialize date pickers immediately (Flatpickr should be loaded by now)
-    if (typeof flatpickr !== 'undefined') {
-        // Get booking rules from PHP settings
+function initRequestDatePickers() {
+        if (typeof flatpickr === 'undefined') return false;
+
         const bookingMaxAdvanceDays = <?= (int) ($bookingSettings['max_advance_booking_days'] ?? 30) ?>;
-        const bookingMinAdvanceHours = <?= (int) ($bookingSettings['min_advance_booking_hours'] ?? 24) ?>;
         const bookingMaxTripHours = <?= (int) ($bookingSettings['max_trip_duration_hours'] ?? 72) ?>;
-        
-        // Calculate min and max dates
+        const startEl = document.getElementById('start_datetime');
+        const endEl = document.getElementById('end_datetime');
+        if (!startEl || !endEl) return true;
+        if (startEl._flatpickr) return true;
+
         const today = new Date();
-        const minDate = today;
         const maxDate = new Date(today);
         maxDate.setDate(maxDate.getDate() + bookingMaxAdvanceDays);
-        
-        // Initialize datetime pickers
-        const startPicker = flatpickr('#start_datetime', {
+
+        const pickerOpts = {
             enableTime: true,
-            dateFormat: "Y-m-d H:i",
+            dateFormat: 'Y-m-d H:i',
             altInput: true,
-            altFormat: "Y-m-d h:i K",
+            altFormat: 'Y-m-d h:i K',
+            altInputClass: 'loka-form-input flatpickr-alt-input w-full',
             time_24hr: false,
             allowInput: true,
-            minDate: minDate,
+            minDate: today,
             maxDate: maxDate,
-            minuteIncrement: 15
-        });
-        
-        const endPicker = flatpickr('#end_datetime', {
-            enableTime: true,
-            dateFormat: "Y-m-d H:i",
-            altInput: true,
-            altFormat: "Y-m-d h:i K",
-            time_24hr: false,
-            allowInput: true,
-            minDate: minDate,
-            maxDate: maxDate,
-            minuteIncrement: 15
-        });
-        
-        // Set minimum end date based on start date
+            minuteIncrement: 15,
+            disableMobile: true
+        };
+
+        const startPicker = flatpickr(startEl, Object.assign({}, pickerOpts, {
+            defaultDate: startEl.value || null
+        }));
+        const endPicker = flatpickr(endEl, Object.assign({}, pickerOpts, {
+            defaultDate: endEl.value || null
+        }));
+
+        // Ensure alt inputs show parsed values (prefills / POST replay)
+        if (startEl.value) startPicker.setDate(startEl.value, false);
+        if (endEl.value) endPicker.setDate(endEl.value, false);
+
         if (startPicker && endPicker) {
-            startPicker.config.onChange.push(function(selectedDates) {
+            startPicker.config.onChange.push(function (selectedDates) {
                 if (selectedDates.length > 0) {
                     endPicker.set('minDate', selectedDates[0]);
-                    // Set max date for end time to enforce max trip duration
                     const maxEndDate = new Date(selectedDates[0]);
                     maxEndDate.setHours(maxEndDate.getHours() + bookingMaxTripHours);
                     endPicker.set('maxDate', maxEndDate);
                 }
             });
-        }
-    } else {
-        // Retry if Flatpickr not loaded yet
-        setTimeout(function() {
-            if (typeof flatpickr !== 'undefined') {
-                const bookingMaxAdvanceDays = <?= (int) ($bookingSettings['max_advance_booking_days'] ?? 30) ?>;
-                const bookingMaxTripHours = <?= (int) ($bookingSettings['max_trip_duration_hours'] ?? 72) ?>;
-                
-                const today = new Date();
-                const maxDate = new Date(today);
-                maxDate.setDate(maxDate.getDate() + bookingMaxAdvanceDays);
-                
-                flatpickr('#start_datetime', {
-                    enableTime: true,
-                    dateFormat: "Y-m-d H:i",
-                    altInput: true,
-                    altFormat: "Y-m-d h:i K",
-                    time_24hr: false,
-                    allowInput: true,
-                    minDate: today,
-                    maxDate: maxDate,
-                    minuteIncrement: 15
-                });
-                flatpickr('#end_datetime', {
-                    enableTime: true,
-                    dateFormat: "Y-m-d H:i",
-                    altInput: true,
-                    altFormat: "Y-m-d h:i K",
-                    time_24hr: false,
-                    allowInput: true,
-                    minDate: today,
-                    maxDate: maxDate,
-                    minuteIncrement: 15
-                });
+            if (startPicker.selectedDates.length > 0) {
+                endPicker.set('minDate', startPicker.selectedDates[0]);
             }
-        }, 500);
+        }
+        return true;
+    }
+
+    if (!initRequestDatePickers()) {
+        setTimeout(initRequestDatePickers, 400);
     }
 })();
 </script>

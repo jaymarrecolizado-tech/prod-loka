@@ -857,7 +857,7 @@ require_once INCLUDES_PATH . '/header.php';
                             <span class="btn-text">
                                 <i class="bi bi-check-lg mr-1"></i>Approve
                             </span>
-                            <span class="btn-loading d-none">
+                            <span class="btn-loading hidden">
                                 <span class="loading loading-spinner loading-sm mr-1" role="status" aria-hidden="true"></span>
                                 Processing...
                             </span>
@@ -866,7 +866,7 @@ require_once INCLUDES_PATH . '/header.php';
                             <span class="btn-text">
                                 <i class="bi bi-arrow-repeat mr-1"></i>Request Revision
                             </span>
-                            <span class="btn-loading d-none">
+                            <span class="btn-loading hidden">
                                 <span class="loading loading-spinner loading-sm mr-1" role="status" aria-hidden="true"></span>
                                 Processing...
                             </span>
@@ -875,7 +875,7 @@ require_once INCLUDES_PATH . '/header.php';
                             <span class="btn-text">
                                 <i class="bi bi-x-lg mr-1"></i>Reject
                             </span>
-                            <span class="btn-loading d-none">
+                            <span class="btn-loading hidden">
                                 <span class="loading loading-spinner loading-sm mr-1" role="status" aria-hidden="true"></span>
                                 Processing...
                             </span>
@@ -966,7 +966,7 @@ require_once INCLUDES_PATH . '/header.php';
 
         function check(type, id, alertEl) {
             if (!id) {
-                alertEl.classList.add('d-none');
+                alertEl.classList.add('hidden');
                 updateConflictDashboardItem(type, {conflict: false});
                 return;
             }
@@ -990,12 +990,12 @@ require_once INCLUDES_PATH . '/header.php';
                                <i class="bi bi-arrow-up-right-square mr-1"></i>View Request
                             </a>
                         `;
-                        alertEl.classList.remove('d-none');
+                        alertEl.classList.remove('hidden');
 
                         // Update conflict dashboard
                         updateConflictDashboardItem(type, data);
                     } else {
-                        alertEl.classList.add('d-none');
+                        alertEl.classList.add('hidden');
                         updateConflictDashboardItem(type, {conflict: false});
                     }
                     updateUI();
@@ -1070,9 +1070,9 @@ require_once INCLUDES_PATH . '/header.php';
             if (countBadge) {
                 if (totalConflicts > 0) {
                     countBadge.textContent = `${totalConflicts} conflict${totalConflicts > 1 ? 's' : ''}`;
-                    countBadge.classList.remove('d-none');
+                    countBadge.classList.remove('hidden');
                 } else {
-                    countBadge.classList.add('d-none');
+                    countBadge.classList.add('hidden');
                 }
             }
 
@@ -1082,13 +1082,13 @@ require_once INCLUDES_PATH . '/header.php';
             const conflictHeader = conflictDashboard ? conflictDashboard.querySelector('div') : null;
             if (overrideSection && conflictDashboard) {
                 if (totalConflicts > 0) {
-                    overrideSection.classList.remove('d-none');
+                    overrideSection.classList.remove('hidden');
                     conflictDashboard.className = conflictDashboard.className.replace(/border-\w+/, 'border-warning');
                     if (conflictHeader) {
                         conflictHeader.className = conflictHeader.className.replace(/bg-\w+/, 'bg-warning');
                     }
                 } else {
-                    overrideSection.classList.add('d-none');
+                    overrideSection.classList.add('hidden');
                     conflictDashboard.className = conflictDashboard.className.replace(/border-\w+/, 'border-success');
                     if (conflictHeader) {
                         conflictHeader.className = conflictHeader.className.replace(/bg-\w+/, 'bg-success');
@@ -1098,14 +1098,14 @@ require_once INCLUDES_PATH . '/header.php';
         }
 
         function updateUI() {
-            const hasConflict = !vAlert.classList.contains('d-none') || !dAlert.classList.contains('d-none');
+            const hasConflict = !vAlert.classList.contains('hidden') || !dAlert.classList.contains('hidden');
             if (hasConflict) {
-                overrideBox.classList.remove('d-none');
+                overrideBox.classList.remove('hidden');
                 if (approveBtn) {
                     approveBtn.disabled = !document.getElementById('confirmOverride').checked;
                 }
             } else {
-                overrideBox.classList.add('d-none');
+                overrideBox.classList.add('hidden');
                 if (approveBtn) {
                     approveBtn.disabled = false;
                 }
@@ -1149,7 +1149,7 @@ require_once INCLUDES_PATH . '/header.php';
             fetch(`<?= APP_URL ?>/?page=api&action=check_conflict&type=driver&id=<?= $request->requested_driver_id ?>&start=${start}&end=${end}&exclude_id=${requestId}`)
                 .then(res => res.json())
                 .then(data => {
-                    if (data.conflict) requestedConflict.classList.remove('d-none');
+                    if (data.conflict) requestedConflict.classList.remove('hidden');
                 });
         <?php endif; ?>
         
@@ -1268,8 +1268,8 @@ require_once INCLUDES_PATH . '/header.php';
             approveBtn.disabled = true;
             rejectBtn.disabled = true;
             if (revisionBtn) revisionBtn.disabled = true;
-            btnText.classList.add('d-none');
-            btnLoading.classList.remove('d-none');
+            btnText.classList.add('hidden');
+            btnLoading.classList.remove('hidden');
             
             // Add AJAX header
             formData.append('ajax', '1');
@@ -1303,8 +1303,8 @@ require_once INCLUDES_PATH . '/header.php';
                     if (approveBtn) approveBtn.disabled = false;
                     if (rejectBtn) rejectBtn.disabled = false;
                     if (revisionBtn) revisionBtn.disabled = false;
-                    if (btnText) btnText.classList.remove('d-none');
-                    if (btnLoading) btnLoading.classList.add('d-none');
+                    if (btnText) btnText.classList.remove('hidden');
+                    if (btnLoading) btnLoading.classList.add('hidden');
                 }
             })
             .catch(error => {
@@ -1314,8 +1314,8 @@ require_once INCLUDES_PATH . '/header.php';
                 if (approveBtn) approveBtn.disabled = false;
                 if (rejectBtn) rejectBtn.disabled = false;
                 if (revisionBtn) revisionBtn.disabled = false;
-                if (btnText) btnText.classList.remove('d-none');
-                if (btnLoading) btnLoading.classList.add('d-none');
+                if (btnText) btnText.classList.remove('hidden');
+                if (btnLoading) btnLoading.classList.add('hidden');
             });
         }
         

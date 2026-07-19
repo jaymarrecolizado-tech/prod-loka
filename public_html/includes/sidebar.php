@@ -47,7 +47,7 @@
                     $pendingGv = badgeCountPendingGasVouchers();
                     if ($pendingGv > 0):
                     ?>
-                    <span class="loka-badge bg-warning/20 text-warning ml-auto"><?= $pendingGv ?></span>
+                    <span class="loka-nav-badge"><?= $pendingGv ?></span>
                     <?php endif; ?>
                 </a>
             </li>
@@ -81,7 +81,7 @@
                     $pendingTicketsCount = badgeCountSubmittedTripTickets();
                     if ($pendingTicketsCount > 0):
                     ?>
-                    <span class="loka-badge bg-warning/20 text-warning ml-auto"><?= $pendingTicketsCount ?></span>
+                    <span class="loka-nav-badge"><?= $pendingTicketsCount ?></span>
                     <?php endif; ?>
                 </a>
             </li>
@@ -95,7 +95,7 @@
                     $pendingCount = badgeCountPendingApprovals();
                     if ($pendingCount > 0):
                     ?>
-                    <span class="loka-badge bg-warning/20 text-warning ml-auto"><?= $pendingCount ?></span>
+                    <span class="loka-nav-badge loka-nav-badge-urgent"><?= $pendingCount ?></span>
                     <?php endif; ?>
                 </a>
             </li>
@@ -139,7 +139,7 @@
                     $pendingMaintenance = badgeCountPendingMaintenance();
                     if ($pendingMaintenance > 0):
                     ?>
-                    <span class="loka-badge bg-warning/20 text-warning ml-auto"><?= $pendingMaintenance ?></span>
+                    <span class="loka-nav-badge"><?= $pendingMaintenance ?></span>
                     <?php endif; ?>
                 </a>
             </li>
@@ -152,7 +152,7 @@
             </li>
             <?php endif; ?>
 
-            <?php if (isApprover()): ?>
+            <?php if (isApprover() || isChiefAdminFinance()): ?>
             <li class="loka-section-label mt-3">Reports</li>
 
             <li>
