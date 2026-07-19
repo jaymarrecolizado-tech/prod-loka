@@ -1590,7 +1590,8 @@ function denyGuardAccess(): void
 }
 
 /**
- * Guards may view approved trips still waiting for dispatch or arrival.
+ * Guards may view trip details for approved/completed fleet trips
+ * (pending dispatch, on trip, or already arrived).
  */
 function canGuardViewActiveTrip(object $request): bool
 {
@@ -1598,6 +1599,5 @@ function canGuardViewActiveTrip(object $request): bool
         return false;
     }
 
-    return $request->status === STATUS_APPROVED
-        && empty($request->actual_arrival_datetime);
+    return in_array($request->status, [STATUS_APPROVED, STATUS_COMPLETED], true);
 }
