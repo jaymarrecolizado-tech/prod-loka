@@ -9,7 +9,8 @@ $pageTitle = 'SMS Notifications';
 $flash = null;
 $queue = new SmsQueue();
 
-$allowlistDefault = implode(',', SMS_DEFAULT_ALLOWLIST);
+$selectableEvents = smsSelectableEvents();
+$allowlistDefault = '*';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     requireCsrf();
@@ -26,12 +27,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $timeout = max(5, min(60, (int) post('sms_timeout_seconds', 15)));
             $maxLen = max(80, min(1600, (int) post('sms_max_length', 320)));
 
-            $selected = post('events', []);
-            if (!is_array($selected)) {
-                $selected = [];
+            $mirrorEmail = post('sms_mirror_email', '0') === '1';
+            if ($mirrorEmail) {
+                $allowlist = '*';
+            } else {
+                $selected = post('events', []);
+                if (!is_array($selected)) {
+                    $selected = [];
+                }
+                $selected = array_values(array_intersect($selected, $selectableEvents));
+                $allowlist = !empty($selected) ? implode(',', $selected) : $allowlistDefault;
             }
-            $selected = array_values(array_intersect($selected, SMS_DEFAULT_ALLOWLIST));
-            $allowlist = !empty($selected) ? implode(',', $selected) : $allowlistDefault;
 
             smsSaveSetting('sms_enabled', $enabled, 'boolean');
             smsSaveSetting('sms_gateway_url', $url);
@@ -96,8 +102,11 @@ $apiPath = smsConfig('sms_api_path', SMS_API_PATH_LOCAL);
 $country = smsConfig('sms_country_code', '63');
 $timeout = smsConfig('sms_timeout_seconds', '15');
 $maxLen = smsConfig('sms_max_length', '320');
-$allowRaw = smsConfig('sms_event_allowlist', $allowlistDefault);
-$allowedEvents = array_filter(array_map('trim', explode(',', $allowRaw)));
+$allowRaw = trim(smsConfig('sms_event_allowlist', $allowlistDefault));
+$mirrorEmail = ($allowRaw === '' || $allowRaw === '*');
+$allowedEvents = $mirrorEmail
+    ? $selectableEvents
+    : array_filter(array_map('trim', explode(',', $allowRaw)));
 $stats = $queue->getStats();
 
 $logs = [];
@@ -218,8 +227,14 @@ require_once INCLUDES_PATH . '/header.php';
 
                         <div>
                             <label class="loka-form-label mb-2">Events that may SMS</label>
-                            <div class="grid grid-cols-1 gap-1 max-h-48 overflow-y-auto border border-base-300 rounded-lg p-2">
-                                <?php foreach (SMS_DEFAULT_ALLOWLIST as $ev): ?>
+                            <label class="flex items-center gap-2 text-sm mb-2 p-2 rounded-lg border border-base-300">
+                                <input type="checkbox" name="sms_mirror_email" value="1" class="checkbox checkbox-sm"
+                                    <?= $mirrorEmail ? 'checked' : '' ?>
+                                    onchange="document.getElementById('smsCustomEvents').classList.toggle('hidden', this.checked)">
+                                <span><strong>Match all email events</strong> (recommended — same types as email notifications)</span>
+                            </label>
+                            <div id="smsCustomEvents" class="grid grid-cols-1 gap-1 max-h-48 overflow-y-auto border border-base-300 rounded-lg p-2 <?= $mirrorEmail ? 'hidden' : '' ?>">
+                                <?php foreach ($selectableEvents as $ev): ?>
                                     <label class="flex items-center gap-2 text-sm">
                                         <input type="checkbox" name="events[]" value="<?= e($ev) ?>" class="checkbox checkbox-sm"
                                             <?= in_array($ev, $allowedEvents, true) ? 'checked' : '' ?>>

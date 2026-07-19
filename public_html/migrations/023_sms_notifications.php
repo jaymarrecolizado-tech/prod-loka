@@ -77,7 +77,7 @@ try {
         ['sms_country_code', '63', 'string', 'sms'],
         ['sms_timeout_seconds', '15', 'integer', 'sms'],
         ['sms_max_length', '320', 'integer', 'sms'],
-        ['sms_event_allowlist', 'driver_assigned,driver_requested,request_fully_approved,trip_fully_approved,vehicle_dispatched,trip_started,vehicle_arrived,trip_completed,request_rejected,request_revision,trip_rejected,trip_revision,request_cancelled,trip_cancelled_driver,gas_voucher_approved,gas_voucher_rejected', 'string', 'sms'],
+        ['sms_event_allowlist', '*', 'string', 'sms'],
     ];
 
     $now = date('Y-m-d H:i:s');

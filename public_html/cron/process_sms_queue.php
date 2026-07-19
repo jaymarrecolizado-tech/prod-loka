@@ -22,6 +22,7 @@ chdir(dirname(__DIR__));
 require_once __DIR__ . '/../config/database.php';
 require_once __DIR__ . '/../config/constants.php';
 require_once __DIR__ . '/../config/security.php';
+require_once __DIR__ . '/../config/mail.php';
 require_once __DIR__ . '/../config/sms.php';
 require_once __DIR__ . '/../classes/Database.php';
 require_once __DIR__ . '/../classes/SmsGateway.php';

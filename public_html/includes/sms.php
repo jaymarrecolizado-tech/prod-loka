@@ -71,12 +71,37 @@ function smsEnabled(): bool
 
 function smsEventAllowed(string $type): bool
 {
-    $raw = smsConfig('sms_event_allowlist', implode(',', SMS_DEFAULT_ALLOWLIST));
+    if ($type === 'test') {
+        return true;
+    }
+
+    // Default "*": same events as email (MAIL_TEMPLATES). Custom CSV can restrict further.
+    $raw = trim(smsConfig('sms_event_allowlist', '*'));
+    if ($raw === '' || $raw === '*') {
+        if (defined('MAIL_TEMPLATES') && is_array(MAIL_TEMPLATES)) {
+            return array_key_exists($type, MAIL_TEMPLATES);
+        }
+        return in_array($type, SMS_DEFAULT_ALLOWLIST, true);
+    }
+
     $list = array_filter(array_map('trim', explode(',', $raw)));
     if (empty($list)) {
-        $list = SMS_DEFAULT_ALLOWLIST;
+        return defined('MAIL_TEMPLATES') && is_array(MAIL_TEMPLATES)
+            ? array_key_exists($type, MAIL_TEMPLATES)
+            : in_array($type, SMS_DEFAULT_ALLOWLIST, true);
     }
-    return in_array($type, $list, true) || $type === 'test';
+    return in_array($type, $list, true);
+}
+
+/** Event keys shown in All Father SMS UI (email templates + legacy defaults). */
+function smsSelectableEvents(): array
+{
+    $events = SMS_DEFAULT_ALLOWLIST;
+    if (defined('MAIL_TEMPLATES') && is_array(MAIL_TEMPLATES)) {
+        $events = array_keys(MAIL_TEMPLATES);
+    }
+    sort($events);
+    return $events;
 }
 
 /**
@@ -221,7 +246,7 @@ function smsNotifyRequesterMissingPhone(int $requestId, int $missingUserId, stri
             return;
         }
 
-        // In-app + email only ('default' is not SMS-allowlisted)
+        // In-app + email (+ SMS if enabled); type matches email templates
         notify($requesterId, 'default', $title, $message, $link, $requestId);
     } catch (Throwable $e) {
         error_log('smsNotifyRequesterMissingPhone: ' . $e->getMessage());

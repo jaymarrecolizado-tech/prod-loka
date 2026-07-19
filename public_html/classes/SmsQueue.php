@@ -63,7 +63,7 @@ class SmsQueue
                 return null;
             }
 
-            return $this->db->insert('sms_logs', [
+            $id = (int) $this->db->insert('sms_logs', [
                 'user_id' => $userId,
                 'request_id' => $requestId,
                 'phone' => $phone,
@@ -73,6 +73,13 @@ class SmsQueue
                 'attempts' => 0,
                 'created_at' => date(DATETIME_FORMAT),
             ]);
+
+            // Send in this request (parity with Immediate email) — soft-fail keeps row pending for cron
+            if ($id > 0) {
+                $this->processOne($id);
+            }
+
+            return $id > 0 ? $id : null;
         } catch (Throwable $e) {
             error_log('SMS QUEUE ERROR: ' . $e->getMessage());
             return null;
@@ -110,6 +117,68 @@ class SmsQueue
     }
 
     /**
+     * Attempt to send a single pending SMS row immediately.
+     */
+    public function processOne(int $id): bool
+    {
+        if (!smsEnabled()) {
+            return false;
+        }
+
+        $row = $this->db->fetch(
+            "SELECT * FROM sms_logs WHERE id = ? AND status = 'pending' AND attempts < 5",
+            [$id]
+        );
+        if (!$row) {
+            return false;
+        }
+
+        $gateway = SmsGateway::fromConfig();
+        if (!$gateway) {
+            error_log('SMS PROCESS: Gateway not configured');
+            return false;
+        }
+
+        $this->db->update(
+            'sms_logs',
+            [
+                'status' => 'processing',
+                'attempts' => ((int) $row->attempts) + 1,
+            ],
+            'id = ? AND status = ?',
+            [$row->id, 'pending']
+        );
+
+        $claimed = $this->db->fetch(
+            "SELECT id FROM sms_logs WHERE id = ? AND status = 'processing'",
+            [$row->id]
+        );
+        if (!$claimed) {
+            return false;
+        }
+
+        $send = $gateway->send((string) $row->phone, (string) $row->message);
+        if ($send['ok']) {
+            $this->db->update('sms_logs', [
+                'status' => 'sent',
+                'gateway_message_id' => $send['message_id'],
+                'gateway_response' => $send['response'],
+                'error_message' => null,
+                'sent_at' => date(DATETIME_FORMAT),
+            ], 'id = ?', [$row->id]);
+            return true;
+        }
+
+        $attempts = ((int) $row->attempts) + 1;
+        $this->db->update('sms_logs', [
+            'status' => $attempts >= 5 ? 'failed' : 'pending',
+            'gateway_response' => $send['response'],
+            'error_message' => $send['error'],
+        ], 'id = ?', [$row->id]);
+        return false;
+    }
+
+    /**
      * @return array{sent:int,failed:int,skipped:int}
      */
     public function process(int $batchSize = 20): array
@@ -135,43 +204,17 @@ class SmsQueue
         );
 
         foreach ($rows as $row) {
-            $this->db->update(
-                'sms_logs',
-                [
-                    'status' => 'processing',
-                    'attempts' => ((int) $row->attempts) + 1,
-                ],
-                'id = ? AND status = ?',
-                [$row->id, 'pending']
-            );
-
-            $claimed = $this->db->fetch(
-                "SELECT id FROM sms_logs WHERE id = ? AND status = 'processing'",
-                [$row->id]
-            );
-            if (!$claimed) {
-                $results['skipped']++;
-                continue;
-            }
-
-            $send = $gateway->send((string) $row->phone, (string) $row->message);
-            if ($send['ok']) {
-                $this->db->update('sms_logs', [
-                    'status' => 'sent',
-                    'gateway_message_id' => $send['message_id'],
-                    'gateway_response' => $send['response'],
-                    'error_message' => null,
-                    'sent_at' => date(DATETIME_FORMAT),
-                ], 'id = ?', [$row->id]);
+            if ($this->processOne((int) $row->id)) {
                 $results['sent']++;
             } else {
-                $attempts = ((int) $row->attempts) + 1;
-                $this->db->update('sms_logs', [
-                    'status' => $attempts >= 5 ? 'failed' : 'pending',
-                    'gateway_response' => $send['response'],
-                    'error_message' => $send['error'],
-                ], 'id = ?', [$row->id]);
-                $results['failed']++;
+                $still = $this->db->fetch("SELECT status FROM sms_logs WHERE id = ?", [$row->id]);
+                if ($still && $still->status === 'pending') {
+                    $results['failed']++;
+                } elseif ($still && $still->status === 'failed') {
+                    $results['failed']++;
+                } else {
+                    $results['skipped']++;
+                }
             }
         }
 
