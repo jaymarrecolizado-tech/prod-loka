@@ -93,7 +93,7 @@ require_once INCLUDES_PATH . '/header.php';
                 </ol>
             </nav>
         </div>
-        <div class="btn-group">
+        <div class="flex flex-wrap items-center gap-2">
             <a href="<?= APP_URL ?>/?page=reports&action=export&start_date=<?= $startDate ?>&end_date=<?= $endDate ?><?= $status ? '&status=' . $status : '' ?>"
                class="loka-btn-outline-primary">
                 <i class="bi bi-file-earmark-csv me-1"></i>Export CSV

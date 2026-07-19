@@ -131,21 +131,19 @@ require_once INCLUDES_PATH . '/header.php';
                     <label class="loka-form-label">End Date</label>
                     <input type="date" class="loka-form-input" name="end_date" value="<?= e($endDate) ?>">
                 </div>
-                <div class="col-span-12 md:col-span-2">
+                <div class="col-span-12 md:col-span-2 flex items-end">
                     <button type="submit" class="loka-btn-primary">
                         <i class="bi bi-search me-1"></i>Generate
                     </button>
                 </div>
                 <?php if ($driverId && !empty($trips)): ?>
-                <div class="col-span-12 md:col-span-3 text-right">
-                    <div class="btn-group">
-                        <a href="<?= APP_URL ?>/?page=reports&action=export-driver-csv&driver_id=<?= $driverId ?>&start_date=<?= $startDate ?>&end_date=<?= $endDate ?>" class="loka-btn-outline-primary">
-                            <i class="bi bi-file-earmark-csv me-1"></i>CSV
-                        </a>
-                        <a href="<?= APP_URL ?>/?page=reports&action=export-driver&driver_id=<?= $driverId ?>&start_date=<?= $startDate ?>&end_date=<?= $endDate ?>" class="loka-btn-outline-error">
-                            <i class="bi bi-file-earmark-pdf me-1"></i>PDF
-                        </a>
-                    </div>
+                <div class="col-span-12 md:col-span-3 flex flex-wrap justify-end items-end gap-2">
+                    <a href="<?= APP_URL ?>/?page=reports&action=export-driver-csv&driver_id=<?= $driverId ?>&start_date=<?= $startDate ?>&end_date=<?= $endDate ?>" class="loka-btn-outline-primary">
+                        <i class="bi bi-file-earmark-csv me-1"></i>CSV
+                    </a>
+                    <a href="<?= APP_URL ?>/?page=reports&action=export-driver&driver_id=<?= $driverId ?>&start_date=<?= $startDate ?>&end_date=<?= $endDate ?>" class="loka-btn-outline-error">
+                        <i class="bi bi-file-earmark-pdf me-1"></i>PDF
+                    </a>
                 </div>
                 <?php endif; ?>
             </form>
