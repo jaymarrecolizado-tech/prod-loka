@@ -34,12 +34,27 @@ class SmsQueue
                 [$userId]
             );
             if (!$user || empty($user->phone)) {
+                // Others with phones still get SMS; warn requester when we can
+                if ($requestId && function_exists('smsNotifyRequesterMissingPhone')) {
+                    smsNotifyRequesterMissingPhone(
+                        $requestId,
+                        $userId,
+                        $user->name ?? ('User #' . $userId)
+                    );
+                }
                 return null;
             }
 
             $phone = normalizePhoneE164((string) $user->phone);
             if ($phone === null) {
                 error_log("SMS SKIP: Invalid phone for user #{$userId}");
+                if ($requestId && function_exists('smsNotifyRequesterMissingPhone')) {
+                    smsNotifyRequesterMissingPhone(
+                        $requestId,
+                        $userId,
+                        $user->name ?? ('User #' . $userId)
+                    );
+                }
                 return null;
             }
 

@@ -179,6 +179,56 @@ function smsNotifyUser(
 }
 
 /**
+ * Tell the trip requester that a participant could not get SMS (no/invalid phone).
+ * Does not block SMS to anyone else. Deduped per requester+participant+request (1 hour).
+ */
+function smsNotifyRequesterMissingPhone(int $requestId, int $missingUserId, string $missingName): void
+{
+    try {
+        if (!smsEnabled()) {
+            return;
+        }
+
+        $request = db()->fetch(
+            "SELECT id, user_id FROM requests WHERE id = ? AND deleted_at IS NULL",
+            [$requestId]
+        );
+        if (!$request || !(int) $request->user_id) {
+            return;
+        }
+
+        $requesterId = (int) $request->user_id;
+        if ($requesterId === $missingUserId) {
+            return;
+        }
+
+        $title = 'SMS not sent — missing phone number';
+        $message = trim($missingName) !== ''
+            ? "{$missingName} has no valid phone number on file, so they did not receive an SMS for request #{$requestId}. Other participants with phone numbers were still texted."
+            : "A participant has no valid phone number on file, so they did not receive an SMS for request #{$requestId}. Other participants with phone numbers were still texted.";
+        $link = '/?page=requests&action=view&id=' . $requestId;
+
+        $dup = db()->fetch(
+            "SELECT id FROM notifications
+             WHERE user_id = ? AND title = ? AND link = ?
+               AND message = ?
+               AND created_at >= DATE_SUB(NOW(), INTERVAL 1 HOUR)
+               AND deleted_at IS NULL
+             LIMIT 1",
+            [$requesterId, $title, $link, $message]
+        );
+        if ($dup) {
+            return;
+        }
+
+        // In-app + email only ('default' is not SMS-allowlisted)
+        notify($requesterId, 'default', $title, $message, $link, $requestId);
+    } catch (Throwable $e) {
+        error_log('smsNotifyRequesterMissingPhone: ' . $e->getMessage());
+    }
+}
+
+/**
  * Upsert a settings row.
  */
 function smsSaveSetting(string $key, string $value, string $type = 'string'): void

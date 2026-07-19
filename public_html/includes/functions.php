@@ -773,12 +773,12 @@ function notifyPassengers(int $requestId, string $type, string $title, string $m
     
     try {
         $passengers = db()->fetchAll(
-            "SELECT rp.user_id, u.name, u.email 
+            "SELECT rp.user_id, u.name, u.email, u.phone
              FROM request_passengers rp
              LEFT JOIN users u ON rp.user_id = u.id
-             WHERE rp.request_id = ? 
-             AND rp.user_id IS NOT NULL 
-             AND u.status = 'active' 
+             WHERE rp.request_id = ?
+             AND rp.user_id IS NOT NULL
+             AND u.status = 'active'
              AND u.deleted_at IS NULL",
             [$requestId]
         );
@@ -795,13 +795,16 @@ function notifyPassengers(int $requestId, string $type, string $title, string $m
         $errors = [];
         
         foreach ($passengers as $passenger) {
-            if ($passenger->user_id && $passenger->email) {
+            // Email and/or phone — missing phone must not block others
+            if ($passenger->user_id && ($passenger->email || $passenger->phone)) {
                 try {
-                    notify($passenger->user_id, $type, $title, $message, $link);
+                    notify($passenger->user_id, $type, $title, $message, $link, $requestId);
                     $notified++;
                 } catch (Exception $e) {
                     $errors[] = "Passenger {$passenger->user_id}: " . $e->getMessage();
                 }
+            } elseif ($passenger->user_id && function_exists('smsNotifyRequesterMissingPhone')) {
+                smsNotifyRequesterMissingPhone($requestId, (int) $passenger->user_id, (string) ($passenger->name ?? 'Passenger'));
             }
         }
         
@@ -834,7 +837,7 @@ function notifyPassengersBatch(int $requestId, string $type, string $title, stri
 {
     // Single query to get all passengers
     $passengers = db()->fetchAll(
-        "SELECT rp.user_id, u.email, u.name 
+        "SELECT rp.user_id, u.email, u.name, u.phone
          FROM request_passengers rp
          LEFT JOIN users u ON rp.user_id = u.id
          WHERE rp.request_id = ? AND rp.user_id IS NOT NULL 
@@ -874,6 +877,7 @@ function notifyPassengersBatch(int $requestId, string $type, string $title, stri
     // Queue emails in batch AFTER transaction commits
     $queue = new EmailQueue();
     $emailsQueued = 0;
+    $smsQueued = 0;
     
     foreach ($passengers as $passenger) {
         if ($passenger->email) {
@@ -891,9 +895,19 @@ function notifyPassengersBatch(int $requestId, string $type, string $title, stri
                 error_log("NOTIFY PASSENGERS BATCH ERROR: Failed to queue email for {$passenger->email}: " . $e->getMessage());
             }
         }
+
+        // SMS per passenger (missing phone only skips that person + warns requester)
+        if (function_exists('smsNotifyUser')) {
+            try {
+                smsNotifyUser((int) $passenger->user_id, $type, $title, $message, $link, $requestId);
+                $smsQueued++;
+            } catch (Throwable $e) {
+                error_log("NOTIFY PASSENGERS BATCH SMS ERROR: user {$passenger->user_id}: " . $e->getMessage());
+            }
+        }
     }
     
-    error_log("NOTIFY PASSENGERS BATCH: Request #{$requestId} - Notified {$notified} passengers, queued {$emailsQueued} emails (type: {$type})");
+    error_log("NOTIFY PASSENGERS BATCH: Request #{$requestId} - Notified {$notified} passengers, queued {$emailsQueued} emails, SMS attempts {$smsQueued} (type: {$type})");
     return $notified;
 }
 
@@ -910,7 +924,7 @@ function notifyDriver(?int $driverId, string $type, string $title, string $messa
     
     $driver = db()->fetch(
         "SELECT d.user_id, d.status as driver_status, d.deleted_at as driver_deleted,
-                u.name, u.email, u.status as user_status, u.deleted_at as user_deleted
+                u.name, u.email, u.phone, u.status as user_status, u.deleted_at as user_deleted
          FROM drivers d
          LEFT JOIN users u ON d.user_id = u.id
          WHERE d.id = ?",
@@ -922,13 +936,25 @@ function notifyDriver(?int $driverId, string $type, string $title, string $messa
         return;
     }
     
-    if (!$driver->user_id || !$driver->email || $driver->user_status !== 'active' || $driver->user_deleted || $driver->driver_deleted) {
+    if (!$driver->user_id || $driver->user_status !== 'active' || $driver->user_deleted || $driver->driver_deleted) {
         error_log("NOTIFY DRIVER: Driver #{$driverId} is inactive or deleted - skipping notification");
+        return;
+    }
+
+    // Need email and/or phone — missing phone must not block in-app for drivers with email
+    if (!$driver->email && !$driver->phone) {
+        error_log("NOTIFY DRIVER: Driver #{$driverId} has no email or phone - skipping");
         return;
     }
     
     try {
-        notify($driver->user_id, $type, $title, $message, $link);
+        // Extract request id from link when present so SMS missing-phone warn can reach requester
+        $requestId = null;
+        if ($link) {
+            parse_str((string) parse_url($link, PHP_URL_QUERY), $query);
+            $requestId = isset($query['id']) ? (int) $query['id'] : null;
+        }
+        notify($driver->user_id, $type, $title, $message, $link, $requestId);
         error_log("NOTIFY DRIVER: Driver #{$driverId} ({$driver->email}) notified (type: {$type})");
     } catch (Exception $e) {
         error_log("NOTIFY DRIVER ERROR: Failed to notify driver #{$driverId}: " . $e->getMessage());
