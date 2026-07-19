@@ -170,6 +170,7 @@ switch ($page) {
         break;
 
     case 'requests':
+        denyGuardAccess();
         if ($action === 'create') {
             require_once PAGES_PATH . '/requests/create.php';
         } elseif ($action === 'view') {
@@ -388,6 +389,7 @@ switch ($page) {
         break;
 
     case 'completed-trips':
+        denyGuardAccess();
         require_once PAGES_PATH . '/completed-trips/index.php';
         break;
 
@@ -407,6 +409,7 @@ switch ($page) {
         break;
 
     case 'trip-tickets':
+        denyGuardAccess();
         if ($action === 'view') {
             require_once PAGES_PATH . '/trip-tickets/view.php';
         } elseif ($action === 'create_form') {
@@ -454,6 +457,7 @@ switch ($page) {
         break;
 
     case 'gas-vouchers':
+        denyGuardAccess();
         if ($action === 'create' || $action === 'edit') {
             requireAnyRole([ROLE_REQUESTER, ROLE_APPROVER, ROLE_MOTORPOOL, ROLE_ADMIN, ROLE_CHIEF_ADMIN_FINANCE]);
             require_once PAGES_PATH . '/gas-vouchers/create.php';

@@ -1,6 +1,6 @@
 <?php
 if (isLoggedIn()) {
-    redirect('/?page=dashboard');
+    redirect(isGuard() ? '/?page=guard' : '/?page=dashboard');
 }
 
 $errors = [];
@@ -25,7 +25,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $result = $auth->attempt($email, $password, $remember);
         if ($result['success']) {
             $userName = $_SESSION['user_name'] ?? 'User';
-            redirectWith('/?page=dashboard', 'success', 'Welcome back, ' . e($userName) . '!');
+            $home = (isset($result['user']) && ($result['user']->role ?? '') === ROLE_GUARD)
+                ? '/?page=guard'
+                : '/?page=dashboard';
+            redirectWith($home, 'success', 'Welcome back, ' . e($userName) . '!');
         } else {
             $errors[] = $result['error'];
         }

@@ -2,14 +2,25 @@
 <nav class="loka-sidebar" id="sidebar" aria-label="Main navigation">
     <div class="loka-sidebar-content">
         <ul class="flex flex-col gap-0.5 px-3 py-2">
-            <!-- Dashboard -->
+            <!-- Dashboard (guards are redirected to Guard Dashboard) -->
             <li>
-                <a class="loka-nav-link <?= activeMenu('dashboard') ?>" href="<?= APP_URL ?>/?page=dashboard">
+                <a class="loka-nav-link <?= activeMenu('dashboard') ?>"
+                   href="<?= APP_URL ?>/?page=<?= isGuard() ? 'guard' : 'dashboard' ?>">
                     <i class="bi bi-speedometer2 w-5 text-center flex-shrink-0"></i>
                     <span>Dashboard</span>
                 </a>
             </li>
 
+            <?php if (isDriver() && !isGuard()): ?>
+            <li>
+                <a class="loka-nav-link <?= activeMenu('my-trips') ?>" href="<?= APP_URL ?>/?page=my-trips">
+                    <i class="bi bi-truck w-5 text-center flex-shrink-0"></i>
+                    <span>My Trips</span>
+                </a>
+            </li>
+            <?php endif; ?>
+
+            <?php if (!isGuard()): ?>
             <!-- Requests -->
             <li>
                 <a class="loka-nav-link <?= activeMenu('requests') ?>" href="<?= APP_URL ?>/?page=requests">
@@ -33,15 +44,14 @@
                     <i class="bi bi-fuel-pump w-5 text-center flex-shrink-0"></i>
                     <span>Gas Vouchers</span>
                     <?php
-                    $pendingGv = db()->fetchColumn(
-                        "SELECT COUNT(*) FROM gas_vouchers WHERE status IN ('pending_review','pending_approval') AND deleted_at IS NULL"
-                    );
+                    $pendingGv = badgeCountPendingGasVouchers();
                     if ($pendingGv > 0):
                     ?>
                     <span class="loka-badge bg-warning/20 text-warning ml-auto"><?= $pendingGv ?></span>
                     <?php endif; ?>
                 </a>
             </li>
+            <?php endif; ?>
             <?php endif; ?>
 
             <!-- Schedule Calendar -->
@@ -52,6 +62,15 @@
                 </a>
             </li>
 
+            <?php if (isGuard()): ?>
+            <li>
+                <a class="loka-nav-link <?= activeMenu('guard') ?>" href="<?= APP_URL ?>/?page=guard">
+                    <i class="bi bi-shield-check w-5 text-center flex-shrink-0"></i>
+                    <span>Guard Dashboard</span>
+                </a>
+            </li>
+            <?php endif; ?>
+
             <?php if (isApprover()): ?>
             <!-- My Trip Tickets -->
             <li>
@@ -59,9 +78,7 @@
                     <i class="bi bi-journal-check w-5 text-center flex-shrink-0"></i>
                     <span>My Trip Tickets</span>
                     <?php
-                    $pendingTicketsCount = db()->fetchColumn(
-                        "SELECT COUNT(*) FROM trip_tickets WHERE status = 'submitted' AND deleted_at IS NULL"
-                    );
+                    $pendingTicketsCount = badgeCountSubmittedTripTickets();
                     if ($pendingTicketsCount > 0):
                     ?>
                     <span class="loka-badge bg-warning/20 text-warning ml-auto"><?= $pendingTicketsCount ?></span>
@@ -75,12 +92,7 @@
                     <i class="bi bi-check-circle w-5 text-center flex-shrink-0"></i>
                     <span>Approvals</span>
                     <?php
-                    $pendingCount = 0;
-                    if (isMotorpool()) {
-                        $pendingCount = db()->count('requests', "status = 'pending_motorpool'");
-                    } else {
-                        $pendingCount = db()->count('requests', "status = 'pending' AND department_id = ?", [currentUser()->department_id]);
-                    }
+                    $pendingCount = badgeCountPendingApprovals();
                     if ($pendingCount > 0):
                     ?>
                     <span class="loka-badge bg-warning/20 text-warning ml-auto"><?= $pendingCount ?></span>
@@ -124,7 +136,7 @@
                     <i class="bi bi-wrench w-5 text-center flex-shrink-0"></i>
                     <span>Maintenance</span>
                     <?php
-                    $pendingMaintenance = db()->count('maintenance_requests', "status IN (?, ?) AND deleted_at IS NULL", [MAINTENANCE_STATUS_PENDING, MAINTENANCE_STATUS_SCHEDULED]);
+                    $pendingMaintenance = badgeCountPendingMaintenance();
                     if ($pendingMaintenance > 0):
                     ?>
                     <span class="loka-badge bg-warning/20 text-warning ml-auto"><?= $pendingMaintenance ?></span>
@@ -188,6 +200,16 @@
                 </a>
             </li>
             <?php endif; ?>
+
+            <?php if (!isApprover() && !isMotorpool() && !isAdmin()): ?>
+            <li class="loka-section-label mt-3">Fleet Management</li>
+            <?php endif; ?>
+            <li>
+                <a class="loka-nav-link <?= activeMenu('patch-notes') ?>" href="<?= APP_URL ?>/?page=patch-notes">
+                    <i class="bi bi-newspaper w-5 text-center flex-shrink-0"></i>
+                    <span>Patch Notes</span>
+                </a>
+            </li>
 
         </ul>
     </div>

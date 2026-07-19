@@ -211,6 +211,36 @@
         }),
       })
     }
+
+    // Vehicle utilization (trip counts)
+    var utilCtx = document.getElementById('utilizationChart')
+    if (utilCtx && analyticsData.vehicleUtilization) {
+      charts.utilization = new Chart(utilCtx, {
+        type: 'bar',
+        data: {
+          labels: analyticsData.vehicleUtilization.map(function (v) {
+            return v.plate_number
+          }),
+          datasets: [
+            {
+              label: 'Completed trips (30d)',
+              data: analyticsData.vehicleUtilization.map(function (v) {
+                return Number(v.trip_count) || 0
+              }),
+              backgroundColor: 'rgba(0, 212, 255, 0.65)',
+              borderColor: '#00d4ff',
+              borderWidth: 1,
+            },
+          ],
+        },
+        options: Object.assign({}, commonOptions, {
+          indexAxis: 'y',
+          scales: {
+            x: { beginAtZero: true, ticks: { stepSize: 1 } },
+          },
+        }),
+      })
+    }
   }
 
   // Initialize when DOM is ready

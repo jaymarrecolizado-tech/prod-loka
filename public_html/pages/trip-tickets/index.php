@@ -378,8 +378,8 @@ $baseParams = tableSortQueryParams($sortState, [
 
 // Statistics
 $totalTickets = count($tickets);
-$pendingTickets = count(array_filter(fn($t) => $t->status === 'submitted', $tickets));
-$approvedTickets = count(array_filter(fn($t) => $t->status === 'approved', $tickets));
+$pendingTickets = count(array_filter($tickets, fn($t) => $t->status === 'submitted'));
+$approvedTickets = count(array_filter($tickets, fn($t) => $t->status === 'approved'));
 
 require_once INCLUDES_PATH . '/header.php';
 ?>

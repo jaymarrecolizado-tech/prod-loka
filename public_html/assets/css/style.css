@@ -217,3 +217,137 @@ body {
         font-size: 0.75rem;
     }
 }
+
+/* ===== BUTTON COLORS (hard colors — works even if OKLCH/HSL tokens fail) ===== */
+.loka-btn-primary,
+.btn-primary,
+.btn.btn-primary,
+button.bg-primary,
+a.bg-primary,
+input[type="submit"].bg-primary {
+    background-color: #00d4ff !important;
+    border-color: #00d4ff !important;
+    color: #041018 !important;
+}
+.loka-btn-secondary,
+.btn-secondary,
+.btn.btn-secondary,
+button.bg-secondary,
+a.bg-secondary {
+    background-color: #60a5fa !important;
+    border-color: #60a5fa !important;
+    color: #041018 !important;
+}
+.loka-btn-success,
+.btn-success,
+.btn.btn-success,
+button.bg-success,
+a.bg-success,
+input[type="submit"].bg-success {
+    background-color: #14e0b0 !important;
+    border-color: #14e0b0 !important;
+    color: #041018 !important;
+}
+.loka-btn-warning,
+.btn-warning,
+.btn.btn-warning,
+button.bg-warning,
+a.bg-warning {
+    background-color: #f5c518 !important;
+    border-color: #f5c518 !important;
+    color: #1a1400 !important;
+}
+.loka-btn-error,
+.btn-error,
+.btn.btn-error,
+button.bg-error,
+a.bg-error,
+button.bg-danger,
+a.bg-danger {
+    background-color: #f43f5e !important;
+    border-color: #f43f5e !important;
+    color: #ffffff !important;
+}
+.loka-btn-info,
+.btn-info,
+.btn.btn-info,
+button.bg-info,
+a.bg-info {
+    background-color: #38bdf8 !important;
+    border-color: #38bdf8 !important;
+    color: #041018 !important;
+}
+
+[data-theme="loka-light"] .loka-btn-primary,
+[data-theme="loka-light"] .btn-primary,
+[data-theme="loka-light"] .btn.btn-primary,
+[data-theme="loka-light"] button.bg-primary,
+[data-theme="loka-light"] a.bg-primary,
+[data-theme="loka-light"] input[type="submit"].bg-primary {
+    background-color: #1d4ed8 !important;
+    border-color: #1d4ed8 !important;
+    color: #ffffff !important;
+}
+[data-theme="loka-light"] .loka-btn-secondary,
+[data-theme="loka-light"] .btn-secondary,
+[data-theme="loka-light"] .btn.btn-secondary,
+[data-theme="loka-light"] button.bg-secondary,
+[data-theme="loka-light"] a.bg-secondary {
+    background-color: #0f766e !important;
+    border-color: #0f766e !important;
+    color: #ffffff !important;
+}
+[data-theme="loka-light"] .loka-btn-success,
+[data-theme="loka-light"] .btn-success,
+[data-theme="loka-light"] .btn.btn-success,
+[data-theme="loka-light"] button.bg-success,
+[data-theme="loka-light"] a.bg-success,
+[data-theme="loka-light"] input[type="submit"].bg-success {
+    background-color: #15803d !important;
+    border-color: #15803d !important;
+    color: #ffffff !important;
+}
+[data-theme="loka-light"] .loka-btn-warning,
+[data-theme="loka-light"] .btn-warning,
+[data-theme="loka-light"] .btn.btn-warning,
+[data-theme="loka-light"] button.bg-warning,
+[data-theme="loka-light"] a.bg-warning {
+    background-color: #c2410c !important;
+    border-color: #c2410c !important;
+    color: #ffffff !important;
+}
+[data-theme="loka-light"] .loka-btn-error,
+[data-theme="loka-light"] .btn-error,
+[data-theme="loka-light"] .btn.btn-error,
+[data-theme="loka-light"] button.bg-error,
+[data-theme="loka-light"] a.bg-error,
+[data-theme="loka-light"] button.bg-danger,
+[data-theme="loka-light"] a.bg-danger {
+    background-color: #b91c1c !important;
+    border-color: #b91c1c !important;
+    color: #ffffff !important;
+}
+[data-theme="loka-light"] .loka-btn-info,
+[data-theme="loka-light"] .btn-info,
+[data-theme="loka-light"] .btn.btn-info,
+[data-theme="loka-light"] button.bg-info,
+[data-theme="loka-light"] a.bg-info {
+    background-color: #0369a1 !important;
+    border-color: #0369a1 !important;
+    color: #ffffff !important;
+}
+
+.loka-btn-primary:hover,
+.btn-primary:hover,
+.loka-btn-secondary:hover,
+.btn-secondary:hover,
+.loka-btn-success:hover,
+.btn-success:hover,
+.loka-btn-warning:hover,
+.btn-warning:hover,
+.loka-btn-error:hover,
+.btn-error:hover,
+.loka-btn-info:hover,
+.btn-info:hover {
+    filter: brightness(1.08);
+}

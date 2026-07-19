@@ -99,8 +99,8 @@ export default {
         loka: {
           'primary': '#00d4ff',           // cyan — primary CTAs
           'primary-content': '#041018',
-          'secondary': '#3b82f6',         // brighter blue — secondary CTAs
-          'secondary-content': '#ffffff',
+          'secondary': '#60a5fa',         // blue-400 — readable on navy
+          'secondary-content': '#041018',
           'accent': '#22d3ee',            // light cyan accent
           'accent-content': '#041018',
           'neutral': '#0c1f4a',
@@ -110,6 +110,7 @@ export default {
           'base-300': '#162033',          // borders
           'base-content': '#eef4ff',
           'info': '#38bdf8',
+          'info-content': '#041018',
           'success': '#14e0b0',
           'success-content': '#041018',
           'warning': '#f5c518',
@@ -133,7 +134,8 @@ export default {
           'base-200': '#f0efeb',          // cards — slightly darker
           'base-300': '#e0ded8',          // borders — visible
           'base-content': '#1e293b',      // slate-800 — body text
-          'info': '#0284c7',
+          'info': '#0369a1',
+          'info-content': '#ffffff',
           'success': '#15803d',
           'success-content': '#ffffff',
           'warning': '#c2410c',

@@ -27,8 +27,8 @@
     <!-- Tom Select CSS -->
     <link href="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/css/tom-select.bootstrap5.min.css" rel="stylesheet">
 
-    <!-- Custom CSS -->
-    <link href="<?= ASSETS_PATH ?>/css/style.css" rel="stylesheet">
+    <!-- Custom CSS (cache-busted) -->
+    <link href="<?= ASSETS_PATH ?>/css/style.css?v=<?= is_file(BASE_PATH . '/assets/css/style.css') ? filemtime(BASE_PATH . '/assets/css/style.css') : time() ?>" rel="stylesheet">
 
     <!-- Modern UI (Tailwind + DaisyUI) -->
     <?= viteEntryCssTags('app') ?>

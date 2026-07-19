@@ -4,6 +4,8 @@
  */
 
 require_once __DIR__ . '/table_sort.php';
+require_once __DIR__ . '/badge_counts.php';
+require_once __DIR__ . '/dashboard_stats.php';
 
 /**
  * Get database instance
@@ -105,7 +107,10 @@ function viteEntryCssTags(string $entry): string
 
     if (isset($item['css']) && is_array($item['css'])) {
         foreach ($item['css'] as $css) {
-            $tags[] = '<link rel="stylesheet" href="' . ASSETS_PATH . '/dist/' . e($css) . '">';
+            $href = ASSETS_PATH . '/dist/' . $css;
+            $abs = BASE_PATH . '/assets/dist/' . $css;
+            $ver = is_file($abs) ? (string) filemtime($abs) : (string) time();
+            $tags[] = '<link rel="stylesheet" href="' . e($href) . '?v=' . e($ver) . '">';
         }
     }
 
@@ -1490,4 +1495,14 @@ function requireAnyRole($roles): void
         }
     }
     redirectWith('/?page=dashboard', 'danger', 'You do not have permission to access this page.');
+}
+
+/**
+ * Block guard accounts from non-ops modules (requests, vouchers, tickets, etc.).
+ */
+function denyGuardAccess(): void
+{
+    if (isGuard()) {
+        redirectWith('/?page=guard', 'danger', 'You do not have permission to access this page.');
+    }
 }
