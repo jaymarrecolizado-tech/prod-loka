@@ -93,11 +93,11 @@
 
             <!-- User Dropdown (DaisyUI dropdown) -->
             <div class="dropdown dropdown-end">
-                <div tabindex="0" role="button" class="loka-navbar-notification flex items-center gap-2">
-                    <div class="loka-avatar">
+                <div tabindex="0" role="button" class="loka-navbar-user" aria-label="User menu">
+                    <div class="loka-avatar loka-navbar-user-avatar">
                         <?= strtoupper(substr(currentUser()->name ?? 'U', 0, 1)) ?>
                     </div>
-                    <span class="hidden md:inline text-sm text-white"><?= e(currentUser()->name ?? 'User') ?></span>
+                    <span class="loka-navbar-user-name"><?= e(currentUser()->name ?? 'User') ?></span>
                 </div>
                 <ul tabindex="0" class="dropdown-content menu bg-base-100 rounded-box z-[1] w-56 p-2 shadow-lg">
                     <li class="menu-title">

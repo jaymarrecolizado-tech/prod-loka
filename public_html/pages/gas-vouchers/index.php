@@ -41,6 +41,20 @@ if ($dateTo) {
     $params[] = $dateTo;
 }
 
+// Sorting (latest created first by default)
+$allowedSortColumns = [
+    'voucher_no' => 'gv.voucher_no',
+    'request_date' => 'gv.request_date',
+    'created_at' => 'gv.created_at',
+    'status' => 'gv.status',
+    'vehicle_plate' => 'gv.vehicle_plate',
+    'driver_name' => 'gv.driver_name',
+    'requester' => 'u.name',
+];
+$sortState = resolveTableSort($allowedSortColumns, 'created_at', 'DESC');
+$sort = $sortState['key'];
+$sortDir = $sortState['dir'];
+
 $vouchers = db()->fetchAll(
     "SELECT gv.*,
             u.name AS requester_name,
@@ -51,9 +65,17 @@ $vouchers = db()->fetchAll(
      LEFT JOIN users reviewer ON gv.reviewed_by = reviewer.id
      LEFT JOIN users approver ON gv.approved_by = approver.id
      WHERE {$whereClause}
-     ORDER BY gv.created_at DESC",
+     ORDER BY {$sortState['orderSql']}",
     $params
 );
+
+$baseParams = tableSortQueryParams($sortState, [
+    'page' => 'gas-vouchers',
+    'status' => $statusFilter,
+    'search' => $searchFilter,
+    'date_from' => $dateFrom,
+    'date_to' => $dateTo,
+]);
 
 // Count by status for summary badges
 $statusCounts = db()->fetchAll(
@@ -177,16 +199,16 @@ require_once INCLUDES_PATH . '/header.php';
             </div>
             <?php else: ?>
             <div class="loka-table-responsive">
-                <table class="loka-table data-table">
+                <table class="loka-table">
                     <thead>
                         <tr>
-                            <th>Voucher No.</th>
-                            <th>Date</th>
-                            <th>Driver / Vehicle</th>
+                            <?= tableSortTh('voucher_no', 'Voucher No.', $sort, $sortDir, $baseParams) ?>
+                            <?= tableSortTh('request_date', 'Date', $sort, $sortDir, $baseParams) ?>
+                            <?= tableSortTh('driver_name', 'Driver / Vehicle', $sort, $sortDir, $baseParams) ?>
                             <th>Fuel</th>
                             <th>Fund Source</th>
                             <th>Purpose</th>
-                            <th>Status</th>
+                            <?= tableSortTh('status', 'Status', $sort, $sortDir, $baseParams) ?>
                             <th>Total Cost</th>
                             <th>Actions</th>
                         </tr>

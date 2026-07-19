@@ -16,14 +16,34 @@ if ($statusFilter) {
     $params[] = $statusFilter;
 }
 
+// Sorting (latest drivers first by default)
+$allowedSortColumns = [
+    'id' => 'd.id',
+    'created_at' => 'd.created_at',
+    'name' => 'u.name',
+    'license_number' => 'd.license_number',
+    'license_expiry' => 'd.license_expiry',
+    'years_experience' => 'd.years_experience',
+    'status' => 'd.status',
+    'phone' => 'u.phone',
+];
+$sortState = resolveTableSort($allowedSortColumns, 'created_at', 'DESC');
+$sort = $sortState['key'];
+$sortDir = $sortState['dir'];
+
 $drivers = db()->fetchAll(
     "SELECT d.*, u.name as driver_name, u.email, u.phone
      FROM drivers d
      JOIN users u ON d.user_id = u.id AND u.deleted_at IS NULL
      WHERE {$whereClause}
-     ORDER BY u.name",
+     ORDER BY {$sortState['orderSql']}",
     $params
 );
+
+$baseParams = tableSortQueryParams($sortState, [
+    'page' => 'drivers',
+    'status' => $statusFilter,
+]);
 
 require_once INCLUDES_PATH . '/header.php';
 ?>
@@ -81,12 +101,12 @@ require_once INCLUDES_PATH . '/header.php';
                 <table class="loka-table">
                     <thead>
                         <tr>
-                            <th>Name</th>
-                            <th>License #</th>
-                            <th>License Expiry</th>
-                            <th>Experience</th>
-                            <th>Status</th>
-                            <th>Contact</th>
+                            <?= tableSortTh('name', 'Name', $sort, $sortDir, $baseParams) ?>
+                            <?= tableSortTh('license_number', 'License #', $sort, $sortDir, $baseParams) ?>
+                            <?= tableSortTh('license_expiry', 'License Expiry', $sort, $sortDir, $baseParams) ?>
+                            <?= tableSortTh('years_experience', 'Experience', $sort, $sortDir, $baseParams) ?>
+                            <?= tableSortTh('status', 'Status', $sort, $sortDir, $baseParams) ?>
+                            <?= tableSortTh('phone', 'Contact', $sort, $sortDir, $baseParams) ?>
                             <th class="text-center w-20">Actions</th>
                         </tr>
                     </thead>

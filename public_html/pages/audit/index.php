@@ -25,15 +25,35 @@ if ($actionFilter) {
     $params[] = '%' . $actionFilter . '%';
 }
 
+// Sorting (latest logs first by default)
+$allowedSortColumns = [
+    'created_at' => 'a.created_at',
+    'user_name' => 'u.name',
+    'action' => 'a.action',
+    'entity_type' => 'a.entity_type',
+    'ip_address' => 'a.ip_address',
+];
+$sortState = resolveTableSort($allowedSortColumns, 'created_at', 'DESC');
+$sort = $sortState['key'];
+$sortDir = $sortState['dir'];
+
 $logs = db()->fetchAll(
     "SELECT a.*, u.name as user_name, u.email as user_email
      FROM audit_logs a
      LEFT JOIN users u ON a.user_id = u.id
      WHERE {$whereClause}
-     ORDER BY a.created_at DESC
+     ORDER BY {$sortState['orderSql']}
      LIMIT 500",
     $params
 );
+
+$baseParams = tableSortQueryParams($sortState, [
+    'page' => 'audit',
+    'user' => $userFilter,
+    'action' => $actionFilter,
+    'start_date' => $startDate,
+    'end_date' => $endDate,
+]);
 
 $users = db()->fetchAll("SELECT id, name FROM users WHERE deleted_at IS NULL ORDER BY name");
 
@@ -86,9 +106,15 @@ require_once INCLUDES_PATH . '/header.php';
     <div class="loka-card">
         <div class="p-4 md:p-6">
             <div class="loka-table-responsive">
-                <table class="loka-table data-table">
+                <table class="loka-table">
                     <thead>
-                        <tr><th>Date/Time</th><th>User</th><th>Action</th><th>Entity</th><th>IP Address</th></tr>
+                        <tr>
+                            <?= tableSortTh('created_at', 'Date/Time', $sort, $sortDir, $baseParams) ?>
+                            <?= tableSortTh('user_name', 'User', $sort, $sortDir, $baseParams) ?>
+                            <?= tableSortTh('action', 'Action', $sort, $sortDir, $baseParams) ?>
+                            <?= tableSortTh('entity_type', 'Entity', $sort, $sortDir, $baseParams) ?>
+                            <?= tableSortTh('ip_address', 'IP Address', $sort, $sortDir, $baseParams) ?>
+                        </tr>
                     </thead>
                     <tbody>
                         <?php foreach ($logs as $log): ?>

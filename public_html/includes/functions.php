@@ -3,6 +3,8 @@
  * LOKA - Helper Functions
  */
 
+require_once __DIR__ . '/table_sort.php';
+
 /**
  * Get database instance
  */
@@ -370,14 +372,16 @@ function formatDateTime(?string $datetime): string
 }
 
 /**
- * Get status badge HTML
+ * Get status badge HTML (uses loka-status-* for reliable light/dark contrast).
  */
 function statusBadge(string $status, array $labels): string
 {
     $info = $labels[$status] ?? ['label' => ucfirst($status), 'color' => 'secondary'];
+    $color = preg_replace('/[^a-z0-9_-]/i', '', (string) ($info['color'] ?? 'secondary')) ?: 'secondary';
+
     return sprintf(
-        '<span class="loka-badge bg-%s">%s</span>',
-        e($info['color']),
+        '<span class="loka-badge loka-status-%s">%s</span>',
+        e($color),
         e($info['label'])
     );
 }

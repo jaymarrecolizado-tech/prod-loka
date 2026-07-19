@@ -9,14 +9,31 @@ requireRole('approver');
 
 $pageTitle = 'Vehicle Types';
 
+// Sorting (latest vehicle types first by default)
+$allowedSortColumns = [
+    'id' => 'vt.id',
+    'created_at' => 'vt.created_at',
+    'name' => 'vt.name',
+    'description' => 'vt.description',
+    'passenger_capacity' => 'vt.passenger_capacity',
+    'vehicle_count' => 'vehicle_count',
+];
+$sortState = resolveTableSort($allowedSortColumns, 'created_at', 'DESC');
+$sort = $sortState['key'];
+$sortDir = $sortState['dir'];
+
 // Get all vehicle types with vehicle count
 $vehicleTypes = db()->fetchAll(
     "SELECT vt.*,
             (SELECT COUNT(*) FROM vehicles v WHERE v.vehicle_type_id = vt.id AND v.deleted_at IS NULL) as vehicle_count
      FROM vehicle_types vt
      WHERE vt.deleted_at IS NULL
-     ORDER BY vt.name"
+     ORDER BY {$sortState['orderSql']}"
 );
+
+$baseParams = tableSortQueryParams($sortState, [
+    'page' => 'vehicle_types',
+]);
 
 require_once INCLUDES_PATH . '/header.php';
 ?>
@@ -48,11 +65,11 @@ require_once INCLUDES_PATH . '/header.php';
                     <table class="loka-table">
                         <thead>
                             <tr>
-                                <th>Name</th>
-                                <th>Description</th>
-                                <th>Passenger Capacity</th>
-                                <th>Vehicles Using</th>
-                                <th>Created</th>
+                                <?= tableSortTh('name', 'Name', $sort, $sortDir, $baseParams) ?>
+                                <?= tableSortTh('description', 'Description', $sort, $sortDir, $baseParams) ?>
+                                <?= tableSortTh('passenger_capacity', 'Passenger Capacity', $sort, $sortDir, $baseParams) ?>
+                                <?= tableSortTh('vehicle_count', 'Vehicles Using', $sort, $sortDir, $baseParams) ?>
+                                <?= tableSortTh('created_at', 'Created', $sort, $sortDir, $baseParams) ?>
                                 <th>Actions</th>
                             </tr>
                         </thead>

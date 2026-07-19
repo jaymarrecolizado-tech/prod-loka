@@ -44,19 +44,39 @@ $params = [$driver->id, $driver->id];
 switch ($filter) {
     case 'past':
         $sql .= " AND r.end_datetime < NOW()";
-        $sql .= " ORDER BY r.start_datetime DESC";
         break;
     case 'all':
-        $sql .= " ORDER BY r.start_datetime DESC";
         break;
     case 'upcoming':
     default:
         $sql .= " AND r.end_datetime >= NOW()";
-        $sql .= " ORDER BY r.start_datetime ASC";
         break;
 }
 
+// Sorting: upcoming defaults ASC (soonest first); past/all default latest-first DESC
+$allowedSortColumns = [
+    'id' => 'r.id',
+    'start_datetime' => 'r.start_datetime',
+    'destination' => 'r.destination',
+    'plate_number' => 'v.plate_number',
+    'mileage' => 'r.mileage_actual',
+    'requester' => 'u.name',
+    'status' => 'r.status',
+    'created_at' => 'r.created_at',
+];
+$defaultSortDir = ($filter === 'upcoming') ? 'ASC' : 'DESC';
+$sortState = resolveTableSort($allowedSortColumns, 'start_datetime', $defaultSortDir);
+$sort = $sortState['key'];
+$sortDir = $sortState['dir'];
+
+$sql .= " ORDER BY {$sortState['orderSql']}";
+
 $trips = db()->fetchAll($sql, $params);
+
+$baseParams = tableSortQueryParams($sortState, [
+    'page' => 'my-trips',
+    'filter' => $filter === 'upcoming' ? '' : $filter,
+]);
 
 $stats = [
     'upcoming' => db()->fetchColumn(
@@ -235,13 +255,13 @@ require_once INCLUDES_PATH . '/header.php';
                     <table class="loka-table">
                         <thead>
                             <tr>
-                                <th>Request #</th>
-                                <th>Date & Time</th>
-                                <th>Destination</th>
-                                <th>Vehicle</th>
-                                <th>Mileage</th>
-                                <th>Requester</th>
-                                <th>Status</th>
+                                <?= tableSortTh('id', 'Request #', $sort, $sortDir, $baseParams) ?>
+                                <?= tableSortTh('start_datetime', 'Date & Time', $sort, $sortDir, $baseParams) ?>
+                                <?= tableSortTh('destination', 'Destination', $sort, $sortDir, $baseParams) ?>
+                                <?= tableSortTh('plate_number', 'Vehicle', $sort, $sortDir, $baseParams) ?>
+                                <?= tableSortTh('mileage', 'Mileage', $sort, $sortDir, $baseParams) ?>
+                                <?= tableSortTh('requester', 'Requester', $sort, $sortDir, $baseParams) ?>
+                                <?= tableSortTh('status', 'Status', $sort, $sortDir, $baseParams) ?>
                                 <th>Role</th>
                                 <th>Trip Ticket</th>
                                 <th>Actions</th>

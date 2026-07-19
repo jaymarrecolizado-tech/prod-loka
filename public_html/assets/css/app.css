@@ -12,8 +12,13 @@
   --sidebar-text: #8899bb;
 }
 
-/* Light theme overrides */
+/* Theme color-scheme — makes native selects/date pickers follow dark/light UI */
+[data-theme="loka"] {
+  color-scheme: dark;
+}
+
 [data-theme="loka-light"] {
+  color-scheme: light;
   --sidebar-bg: #1e293b;
   --sidebar-text: #cbd5e1;
 }
@@ -163,57 +168,126 @@ body {
   opacity: 0.5;
 }
 
-/* ===== BUTTONS ===== */
-.loka-btn {
+/* ===== BUTTONS =====
+   Variants include base layout so pages can use `loka-btn-primary` alone.
+   Colors use DaisyUI tokens for dark (loka) + light (loka-light) themes. */
+.loka-btn,
+.loka-btn-primary,
+.loka-btn-secondary,
+.loka-btn-success,
+.loka-btn-warning,
+.loka-btn-error,
+.loka-btn-ghost,
+.loka-btn-outline-primary,
+.loka-btn-outline-secondary,
+.loka-btn-outline-error {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
   border-radius: 0.75rem;
-  padding: 0.5rem 1rem;
+  padding: 0.55rem 1.1rem;
   font-size: 0.875rem;
-  font-weight: 600;
-  transition: opacity 0.15s, background 0.15s;
-  border: none;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  transition: background 0.15s, color 0.15s, border-color 0.15s, box-shadow 0.15s, filter 0.15s;
+  border: 1.5px solid transparent;
   cursor: pointer;
   text-decoration: none;
-  line-height: 1.5;
+  line-height: 1.4;
+  white-space: nowrap;
 }
 
+.loka-btn:disabled,
+.loka-btn-primary:disabled,
+.loka-btn-secondary:disabled,
+.loka-btn-success:disabled,
+.loka-btn-warning:disabled,
+.loka-btn-error:disabled,
+.loka-btn-ghost:disabled,
+.loka-btn-outline-primary:disabled,
+.loka-btn-outline-secondary:disabled,
+.loka-btn-outline-error:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  box-shadow: none;
+  filter: none;
+}
+
+/* Primary CTA — cyan (dark) / blue (light) */
 .loka-btn-primary {
   background: hsl(var(--p));
   color: hsl(var(--pc));
+  border-color: hsl(var(--p));
+  box-shadow: 0 2px 10px hsl(var(--p) / 0.35);
 }
-.loka-btn-primary:hover { opacity: 0.88; color: hsl(var(--pc)); }
+.loka-btn-primary:hover {
+  filter: brightness(1.1);
+  color: hsl(var(--pc));
+  box-shadow: 0 4px 16px hsl(var(--p) / 0.45);
+}
 
+/* Secondary actions — bright blue fill (was low-contrast base-300) */
 .loka-btn-secondary {
-  background: hsl(var(--b3));
-  color: hsl(var(--bc));
-  border: 1px solid hsl(var(--b3));
+  background: hsl(var(--s));
+  color: hsl(var(--sc));
+  border-color: hsl(var(--s));
+  box-shadow: 0 2px 10px hsl(var(--s) / 0.3);
 }
-.loka-btn-secondary:hover { background: hsl(var(--p) / 0.15); color: hsl(var(--p)); border-color: hsl(var(--p) / 0.3); }
+.loka-btn-secondary:hover {
+  filter: brightness(1.12);
+  color: hsl(var(--sc));
+  box-shadow: 0 4px 16px hsl(var(--s) / 0.4);
+}
 
 .loka-btn-success {
   background: hsl(var(--su));
   color: hsl(var(--suc));
+  border-color: hsl(var(--su));
+  box-shadow: 0 2px 10px hsl(var(--su) / 0.3);
 }
-.loka-btn-success:hover { opacity: 0.88; color: hsl(var(--suc)); }
+.loka-btn-success:hover {
+  filter: brightness(1.08);
+  color: hsl(var(--suc));
+}
 
 .loka-btn-warning {
   background: hsl(var(--wa));
   color: hsl(var(--wac));
+  border-color: hsl(var(--wa));
+  box-shadow: 0 2px 10px hsl(var(--wa) / 0.3);
 }
-.loka-btn-warning:hover { opacity: 0.88; color: hsl(var(--wac)); }
+.loka-btn-warning:hover {
+  filter: brightness(1.08);
+  color: hsl(var(--wac));
+}
+
+.loka-btn-error {
+  background: hsl(var(--er));
+  color: hsl(var(--erc));
+  border-color: hsl(var(--er));
+  box-shadow: 0 2px 10px hsl(var(--er) / 0.3);
+}
+.loka-btn-error:hover {
+  filter: brightness(1.08);
+  color: hsl(var(--erc));
+}
 
 .loka-btn-ghost {
-  background: transparent;
+  background: hsl(var(--bc) / 0.06);
+  color: hsl(var(--bc));
+  border-color: hsl(var(--bc) / 0.22);
+}
+.loka-btn-ghost:hover {
+  background: hsl(var(--bc) / 0.12);
+  border-color: hsl(var(--bc) / 0.4);
   color: hsl(var(--bc));
 }
-.loka-btn-ghost:hover { background: hsl(var(--b3)); }
 
 .loka-btn-sm {
-  padding: 0.35rem 0.75rem;
+  padding: 0.35rem 0.8rem;
   font-size: 0.75rem;
+  gap: 0.35rem;
 }
 
 .loka-btn-icon {
@@ -223,24 +297,94 @@ body {
   align-items: center;
   justify-content: center;
   border-radius: 0.75rem;
-  transition: background 0.15s;
+  border: 1.5px solid hsl(var(--bc) / 0.18);
+  background: hsl(var(--bc) / 0.05);
+  color: hsl(var(--bc));
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
   cursor: pointer;
 }
-.loka-btn-icon:hover { background: hsl(var(--b3)); }
-
-.loka-btn-outline-primary {
-  background: transparent;
-  border: 1.5px solid hsl(var(--p));
+.loka-btn-icon:hover {
+  background: hsl(var(--p) / 0.15);
+  border-color: hsl(var(--p) / 0.45);
   color: hsl(var(--p));
 }
-.loka-btn-outline-primary:hover { background: hsl(var(--p) / 0.2); }
+
+.loka-btn-outline-primary {
+  background: hsl(var(--p) / 0.08);
+  border-color: hsl(var(--p));
+  color: hsl(var(--p));
+  box-shadow: inset 0 0 0 1px hsl(var(--p) / 0.15);
+}
+.loka-btn-outline-primary:hover {
+  background: hsl(var(--p));
+  color: hsl(var(--pc));
+  box-shadow: 0 2px 10px hsl(var(--p) / 0.3);
+}
+
+.loka-btn-outline-secondary {
+  background: hsl(var(--s) / 0.1);
+  border-color: hsl(var(--s));
+  color: hsl(var(--s));
+}
+.loka-btn-outline-secondary:hover {
+  background: hsl(var(--s));
+  color: hsl(var(--sc));
+  box-shadow: 0 2px 10px hsl(var(--s) / 0.3);
+}
 
 .loka-btn-outline-error {
-  background: transparent;
-  border: 1.5px solid hsl(var(--er));
+  background: hsl(var(--er) / 0.08);
+  border-color: hsl(var(--er));
   color: hsl(var(--er));
 }
-.loka-btn-outline-error:hover { background: hsl(var(--er) / 0.2); }
+.loka-btn-outline-error:hover {
+  background: hsl(var(--er));
+  color: hsl(var(--erc));
+  box-shadow: 0 2px 10px hsl(var(--er) / 0.3);
+}
+
+/* DaisyUI pagination / join buttons — keep readable on navy surfaces */
+[data-theme="loka"] .btn {
+  border-color: hsl(var(--bc) / 0.22);
+  color: hsl(var(--bc));
+  background: hsl(var(--b2));
+  font-weight: 600;
+}
+[data-theme="loka"] .btn:hover {
+  border-color: hsl(var(--p) / 0.55);
+  color: hsl(var(--p));
+  background: hsl(var(--p) / 0.12);
+}
+[data-theme="loka"] .btn-primary,
+[data-theme="loka"] .btn.btn-primary {
+  background: hsl(var(--p));
+  border-color: hsl(var(--p));
+  color: hsl(var(--pc));
+  box-shadow: 0 2px 8px hsl(var(--p) / 0.3);
+}
+[data-theme="loka"] .btn-primary:hover,
+[data-theme="loka"] .btn.btn-primary:hover {
+  filter: brightness(1.08);
+  color: hsl(var(--pc));
+}
+
+[data-theme="loka-light"] .btn {
+  border-color: hsl(var(--bc) / 0.18);
+  color: hsl(var(--bc));
+  background: #fff;
+  font-weight: 600;
+}
+[data-theme="loka-light"] .btn:hover {
+  border-color: hsl(var(--p) / 0.5);
+  color: hsl(var(--p));
+  background: hsl(var(--p) / 0.08);
+}
+[data-theme="loka-light"] .btn-primary,
+[data-theme="loka-light"] .btn.btn-primary {
+  background: hsl(var(--p));
+  border-color: hsl(var(--p));
+  color: hsl(var(--pc));
+}
 
 /* ===== AVATAR ===== */
 .loka-avatar {
@@ -275,9 +419,183 @@ body {
   display: inline-flex;
   align-items: center;
   border-radius: 9999px;
-  padding: 0.15rem 0.6rem;
-  font-size: 0.7rem;
+  padding: 0.2rem 0.65rem;
+  font-size: 0.72rem;
   font-weight: 700;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+/* Semantic status colors — readable in dark + light */
+.loka-status-success {
+  background: rgba(22, 163, 74, 0.18) !important;
+  color: #4ade80 !important; /* green */
+  border: 1px solid rgba(74, 222, 128, 0.35);
+}
+.loka-status-warning {
+  background: rgba(245, 158, 11, 0.18) !important;
+  color: #fbbf24 !important; /* mild orange */
+  border: 1px solid rgba(251, 191, 36, 0.4);
+}
+.loka-status-danger,
+.loka-status-error {
+  background: rgba(239, 68, 68, 0.18) !important;
+  color: #f87171 !important; /* red */
+  border: 1px solid rgba(248, 113, 113, 0.4);
+}
+.loka-status-info,
+.loka-status-primary {
+  background: rgba(56, 189, 248, 0.16) !important;
+  color: #7dd3fc !important;
+  border: 1px solid rgba(125, 211, 252, 0.35);
+}
+.loka-status-secondary,
+.loka-status-dark,
+.loka-status-muted {
+  background: rgba(148, 163, 184, 0.16) !important;
+  color: #cbd5e1 !important; /* mild black / slate on dark */
+  border: 1px solid rgba(148, 163, 184, 0.35);
+}
+.loka-status-orange {
+  background: rgba(249, 115, 22, 0.18) !important;
+  color: #fb923c !important;
+  border: 1px solid rgba(251, 146, 60, 0.4);
+}
+
+[data-theme="loka-light"] .loka-status-success {
+  background: #dcfce7 !important;
+  color: #15803d !important;
+  border-color: #86efac;
+}
+[data-theme="loka-light"] .loka-status-warning,
+[data-theme="loka-light"] .loka-status-orange {
+  background: #ffedd5 !important;
+  color: #c2410c !important; /* mild orange */
+  border-color: #fdba74;
+}
+[data-theme="loka-light"] .loka-status-danger,
+[data-theme="loka-light"] .loka-status-error {
+  background: #fee2e2 !important;
+  color: #b91c1c !important;
+  border-color: #fca5a5;
+}
+[data-theme="loka-light"] .loka-status-info,
+[data-theme="loka-light"] .loka-status-primary {
+  background: #e0f2fe !important;
+  color: #0369a1 !important;
+  border-color: #7dd3fc;
+}
+[data-theme="loka-light"] .loka-status-secondary,
+[data-theme="loka-light"] .loka-status-dark,
+[data-theme="loka-light"] .loka-status-muted {
+  background: #e2e8f0 !important;
+  color: #334155 !important; /* mild black */
+  border-color: #94a3b8;
+}
+
+/* Primary badges must keep a solid fill — utilities alone often leave white text on cream */
+.loka-badge.bg-primary,
+a.loka-badge.bg-primary,
+.loka-badge.bg-primary.text-primary-content,
+a.bg-primary.text-primary-content {
+  background-color: #00d4ff !important;
+  color: #041018 !important;
+  border: none;
+}
+[data-theme="loka-light"] .loka-badge.bg-primary,
+[data-theme="loka-light"] a.loka-badge.bg-primary,
+[data-theme="loka-light"] .loka-badge.bg-primary.text-primary-content,
+[data-theme="loka-light"] a.bg-primary.text-primary-content {
+  background-color: #1d4ed8 !important;
+  color: #ffffff !important;
+}
+
+/* ===== FILTER TABS / STATUS CHIPS (system-wide) ===== */
+.loka-filter-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.loka-filter-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  border-radius: 9999px;
+  padding: 0.4rem 0.9rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  line-height: 1.2;
+  text-decoration: none !important;
+  border: 1.5px solid hsl(var(--bc) / 0.2);
+  background: hsl(var(--b2));
+  color: hsl(var(--bc)) !important;
+  transition: background 0.15s, color 0.15s, border-color 0.15s, box-shadow 0.15s;
+  cursor: pointer;
+}
+
+.loka-filter-tab:hover {
+  border-color: hsl(var(--p) / 0.55);
+  color: hsl(var(--p)) !important;
+  background: hsl(var(--p) / 0.1);
+}
+
+.loka-filter-tab.is-active {
+  background: #00d4ff !important;
+  border-color: #00d4ff !important;
+  color: #041018 !important;
+  box-shadow: 0 2px 10px rgba(0, 212, 255, 0.35);
+}
+
+[data-theme="loka-light"] .loka-filter-tab {
+  background: #e2e8f0;
+  border-color: #94a3b8;
+  color: #0f172a !important;
+}
+
+[data-theme="loka-light"] .loka-filter-tab:hover {
+  background: #dbeafe;
+  border-color: #3b82f6;
+  color: #1d4ed8 !important;
+}
+
+[data-theme="loka-light"] .loka-filter-tab.is-active {
+  background: #1d4ed8 !important;
+  border-color: #1d4ed8 !important;
+  color: #ffffff !important;
+  box-shadow: 0 2px 10px rgba(29, 78, 216, 0.3);
+}
+
+/* DaisyUI tabs + join filter buttons — active state contrast */
+.tabs .tab.tab-active,
+.tab.tab-active {
+  color: hsl(var(--p)) !important;
+  border-color: hsl(var(--p)) !important;
+  font-weight: 700;
+}
+
+[data-theme="loka-light"] .tabs .tab.tab-active,
+[data-theme="loka-light"] .tab.tab-active {
+  color: #1d4ed8 !important;
+  border-color: #1d4ed8 !important;
+}
+
+.join > .btn.btn-active,
+.join-item.btn-active,
+.btn.btn-active {
+  background: #00d4ff !important;
+  border-color: #00d4ff !important;
+  color: #041018 !important;
+  font-weight: 700 !important;
+}
+
+[data-theme="loka-light"] .join > .btn.btn-active,
+[data-theme="loka-light"] .join-item.btn-active,
+[data-theme="loka-light"] .btn.btn-active {
+  background: #1d4ed8 !important;
+  border-color: #1d4ed8 !important;
+  color: #ffffff !important;
 }
 
 /* ===== ALERTS ===== */
@@ -337,24 +655,230 @@ body {
 }
 
 .loka-form-input {
+  display: block;
   width: 100%;
+  min-height: 2.75rem;
   border-radius: 0.75rem;
-  border: 1px solid hsl(var(--b3));
-  background: hsl(var(--b1));
-  padding: 0.625rem 1rem;
+  border: 1.5px solid hsl(var(--bc) / 0.32);
+  background-color: hsl(var(--b1));
+  padding: 0.55rem 0.9rem;
   font-size: 0.875rem;
+  font-weight: 500;
+  line-height: 1.4;
   color: hsl(var(--bc));
   transition: border-color 0.15s, box-shadow 0.15s;
+  box-sizing: border-box;
+  vertical-align: middle;
+}
+
+select.loka-form-input {
+  padding-right: 2.25rem;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2364748b'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.65rem center;
+  background-size: 1rem;
+}
+
+.loka-form-input:hover {
+  border-color: hsl(var(--bc) / 0.5);
 }
 
 .loka-form-input:focus {
   outline: none;
   border-color: hsl(var(--p));
-  box-shadow: 0 0 0 3px hsl(var(--p) / 0.15);
+  box-shadow: 0 0 0 3px hsl(var(--p) / 0.18);
 }
 
 .loka-form-input::placeholder {
-  color: hsl(var(--bc) / 0.35);
+  color: hsl(var(--bc) / 0.45);
+  opacity: 1;
+}
+
+/*
+  System-wide form controls — readable text + visible borders + aligned content.
+  Avoid overriding DaisyUI height/padding poorly; set a full consistent box model.
+*/
+select,
+.select,
+.input,
+.textarea,
+.loka-form-input,
+[type="text"],
+[type="email"],
+[type="password"],
+[type="number"],
+[type="search"],
+[type="tel"],
+[type="url"],
+[type="date"],
+[type="datetime-local"],
+[type="time"],
+[type="month"],
+[type="week"],
+textarea {
+  background-color: hsl(var(--b1)) !important;
+  color: hsl(var(--bc)) !important;
+  border: 1.5px solid hsl(var(--bc) / 0.32) !important;
+  border-radius: 0.75rem !important;
+  box-sizing: border-box !important;
+  font-size: 0.875rem !important;
+  font-weight: 500 !important;
+  line-height: 1.4 !important;
+  min-height: 2.75rem !important;
+  height: auto !important;
+  padding: 0.55rem 0.9rem !important;
+  vertical-align: middle;
+}
+
+/* Native + DaisyUI selects need extra right padding for the chevron */
+select,
+select.loka-form-input,
+.select {
+  padding-right: 2.35rem !important;
+  appearance: none !important;
+  -webkit-appearance: none !important;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2394a3b8'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E") !important;
+  background-repeat: no-repeat !important;
+  background-position: right 0.7rem center !important;
+  background-size: 1rem !important;
+  text-overflow: ellipsis;
+}
+
+textarea,
+.textarea {
+  min-height: 5rem !important;
+  height: auto !important;
+  padding: 0.7rem 0.9rem !important;
+  resize: vertical;
+}
+
+.select-sm,
+.input-sm,
+select.select-sm,
+input.input-sm {
+  min-height: 2.25rem !important;
+  padding-top: 0.35rem !important;
+  padding-bottom: 0.35rem !important;
+  font-size: 0.8125rem !important;
+}
+
+select:hover,
+.select:hover,
+.input:hover,
+.textarea:hover,
+.loka-form-input:hover,
+[type="text"]:hover,
+[type="email"]:hover,
+[type="password"]:hover,
+[type="number"]:hover,
+[type="search"]:hover,
+[type="date"]:hover,
+textarea:hover {
+  border-color: hsl(var(--bc) / 0.5) !important;
+}
+
+select:focus,
+.select:focus,
+.input:focus,
+.textarea:focus,
+.loka-form-input:focus,
+[type="text"]:focus,
+[type="email"]:focus,
+[type="password"]:focus,
+[type="number"]:focus,
+[type="search"]:focus,
+[type="date"]:focus,
+textarea:focus {
+  outline: none !important;
+  border-color: hsl(var(--p)) !important;
+  box-shadow: 0 0 0 3px hsl(var(--p) / 0.18) !important;
+}
+
+/* Light theme: white fields, dark text, stronger borders */
+[data-theme="loka-light"] select,
+[data-theme="loka-light"] .select,
+[data-theme="loka-light"] .input,
+[data-theme="loka-light"] .textarea,
+[data-theme="loka-light"] .loka-form-input,
+[data-theme="loka-light"] .select-bordered,
+[data-theme="loka-light"] .input-bordered,
+[data-theme="loka-light"] .textarea-bordered,
+[data-theme="loka-light"] [type="text"],
+[data-theme="loka-light"] [type="email"],
+[data-theme="loka-light"] [type="password"],
+[data-theme="loka-light"] [type="number"],
+[data-theme="loka-light"] [type="search"],
+[data-theme="loka-light"] [type="tel"],
+[data-theme="loka-light"] [type="url"],
+[data-theme="loka-light"] [type="date"],
+[data-theme="loka-light"] [type="datetime-local"],
+[data-theme="loka-light"] [type="time"],
+[data-theme="loka-light"] [type="month"],
+[data-theme="loka-light"] [type="week"],
+[data-theme="loka-light"] textarea {
+  background-color: #ffffff !important;
+  color: #0f172a !important;
+  border: 1.5px solid #64748b !important;
+}
+
+[data-theme="loka-light"] select,
+[data-theme="loka-light"] .select,
+[data-theme="loka-light"] select.loka-form-input {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23475569'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E") !important;
+  background-repeat: no-repeat !important;
+  background-position: right 0.7rem center !important;
+  background-size: 1rem !important;
+}
+
+[data-theme="loka-light"] select:hover,
+[data-theme="loka-light"] .select:hover,
+[data-theme="loka-light"] .input:hover,
+[data-theme="loka-light"] .textarea:hover,
+[data-theme="loka-light"] .loka-form-input:hover {
+  border-color: #334155 !important;
+}
+
+select option,
+select optgroup,
+.loka-form-input option,
+.select option,
+.select optgroup {
+  background-color: #0d1526;
+  color: #eef4ff;
+  font-size: 0.875rem;
+  padding: 0.5rem;
+}
+
+[data-theme="loka-light"] select option,
+[data-theme="loka-light"] select optgroup,
+[data-theme="loka-light"] .select option {
+  background-color: #ffffff;
+  color: #0f172a;
+}
+
+.select-bordered,
+.input-bordered,
+.textarea-bordered {
+  background-color: hsl(var(--b1)) !important;
+  color: hsl(var(--bc)) !important;
+  border: 1.5px solid hsl(var(--bc) / 0.32) !important;
+}
+
+input:-webkit-autofill,
+textarea:-webkit-autofill,
+select:-webkit-autofill {
+  -webkit-text-fill-color: hsl(var(--bc)) !important;
+  caret-color: hsl(var(--bc));
+  box-shadow: 0 0 0 1000px hsl(var(--b1)) inset !important;
+  transition: background-color 99999s ease-in-out 0s;
+}
+
+[data-theme="loka-light"] input:-webkit-autofill,
+[data-theme="loka-light"] textarea:-webkit-autofill,
+[data-theme="loka-light"] select:-webkit-autofill {
+  -webkit-text-fill-color: #0f172a !important;
+  box-shadow: 0 0 0 1000px #ffffff inset !important;
 }
 
 /* ===== TABLES ===== */
@@ -376,6 +900,26 @@ body {
   color: hsl(var(--bc) / 0.55);
 }
 
+.loka-table thead th .loka-sort-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  white-space: nowrap;
+  cursor: pointer;
+  font: inherit;
+  letter-spacing: inherit;
+  text-transform: inherit;
+  color: inherit;
+}
+
+.loka-table thead th .loka-sort-link:hover {
+  color: hsl(var(--p));
+}
+
+.loka-table thead th .loka-sort-link.text-primary {
+  color: hsl(var(--p));
+}
+
 .loka-table thead th:first-child { border-radius: 0.5rem 0 0 0; }
 .loka-table thead th:last-child  { border-radius: 0 0.5rem 0 0; }
 
@@ -384,14 +928,161 @@ body {
   vertical-align: middle;
   border-bottom: 1px solid hsl(var(--b3));
   color: hsl(var(--bc));
+  transition: background-color 0.12s ease;
 }
 
 .loka-table tbody tr:last-child td {
   border-bottom: none;
 }
 
+/* Full-row hover highlight — all loka tables */
+.loka-table tbody tr {
+  cursor: default;
+}
+
+/* Dark mode needs a solid lift — translucent cyan is nearly invisible on navy */
+[data-theme="loka"] .loka-table tbody tr:hover td,
+[data-theme="loka"] .table tbody tr:hover td,
+[data-theme="loka"] table.table-hover tbody tr:hover td {
+  background-color: #1e3a5f !important;
+}
+
+[data-theme="loka"] .loka-table tbody tr:hover td:first-child,
+[data-theme="loka"] .table tbody tr:hover td:first-child {
+  box-shadow: inset 3px 0 0 #00d4ff;
+}
+
+[data-theme="loka-light"] .loka-table tbody tr:hover td,
+[data-theme="loka-light"] .table tbody tr:hover td,
+[data-theme="loka-light"] table.table-hover tbody tr:hover td {
+  background-color: #dbeafe !important;
+}
+
+[data-theme="loka-light"] .loka-table tbody tr:hover td:first-child,
+[data-theme="loka-light"] .table tbody tr:hover td:first-child {
+  box-shadow: inset 3px 0 0 #2563eb;
+}
+
+/* Fallback when data-theme attribute is missing */
 .loka-table tbody tr:hover td {
-  background: hsl(var(--b3) / 0.5);
+  background-color: #1e3a5f;
+}
+
+.loka-table tbody tr:hover td:first-child {
+  box-shadow: inset 3px 0 0 #00d4ff;
+}
+
+/* ===== TABLE ACTIONS COLUMN — aligned icon groups ===== */
+.loka-table thead th:last-child,
+.loka-table tbody td:last-child {
+  text-align: right;
+  white-space: nowrap;
+  vertical-align: middle;
+}
+
+.loka-table tbody td:last-child > .join,
+.loka-table tbody td:last-child > .btn-group,
+.loka-table tbody td:last-child > .flex {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  vertical-align: middle;
+  gap: 0;
+}
+
+.loka-table tbody td:last-child > .flex {
+  gap: 0.35rem;
+}
+
+/* Action join pills: equal size, vertically centered icons */
+.loka-table .join {
+  display: inline-flex !important;
+  flex-wrap: nowrap;
+  align-items: stretch;
+  border-radius: 0.55rem;
+  overflow: hidden;
+  border: 1px solid hsl(var(--bc) / 0.25);
+  background: hsl(var(--b2));
+}
+
+.loka-table .join > .join-item,
+.loka-table .join > a,
+.loka-table .join > button {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 2.1rem !important;
+  min-width: 2.1rem !important;
+  height: 2.1rem !important;
+  min-height: 2.1rem !important;
+  max-height: 2.1rem !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  gap: 0 !important;
+  line-height: 1 !important;
+  font-size: 0.9rem !important;
+  font-weight: 600 !important;
+  border-radius: 0 !important;
+  border: none !important;
+  border-right: 1px solid hsl(var(--bc) / 0.2) !important;
+  box-shadow: none !important;
+  background: transparent !important;
+  color: hsl(var(--bc)) !important;
+  text-decoration: none !important;
+  filter: none !important;
+}
+
+.loka-table .join > .join-item:last-child,
+.loka-table .join > a:last-child,
+.loka-table .join > button:last-child {
+  border-right: none !important;
+}
+
+.loka-table .join > .join-item:hover,
+.loka-table .join > a:hover,
+.loka-table .join > button:hover {
+  background: hsl(var(--p) / 0.18) !important;
+  color: hsl(var(--p)) !important;
+}
+
+.loka-table .join .bi {
+  display: block;
+  line-height: 1;
+  font-size: 0.95rem;
+}
+
+/* Outline action buttons sitting alone in Actions cells */
+.loka-table tbody td:last-child > .loka-btn-sm,
+.loka-table tbody td:last-child > .loka-btn-outline-primary,
+.loka-table tbody td:last-child > .loka-btn-outline-error,
+.loka-table tbody td:last-child > a.loka-btn-primary,
+.loka-table tbody td:last-child > a.loka-btn-secondary {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  min-height: 2.1rem !important;
+  height: 2.1rem !important;
+  padding: 0 0.75rem !important;
+  white-space: nowrap;
+}
+
+[data-theme="loka-light"] .loka-table .join {
+  background: #ffffff;
+  border-color: #94a3b8;
+}
+
+[data-theme="loka-light"] .loka-table .join > .join-item,
+[data-theme="loka-light"] .loka-table .join > a,
+[data-theme="loka-light"] .loka-table .join > button {
+  color: #0f172a !important;
+  border-right-color: #cbd5e1 !important;
+}
+
+[data-theme="loka-light"] .loka-table .join > .join-item:hover,
+[data-theme="loka-light"] .loka-table .join > a:hover,
+[data-theme="loka-light"] .loka-table .join > button:hover {
+  background: #dbeafe !important;
+  color: #1d4ed8 !important;
 }
 
 .loka-table-responsive {
@@ -448,10 +1139,14 @@ body {
   left: 0; right: 0; top: 0;
   display: flex;
   align-items: center;
-  padding: 0 1rem;
+  gap: 0.5rem;
+  padding: 0 0.75rem 0 1rem;
   height: var(--navbar-height);
   z-index: 1030;
   background: hsl(var(--p));
+  overflow: visible;
+  box-sizing: border-box;
+  max-width: 100vw;
 }
 
 .loka-navbar-brand {
@@ -463,6 +1158,10 @@ body {
   font-weight: 700;
   color: hsl(var(--pc));
   text-decoration: none;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .loka-navbar-toggle {
@@ -488,6 +1187,8 @@ body {
   display: flex;
   align-items: center;
   gap: 0.25rem;
+  flex-shrink: 0;
+  max-width: min(100%, 22rem);
 }
 
 .loka-navbar-notification {
@@ -495,6 +1196,7 @@ body {
   display: flex;
   height: 2.5rem;
   width: 2.5rem;
+  flex-shrink: 0;
   align-items: center;
   justify-content: center;
   border-radius: 0.5rem;
@@ -520,6 +1222,49 @@ body {
   font-size: 0.625rem;
   font-weight: 700;
   color: #fff;
+}
+
+/* User chip — must NOT inherit the fixed 2.5rem notification square */
+.loka-navbar-user {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  height: 2.5rem;
+  max-width: 11.5rem;
+  padding: 0 0.55rem 0 0.3rem;
+  border-radius: 0.65rem;
+  color: hsl(var(--pc));
+  cursor: pointer;
+  transition: background 0.15s;
+  flex-shrink: 1;
+  min-width: 2.5rem;
+  box-sizing: border-box;
+}
+.loka-navbar-user:hover {
+  background: rgba(255,255,255,0.12);
+}
+.loka-navbar-user-avatar {
+  height: 1.85rem;
+  width: 1.85rem;
+  font-size: 0.75rem;
+  flex-shrink: 0;
+}
+.loka-navbar-user-name {
+  display: none;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  line-height: 1.2;
+  color: hsl(var(--pc));
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+}
+@media (min-width: 768px) {
+  .loka-navbar-user-name {
+    display: block;
+  }
 }
 
 /* ===== SIDEBAR NAV LINKS (dark background) ===== */

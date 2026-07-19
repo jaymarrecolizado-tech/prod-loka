@@ -25,14 +25,35 @@ if ($typeFilter) {
     $params[] = $typeFilter;
 }
 
+// Sorting (latest vehicles first by default)
+$allowedSortColumns = [
+    'id' => 'v.id',
+    'created_at' => 'v.created_at',
+    'plate_number' => 'v.plate_number',
+    'make' => 'v.make',
+    'type_name' => 'vt.name',
+    'capacity' => 'vt.passenger_capacity',
+    'status' => 'v.status',
+    'mileage' => 'v.mileage',
+];
+$sortState = resolveTableSort($allowedSortColumns, 'created_at', 'DESC');
+$sort = $sortState['key'];
+$sortDir = $sortState['dir'];
+
 $vehicles = db()->fetchAll(
     "SELECT v.*, vt.name as type_name, vt.passenger_capacity
      FROM vehicles v
      JOIN vehicle_types vt ON v.vehicle_type_id = vt.id
      WHERE {$whereClause}
-     ORDER BY v.plate_number",
+     ORDER BY {$sortState['orderSql']}",
     $params
 );
+
+$baseParams = tableSortQueryParams($sortState, [
+    'page' => 'vehicles',
+    'status' => $statusFilter,
+    'type' => $typeFilter,
+]);
 
 $vehicleTypes = db()->fetchAll("SELECT * FROM vehicle_types WHERE deleted_at IS NULL ORDER BY name");
 
@@ -103,12 +124,12 @@ require_once INCLUDES_PATH . '/header.php';
                 <table class="loka-table">
                     <thead>
                         <tr>
-                            <th>Plate #</th>
-                            <th>Vehicle</th>
-                            <th>Type</th>
-                            <th>Capacity</th>
-                            <th>Status</th>
-                            <th>Mileage</th>
+                            <?= tableSortTh('plate_number', 'Plate #', $sort, $sortDir, $baseParams) ?>
+                            <?= tableSortTh('make', 'Vehicle', $sort, $sortDir, $baseParams) ?>
+                            <?= tableSortTh('type_name', 'Type', $sort, $sortDir, $baseParams) ?>
+                            <?= tableSortTh('capacity', 'Capacity', $sort, $sortDir, $baseParams) ?>
+                            <?= tableSortTh('status', 'Status', $sort, $sortDir, $baseParams) ?>
+                            <?= tableSortTh('mileage', 'Mileage', $sort, $sortDir, $baseParams) ?>
                             <th class="text-center w-28">Actions</th>
                         </tr>
                     </thead>

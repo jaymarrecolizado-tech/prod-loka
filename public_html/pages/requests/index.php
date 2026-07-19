@@ -17,6 +17,21 @@ $dateFrom = getSafe('date_from', '', 20);
 $dateTo = getSafe('date_to', '', 20);
 $searchQuery = getSafe('q', '', 100);
 
+// Sorting (latest created first by default)
+$allowedSortColumns = [
+    'id' => 'r.id',
+    'created_at' => 'r.created_at',
+    'purpose' => 'r.purpose',
+    'status' => 'r.status',
+    'plate' => 'v.plate_number',
+    'driver' => 'd.name',
+    'requester' => 'u.name',
+    'start_datetime' => 'r.start_datetime',
+];
+$sortState = resolveTableSort($allowedSortColumns, 'created_at', 'DESC');
+$sort = $sortState['key'];
+$sortDir = $sortState['dir'];
+
 // Build query conditions
 $where = [];
 $params = [];
@@ -69,21 +84,35 @@ $sql = "SELECT r.*,
         LEFT JOIN drivers dr ON r.driver_id = dr.id
         LEFT JOIN users d ON dr.user_id = d.id
         {$whereClause}
-        ORDER BY r.created_at DESC
+        ORDER BY {$sortState['orderSql']}
         LIMIT ? OFFSET ?";
 $params[] = $perPage;
 $params[] = $offset;
 
 $requests = $db->fetchAll($sql, $params);
 
-// Status counts for badges
-$statusCounts = $db->fetchAll("
-    SELECT status, COUNT(*) as count
-    FROM requests
-    " . (hasRole(ROLE_REQUESTER) && !hasRole(ROLE_APPROVER) ? "WHERE r.user_id = " . userId() : "") . "
-    GROUP BY status
-");
-$statusMap = array_column($statusCounts, 'count', 'status');
+$baseParams = tableSortQueryParams($sortState, [
+    'page' => 'requests',
+    'status' => $statusFilter,
+    'q' => $searchQuery,
+    'date_from' => $dateFrom,
+    'date_to' => $dateTo,
+]);
+
+// Status tab counts (never use filtered $totalItems for "All")
+$statusCountSql = "SELECT status, COUNT(*) AS count FROM requests WHERE deleted_at IS NULL";
+$statusCountParams = [];
+if (hasRole(ROLE_REQUESTER) && !hasRole(ROLE_APPROVER) && !hasRole(ROLE_ADMIN) && !hasRole(ROLE_MOTORPOOL)) {
+    $statusCountSql .= " AND user_id = ?";
+    $statusCountParams[] = userId();
+}
+$statusCountSql .= " GROUP BY status";
+$statusCounts = $db->fetchAll($statusCountSql, $statusCountParams);
+$statusMap = [];
+foreach ($statusCounts as $row) {
+    $statusMap[$row->status] = (int) $row->count;
+}
+$allCount = array_sum($statusMap);
 
 require_once INCLUDES_PATH . '/header.php';
 ?>
@@ -101,23 +130,23 @@ require_once INCLUDES_PATH . '/header.php';
     </div>
 
     <!-- Status Tabs -->
-    <div class="flex gap-2 mb-6 flex-wrap">
-        <a href="?page=requests" class="loka-badge <?= !$statusFilter ? 'bg-primary text-primary-content' : 'bg-base-200 text-base-content hover:bg-base-300' ?> transition-colors">
-            All (<?= $totalItems ?>)
+    <div class="loka-filter-tabs">
+        <a href="?page=requests" class="loka-filter-tab <?= !$statusFilter ? 'is-active' : '' ?>">
+            All (<?= $allCount ?>)
         </a>
         <?php
-        $statuses = ['pending' => 'Pending', 'approved' => 'Approved', 'rejected' => 'Rejected', 'cancelled' => 'Cancelled'];
+        $statuses = [
+            'pending' => 'Pending',
+            'approved' => 'Approved',
+            'completed' => 'Completed',
+            'rejected' => 'Rejected',
+            'cancelled' => 'Cancelled',
+        ];
         foreach ($statuses as $s => $label):
             $count = $statusMap[$s] ?? 0;
-            $colors = [
-                'pending' => 'bg-warning/20 text-warning',
-                'approved' => 'bg-success/20 text-success',
-                'rejected' => 'bg-error/20 text-error',
-                'cancelled' => 'bg-base-200 text-base-content/60',
-            ];
         ?>
-        <a href="?page=requests&status=<?= $s ?>" class="loka-badge <?= $statusFilter === $s ? $colors[$s] . ' ring-2 ring-current' : 'bg-base-200 text-base-content hover:bg-base-300' ?> transition-colors">
-            <?= $label ?> (<?= $count ?>)
+        <a href="?page=requests&status=<?= e($s) ?>" class="loka-filter-tab <?= $statusFilter === $s ? 'is-active' : '' ?>">
+            <?= e($label) ?> (<?= $count ?>)
         </a>
         <?php endforeach; ?>
     </div>
@@ -171,14 +200,14 @@ require_once INCLUDES_PATH . '/header.php';
             <table class="loka-table">
                 <thead>
                     <tr>
-                        <th>Control No.</th>
-                        <th>Purpose</th>
-                        <th>Requester</th>
-                        <th>Date Needed</th>
+                        <?= tableSortTh('id', 'Control No.', $sort, $sortDir, $baseParams) ?>
+                        <?= tableSortTh('purpose', 'Purpose', $sort, $sortDir, $baseParams) ?>
+                        <?= tableSortTh('requester', 'Requester', $sort, $sortDir, $baseParams) ?>
+                        <?= tableSortTh('start_datetime', 'Date Needed', $sort, $sortDir, $baseParams) ?>
                         <th>Route</th>
                         <th>Passengers</th>
-                        <th>Status</th>
-                        <th>Created</th>
+                        <?= tableSortTh('status', 'Status', $sort, $sortDir, $baseParams) ?>
+                        <?= tableSortTh('created_at', 'Created', $sort, $sortDir, $baseParams) ?>
                         <th class="text-center w-20">Actions</th>
                     </tr>
                 </thead>
@@ -232,25 +261,7 @@ require_once INCLUDES_PATH . '/header.php';
                             <span class="loka-badge loka-badge-sm bg-base-200 text-base-content"><?= (int)($req->passenger_count ?? 0) ?></span>
                         </td>
                         <td>
-                            <?php
-                            $statusClasses = [
-                                'pending' => 'bg-warning/20 text-warning',
-                                'approved' => 'bg-success/20 text-success',
-                                'rejected' => 'bg-error/20 text-error',
-                                'cancelled' => 'bg-base-200 text-base-content/60',
-                                'completed' => 'bg-info/20 text-info',
-                            ];
-                            $statusLabels = [
-                                'pending' => 'Pending',
-                                'approved' => 'Approved',
-                                'rejected' => 'Rejected',
-                                'cancelled' => 'Cancelled',
-                                'completed' => 'Completed',
-                            ];
-                            $cls = $statusClasses[$req->status] ?? 'bg-base-200 text-base-content';
-                            $lbl = $statusLabels[$req->status ?? 'pending'] ?? ucfirst($req->status);
-                            ?>
-                            <span class="loka-badge <?= $cls ?>"><?= $lbl ?></span>
+                            <?= requestStatusBadge($req->status ?? 'pending') ?>
                         </td>
                         <td>
                             <p class="text-sm text-base-content"><?= date('M d', strtotime($req->created_at)) ?></p>
@@ -275,8 +286,15 @@ require_once INCLUDES_PATH . '/header.php';
                 Showing <?= $offset + 1 ?>–<?= min($offset + $perPage, $totalItems) ?> of <?= $totalItems ?>
             </p>
             <div class="join">
+                <?php
+                $pageParams = $baseParams;
+                $buildPageUrl = static function (array $params, int $pageNum): string {
+                    $params['p'] = $pageNum;
+                    return '?' . http_build_query(array_filter($params, static fn($v) => $v !== null && $v !== ''));
+                };
+                ?>
                 <?php if ($page > 1): ?>
-                <a href="?page=requests&p=<?= $page - 1 ?>&status=<?= e($statusFilter) ?>" class="join-item btn btn-sm">«</a>
+                <a href="<?= e($buildPageUrl($pageParams, $page - 1)) ?>" class="join-item btn btn-sm">«</a>
                 <?php endif; ?>
 
                 <?php
@@ -284,11 +302,11 @@ require_once INCLUDES_PATH . '/header.php';
                 $end = min($totalPages, $page + 2);
                 for ($i = $start; $i <= $end; $i++):
                 ?>
-                <a href="?page=requests&p=<?= $i ?>&status=<?= e($statusFilter) ?>" class="join-item btn btn-sm <?= $i === $page ? 'btn-primary' : '' ?>"><?= $i ?></a>
+                <a href="<?= e($buildPageUrl($pageParams, $i)) ?>" class="join-item btn btn-sm <?= $i === $page ? 'btn-primary' : '' ?>"><?= $i ?></a>
                 <?php endfor; ?>
 
                 <?php if ($page < $totalPages): ?>
-                <a href="?page=requests&p=<?= $page + 1 ?>&status=<?= e($statusFilter) ?>" class="join-item btn btn-sm">»</a>
+                <a href="<?= e($buildPageUrl($pageParams, $page + 1)) ?>" class="join-item btn btn-sm">»</a>
                 <?php endif; ?>
             </div>
         </div>

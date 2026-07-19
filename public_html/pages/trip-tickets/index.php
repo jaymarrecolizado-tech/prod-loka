@@ -351,9 +351,30 @@ if ($search) {
     $params[] = $searchTerm;
 }
 
-$sql .= " ORDER BY tt.created_at DESC";
+// Sorting (latest created first by default)
+$allowedSortColumns = [
+    'id' => 'tt.id',
+    'request_id' => 'r.id',
+    'trip_type' => 'tt.trip_type',
+    'driver_name' => 'du.name',
+    'destination' => 'r.destination',
+    'start_date' => 'tt.start_date',
+    'status' => 'tt.status',
+    'created_at' => 'tt.created_at',
+];
+$sortState = resolveTableSort($allowedSortColumns, 'created_at', 'DESC');
+$sort = $sortState['key'];
+$sortDir = $sortState['dir'];
+
+$sql .= " ORDER BY {$sortState['orderSql']}";
 
 $tickets = db()->fetchAll($sql, $params);
+
+$baseParams = tableSortQueryParams($sortState, [
+    'page' => 'trip-tickets',
+    'status' => $statusFilter,
+    'search' => $search,
+]);
 
 // Statistics
 $totalTickets = count($tickets);
@@ -486,16 +507,16 @@ require_once INCLUDES_PATH . '/header.php';
                     <table class="loka-table table-zebra w-full" id="ticketsTable">
                         <thead>
                             <tr>
-                                <th>ID</th>
-                                <th>Request</th>
-                                <th>Trip Type</th>
-                                <th>Driver</th>
-                                <th>Destination</th>
-                                <th>Date Range</th>
-                                <th>Status</th>
+                                <?= tableSortTh('id', 'ID', $sort, $sortDir, $baseParams) ?>
+                                <?= tableSortTh('request_id', 'Request', $sort, $sortDir, $baseParams) ?>
+                                <?= tableSortTh('trip_type', 'Trip Type', $sort, $sortDir, $baseParams) ?>
+                                <?= tableSortTh('driver_name', 'Driver', $sort, $sortDir, $baseParams) ?>
+                                <?= tableSortTh('destination', 'Destination', $sort, $sortDir, $baseParams) ?>
+                                <?= tableSortTh('start_date', 'Date Range', $sort, $sortDir, $baseParams) ?>
+                                <?= tableSortTh('status', 'Status', $sort, $sortDir, $baseParams) ?>
                                 <th>Documents</th>
                                 <th>Issues</th>
-                                <th>Created</th>
+                                <?= tableSortTh('created_at', 'Created', $sort, $sortDir, $baseParams) ?>
                                 <th>Actions</th>
                             </tr>
                         </thead>

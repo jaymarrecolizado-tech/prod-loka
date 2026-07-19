@@ -39,6 +39,21 @@ if ($searchQuery) {
     $params[] = $searchPattern;
 }
 
+// Sorting (latest users first by default)
+$allowedSortColumns = [
+    'id' => 'u.id',
+    'created_at' => 'u.created_at',
+    'name' => 'u.name',
+    'email' => 'u.email',
+    'department' => 'd.name',
+    'role' => 'u.role',
+    'status' => 'u.status',
+    'last_login_at' => 'u.last_login_at',
+];
+$sortState = resolveTableSort($allowedSortColumns, 'created_at', 'DESC');
+$sort = $sortState['key'];
+$sortDir = $sortState['dir'];
+
 // Get total count for pagination
 $totalUsers = db()->count('users', $whereClause, $params);
 $totalPages = ceil($totalUsers / $perPage);
@@ -49,10 +64,17 @@ $users = db()->fetchAll(
      FROM users u
      LEFT JOIN departments d ON u.department_id = d.id
      WHERE {$whereClauseAliased}
-     ORDER BY u.name
+     ORDER BY {$sortState['orderSql']}
      LIMIT ? OFFSET ?",
     array_merge($params, [$perPage, $offset])
 );
+
+$baseParams = tableSortQueryParams($sortState, [
+    'page' => 'users',
+    'role' => $roleFilter,
+    'status' => $statusFilter,
+    'search' => $searchQuery,
+]);
 
 $departments = db()->fetchAll("SELECT * FROM departments WHERE departments.deleted_at IS NULL ORDER BY name");
 
@@ -105,7 +127,15 @@ require_once INCLUDES_PATH . '/header.php';
         <div class="loka-table-responsive">
             <table class="loka-table">
                 <thead>
-                    <tr><th>Name</th><th>Email</th><th>Department</th><th>Role</th><th>Status</th><th>Last Login</th><th>Actions</th></tr>
+                    <tr>
+                        <?= tableSortTh('name', 'Name', $sort, $sortDir, $baseParams) ?>
+                        <?= tableSortTh('email', 'Email', $sort, $sortDir, $baseParams) ?>
+                        <?= tableSortTh('department', 'Department', $sort, $sortDir, $baseParams) ?>
+                        <?= tableSortTh('role', 'Role', $sort, $sortDir, $baseParams) ?>
+                        <?= tableSortTh('status', 'Status', $sort, $sortDir, $baseParams) ?>
+                        <?= tableSortTh('last_login_at', 'Last Login', $sort, $sortDir, $baseParams) ?>
+                        <th>Actions</th>
+                    </tr>
                 </thead>
                 <tbody>
                     <?php foreach ($users as $user): ?>
@@ -135,32 +165,38 @@ require_once INCLUDES_PATH . '/header.php';
         <?php if ($totalPages > 1): ?>
         <div class="border-t border-base-200 px-6 py-4">
             <div class="flex justify-center">
+                <?php
+                $buildUsersPageUrl = static function (array $params, int $pageNum): string {
+                    $params['p'] = $pageNum;
+                    return APP_URL . '/?' . http_build_query(array_filter($params, static fn($v) => $v !== null && $v !== ''));
+                };
+                ?>
                 <div class="join">
-                    <a class="join-item btn btn-sm <?= $currentPage <= 1 ? 'btn-disabled' : '' ?>" href="<?= APP_URL ?>/?page=users&p=<?= $currentPage - 1 ?><?= $roleFilter ? '&role=' . $roleFilter : '' ?><?= $statusFilter ? '&status=' . $statusFilter : '' ?><?= $searchQuery ? '&search=' . urlencode($searchQuery) : '' ?>">&laquo;</a>
+                    <a class="join-item btn btn-sm <?= $currentPage <= 1 ? 'btn-disabled' : '' ?>" href="<?= e($buildUsersPageUrl($baseParams, $currentPage - 1)) ?>">&laquo;</a>
 
                     <?php
                     $start = max(1, $currentPage - 2);
                     $end = min($totalPages, $currentPage + 2);
 
                     if ($start > 1): ?>
-                    <a class="join-item btn btn-sm" href="<?= APP_URL ?>/?page=users&p=1<?= $roleFilter ? '&role=' . $roleFilter : '' ?><?= $statusFilter ? '&status=' . $statusFilter : '' ?><?= $searchQuery ? '&search=' . urlencode($searchQuery) : '' ?>">1</a>
+                    <a class="join-item btn btn-sm" href="<?= e($buildUsersPageUrl($baseParams, 1)) ?>">1</a>
                     <?php if ($start > 2): ?>
                     <button class="join-item btn btn-sm btn-disabled">...</button>
                     <?php endif; ?>
                     <?php endif; ?>
 
                     <?php for ($i = $start; $i <= $end; $i++): ?>
-                    <a class="join-item btn btn-sm <?= $i === $currentPage ? 'btn-primary' : '' ?>" href="<?= APP_URL ?>/?page=users&p=<?= $i ?><?= $roleFilter ? '&role=' . $roleFilter : '' ?><?= $statusFilter ? '&status=' . $statusFilter : '' ?><?= $searchQuery ? '&search=' . urlencode($searchQuery) : '' ?>"><?= $i ?></a>
+                    <a class="join-item btn btn-sm <?= $i === $currentPage ? 'btn-primary' : '' ?>" href="<?= e($buildUsersPageUrl($baseParams, $i)) ?>"><?= $i ?></a>
                     <?php endfor; ?>
 
                     <?php if ($end < $totalPages): ?>
                     <?php if ($end < $totalPages - 1): ?>
                     <button class="join-item btn btn-sm btn-disabled">...</button>
                     <?php endif; ?>
-                    <a class="join-item btn btn-sm" href="<?= APP_URL ?>/?page=users&p=<?= $totalPages ?><?= $roleFilter ? '&role=' . $roleFilter : '' ?><?= $statusFilter ? '&status=' . $statusFilter : '' ?><?= $searchQuery ? '&search=' . urlencode($searchQuery) : '' ?>"><?= $totalPages ?></a>
+                    <a class="join-item btn btn-sm" href="<?= e($buildUsersPageUrl($baseParams, $totalPages)) ?>"><?= $totalPages ?></a>
                     <?php endif; ?>
 
-                    <a class="join-item btn btn-sm <?= $currentPage >= $totalPages ? 'btn-disabled' : '' ?>" href="<?= APP_URL ?>/?page=users&p=<?= $currentPage + 1 ?><?= $roleFilter ? '&role=' . $roleFilter : '' ?><?= $statusFilter ? '&status=' . $statusFilter : '' ?><?= $searchQuery ? '&search=' . urlencode($searchQuery) : '' ?>">&raquo;</a>
+                    <a class="join-item btn btn-sm <?= $currentPage >= $totalPages ? 'btn-disabled' : '' ?>" href="<?= e($buildUsersPageUrl($baseParams, $currentPage + 1)) ?>">&raquo;</a>
                 </div>
             </div>
             <div class="text-center mt-2">

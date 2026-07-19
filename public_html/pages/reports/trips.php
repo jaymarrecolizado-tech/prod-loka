@@ -33,6 +33,22 @@ $stats = db()->fetch(
     $params
 );
 
+// Sorting (latest created first by default)
+$allowedSortColumns = [
+    'id' => 'r.id',
+    'created_at' => 'r.created_at',
+    'start_datetime' => 'r.start_datetime',
+    'requester' => 'u.name',
+    'destination' => 'r.destination',
+    'plate_number' => 'v.plate_number',
+    'driver_name' => 'dr_user.name',
+    'status' => 'r.status',
+    'duration' => 'planned_duration',
+];
+$sortState = resolveTableSort($allowedSortColumns, 'created_at', 'DESC');
+$sort = $sortState['key'];
+$sortDir = $sortState['dir'];
+
 // Get requests
 $requests = db()->fetchAll(
     "SELECT r.id, r.created_at, r.start_datetime, r.end_datetime, r.purpose, r.destination,
@@ -49,10 +65,18 @@ $requests = db()->fetchAll(
      LEFT JOIN drivers dr ON r.driver_id = dr.id
      LEFT JOIN users dr_user ON dr.user_id = dr_user.id
      $whereClause
-     ORDER BY r.created_at DESC
+     ORDER BY {$sortState['orderSql']}
      LIMIT 500",
     $params
 );
+
+$baseParams = tableSortQueryParams($sortState, [
+    'page' => 'reports',
+    'action' => 'trips',
+    'start_date' => $startDate,
+    'end_date' => $endDate,
+    'status' => $status,
+]);
 
 require_once INCLUDES_PATH . '/header.php';
 ?>
@@ -177,15 +201,15 @@ require_once INCLUDES_PATH . '/header.php';
                 <table class="loka-table table-hover mb-0">
                     <thead>
                         <tr>
-                            <th>ID</th>
-                            <th>Created</th>
-                            <th>Scheduled</th>
-                            <th>Requester</th>
-                            <th>Destination</th>
-                            <th>Vehicle</th>
-                            <th>Driver</th>
-                            <th>Status</th>
-                            <th>Duration</th>
+                            <?= tableSortTh('id', 'ID', $sort, $sortDir, $baseParams) ?>
+                            <?= tableSortTh('created_at', 'Created', $sort, $sortDir, $baseParams) ?>
+                            <?= tableSortTh('start_datetime', 'Scheduled', $sort, $sortDir, $baseParams) ?>
+                            <?= tableSortTh('requester', 'Requester', $sort, $sortDir, $baseParams) ?>
+                            <?= tableSortTh('destination', 'Destination', $sort, $sortDir, $baseParams) ?>
+                            <?= tableSortTh('plate_number', 'Vehicle', $sort, $sortDir, $baseParams) ?>
+                            <?= tableSortTh('driver_name', 'Driver', $sort, $sortDir, $baseParams) ?>
+                            <?= tableSortTh('status', 'Status', $sort, $sortDir, $baseParams) ?>
+                            <?= tableSortTh('duration', 'Duration', $sort, $sortDir, $baseParams) ?>
                         </tr>
                     </thead>
                     <tbody>

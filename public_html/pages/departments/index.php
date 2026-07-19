@@ -7,14 +7,32 @@ requireRole(ROLE_MOTORPOOL);
 
 $pageTitle = 'Departments';
 
+// Sorting (latest departments first by default)
+$allowedSortColumns = [
+    'id' => 'd.id',
+    'created_at' => 'd.created_at',
+    'name' => 'd.name',
+    'description' => 'd.description',
+    'head_name' => 'u.name',
+    'user_count' => 'user_count',
+    'status' => 'd.status',
+];
+$sortState = resolveTableSort($allowedSortColumns, 'created_at', 'DESC');
+$sort = $sortState['key'];
+$sortDir = $sortState['dir'];
+
 $departments = db()->fetchAll(
     "SELECT d.*, u.name as head_name,
             (SELECT COUNT(*) FROM users WHERE department_id = d.id AND deleted_at IS NULL) as user_count
      FROM departments d
      LEFT JOIN users u ON d.head_user_id = u.id
      WHERE d.deleted_at IS NULL
-     ORDER BY d.name"
+     ORDER BY {$sortState['orderSql']}"
 );
+
+$baseParams = tableSortQueryParams($sortState, [
+    'page' => 'departments',
+]);
 
 require_once INCLUDES_PATH . '/header.php';
 ?>
@@ -39,8 +57,17 @@ require_once INCLUDES_PATH . '/header.php';
             <div class="loka-empty"><i class="bi bi-building"></i><h5>No departments found</h5></div>
             <?php else: ?>
             <div class="loka-table-responsive">
-                <table class="loka-table data-table">
-                    <thead><tr><th>Name</th><th>Description</th><th>Head</th><th>Users</th><th>Status</th><th>Actions</th></tr></thead>
+                <table class="loka-table">
+                    <thead>
+                        <tr>
+                            <?= tableSortTh('name', 'Name', $sort, $sortDir, $baseParams) ?>
+                            <?= tableSortTh('description', 'Description', $sort, $sortDir, $baseParams) ?>
+                            <?= tableSortTh('head_name', 'Head', $sort, $sortDir, $baseParams) ?>
+                            <?= tableSortTh('user_count', 'Users', $sort, $sortDir, $baseParams) ?>
+                            <?= tableSortTh('status', 'Status', $sort, $sortDir, $baseParams) ?>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
                     <tbody>
                         <?php foreach ($departments as $dept): ?>
                         <tr>

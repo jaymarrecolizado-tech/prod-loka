@@ -20,7 +20,7 @@ $perPage = getInt('per_page', 25); // Records per page: 10, 25, 50, 100
 $limit = in_array($perPage, [10, 25, 50, 100]) ? $perPage : 25;
 $offset = ($page - 1) * $limit;
 
-// Sorting
+// Sorting (latest completed first by default)
 $allowedSortColumns = [
     'id' => 'r.id',
     'completed_date' => 'r.actual_arrival_datetime',
@@ -29,12 +29,12 @@ $allowedSortColumns = [
     'requester_name' => 'u.name',
     'destination' => 'r.destination',
     'duration' => 'actual_duration',
-    'mileage' => 'r.mileage_actual'
+    'mileage' => 'r.mileage_actual',
 ];
-$sort = get('sort', 'completed_date');
-$sortDir = get('dir', 'DESC');
-$sortDir = in_array(strtoupper($sortDir), ['ASC', 'DESC']) ? strtoupper($sortDir) : 'DESC';
-$sortColumn = $allowedSortColumns[$sort] ?? 'r.actual_arrival_datetime';
+$sortState = resolveTableSort($allowedSortColumns, 'completed_date', 'DESC');
+$sort = $sortState['key'];
+$sortDir = $sortState['dir'];
+$sortColumn = $sortState['column'];
 
 // Date filter - only apply if not showing all
 $startDate = null;
@@ -331,20 +331,19 @@ require_once INCLUDES_PATH . '/header.php';
         </div>
         <div class="p-6">
             <?php
-function buildSortUrl($column, $currentSort, $currentDir, $baseParams) {
-    $newDir = ($currentSort === $column && $currentDir === 'DESC') ? 'ASC' : 'DESC';
-    $params = array_merge($baseParams, ['sort' => $column, 'dir' => $newDir, 'p' => 1]);
-    return '?' . http_build_query(array_filter($params));
-}
-
 $baseParams = [
     'page' => 'completed-trips',
     'all' => $showAll,
     'per_page' => $perPage,
-    'search' => $search
+    'search' => $search,
 ];
-if ($startDate) $baseParams['start_date'] = $startDate;
-if ($endDate) $baseParams['end_date'] = $endDate;
+if ($startDate) {
+    $baseParams['start_date'] = $startDate;
+}
+if ($endDate) {
+    $baseParams['end_date'] = $endDate;
+}
+$baseParams = tableSortQueryParams($sortState, $baseParams);
 ?>
             <?php if (empty($trips)): ?>
                 <div class="text-center py-5">
@@ -356,14 +355,14 @@ if ($endDate) $baseParams['end_date'] = $endDate;
                     <table class="loka-table" id="completedTripsTable">
                         <thead>
                             <tr>
-                                <th><a href="<?= buildSortUrl('id', $sort, $sortDir, $baseParams) ?>" class="no-underline text-base-content<?= $sort === 'id' ? ' text-primary' : '' ?>" style="cursor:pointer">ID <?= $sort === 'id' ? ($sortDir === 'ASC' ? '<i class="bi bi-arrow-up"></i>' : '<i class="bi bi-arrow-down"></i>') : '' ?></a></th>
-                                <th><a href="<?= buildSortUrl('completed_date', $sort, $sortDir, $baseParams) ?>" class="no-underline text-base-content<?= $sort === 'completed_date' ? ' text-primary' : '' ?>" style="cursor:pointer">Completed Date <?= $sort === 'completed_date' ? ($sortDir === 'ASC' ? '<i class="bi bi-arrow-up"></i>' : '<i class="bi bi-arrow-down"></i>') : '' ?></a></th>
-                                <th><a href="<?= buildSortUrl('plate_number', $sort, $sortDir, $baseParams) ?>" class="no-underline text-base-content<?= $sort === 'plate_number' ? ' text-primary' : '' ?>" style="cursor:pointer">Vehicle <?= $sort === 'plate_number' ? ($sortDir === 'ASC' ? '<i class="bi bi-arrow-up"></i>' : '<i class="bi bi-arrow-down"></i>') : '' ?></a></th>
-                                <th><a href="<?= buildSortUrl('driver_name', $sort, $sortDir, $baseParams) ?>" class="no-underline text-base-content<?= $sort === 'driver_name' ? ' text-primary' : '' ?>" style="cursor:pointer">Driver <?= $sort === 'driver_name' ? ($sortDir === 'ASC' ? '<i class="bi bi-arrow-up"></i>' : '<i class="bi bi-arrow-down"></i>') : '' ?></a></th>
-                                <th><a href="<?= buildSortUrl('requester_name', $sort, $sortDir, $baseParams) ?>" class="no-underline text-base-content<?= $sort === 'requester_name' ? ' text-primary' : '' ?>" style="cursor:pointer">Requester <?= $sort === 'requester_name' ? ($sortDir === 'ASC' ? '<i class="bi bi-arrow-up"></i>' : '<i class="bi bi-arrow-down"></i>') : '' ?></a></th>
-                                <th><a href="<?= buildSortUrl('destination', $sort, $sortDir, $baseParams) ?>" class="no-underline text-base-content<?= $sort === 'destination' ? ' text-primary' : '' ?>" style="cursor:pointer">Destination <?= $sort === 'destination' ? ($sortDir === 'ASC' ? '<i class="bi bi-arrow-up"></i>' : '<i class="bi bi-arrow-down"></i>') : '' ?></a></th>
-                                <th><a href="<?= buildSortUrl('duration', $sort, $sortDir, $baseParams) ?>" class="no-underline text-base-content<?= $sort === 'duration' ? ' text-primary' : '' ?>" style="cursor:pointer">Duration <?= $sort === 'duration' ? ($sortDir === 'ASC' ? '<i class="bi bi-arrow-up"></i>' : '<i class="bi bi-arrow-down"></i>') : '' ?></a></th>
-                                <th><a href="<?= buildSortUrl('mileage', $sort, $sortDir, $baseParams) ?>" class="no-underline text-base-content<?= $sort === 'mileage' ? ' text-primary' : '' ?>" style="cursor:pointer">Mileage <?= $sort === 'mileage' ? ($sortDir === 'ASC' ? '<i class="bi bi-arrow-up"></i>' : '<i class="bi bi-arrow-down"></i>') : '' ?></a></th>
+                                <?= tableSortTh('id', 'ID', $sort, $sortDir, $baseParams) ?>
+                                <?= tableSortTh('completed_date', 'Completed Date', $sort, $sortDir, $baseParams) ?>
+                                <?= tableSortTh('plate_number', 'Vehicle', $sort, $sortDir, $baseParams) ?>
+                                <?= tableSortTh('driver_name', 'Driver', $sort, $sortDir, $baseParams) ?>
+                                <?= tableSortTh('requester_name', 'Requester', $sort, $sortDir, $baseParams) ?>
+                                <?= tableSortTh('destination', 'Destination', $sort, $sortDir, $baseParams) ?>
+                                <?= tableSortTh('duration', 'Duration', $sort, $sortDir, $baseParams) ?>
+                                <?= tableSortTh('mileage', 'Mileage', $sort, $sortDir, $baseParams) ?>
                                 <th>Passengers</th>
                                 <?php if (in_array($role, [ROLE_MOTORPOOL, ROLE_ADMIN])): ?>
                                 <th>Dispatch</th>
@@ -472,15 +471,15 @@ if ($endDate) $baseParams['end_date'] = $endDate;
                 <nav class="mt-3 flex flex-col items-center gap-2" aria-label="Trips pagination">
                     <?php
                     // Build base query string for pagination
-                    $queryParams = [
+                    $queryParams = tableSortQueryParams($sortState, [
                         'page' => 'completed-trips',
                         'p' => null, // Will be set per link
-                        'per_page' => $limit
-                    ];
-                    if ($showAll !== '1') $queryParams['all'] = $showAll;
-                    if ($startDate) $queryParams['start_date'] = $startDate;
-                    if ($endDate) $queryParams['end_date'] = $endDate;
-                    if ($search) $queryParams['search'] = $search;
+                        'per_page' => $limit,
+                        'all' => $showAll,
+                        'start_date' => $startDate,
+                        'end_date' => $endDate,
+                        'search' => $search,
+                    ]);
 
                     function buildPageUrl($params, $pageNum) {
                         $params['p'] = $pageNum;

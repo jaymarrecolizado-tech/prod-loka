@@ -53,9 +53,28 @@ if ($search) {
     $params[] = $searchParam;
 }
 
-$sql .= " ORDER BY tt.created_at DESC";
+// Sorting (latest created first by default)
+$allowedSortColumns = [
+    'id' => 'tt.id',
+    'destination' => 'r.destination',
+    'start_date' => 'tt.start_date',
+    'plate_number' => 'v.plate_number',
+    'status' => 'tt.status',
+    'created_at' => 'tt.created_at',
+];
+$sortState = resolveTableSort($allowedSortColumns, 'created_at', 'DESC');
+$sort = $sortState['key'];
+$sortDir = $sortState['dir'];
+
+$sql .= " ORDER BY {$sortState['orderSql']}";
 
 $tripTickets = db()->fetchAll($sql, $params);
+
+$baseParams = tableSortQueryParams($sortState, [
+    'page' => 'my-trip-tickets',
+    'status' => $statusFilter,
+    'search' => $search,
+]);
 
 // Get counts for each status
 $stats = [
@@ -221,11 +240,11 @@ require_once INCLUDES_PATH . '/header.php';
                     <table class="loka-table">
                         <thead>
                             <tr>
-                                <th>Ticket ID</th>
-                                <th>Destination</th>
-                                <th>Date</th>
-                                <th>Vehicle</th>
-                                <th>Status</th>
+                                <?= tableSortTh('id', 'Ticket ID', $sort, $sortDir, $baseParams) ?>
+                                <?= tableSortTh('destination', 'Destination', $sort, $sortDir, $baseParams) ?>
+                                <?= tableSortTh('start_date', 'Date', $sort, $sortDir, $baseParams) ?>
+                                <?= tableSortTh('plate_number', 'Vehicle', $sort, $sortDir, $baseParams) ?>
+                                <?= tableSortTh('status', 'Status', $sort, $sortDir, $baseParams) ?>
                                 <th>Actions</th>
                             </tr>
                         </thead>
@@ -295,17 +314,17 @@ require_once INCLUDES_PATH . '/header.php';
                                         </span>
                                     </td>
                                     <td>
-                                        <div class="join">
+                                        <div class="join" role="group" aria-label="Ticket actions">
                                             <a href="?page=trip-tickets&action=view&id=<?= $tt->id ?>"
-                                                class="join-item btn btn-xs loka-btn-outline-primary text-xs" title="View Ticket">
+                                                class="join-item" title="View Ticket">
                                                 <i class="bi bi-eye"></i>
                                             </a>
                                             <a href="?page=trip-tickets&action=export-pdf&id=<?= $tt->id ?>"
-                                                class="join-item btn btn-xs loka-btn-outline-error text-xs" title="Export PDF">
+                                                class="join-item" title="Export PDF">
                                                 <i class="bi bi-file-earmark-pdf"></i>
                                             </a>
                                             <a href="?page=trip-tickets&action=export-excel&id=<?= $tt->id ?>"
-                                                class="join-item btn btn-xs bg-transparent border border-success text-success hover:bg-success/10 px-3 py-1 text-xs font-medium rounded-xl inline-flex items-center gap-1 transition-colors" title="Export Excel">
+                                                class="join-item" title="Export Excel">
                                                 <i class="bi bi-file-earmark-excel"></i>
                                             </a>
                                         </div>

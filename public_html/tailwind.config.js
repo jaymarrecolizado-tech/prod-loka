@@ -97,30 +97,33 @@ export default {
       {
         // Navy Cyan — sleek dark theme matching login screen palette
         loka: {
-          'primary': '#00d4ff',           // cyan
-          'primary-content': '#0a0e1a',
-          'secondary': '#2e6af6',         // blue-bright
-          'secondary-content': '#eef4ff',
-          'accent': '#1e4db7',            // blue-mid
-          'accent-content': '#eef4ff',
+          'primary': '#00d4ff',           // cyan — primary CTAs
+          'primary-content': '#041018',
+          'secondary': '#3b82f6',         // brighter blue — secondary CTAs
+          'secondary-content': '#ffffff',
+          'accent': '#22d3ee',            // light cyan accent
+          'accent-content': '#041018',
           'neutral': '#0c1f4a',
           'neutral-content': '#eef4ff',
           'base-100': '#0a0e1a',          // navy — page bg
           'base-200': '#0d1526',          // navy2 — cards
           'base-300': '#162033',          // borders
           'base-content': '#eef4ff',
-          'info': '#00d4ff',
-          'success': '#00f5e4',
+          'info': '#38bdf8',
+          'success': '#14e0b0',
+          'success-content': '#041018',
           'warning': '#f5c518',
-          'error': '#e82333',
+          'warning-content': '#1a1400',
+          'error': '#f43f5e',
+          'error-content': '#ffffff',
         },
       },
       {
         // Ghost White — soft, warm light theme with saddle undertones
         'loka-light': {
-          'primary': '#2563eb',           // blue-600 — primary actions
+          'primary': '#1d4ed8',           // blue-700 — stronger primary
           'primary-content': '#ffffff',
-          'secondary': '#64748b',         // slate-500
+          'secondary': '#0f766e',         // teal-700 — clear contrast vs primary
           'secondary-content': '#ffffff',
           'accent': '#0891b2',            // cyan-600
           'accent-content': '#ffffff',
@@ -130,10 +133,13 @@ export default {
           'base-200': '#f0efeb',          // cards — slightly darker
           'base-300': '#e0ded8',          // borders — visible
           'base-content': '#1e293b',      // slate-800 — body text
-          'info': '#0ea5e9',
-          'success': '#16a34a',
-          'warning': '#d97706',
-          'error': '#dc2626',
+          'info': '#0284c7',
+          'success': '#15803d',
+          'success-content': '#ffffff',
+          'warning': '#c2410c',
+          'warning-content': '#ffffff',
+          'error': '#b91c1c',
+          'error-content': '#ffffff',
         },
       },
     ],

@@ -42,13 +42,30 @@ switch ($filter) {
         break;
 }
 
-$sql .= " ORDER BY 
-    FIELD(mr.priority, 'critical', 'high', 'medium', 'low'),
-    FIELD(mr.status, 'pending', 'scheduled', 'in_progress', 'completed', 'cancelled'),
-    mr.scheduled_date ASC,
-    mr.created_at DESC";
+// Sorting (latest created first by default; priority as secondary tie-breaker)
+$allowedSortColumns = [
+    'id' => 'mr.id',
+    'created_at' => 'mr.created_at',
+    'plate_number' => 'v.plate_number',
+    'title' => 'mr.title',
+    'type' => 'mr.type',
+    'priority' => "FIELD(mr.priority, 'critical', 'high', 'medium', 'low')",
+    'scheduled_date' => 'mr.scheduled_date',
+    'status' => 'mr.status',
+];
+$sortState = resolveTableSort($allowedSortColumns, 'created_at', 'DESC');
+$sort = $sortState['key'];
+$sortDir = $sortState['dir'];
+
+$sql .= " ORDER BY {$sortState['orderSql']}, FIELD(mr.priority, 'critical', 'high', 'medium', 'low')";
 
 $maintenanceRequests = db()->fetchAll($sql, $params);
+
+$baseParams = tableSortQueryParams($sortState, [
+    'page' => 'maintenance',
+    'filter' => $filter === 'all' ? '' : $filter,
+    'status' => $status,
+]);
 
 $stats = [
     'pending' => db()->count('maintenance_requests', "status = ? AND deleted_at IS NULL", [MAINTENANCE_STATUS_PENDING]),
@@ -177,13 +194,13 @@ require_once INCLUDES_PATH . '/header.php';
                     <table class="loka-table table-hover align-middle">
                         <thead>
                             <tr>
-                                <th>ID</th>
-                                <th>Vehicle</th>
-                                <th>Issue</th>
-                                <th>Type</th>
-                                <th>Priority</th>
-                                <th>Scheduled</th>
-                                <th>Status</th>
+                                <?= tableSortTh('id', 'ID', $sort, $sortDir, $baseParams) ?>
+                                <?= tableSortTh('plate_number', 'Vehicle', $sort, $sortDir, $baseParams) ?>
+                                <?= tableSortTh('title', 'Issue', $sort, $sortDir, $baseParams) ?>
+                                <?= tableSortTh('type', 'Type', $sort, $sortDir, $baseParams) ?>
+                                <?= tableSortTh('priority', 'Priority', $sort, $sortDir, $baseParams) ?>
+                                <?= tableSortTh('scheduled_date', 'Scheduled', $sort, $sortDir, $baseParams) ?>
+                                <?= tableSortTh('status', 'Status', $sort, $sortDir, $baseParams) ?>
                                 <th>Actions</th>
                             </tr>
                         </thead>

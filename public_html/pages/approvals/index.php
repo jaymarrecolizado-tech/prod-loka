@@ -13,6 +13,38 @@ $recordsPerPage = 10;
 $pendingPage = max(1, getInt('p_pending', 1));
 $processedPage = max(1, getInt('p_processed', 1));
 
+// Sorting (latest created / action first by default)
+// Both list queries run every request; only the active tab uses request sort params.
+$pendingSortColumns = [
+    'id' => 'r.id',
+    'requester' => 'u.name',
+    'department' => 'd.name',
+    'purpose' => 'r.purpose',
+    'start_datetime' => 'r.start_datetime',
+    'vehicle' => 'v.plate_number',
+    'created_at' => 'r.created_at',
+];
+$processedSortColumns = [
+    'id' => 'r.id',
+    'requester' => 'u.name',
+    'purpose' => 'r.purpose',
+    'approval_type' => 'a.approval_type',
+    'my_action' => 'a.status',
+    'action_date' => 'a.created_at',
+    'status' => 'r.status',
+];
+if ($tab === 'processed') {
+    $sortState = resolveTableSort($processedSortColumns, 'action_date', 'DESC');
+    $pendingOrderSql = 'r.created_at DESC';
+    $processedOrderSql = $sortState['orderSql'];
+} else {
+    $sortState = resolveTableSort($pendingSortColumns, 'created_at', 'DESC');
+    $pendingOrderSql = $sortState['orderSql'];
+    $processedOrderSql = 'a.created_at DESC';
+}
+$sort = $sortState['key'];
+$sortDir = $sortState['dir'];
+
 // Determine which requests to show based on role
 // Only the specifically assigned approver/motorpool head can see and process requests
 if (isAdmin()) {
@@ -35,7 +67,7 @@ if (isAdmin()) {
          LEFT JOIN users mph ON r.motorpool_head_id = mph.id
          LEFT JOIN vehicles v ON r.vehicle_id = v.id AND v.deleted_at IS NULL
          WHERE r.status IN ('pending', 'pending_motorpool', 'revision') AND r.deleted_at IS NULL
-         ORDER BY r.viewed_at IS NULL DESC, r.created_at DESC
+         ORDER BY {$pendingOrderSql}, r.viewed_at IS NULL DESC
          LIMIT ? OFFSET ?",
         [$recordsPerPage, $pendingOffset]
     );
@@ -64,7 +96,7 @@ if (isAdmin()) {
          WHERE (r.status = 'pending_motorpool' OR r.status = 'revision')
          AND r.motorpool_head_id = ?
          AND r.deleted_at IS NULL
-         ORDER BY r.viewed_at IS NULL DESC, r.created_at DESC
+         ORDER BY {$pendingOrderSql}, r.viewed_at IS NULL DESC
          LIMIT ? OFFSET ?",
         [userId(), $recordsPerPage, $pendingOffset]
     );
@@ -93,7 +125,7 @@ if (isAdmin()) {
          WHERE (r.status = 'pending' OR r.status = 'revision')
          AND r.approver_id = ?
          AND r.deleted_at IS NULL
-         ORDER BY r.viewed_at IS NULL DESC, r.created_at DESC
+         ORDER BY {$pendingOrderSql}, r.viewed_at IS NULL DESC
          LIMIT ? OFFSET ?",
         [userId(), $recordsPerPage, $pendingOffset]
     );
@@ -119,7 +151,7 @@ $processedRequests = db()->fetchAll(
      JOIN users u ON r.user_id = u.id
      JOIN departments d ON r.department_id = d.id
      WHERE a.approver_id = ? AND r.deleted_at IS NULL
-     ORDER BY a.created_at DESC
+     ORDER BY {$processedOrderSql}
      LIMIT ? OFFSET ?",
     [userId(), $recordsPerPage, $processedOffset]
 );
@@ -127,6 +159,11 @@ $processedRequests = db()->fetchAll(
 // Calculate pagination
 $pendingTotalPages = ceil($pendingRequestsCount / $recordsPerPage);
 $processedTotalPages = ceil($processedRequestsCount / $recordsPerPage);
+
+$baseParams = tableSortQueryParams($sortState, [
+    'page' => 'approvals',
+    'tab' => $tab,
+]);
 
 require_once INCLUDES_PATH . '/header.php';
 ?>
@@ -189,14 +226,14 @@ require_once INCLUDES_PATH . '/header.php';
                 <table class="loka-table">
                     <thead>
                         <tr>
-                            <th>ID</th>
-                            <th>Requester</th>
-                            <th>Department</th>
-                            <th>Purpose</th>
-                            <th>Date/Time</th>
-                            <th>Vehicle</th>
+                            <?= tableSortTh('id', 'ID', $sort, $sortDir, $baseParams) ?>
+                            <?= tableSortTh('requester', 'Requester', $sort, $sortDir, $baseParams) ?>
+                            <?= tableSortTh('department', 'Department', $sort, $sortDir, $baseParams) ?>
+                            <?= tableSortTh('purpose', 'Purpose', $sort, $sortDir, $baseParams) ?>
+                            <?= tableSortTh('start_datetime', 'Date/Time', $sort, $sortDir, $baseParams) ?>
+                            <?= tableSortTh('vehicle', 'Vehicle', $sort, $sortDir, $baseParams) ?>
                             <th>Stage Status</th>
-                            <th>Submitted</th>
+                            <?= tableSortTh('created_at', 'Submitted', $sort, $sortDir, $baseParams) ?>
                             <th>Actions</th>
                         </tr>
                     </thead>
@@ -276,14 +313,21 @@ require_once INCLUDES_PATH . '/header.php';
             <!-- Pagination -->
             <?php if ($pendingTotalPages > 1): ?>
             <nav aria-label="Pending approvals pagination" class="mt-4">
+                <?php
+                $pendingPageParams = tableSortQueryParams($sortState, ['page' => 'approvals', 'tab' => 'pending']);
+                $buildPendingUrl = static function (array $params, int $pageNum): string {
+                    $params['p_pending'] = $pageNum;
+                    return APP_URL . '/?' . http_build_query(array_filter($params, static fn($v) => $v !== null && $v !== ''));
+                };
+                ?>
                 <div class="join justify-center mb-0">
-                    <a class="join-item btn btn-sm <?= $pendingPage <= 1 ? 'btn-disabled' : '' ?>" href="<?= APP_URL ?>/?page=approvals&tab=pending&p_pending=<?= $pendingPage - 1 ?>">
+                    <a class="join-item btn btn-sm <?= $pendingPage <= 1 ? 'btn-disabled' : '' ?>" href="<?= e($buildPendingUrl($pendingPageParams, $pendingPage - 1)) ?>">
                         <i class="bi bi-chevron-left"></i> Previous
                     </a>
                     <?php for ($i = 1; $i <= $pendingTotalPages; $i++): ?>
-                    <a class="join-item btn btn-sm <?= $i === $pendingPage ? 'btn-primary' : '' ?>" href="<?= APP_URL ?>/?page=approvals&tab=pending&p_pending=<?= $i ?>"><?= $i ?></a>
+                    <a class="join-item btn btn-sm <?= $i === $pendingPage ? 'btn-primary' : '' ?>" href="<?= e($buildPendingUrl($pendingPageParams, $i)) ?>"><?= $i ?></a>
                     <?php endfor; ?>
-                    <a class="join-item btn btn-sm <?= $pendingPage >= $pendingTotalPages ? 'btn-disabled' : '' ?>" href="<?= APP_URL ?>/?page=approvals&tab=pending&p_pending=<?= $pendingPage + 1 ?>">
+                    <a class="join-item btn btn-sm <?= $pendingPage >= $pendingTotalPages ? 'btn-disabled' : '' ?>" href="<?= e($buildPendingUrl($pendingPageParams, $pendingPage + 1)) ?>">
                         Next <i class="bi bi-chevron-right"></i>
                     </a>
                 </div>
@@ -308,16 +352,16 @@ require_once INCLUDES_PATH . '/header.php';
             </div>
             <?php else: ?>
                 <div class="loka-table-responsive">
-                <table class="loka-table data-table">
+                <table class="loka-table">
                     <thead>
                         <tr>
-                            <th>ID</th>
-                            <th>Requester</th>
-                            <th>Purpose</th>
-                            <th>Approval Level</th>
-                            <th>Your Action</th>
-                            <th>Action Date</th>
-                            <th>Final Status</th>
+                            <?= tableSortTh('id', 'ID', $sort, $sortDir, $baseParams) ?>
+                            <?= tableSortTh('requester', 'Requester', $sort, $sortDir, $baseParams) ?>
+                            <?= tableSortTh('purpose', 'Purpose', $sort, $sortDir, $baseParams) ?>
+                            <?= tableSortTh('approval_type', 'Approval Level', $sort, $sortDir, $baseParams) ?>
+                            <?= tableSortTh('my_action', 'Your Action', $sort, $sortDir, $baseParams) ?>
+                            <?= tableSortTh('action_date', 'Action Date', $sort, $sortDir, $baseParams) ?>
+                            <?= tableSortTh('status', 'Final Status', $sort, $sortDir, $baseParams) ?>
                             <th>View</th>
                         </tr>
                     </thead>
@@ -354,14 +398,21 @@ require_once INCLUDES_PATH . '/header.php';
             <!-- Pagination -->
             <?php if ($processedTotalPages > 1): ?>
             <nav aria-label="Processed approvals pagination" class="mt-4">
+                <?php
+                $processedPageParams = tableSortQueryParams($sortState, ['page' => 'approvals', 'tab' => 'processed']);
+                $buildProcessedUrl = static function (array $params, int $pageNum): string {
+                    $params['p_processed'] = $pageNum;
+                    return APP_URL . '/?' . http_build_query(array_filter($params, static fn($v) => $v !== null && $v !== ''));
+                };
+                ?>
                 <div class="join justify-center mb-0">
-                    <a class="join-item btn btn-sm <?= $processedPage <= 1 ? 'btn-disabled' : '' ?>" href="<?= APP_URL ?>/?page=approvals&tab=processed&p_processed=<?= $processedPage - 1 ?>">
+                    <a class="join-item btn btn-sm <?= $processedPage <= 1 ? 'btn-disabled' : '' ?>" href="<?= e($buildProcessedUrl($processedPageParams, $processedPage - 1)) ?>">
                         <i class="bi bi-chevron-left"></i> Previous
                     </a>
                     <?php for ($i = 1; $i <= $processedTotalPages; $i++): ?>
-                    <a class="join-item btn btn-sm <?= $i === $processedPage ? 'btn-primary' : '' ?>" href="<?= APP_URL ?>/?page=approvals&tab=processed&p_processed=<?= $i ?>"><?= $i ?></a>
+                    <a class="join-item btn btn-sm <?= $i === $processedPage ? 'btn-primary' : '' ?>" href="<?= e($buildProcessedUrl($processedPageParams, $i)) ?>"><?= $i ?></a>
                     <?php endfor; ?>
-                    <a class="join-item btn btn-sm <?= $processedPage >= $processedTotalPages ? 'btn-disabled' : '' ?>" href="<?= APP_URL ?>/?page=approvals&tab=processed&p_processed=<?= $processedPage + 1 ?>">
+                    <a class="join-item btn btn-sm <?= $processedPage >= $processedTotalPages ? 'btn-disabled' : '' ?>" href="<?= e($buildProcessedUrl($processedPageParams, $processedPage + 1)) ?>">
                         Next <i class="bi bi-chevron-right"></i>
                     </a>
                 </div>

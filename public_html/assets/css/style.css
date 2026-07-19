@@ -99,12 +99,27 @@ body {
 
 .ts-wrapper .ts-control {
     border-radius: 0.75rem;
-    border-color: hsl(var(--b3));
-    background: hsl(var(--b1));
+    border: 1.5px solid hsl(var(--bc) / 0.28) !important;
+    background: hsl(var(--b1)) !important;
+    color: hsl(var(--bc)) !important;
     padding: 0.5rem 0.75rem;
     min-height: 42px;
     font-size: 0.875rem;
     transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+[data-theme="loka-light"] .ts-wrapper .ts-control {
+    background: #ffffff !important;
+    border: 1.5px solid #94a3b8 !important;
+    color: #1e293b !important;
+}
+
+.ts-wrapper .ts-control input {
+    color: hsl(var(--bc)) !important;
+}
+
+.ts-wrapper .ts-control input::placeholder {
+    color: hsl(var(--bc) / 0.4);
 }
 
 .ts-wrapper.focus .ts-control {
@@ -138,18 +153,21 @@ body {
     border-radius: 0.75rem;
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
     margin-top: 4px;
-    background: hsl(var(--b1));
+    background: hsl(var(--b1)) !important;
+    color: hsl(var(--bc));
 }
 
-.ts-dropdown .option {
+.ts-dropdown .option,
+.ts-dropdown .optgroup-header {
     padding: 0.5rem 0.875rem;
-    color: hsl(var(--bc));
+    background: hsl(var(--b1));
+    color: hsl(var(--bc)) !important;
 }
 
 .ts-dropdown .option.active,
 .ts-dropdown .option:hover {
-    background: hsl(var(--p) / 0.1);
-    color: hsl(var(--p));
+    background: hsl(var(--p) / 0.18) !important;
+    color: hsl(var(--p)) !important;
 }
 
 /* ===== FLATPICKR INTEGRATION ===== */

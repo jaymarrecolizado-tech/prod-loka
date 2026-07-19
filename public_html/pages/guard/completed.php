@@ -55,9 +55,32 @@ if ($search) {
     $params = array_merge($params, array_fill(0, 5, $searchTerm));
 }
 
-$sql .= " ORDER BY r.actual_arrival_datetime DESC";
+// Sorting (latest arrival first by default)
+$allowedSortColumns = [
+    'id' => 'r.id',
+    'completed_date' => 'r.actual_arrival_datetime',
+    'plate_number' => 'v.plate_number',
+    'driver_name' => 'driver_user.name',
+    'requester_name' => 'u.name',
+    'destination' => 'r.destination',
+    'duration' => 'actual_duration',
+    'mileage' => 'r.mileage_actual',
+];
+$sortState = resolveTableSort($allowedSortColumns, 'completed_date', 'DESC');
+$sort = $sortState['key'];
+$sortDir = $sortState['dir'];
+
+$sql .= " ORDER BY {$sortState['orderSql']}";
 
 $trips = db()->fetchAll($sql, $params);
+
+$baseParams = tableSortQueryParams($sortState, [
+    'page' => 'guard',
+    'action' => 'completed',
+    'start_date' => $startDate,
+    'end_date' => $endDate,
+    'search' => $search,
+]);
 
 // Calculate statistics
 $totalTrips = count($trips);
@@ -204,14 +227,14 @@ require_once INCLUDES_PATH . '/header.php';
                     <table class="loka-table" id="completedTripsTable">
                         <thead>
                             <tr>
-                                <th>ID</th>
-                                <th>Arrival Date</th>
-                                <th>Vehicle</th>
-                                <th>Driver</th>
-                                <th>Requester</th>
-                                <th>Destination</th>
-                                <th>Duration</th>
-                                <th>Mileage</th>
+                                <?= tableSortTh('id', 'ID', $sort, $sortDir, $baseParams) ?>
+                                <?= tableSortTh('completed_date', 'Arrival Date', $sort, $sortDir, $baseParams) ?>
+                                <?= tableSortTh('plate_number', 'Vehicle', $sort, $sortDir, $baseParams) ?>
+                                <?= tableSortTh('driver_name', 'Driver', $sort, $sortDir, $baseParams) ?>
+                                <?= tableSortTh('requester_name', 'Requester', $sort, $sortDir, $baseParams) ?>
+                                <?= tableSortTh('destination', 'Destination', $sort, $sortDir, $baseParams) ?>
+                                <?= tableSortTh('duration', 'Duration', $sort, $sortDir, $baseParams) ?>
+                                <?= tableSortTh('mileage', 'Mileage', $sort, $sortDir, $baseParams) ?>
                                 <th>Documents</th>
                                 <th>Dispatch</th>
                                 <th>Arrival</th>

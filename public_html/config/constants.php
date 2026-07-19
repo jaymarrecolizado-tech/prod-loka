@@ -101,13 +101,13 @@ define('DISPLAY_DATETIME', 'M d, Y h:i A');
 // Status Labels & Colors
 define('STATUS_LABELS', [
     STATUS_DRAFT => ['label' => 'Draft', 'color' => 'secondary'],
-    STATUS_PENDING => ['label' => 'Pending Approval', 'color' => 'warning'],
-    STATUS_PENDING_MOTORPOOL => ['label' => 'Pending Motorpool', 'color' => 'info'],
-    STATUS_APPROVED => ['label' => 'Approved', 'color' => 'success'],
-    STATUS_REJECTED => ['label' => 'Rejected', 'color' => 'danger'],
-    STATUS_REVISION => ['label' => 'For Revision', 'color' => 'orange'],
-    STATUS_CANCELLED => ['label' => 'Cancelled', 'color' => 'dark'],
-    STATUS_COMPLETED => ['label' => 'Completed', 'color' => 'primary'],
+    STATUS_PENDING => ['label' => 'Pending', 'color' => 'warning'],           // mild orange
+    STATUS_PENDING_MOTORPOOL => ['label' => 'Pending Motorpool', 'color' => 'warning'],
+    STATUS_APPROVED => ['label' => 'Approved', 'color' => 'info'],            // blue
+    STATUS_REJECTED => ['label' => 'Rejected', 'color' => 'danger'],          // red
+    STATUS_REVISION => ['label' => 'For Revision', 'color' => 'warning'],
+    STATUS_CANCELLED => ['label' => 'Cancelled', 'color' => 'muted'],         // mild black
+    STATUS_COMPLETED => ['label' => 'Completed', 'color' => 'success'],       // green
     STATUS_MODIFIED => ['label' => 'Modified', 'color' => 'warning']
 ]);
 
