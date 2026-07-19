@@ -20,4 +20,8 @@ if ($securityAction === 'index' || $securityAction === '') {
        class="loka-btn-sm <?= $securityAction === 'sms' ? 'loka-btn-primary' : 'loka-btn-secondary' ?>">
         <i class="bi bi-phone me-1"></i>SMS
     </a>
+    <a href="<?= APP_URL ?>/?page=security&action=email"
+       class="loka-btn-sm <?= $securityAction === 'email' ? 'loka-btn-primary' : 'loka-btn-secondary' ?>">
+        <i class="bi bi-envelope me-1"></i>Email
+    </a>
 </div>

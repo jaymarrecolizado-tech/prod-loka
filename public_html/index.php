@@ -75,6 +75,7 @@ require_once __DIR__ . '/config/session.php';
 // Load helpers
 require_once __DIR__ . '/includes/functions.php';
 require_once __DIR__ . '/includes/sms.php';
+require_once __DIR__ . '/includes/mail_delivery.php';
 
 // Initialize Security and send headers
 $security = Security::getInstance();
@@ -131,7 +132,7 @@ $page = get('page', 'dashboard');
 $action = get('action', 'index');
 
 // Public pages (no auth required)
-$publicPages = ['login', 'logout', 'forgot-password', 'reset-password', 'qr', 'verify-voucher'];
+$publicPages = ['login', 'logout', 'forgot-password', 'reset-password', 'qr', 'verify-voucher', 'cron'];
 
 // Route handling
 if (!in_array($page, $publicPages)) {
@@ -430,9 +431,16 @@ switch ($page) {
             require_once PAGES_PATH . '/security/summary.php';
         } elseif ($action === 'sms') {
             require_once PAGES_PATH . '/security/sms.php';
+        } elseif ($action === 'email') {
+            require_once PAGES_PATH . '/security/email.php';
         } else {
             require_once PAGES_PATH . '/security/rate-limits.php';
         }
+        break;
+
+    case 'cron':
+        // No login UI — secret key auth inside the page
+        require_once PAGES_PATH . '/cron/index.php';
         break;
 
     case 'profile':

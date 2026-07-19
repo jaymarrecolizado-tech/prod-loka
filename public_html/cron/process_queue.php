@@ -38,6 +38,8 @@ require_once __DIR__ . '/../classes/Database.php';
 require_once __DIR__ . '/../classes/Security.php';
 require_once __DIR__ . '/../classes/Mailer.php';
 require_once __DIR__ . '/../classes/EmailQueue.php';
+require_once __DIR__ . '/../includes/functions.php';
+require_once __DIR__ . '/../includes/mail_delivery.php';
 
 // Configuration
 $batchSize = 20;        // Process 20 emails per run (increased for faster processing)

@@ -232,6 +232,23 @@ if ($startDatetime && $endDatetime) {
     
     // Create request if no errors
     if (empty($errors)) {
+        // Soft guard: same user + destination + start within 2 minutes (double-click / slow SMTP)
+        $dup = db()->fetch(
+            "SELECT id FROM requests
+             WHERE user_id = ? AND destination = ? AND start_datetime = ?
+               AND deleted_at IS NULL
+               AND created_at >= DATE_SUB(NOW(), INTERVAL 120 SECOND)
+             ORDER BY id DESC LIMIT 1",
+            [userId(), $destination, $startDatetime]
+        );
+        if ($dup) {
+            redirectWith(
+                '/?page=requests&action=view&id=' . (int) $dup->id,
+                'warning',
+                'A matching request was just submitted. Opened the existing one to avoid duplicates.'
+            );
+        }
+
         try {
             db()->beginTransaction();
             
@@ -422,7 +439,7 @@ require_once INCLUDES_PATH . '/header.php';
                     </div>
                     <?php endif; ?>
                     
-                    <form method="POST" novalidate id="requestForm" class="space-y-6">
+                    <form method="POST" novalidate id="requestForm" class="space-y-6" data-loka-busy-submit="1">
                         <?= csrfField() ?>
                         <!-- Hidden input to store selected passengers for form submission -->
                         <input type="hidden" name="passengers_json" id="passengers_json" value="">

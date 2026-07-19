@@ -51,6 +51,7 @@ require_once __DIR__ . '/session.php';
 // Load helpers
 require_once __DIR__ . '/../includes/functions.php';
 require_once __DIR__ . '/../includes/sms.php';
+require_once __DIR__ . '/../includes/mail_delivery.php';
 
 // Initialize Security
 $security = Security::getInstance();

@@ -14,6 +14,7 @@
     
     <!-- Custom JS -->
     <?= viteEntryJsTags('app') ?>
+    <script src="<?= APP_URL ?>/assets/js/submit-guard.js" defer></script>
 
     <!-- Theme Toggle Script -->
     <script>

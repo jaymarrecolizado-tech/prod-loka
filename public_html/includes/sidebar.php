@@ -219,6 +219,13 @@
                             <span>SMS</span>
                         </a>
                     </li>
+                    <li>
+                        <a class="loka-nav-link loka-nav-sublink <?= ($secOpen && $secAction === 'email') ? 'active' : '' ?>"
+                           href="<?= APP_URL ?>/?page=security&action=email">
+                            <i class="bi bi-envelope w-5 text-center flex-shrink-0"></i>
+                            <span>Email</span>
+                        </a>
+                    </li>
                 </ul>
             </li>
             <?php endif; ?>
