@@ -1588,3 +1588,16 @@ function denyGuardAccess(): void
         redirectWith('/?page=guard', 'danger', 'You do not have permission to access this page.');
     }
 }
+
+/**
+ * Guards may view approved trips still waiting for dispatch or arrival.
+ */
+function canGuardViewActiveTrip(object $request): bool
+{
+    if (!isGuard()) {
+        return false;
+    }
+
+    return $request->status === STATUS_APPROVED
+        && empty($request->actual_arrival_datetime);
+}

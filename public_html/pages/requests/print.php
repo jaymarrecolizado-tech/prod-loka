@@ -26,12 +26,22 @@ $request = db()->fetch(
 );
 
 if (!$request) {
-    redirectWith('/?page=requests', 'danger', 'Request not found.');
+    redirectWith(isGuard() ? '/?page=guard' : '/?page=requests', 'danger', 'Request not found.');
 }
 
-// Check access - allow requester, approvers, motorpool, guards, and admin
-if ($request->user_id !== userId() && !isApprover() && !isGuard() && !isMotorpool() && !isAdmin()) {
-    redirectWith('/?page=requests', 'danger', 'You do not have permission to view this request.');
+// Requester, ops, or guard on a trip awaiting dispatch/arrival
+$canPrint = $request->user_id === userId()
+    || isApprover()
+    || isMotorpool()
+    || isAdmin()
+    || canGuardViewActiveTrip($request);
+
+if (!$canPrint) {
+    redirectWith(
+        isGuard() ? '/?page=guard' : '/?page=requests',
+        'danger',
+        'You do not have permission to view this request.'
+    );
 }
 
 // Get approval records - fetch the LATEST one for each type (in case of revision -> approved)

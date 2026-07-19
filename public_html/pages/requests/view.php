@@ -34,12 +34,20 @@ $request = db()->fetch(
 );
 
 if (!$request) {
-    redirectWith('/?page=requests', 'danger', 'Request not found.');
+    redirectWith(isGuard() ? '/?page=guard' : '/?page=requests', 'danger', 'Request not found.');
 }
 
-// Check access - only owner or approver/admin can view
-if ($request->user_id !== userId() && !isApprover()) {
-    redirectWith('/?page=requests', 'danger', 'You do not have permission to view this request.');
+// Owner, approver+, or guard viewing a trip awaiting dispatch/arrival
+$canView = $request->user_id === userId()
+    || isApprover()
+    || canGuardViewActiveTrip($request);
+
+if (!$canView) {
+    redirectWith(
+        isGuard() ? '/?page=guard' : '/?page=requests',
+        'danger',
+        'You do not have permission to view this request.'
+    );
 }
 
 // Mark notifications as read when requester views their request
@@ -110,10 +118,14 @@ require_once INCLUDES_PATH . '/header.php';
         <div>
             <h2 class="text-xl font-semibold mb-1">Request #<?= $requestId ?></h2>
             <div class="text-sm text-base-content/60">
-                <a href="<?= APP_URL ?>" class="hover:text-primary">Dashboard</a>
+                <a href="<?= APP_URL ?>/?page=<?= isGuard() ? 'guard' : 'dashboard' ?>" class="hover:text-primary">
+                    <?= isGuard() ? 'Guard Dashboard' : 'Dashboard' ?>
+                </a>
                 <span class="mx-1">/</span>
+                <?php if (!isGuard()): ?>
                 <a href="<?= APP_URL ?>/?page=requests" class="hover:text-primary">Requests</a>
                 <span class="mx-1">/</span>
+                <?php endif; ?>
                 <span>View</span>
             </div>
         </div>

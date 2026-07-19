@@ -172,7 +172,10 @@ switch ($page) {
         break;
 
     case 'requests':
-        denyGuardAccess();
+        // Guards may only open trip detail/print for active dispatch/arrival trips
+        if (!in_array($action, ['view', 'print'], true)) {
+            denyGuardAccess();
+        }
         if ($action === 'create') {
             require_once PAGES_PATH . '/requests/create.php';
         } elseif ($action === 'view') {
