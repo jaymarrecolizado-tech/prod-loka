@@ -7,7 +7,7 @@ requireRole(ROLE_APPROVER);
 
 $pageTitle = 'Approval Queue';
 $tab = get('tab', 'pending');
-$recordsPerPage = 10;
+$recordsPerPage = resolvePerPage();
 
 // Get current page for pagination
 $pendingPage = max(1, getInt('p_pending', 1));

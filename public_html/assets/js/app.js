@@ -140,7 +140,8 @@ function initDataTables() {
 }
 
 function vanillaDataTable(table) {
-  const PAGE_LENGTH = 15
+  const PAGE_LENGTH = 10
+  const PAGE_OPTIONS = [10, 25, 50, 100]
   const tbody = table.querySelector('tbody')
   const thead = table.querySelector('thead')
   if (!tbody || !thead) return
@@ -172,17 +173,13 @@ function vanillaDataTable(table) {
   lengthWrap.innerHTML = '<span class="text-base-content/60">Show</span>'
   const lengthSelect = document.createElement('select')
   lengthSelect.className = 'select select-bordered select-sm'
-  ;[10, 15, 25, 50].forEach(n => {
+  PAGE_OPTIONS.forEach(n => {
     const o = document.createElement('option')
     o.value = n
     o.textContent = n
     if (n === perPage) o.selected = true
     lengthSelect.appendChild(o)
   })
-  const allOpt = document.createElement('option')
-  allOpt.value = -1
-  allOpt.textContent = 'All'
-  lengthSelect.appendChild(allOpt)
   lengthSelect.addEventListener('change', () => {
     perPage = parseInt(lengthSelect.value)
     currentPage = 1

@@ -10,11 +10,6 @@ $roleFilter = get('role', '');
 $statusFilter = get('status', '');
 $searchQuery = trim(get('search', ''));
 
-// Pagination
-$perPage = 15;
-$currentPage = max(1, (int) get('p', 1));
-$offset = ($currentPage - 1) * $perPage;
-
 $params = [];
 $whereClause = 'deleted_at IS NULL';
 $whereClauseAliased = 'u.deleted_at IS NULL';
@@ -54,11 +49,14 @@ $sortState = resolveTableSort($allowedSortColumns, 'created_at', 'DESC');
 $sort = $sortState['key'];
 $sortDir = $sortState['dir'];
 
-// Get total count for pagination
+// Pagination (10 / 25 / 50 / 100; default 10)
 $totalUsers = db()->count('users', $whereClause, $params);
-$totalPages = ceil($totalUsers / $perPage);
+$pag = listPaginationState((int) $totalUsers);
+$perPage = $pag['perPage'];
+$currentPage = $pag['page'];
+$totalPages = $pag['totalPages'];
+$offset = $pag['offset'];
 
-// Get paginated users
 $users = db()->fetchAll(
     "SELECT u.*, d.name as department_name
      FROM users u
@@ -74,6 +72,7 @@ $baseParams = tableSortQueryParams($sortState, [
     'role' => $roleFilter,
     'status' => $statusFilter,
     'search' => $searchQuery,
+    'per_page' => $perPage,
 ]);
 
 $departments = db()->fetchAll("SELECT * FROM departments WHERE departments.deleted_at IS NULL ORDER BY name");
@@ -116,6 +115,7 @@ require_once INCLUDES_PATH . '/header.php';
                     <option value="inactive" <?= $statusFilter === 'inactive' ? 'selected' : '' ?>>Inactive</option>
                 </select>
             </div>
+            <?= perPageFieldHtml($pag['perPage']) ?>
             <div>
                 <button type="submit" class="loka-btn-primary"><i class="bi bi-search me-1"></i>Filter</button>
                 <a href="<?= APP_URL ?>/?page=users" class="loka-btn-secondary">Reset</a>
@@ -162,48 +162,9 @@ require_once INCLUDES_PATH . '/header.php';
             </table>
         </div>
 
-        <?php if ($totalPages > 1): ?>
-        <div class="border-t border-base-200 px-6 py-4">
-            <div class="flex justify-center">
-                <?php
-                $buildUsersPageUrl = static function (array $params, int $pageNum): string {
-                    $params['p'] = $pageNum;
-                    return APP_URL . '/?' . http_build_query(array_filter($params, static fn($v) => $v !== null && $v !== ''));
-                };
-                ?>
-                <div class="join">
-                    <a class="join-item btn btn-sm <?= $currentPage <= 1 ? 'btn-disabled' : '' ?>" href="<?= e($buildUsersPageUrl($baseParams, $currentPage - 1)) ?>">&laquo;</a>
-
-                    <?php
-                    $start = max(1, $currentPage - 2);
-                    $end = min($totalPages, $currentPage + 2);
-
-                    if ($start > 1): ?>
-                    <a class="join-item btn btn-sm" href="<?= e($buildUsersPageUrl($baseParams, 1)) ?>">1</a>
-                    <?php if ($start > 2): ?>
-                    <button class="join-item btn btn-sm btn-disabled">...</button>
-                    <?php endif; ?>
-                    <?php endif; ?>
-
-                    <?php for ($i = $start; $i <= $end; $i++): ?>
-                    <a class="join-item btn btn-sm <?= $i === $currentPage ? 'btn-primary' : '' ?>" href="<?= e($buildUsersPageUrl($baseParams, $i)) ?>"><?= $i ?></a>
-                    <?php endfor; ?>
-
-                    <?php if ($end < $totalPages): ?>
-                    <?php if ($end < $totalPages - 1): ?>
-                    <button class="join-item btn btn-sm btn-disabled">...</button>
-                    <?php endif; ?>
-                    <a class="join-item btn btn-sm" href="<?= e($buildUsersPageUrl($baseParams, $totalPages)) ?>"><?= $totalPages ?></a>
-                    <?php endif; ?>
-
-                    <a class="join-item btn btn-sm <?= $currentPage >= $totalPages ? 'btn-disabled' : '' ?>" href="<?= e($buildUsersPageUrl($baseParams, $currentPage + 1)) ?>">&raquo;</a>
-                </div>
-            </div>
-            <div class="text-center mt-2">
-                <span class="text-xs text-base-content/50">Page <?= $currentPage ?> of <?= $totalPages ?> (<?= $totalUsers ?> total users)</span>
-            </div>
+        <div class="px-6 pb-4">
+            <?= listPaginationFooter($pag, $baseParams) ?>
         </div>
-        <?php endif; ?>
     </div>
 </div>
 

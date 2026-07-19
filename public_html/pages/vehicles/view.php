@@ -82,6 +82,9 @@ require_once INCLUDES_PATH . '/header.php';
                         <div class="col-span-12 md:col-span-6">
                             <label class="text-base-content/60 small">Mileage</label>
                             <div class="fw-bold"><?= number_format($vehicle->mileage) ?> km</div>
+                            <?php if (!empty($vehicle->odometer_broken)): ?>
+                            <div class="text-warning text-sm mt-1"><i class="bi bi-exclamation-triangle"></i> Odometer broken / unreadable</div>
+                            <?php endif; ?>
                         </div>
                         <div class="col-span-12 md:col-span-6">
                             <label class="text-base-content/60 small">Status</label>

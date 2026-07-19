@@ -31,18 +31,29 @@ $sortState = resolveTableSort($allowedSortColumns, 'created_at', 'DESC');
 $sort = $sortState['key'];
 $sortDir = $sortState['dir'];
 
+$countRow = db()->fetch(
+    "SELECT COUNT(*) as c
+     FROM drivers d
+     JOIN users u ON d.user_id = u.id AND u.deleted_at IS NULL
+     WHERE {$whereClause}",
+    $params
+);
+$pag = listPaginationState((int) ($countRow->c ?? 0));
+
 $drivers = db()->fetchAll(
     "SELECT d.*, u.name as driver_name, u.email, u.phone
      FROM drivers d
      JOIN users u ON d.user_id = u.id AND u.deleted_at IS NULL
      WHERE {$whereClause}
-     ORDER BY {$sortState['orderSql']}",
-    $params
+     ORDER BY {$sortState['orderSql']}
+     LIMIT ? OFFSET ?",
+    array_merge($params, [$pag['perPage'], $pag['offset']])
 );
 
 $baseParams = tableSortQueryParams($sortState, [
     'page' => 'drivers',
     'status' => $statusFilter,
+    'per_page' => $pag['perPage'],
 ]);
 
 require_once INCLUDES_PATH . '/header.php';
@@ -77,6 +88,7 @@ require_once INCLUDES_PATH . '/header.php';
                     <?php endforeach; ?>
                 </select>
             </div>
+            <?= perPageFieldHtml($pag['perPage']) ?>
             <div class="flex gap-2">
                 <button type="submit" class="loka-btn-primary loka-btn-sm">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
@@ -156,6 +168,7 @@ require_once INCLUDES_PATH . '/header.php';
                     </tbody>
                 </table>
             </div>
+            <?= listPaginationFooter($pag, $baseParams) ?>
         <?php endif; ?>
     </div>
 </div>

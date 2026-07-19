@@ -6,11 +6,6 @@ requireRole(ROLE_REQUESTER);
 
 $db = Database::getInstance();
 
-// Pagination settings
-$perPage = 15;
-$page = max(1, (int)($_GET['p'] ?? 1));
-$offset = ($page - 1) * $perPage;
-
 // Filters
 $statusFilter = getSafe('status', '', 50);
 $dateFrom = getSafe('date_from', '', 20);
@@ -66,12 +61,16 @@ if ($searchQuery) {
 
 $whereClause = !empty($where) ? 'WHERE ' . implode(' AND ', $where) : '';
 
-// Get total count
-$countSql = "SELECT COUNT(*) FROM requests r
+// Get total count + pagination (10 / 25 / 50 / 100; default 10)
+$countSql = "SELECT COUNT(*) as c FROM requests r
              LEFT JOIN users u ON r.user_id = u.id
              {$whereClause}";
-$totalItems = $db->fetch($countSql, $params)->{"COUNT(*)"} ?? 0;
-$totalPages = max(1, ceil($totalItems / $perPage));
+$totalItems = (int) ($db->fetch($countSql, $params)->c ?? 0);
+$pag = listPaginationState($totalItems);
+$perPage = $pag['perPage'];
+$page = $pag['page'];
+$offset = $pag['offset'];
+$totalPages = $pag['totalPages'];
 
 // Fetch requests
 $sql = "SELECT r.*,
@@ -97,6 +96,7 @@ $baseParams = tableSortQueryParams($sortState, [
     'q' => $searchQuery,
     'date_from' => $dateFrom,
     'date_to' => $dateTo,
+    'per_page' => $perPage,
 ]);
 
 // Status tab counts (never use filtered $totalItems for "All")
@@ -184,6 +184,7 @@ require_once INCLUDES_PATH . '/header.php';
                 </label>
                 <input type="date" name="date_to" value="<?= e($dateTo) ?>" class="input input-bordered input-sm bg-base-100">
             </div>
+            <?= perPageFieldHtml($pag['perPage']) ?>
             <div class="flex gap-2">
                 <button type="submit" class="loka-btn-primary loka-btn-sm">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
@@ -279,38 +280,9 @@ require_once INCLUDES_PATH . '/header.php';
             </table>
         </div>
 
-        <!-- Pagination -->
-        <?php if ($totalPages > 1): ?>
-        <div class="flex items-center justify-between mt-4 px-4 pb-4">
-            <p class="text-sm text-base-content/60">
-                Showing <?= $offset + 1 ?>–<?= min($offset + $perPage, $totalItems) ?> of <?= $totalItems ?>
-            </p>
-            <div class="join">
-                <?php
-                $pageParams = $baseParams;
-                $buildPageUrl = static function (array $params, int $pageNum): string {
-                    $params['p'] = $pageNum;
-                    return '?' . http_build_query(array_filter($params, static fn($v) => $v !== null && $v !== ''));
-                };
-                ?>
-                <?php if ($page > 1): ?>
-                <a href="<?= e($buildPageUrl($pageParams, $page - 1)) ?>" class="join-item btn btn-sm">«</a>
-                <?php endif; ?>
-
-                <?php
-                $start = max(1, $page - 2);
-                $end = min($totalPages, $page + 2);
-                for ($i = $start; $i <= $end; $i++):
-                ?>
-                <a href="<?= e($buildPageUrl($pageParams, $i)) ?>" class="join-item btn btn-sm <?= $i === $page ? 'btn-primary' : '' ?>"><?= $i ?></a>
-                <?php endfor; ?>
-
-                <?php if ($page < $totalPages): ?>
-                <a href="<?= e($buildPageUrl($pageParams, $page + 1)) ?>" class="join-item btn btn-sm">»</a>
-                <?php endif; ?>
-            </div>
+        <div class="px-4 pb-4">
+            <?= listPaginationFooter($pag, $baseParams) ?>
         </div>
-        <?php endif; ?>
     </div>
 </div>
 

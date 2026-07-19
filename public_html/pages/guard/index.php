@@ -17,6 +17,7 @@ $sql = "SELECT r.*,
             u.name as requester_name, u.phone as requester_phone,
             d.name as department_name,
             v.plate_number, v.make, v.model as vehicle_model,
+            v.mileage as vehicle_mileage, COALESCE(v.odometer_broken, 0) as odometer_broken,
             dr.license_number as driver_license,
             driver_user.name as driver_name, driver_user.phone as driver_phone,
             mph.name as motorpool_head_name,
@@ -318,7 +319,7 @@ require_once INCLUDES_PATH . '/header.php';
     <?php if (!$trip->actual_dispatch_datetime): ?>
         <dialog id="dispatchModal<?= $trip->id ?>" class="modal">
             <div class="modal-box bg-base-100 p-0 max-w-xl">
-                <form method="POST" action="<?= APP_URL ?>/?page=guard&action=record_dispatch" enctype="multipart/form-data" class="obs-guard-form">
+                <form method="POST" action="<?= APP_URL ?>/?page=guard&action=record_dispatch" enctype="multipart/form-data" class="obs-guard-form" data-odo-remind="dispatch" onsubmit="return confirmGuardOdometer(this)">
                     <?= csrfField() ?>
                     <input type="hidden" name="request_id" value="<?= $trip->id ?>">
 
@@ -380,6 +381,12 @@ require_once INCLUDES_PATH . '/header.php';
                         </div>
 
                         <?php
+                        $odoPhase = 'dispatch';
+                        $tripId = (int) $trip->id;
+                        require __DIR__ . '/partials/odometer_fields.php';
+                        ?>
+
+                        <?php
                         $obsPhase = 'dispatch';
                         $tripId = (int) $trip->id;
                         require __DIR__ . '/partials/observation_fields.php';
@@ -414,7 +421,7 @@ require_once INCLUDES_PATH . '/header.php';
     <?php if ($trip->actual_dispatch_datetime && !$trip->actual_arrival_datetime): ?>
         <dialog id="arrivalModal<?= $trip->id ?>" class="modal">
             <div class="modal-box bg-base-100 p-0 max-w-xl">
-                <form method="POST" action="<?= APP_URL ?>/?page=guard&action=record_arrival" enctype="multipart/form-data" class="obs-guard-form">
+                <form method="POST" action="<?= APP_URL ?>/?page=guard&action=record_arrival" enctype="multipart/form-data" class="obs-guard-form" data-odo-remind="arrival" onsubmit="return confirmGuardOdometer(this)">
                     <?= csrfField() ?>
                     <input type="hidden" name="request_id" value="<?= $trip->id ?>">
 
@@ -464,18 +471,11 @@ require_once INCLUDES_PATH . '/header.php';
                             </label>
                         </div>
 
-                        <?php if ($trip->mileage_start): ?>
-                        <div class="flex flex-col gap-1.5">
-                            <label class="label">
-                                <span class="label-text text-xs font-semibold text-base-content/70 uppercase tracking-wide">Ending Mileage (Optional)</span>
-                            </label>
-                            <input type="number" class="input input-bordered input-sm bg-base-100" name="mileage_end"
-                                   min="<?= $trip->mileage_start ?>" placeholder="Current odometer reading">
-                            <label class="label">
-                                <span class="label-text-alt text-xs text-base-content/50">Starting mileage was <strong><?= $trip->mileage_start ?> km</strong>. If entered, system will calculate actual trip distance.</span>
-                            </label>
-                        </div>
-                        <?php endif; ?>
+                        <?php
+                        $odoPhase = 'arrival';
+                        $tripId = (int) $trip->id;
+                        require __DIR__ . '/partials/odometer_fields.php';
+                        ?>
 
                         <?php
                         $obsPhase = 'arrival';
@@ -528,6 +528,46 @@ function toggleObSlipInput(id) {
         input.required = checkbox.checked;
     }
 }
+
+function toggleGuardOdometerBroken(id) {
+    const broken = document.getElementById('odoBroken' + id);
+    const input = document.getElementById('odoInput' + id);
+    if (!broken || !input) return;
+    if (broken.checked) {
+        input.disabled = true;
+        input.required = false;
+        input.value = '';
+    } else {
+        input.disabled = false;
+        input.required = true;
+    }
+}
+
+function confirmGuardOdometer(form) {
+    const phase = form.getAttribute('data-odo-remind') || 'dispatch';
+    const broken = form.querySelector('input[name="odometer_broken"]');
+    if (broken && broken.checked) {
+        return confirm(
+            'Odometer marked broken/unreadable.\n\n' +
+            'Please still remind the driver that no reading will be recorded for this ' + phase + '.\n\n' +
+            'Continue?'
+        );
+    }
+    const odo = form.querySelector('input[name="mileage_start"], input[name="mileage_end"]');
+    const reading = odo && odo.value ? odo.value + ' km' : '(missing)';
+    return confirm(
+        'Remind the driver to confirm the odometer reading before you proceed.\n\n' +
+        'Recorded reading: ' + reading + '\n\n' +
+        'Confirm ' + phase + '?'
+    );
+}
+
+document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('[id^="odoBroken"]').forEach(function (cb) {
+        const id = cb.id.replace('odoBroken', '');
+        toggleGuardOdometerBroken(id);
+    });
+});
 
 async function compressImageFile(file, maxEdge, quality) {
     if (!file || !file.type || !file.type.startsWith('image/')) return file;

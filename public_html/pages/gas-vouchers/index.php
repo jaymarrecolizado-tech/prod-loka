@@ -57,6 +57,12 @@ $sortState = resolveTableSort($allowedSortColumns, 'created_at', 'DESC');
 $sort = $sortState['key'];
 $sortDir = $sortState['dir'];
 
+$countRow = db()->fetch(
+    "SELECT COUNT(*) as c FROM gas_vouchers gv WHERE {$whereClause}",
+    $params
+);
+$pag = listPaginationState((int) ($countRow->c ?? 0));
+
 $vouchers = db()->fetchAll(
     "SELECT gv.*,
             u.name AS requester_name,
@@ -67,8 +73,9 @@ $vouchers = db()->fetchAll(
      LEFT JOIN users reviewer ON gv.reviewed_by = reviewer.id
      LEFT JOIN users approver ON gv.approved_by = approver.id
      WHERE {$whereClause}
-     ORDER BY {$sortState['orderSql']}",
-    $params
+     ORDER BY {$sortState['orderSql']}
+     LIMIT ? OFFSET ?",
+    array_merge($params, [$pag['perPage'], $pag['offset']])
 );
 
 $baseParams = tableSortQueryParams($sortState, [
@@ -77,6 +84,7 @@ $baseParams = tableSortQueryParams($sortState, [
     'search' => $searchFilter,
     'date_from' => $dateFrom,
     'date_to' => $dateTo,
+    'per_page' => $pag['perPage'],
 ]);
 
 // Count by status for summary badges
@@ -176,6 +184,8 @@ require_once INCLUDES_PATH . '/header.php';
                     <label class="label label-text text-xs">Date To</label>
                     <input type="date" name="date_to" class="input input-bordered input-sm w-40" value="<?= e($dateTo) ?>">
                 </div>
+
+                <?= perPageFieldHtml($pag['perPage']) ?>
 
                 <div class="flex gap-2">
                     <button type="submit" class="loka-btn loka-btn-primary loka-btn-sm">
@@ -280,6 +290,7 @@ require_once INCLUDES_PATH . '/header.php';
                     </tbody>
                 </table>
             </div>
+            <?= listPaginationFooter($pag, $baseParams) ?>
             <?php endif; ?>
         </div>
     </div>

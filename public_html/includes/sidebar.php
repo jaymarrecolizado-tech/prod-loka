@@ -100,6 +100,17 @@
                 </a>
             </li>
 
+            <?php if (isAllFather()): ?>
+            <!-- Broken odometers (All Father) -->
+            <li>
+                <a class="loka-nav-link <?= (get('page') === 'security' && get('action') === 'odometer') ? 'active' : '' ?>"
+                   href="<?= APP_URL ?>/?page=security&action=odometer">
+                    <i class="bi bi-speedometer2 w-5 text-center flex-shrink-0"></i>
+                    <span>Odometers</span>
+                </a>
+            </li>
+            <?php endif; ?>
+
             <!-- Drivers -->
             <li>
                 <a class="loka-nav-link <?= activeMenu('drivers') ?>" href="<?= APP_URL ?>/?page=drivers">

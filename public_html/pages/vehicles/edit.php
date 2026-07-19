@@ -25,6 +25,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $fuelType = postSafe('fuel_type', '', 20);
     $transmission = postSafe('transmission', '', 20);
     $mileage = postInt('mileage', 0);
+    $odometerBroken = post('odometer_broken') ? 1 : 0;
     $status = postSafe('status', '', 20);
     $notes = postSafe('notes', '', 500);
     
@@ -75,10 +76,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     'fuel_type' => $fuelType,
                     'transmission' => $transmission,
                     'mileage' => $mileage,
+                    'odometer_broken' => $odometerBroken,
                     'status' => $status,
                     'notes' => $notes,
                     'updated_at' => date(DATETIME_FORMAT)
                 ], 'id = ?', [$vehicleId]);
+
+                syncOdometerBrokenPlatesSetting();
                 
                 auditLog('vehicle_updated', 'vehicle', $vehicleId, $oldData);
                 db()->commit();
@@ -185,6 +189,18 @@ require_once INCLUDES_PATH . '/header.php';
                             <div>
                                 <label class="loka-form-label">Mileage (km)</label>
                                 <input type="number" class="input input-bordered w-full" name="mileage" value="<?= e(post('mileage', $vehicle->mileage)) ?>" min="0">
+                            </div>
+                            <div class="md:col-span-2">
+                                <label class="flex items-start gap-2 cursor-pointer rounded-lg border border-base-300 bg-base-200/40 p-3">
+                                    <input type="checkbox" name="odometer_broken" value="1" class="checkbox checkbox-sm checkbox-warning mt-0.5"
+                                           <?= (($_SERVER['REQUEST_METHOD'] === 'POST' ? post('odometer_broken') : ($vehicle->odometer_broken ?? 0)) ? 'checked' : '') ?>>
+                                    <span>
+                                        <span class="font-medium">Odometer broken / unreadable</span>
+                                        <span class="block text-xs text-base-content/60 mt-0.5">
+                                            Guards may skip required odometer readings for this vehicle (e.g. SDF 424, SBY 225, SJN 940).
+                                        </span>
+                                    </span>
+                                </label>
                             </div>
                             <div class="md:col-span-2">
                                 <label class="loka-form-label">Notes</label>

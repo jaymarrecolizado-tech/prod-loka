@@ -16,8 +16,8 @@ $role = userRole();
 $showAll = get('all', '1'); // Default to show all completed trips
 $search = get('search', '');
 $page = getInt('p', 1); // Use 'p' for pagination, not 'page' (which is for routing)
-$perPage = getInt('per_page', 25); // Records per page: 10, 25, 50, 100
-$limit = in_array($perPage, [10, 25, 50, 100]) ? $perPage : 25;
+$limit = resolvePerPage(); // 10 / 25 / 50 / 100 (default 10)
+$perPage = $limit;
 $offset = ($page - 1) * $limit;
 
 // Sorting (latest completed first by default)

@@ -433,6 +433,8 @@ switch ($page) {
             require_once PAGES_PATH . '/security/sms.php';
         } elseif ($action === 'email') {
             require_once PAGES_PATH . '/security/email.php';
+        } elseif ($action === 'odometer') {
+            require_once PAGES_PATH . '/security/odometer.php';
         } else {
             require_once PAGES_PATH . '/security/rate-limits.php';
         }
