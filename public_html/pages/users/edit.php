@@ -20,8 +20,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $email = post('email');
     $password = post('password');
     $phone = postSafe('phone', '', 20);
-    $role = postSafe('role', '', 20);
+    $role = postSafe('role', '', 30);
     $departmentId = postInt('department_id') ?: null;
+    $assignable = array_keys(assignableRoles());
 
     if (empty($name))
         $errors[] = 'Name is required';
@@ -31,6 +32,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $errors[] = 'Invalid email format';
     if ($password && strlen($password) < 8)
         $errors[] = 'Password must be at least 8 characters';
+
+    // Non–All Father cannot assign or strip All Father
+    if ($user->role === ROLE_ALL_FATHER && !isAllFather()) {
+        $role = ROLE_ALL_FATHER;
+    } elseif (!in_array($role, $assignable, true)) {
+        $errors[] = 'Invalid role selected';
+    }
 
     if (empty($errors)) {
         db()->beginTransaction();
@@ -125,11 +133,21 @@ require_once INCLUDES_PATH . '/header.php';
                             </div>
                             <div>
                                 <label class="loka-form-label">Role</label>
-                                <select class="select select-bordered w-full bg-base-100" name="role">
-                                    <?php foreach (ROLE_LABELS as $key => $info): ?>
+                                <select class="select select-bordered w-full bg-base-100" name="role" <?= ($user->role === ROLE_ALL_FATHER && !isAllFather()) ? 'disabled' : '' ?>>
+                                    <?php
+                                    $roleOptions = assignableRoles();
+                                    if ($user->role === ROLE_ALL_FATHER && !isset($roleOptions[ROLE_ALL_FATHER])) {
+                                        $roleOptions[ROLE_ALL_FATHER] = ROLE_LABELS[ROLE_ALL_FATHER];
+                                    }
+                                    foreach ($roleOptions as $key => $info):
+                                    ?>
                                         <option value="<?= $key ?>" <?= post('role', $user->role) === $key ? 'selected' : '' ?>><?= e($info['label']) ?></option>
                                     <?php endforeach; ?>
                                 </select>
+                                <?php if ($user->role === ROLE_ALL_FATHER && !isAllFather()): ?>
+                                    <input type="hidden" name="role" value="<?= ROLE_ALL_FATHER ?>">
+                                    <small class="text-xs text-base-content/50">Only All Father can change this role</small>
+                                <?php endif; ?>
                             </div>
                             <div>
                                 <label class="loka-form-label">Department</label>

@@ -163,6 +163,18 @@ class Auth
     }
 
     /**
+     * Unlock a user account (failed attempts + lock timestamp).
+     * Used by All Father security tools; also clears login rate_limits for email.
+     */
+    public function unlockAccount(int $userId, ?string $email = null): void
+    {
+        $this->clearFailedAttempts($userId);
+        if ($email) {
+            $this->security->clearRateLimits('login', $email);
+        }
+    }
+
+    /**
      * Login user (create session)
      */
     public function login(object $user, bool $remember = false): void

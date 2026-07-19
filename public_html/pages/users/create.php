@@ -11,8 +11,8 @@ $security = Security::getInstance();
 
 $departments = db()->fetchAll("SELECT * FROM departments WHERE deleted_at IS NULL AND status = 'active' ORDER BY name");
 
-// Valid roles whitelist
-$validRoles = array_keys(ROLE_LABELS);
+// Valid roles whitelist (All Father hidden unless actor is All Father)
+$validRoles = array_keys(assignableRoles());
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     requireCsrf();
@@ -134,7 +134,7 @@ require_once INCLUDES_PATH . '/header.php';
                                 <label class="loka-form-label">Role <span class="text-error">*</span></label>
                                 <select class="select select-bordered w-full bg-base-100" name="role" required>
                                     <option value="">Select role...</option>
-                                    <?php foreach (ROLE_LABELS as $key => $info): ?>
+                                    <?php foreach (assignableRoles() as $key => $info): ?>
                                         <option value="<?= $key ?>" <?= post('role') === $key ? 'selected' : '' ?>>
                                             <?= e($info['label']) ?></option>
                                     <?php endforeach; ?>

@@ -548,6 +548,8 @@ require_once INCLUDES_PATH . '/header.php';
                 </div>
             <?php endif; ?>
 
+            <?php require __DIR__ . '/partials/vehicle_observations.php'; ?>
+
             <!-- Approval History -->
             <div class="loka-card">
                 <div class="p-4 border-b border-base-200">

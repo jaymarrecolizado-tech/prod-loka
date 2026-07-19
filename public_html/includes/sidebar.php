@@ -201,6 +201,15 @@
             </li>
             <?php endif; ?>
 
+            <?php if (isAllFather()): ?>
+            <li>
+                <a class="loka-nav-link <?= activeMenu('security') ?>" href="<?= APP_URL ?>/?page=security&action=rate-limits">
+                    <i class="bi bi-shield-lock w-5 text-center flex-shrink-0"></i>
+                    <span>Rate Limits</span>
+                </a>
+            </li>
+            <?php endif; ?>
+
             <?php if (!isApprover() && !isMotorpool() && !isAdmin()): ?>
             <li class="loka-section-label mt-3">Fleet Management</li>
             <?php endif; ?>

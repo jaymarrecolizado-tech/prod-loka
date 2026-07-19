@@ -34,7 +34,9 @@ class Database
         'maintenance_requests',
         'assignment_history',
         'trip_tickets',
-        'gas_vouchers'
+        'gas_vouchers',
+        'vehicle_observations',
+        'vehicle_observation_photos',
     ];
 
     private function __construct()

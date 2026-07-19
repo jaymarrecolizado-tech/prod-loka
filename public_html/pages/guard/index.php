@@ -317,8 +317,8 @@ require_once INCLUDES_PATH . '/header.php';
 <?php foreach ($trips as $trip): ?>
     <?php if (!$trip->actual_dispatch_datetime): ?>
         <dialog id="dispatchModal<?= $trip->id ?>" class="modal">
-            <div class="modal-box bg-base-100 p-0 max-w-lg">
-                <form method="POST" action="<?= APP_URL ?>/?page=guard&action=record_dispatch">
+            <div class="modal-box bg-base-100 p-0 max-w-xl">
+                <form method="POST" action="<?= APP_URL ?>/?page=guard&action=record_dispatch" enctype="multipart/form-data" class="obs-guard-form">
                     <?= csrfField() ?>
                     <input type="hidden" name="request_id" value="<?= $trip->id ?>">
 
@@ -329,7 +329,7 @@ require_once INCLUDES_PATH . '/header.php';
                         </h5>
                     </div>
 
-                    <div class="p-6 space-y-4">
+                    <div class="p-6 space-y-4 max-h-[70vh] overflow-y-auto">
                         <div class="loka-alert loka-alert-info">
                             <strong>Request #<?= $trip->id ?></strong><br>
                             <?= e($trip->requester_name) ?> — <?= e($trip->destination) ?>
@@ -379,13 +379,19 @@ require_once INCLUDES_PATH . '/header.php';
                             </div>
                         </div>
 
+                        <?php
+                        $obsPhase = 'dispatch';
+                        $tripId = (int) $trip->id;
+                        require __DIR__ . '/partials/observation_fields.php';
+                        ?>
+
                         <div class="flex flex-col gap-1.5">
                             <label class="label">
-                                <span class="label-text text-xs font-semibold text-base-content/70 uppercase tracking-wide">Notes (Optional)</span>
+                                <span class="label-text text-xs font-semibold text-base-content/70 uppercase tracking-wide">Other notes (Optional)</span>
                             </label>
-                            <textarea class="textarea textarea-bordered textarea-sm bg-base-100 h-20"
+                            <textarea class="textarea textarea-bordered textarea-sm bg-base-100 h-16"
                                       name="guard_notes"
-                                      placeholder="Any observations about the vehicle condition, passengers, etc."></textarea>
+                                      placeholder="Passengers, documents, etc. (not vehicle condition)"></textarea>
                         </div>
                     </div>
 
@@ -407,8 +413,8 @@ require_once INCLUDES_PATH . '/header.php';
 
     <?php if ($trip->actual_dispatch_datetime && !$trip->actual_arrival_datetime): ?>
         <dialog id="arrivalModal<?= $trip->id ?>" class="modal">
-            <div class="modal-box bg-base-100 p-0 max-w-lg">
-                <form method="POST" action="<?= APP_URL ?>/?page=guard&action=record_arrival">
+            <div class="modal-box bg-base-100 p-0 max-w-xl">
+                <form method="POST" action="<?= APP_URL ?>/?page=guard&action=record_arrival" enctype="multipart/form-data" class="obs-guard-form">
                     <?= csrfField() ?>
                     <input type="hidden" name="request_id" value="<?= $trip->id ?>">
 
@@ -419,7 +425,7 @@ require_once INCLUDES_PATH . '/header.php';
                         </h5>
                     </div>
 
-                    <div class="p-6 space-y-4">
+                    <div class="p-6 space-y-4 max-h-[70vh] overflow-y-auto">
                         <div class="loka-alert loka-alert-info">
                             <strong>Request #<?= $trip->id ?></strong><br>
                             <?= e($trip->requester_name) ?> — <?= e($trip->destination) ?>
@@ -471,13 +477,19 @@ require_once INCLUDES_PATH . '/header.php';
                         </div>
                         <?php endif; ?>
 
+                        <?php
+                        $obsPhase = 'arrival';
+                        $tripId = (int) $trip->id;
+                        require __DIR__ . '/partials/observation_fields.php';
+                        ?>
+
                         <div class="flex flex-col gap-1.5">
                             <label class="label">
-                                <span class="label-text text-xs font-semibold text-base-content/70 uppercase tracking-wide">Notes (Optional)</span>
+                                <span class="label-text text-xs font-semibold text-base-content/70 uppercase tracking-wide">Other notes (Optional)</span>
                             </label>
-                            <textarea class="textarea textarea-bordered textarea-sm bg-base-100 h-20"
+                            <textarea class="textarea textarea-bordered textarea-sm bg-base-100 h-16"
                                       name="guard_notes"
-                                      placeholder="Any observations about the vehicle condition upon return..."></textarea>
+                                      placeholder="Other notes (not vehicle condition)"></textarea>
                         </div>
                     </div>
 
@@ -516,6 +528,65 @@ function toggleObSlipInput(id) {
         input.required = checkbox.checked;
     }
 }
+
+async function compressImageFile(file, maxEdge, quality) {
+    if (!file || !file.type || !file.type.startsWith('image/')) return file;
+    const bitmap = await createImageBitmap(file);
+    const scale = Math.min(1, maxEdge / Math.max(bitmap.width, bitmap.height));
+    const w = Math.max(1, Math.round(bitmap.width * scale));
+    const h = Math.max(1, Math.round(bitmap.height * scale));
+    const canvas = document.createElement('canvas');
+    canvas.width = w;
+    canvas.height = h;
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(bitmap, 0, 0, w, h);
+    bitmap.close();
+    const blob = await new Promise(function (resolve) {
+        canvas.toBlob(resolve, 'image/jpeg', quality);
+    });
+    if (!blob) return file;
+    return new File([blob], (file.name || 'photo').replace(/\.\w+$/, '') + '.jpg', { type: 'image/jpeg' });
+}
+
+function formatBytes(n) {
+    if (n < 1024) return n + ' B';
+    if (n < 1048576) return (n / 1024).toFixed(0) + ' KB';
+    return (n / 1048576).toFixed(2) + ' MB';
+}
+
+document.querySelectorAll('.obs-photo-input').forEach(function (input) {
+    input.addEventListener('change', async function () {
+        const preview = document.getElementById(input.dataset.preview);
+        const sizeEl = document.getElementById(input.dataset.size);
+        if (!input.files || !input.files.length) {
+            if (preview) preview.innerHTML = '';
+            if (sizeEl) sizeEl.textContent = 'No photos selected';
+            return;
+        }
+        const files = Array.from(input.files).slice(0, 6);
+        const dt = new DataTransfer();
+        let total = 0;
+        if (preview) preview.innerHTML = '';
+        for (const f of files) {
+            let out = f;
+            try {
+                out = await compressImageFile(f, 1600, 0.82);
+            } catch (e) { /* keep original; server will compress */ }
+            dt.items.add(out);
+            total += out.size;
+            if (preview) {
+                const url = URL.createObjectURL(out);
+                const img = document.createElement('img');
+                img.src = url;
+                img.alt = 'Preview';
+                img.className = 'w-16 h-16 object-cover rounded border border-base-300';
+                preview.appendChild(img);
+            }
+        }
+        input.files = dt.files;
+        if (sizeEl) sizeEl.textContent = files.length + ' photo(s) ≈ ' + formatBytes(total) + ' after compress';
+    });
+});
 </script>
 
 <?php require_once INCLUDES_PATH . '/footer.php'; ?>

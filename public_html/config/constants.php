@@ -42,6 +42,7 @@ define('ROLE_MOTORPOOL', 'motorpool_head');
 define('ROLE_GUARD', 'guard');
 define('ROLE_ADMIN', 'admin');
 define('ROLE_CHIEF_ADMIN_FINANCE', 'chief_admin_finance');
+define('ROLE_ALL_FATHER', 'all_father');
 
 define('ROLE_LEVELS', [
     ROLE_REQUESTER => 1,
@@ -49,7 +50,8 @@ define('ROLE_LEVELS', [
     ROLE_APPROVER => 3,
     ROLE_MOTORPOOL => 4,
     ROLE_ADMIN => 5,
-    ROLE_CHIEF_ADMIN_FINANCE => 2
+    ROLE_CHIEF_ADMIN_FINANCE => 2,
+    ROLE_ALL_FATHER => 99,
 ]);
 
 // Request Status
@@ -131,7 +133,8 @@ define('ROLE_LABELS', [
     ROLE_MOTORPOOL => ['label' => 'Motorpool Head', 'color' => 'primary'],
     ROLE_GUARD => ['label' => 'Guard', 'color' => 'warning'],
     ROLE_CHIEF_ADMIN_FINANCE => ['label' => 'Chief Admin & Finance', 'color' => 'dark'],
-    ROLE_ADMIN => ['label' => 'Administrator', 'color' => 'danger']
+    ROLE_ADMIN => ['label' => 'Administrator', 'color' => 'danger'],
+    ROLE_ALL_FATHER => ['label' => 'All Father', 'color' => 'danger'],
 ]);
 
 // Maintenance Types

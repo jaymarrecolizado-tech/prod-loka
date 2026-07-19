@@ -7,6 +7,8 @@ require_once __DIR__ . '/table_sort.php';
 require_once __DIR__ . '/badge_counts.php';
 require_once __DIR__ . '/dashboard_stats.php';
 require_once __DIR__ . '/availability.php';
+require_once __DIR__ . '/image_optimize.php';
+require_once __DIR__ . '/vehicle_observations.php';
 
 /**
  * Get database instance
@@ -248,11 +250,51 @@ function hasRole(string $minRole): bool
 }
 
 /**
- * Check if user is admin
+ * Check if user is All Father (god / super-super-admin)
+ */
+function isAllFather(): bool
+{
+    return userRole() === ROLE_ALL_FATHER;
+}
+
+/**
+ * Only All Father may clear rate limits / unlock accounts in-app.
+ */
+function canClearRateLimits(): bool
+{
+    return isAllFather();
+}
+
+/**
+ * Roles assignable in user create/edit. All Father is hidden unless actor is All Father.
+ *
+ * @return array<string, array{label: string, color: string}>
+ */
+function assignableRoles(): array
+{
+    $roles = ROLE_LABELS;
+    if (!isAllFather()) {
+        unset($roles[ROLE_ALL_FATHER]);
+    }
+    return $roles;
+}
+
+/**
+ * Check if user is admin (includes All Father)
  */
 function isAdmin(): bool
 {
-    return userRole() === ROLE_ADMIN;
+    return userRole() === ROLE_ADMIN || isAllFather();
+}
+
+/**
+ * Require All Father role or redirect.
+ */
+function requireAllFather(): void
+{
+    if (!isAllFather()) {
+        redirectWith('/?page=dashboard', 'danger', 'All Father access required.');
+    }
 }
 
 /**

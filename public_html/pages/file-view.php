@@ -35,6 +35,7 @@ $mimeTypes = [
     'jpeg' => 'image/jpeg',
     'png' => 'image/png',
     'gif' => 'image/gif',
+    'webp' => 'image/webp',
     'txt' => 'text/plain',
     'csv' => 'text/csv',
     'xls' => 'application/vnd.ms-excel',

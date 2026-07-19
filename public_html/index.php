@@ -384,6 +384,15 @@ switch ($page) {
         }
         break;
 
+    case 'security':
+        requireAllFather();
+        if ($action === 'rate-limits' || $action === 'index') {
+            require_once PAGES_PATH . '/security/rate-limits.php';
+        } else {
+            require_once PAGES_PATH . '/security/rate-limits.php';
+        }
+        break;
+
     case 'profile':
         require_once PAGES_PATH . '/profile/index.php';
         break;

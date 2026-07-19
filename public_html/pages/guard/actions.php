@@ -67,6 +67,21 @@ switch ($action) {
         // Format the datetime
         $formattedDispatchTime = date('Y-m-d H:i:s', strtotime($dispatchTime));
 
+        $obsResult = observationSaveForPhase(
+            $requestId,
+            $request->vehicle_id ? (int) $request->vehicle_id : null,
+            'dispatch',
+            (int) userId(),
+            (string) post('overall_condition', ''),
+            observationParseFlagsFromPost(),
+            (string) postSafe('condition_notes', '', 1000),
+            null,
+            $_FILES['observation_photos'] ?? []
+        );
+        if (!$obsResult['ok']) {
+            redirectWith('/?page=guard', 'danger', $obsResult['error'] ?? 'Could not save vehicle observation.');
+        }
+
         // Update request
         db()->update('requests', [
             'actual_dispatch_datetime' => $formattedDispatchTime,
@@ -88,7 +103,8 @@ switch ($action) {
             [
                 'dispatch_time' => $formattedDispatchTime,
                 'guard_id' => userId(),
-                'guard_notes' => $guardNotes
+                'guard_notes' => $guardNotes,
+                'observation_id' => $obsResult['observation_id'] ?? null,
             ]
         );
         
@@ -153,6 +169,24 @@ switch ($action) {
         if ($mileageEnd !== null && $request->mileage_start !== null) {
             $mileageActual = $mileageEnd - $request->mileage_start;
         }
+
+        $overallCondition = (string) post('overall_condition', '');
+        $conditionNotes = (string) postSafe('condition_notes', '', 1000);
+        $obsResult = observationSaveForPhase(
+            $requestId,
+            $request->vehicle_id ? (int) $request->vehicle_id : null,
+            'arrival',
+            (int) userId(),
+            $overallCondition,
+            observationParseFlagsFromPost(),
+            $conditionNotes,
+            $mileageEnd,
+            $_FILES['observation_photos'] ?? []
+        );
+        if (!$obsResult['ok']) {
+            redirectWith('/?page=guard', 'danger', $obsResult['error'] ?? 'Could not save vehicle observation.');
+        }
+        observationNotifyDamage($request, $overallCondition, $conditionNotes);
 
         // Update request - mark as completed
         $updateData = [
