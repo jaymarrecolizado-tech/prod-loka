@@ -1,0 +1,25 @@
+# LOKA staging crons — Hostinger KVM (lokastage.dictr2.cloud)
+# Install: crontab -e  (as user lokaloka)  OR Hostinger hPanel → Cron Jobs
+#
+# Document root:
+#   /home/lokaloka/htdocs/lokastage.dictr2.cloud
+#
+# Confirm PHP binary first:
+#   which php
+#   php -v
+
+# ---------- Option A: CLI (recommended) ----------
+*/2 * * * * /usr/bin/php /home/lokaloka/htdocs/lokastage.dictr2.cloud/cron/process_queue.php >> /home/lokaloka/htdocs/lokastage.dictr2.cloud/logs/cron-email.log 2>&1
+*/2 * * * * /usr/bin/php /home/lokaloka/htdocs/lokastage.dictr2.cloud/cron/process_sms_queue.php >> /home/lokaloka/htdocs/lokastage.dictr2.cloud/logs/cron-sms.log 2>&1
+
+# Optional: workflow / maintenance if you use them
+# 0 * * * * /usr/bin/php /home/lokaloka/htdocs/lokastage.dictr2.cloud/cron/fix_workflow.php >> /home/lokaloka/htdocs/lokastage.dictr2.cloud/logs/cron-workflow.log 2>&1
+
+# ---------- Option B: HTTP cron (uses All Father cron_secret) ----------
+# Replace YOUR_CRON_SECRET with the value from System Control → Email (or CRON_SECRET in .env / settings).
+# */2 * * * * /usr/bin/curl -fsS "https://lokastage.dictr2.cloud/?page=cron&action=email&key=YOUR_CRON_SECRET" >> /home/lokaloka/htdocs/lokastage.dictr2.cloud/logs/cron-email-http.log 2>&1
+# */2 * * * * /usr/bin/curl -fsS "https://lokastage.dictr2.cloud/?page=cron&action=sms&key=YOUR_CRON_SECRET" >> /home/lokaloka/htdocs/lokastage.dictr2.cloud/logs/cron-sms-http.log 2>&1
+
+# Manual smoke test (SSH):
+#   php /home/lokaloka/htdocs/lokastage.dictr2.cloud/cron/process_queue.php
+#   php /home/lokaloka/htdocs/lokastage.dictr2.cloud/cron/process_sms_queue.php

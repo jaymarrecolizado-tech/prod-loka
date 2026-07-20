@@ -50,3 +50,7 @@ public_html/.env
 public_html/.env.local
 public_html/.env.*
 !public_html/.env.example
+
+# Deployment upload tree (rebuild with scripts/build-package.ps1)
+DEPLOYMENT-PRIME/htdocs/
+
