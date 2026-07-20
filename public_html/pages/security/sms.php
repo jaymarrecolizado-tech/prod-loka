@@ -22,7 +22,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $url = trim(postSafe('sms_gateway_url', '', 255));
             $username = trim(postSafe('sms_gateway_username', '', 100));
             $password = (string) post('sms_gateway_password', '');
-            $apiPath = trim(postSafe('sms_api_path', SMS_API_PATH_LOCAL, 120));
+            $apiPath = trim(postSafe('sms_api_path', SMS_API_PATH_CLOUD, 120));
             $country = preg_replace('/\D+/', '', postSafe('sms_country_code', '63', 5)) ?: '63';
             $timeout = max(5, min(60, (int) post('sms_timeout_seconds', 15)));
             $maxLen = max(80, min(1600, (int) post('sms_max_length', 320)));
@@ -39,13 +39,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $allowlist = !empty($selected) ? implode(',', $selected) : $allowlistDefault;
             }
 
+            $allowedPaths = [SMS_API_PATH_LOCAL, SMS_API_PATH_PRIVATE, SMS_API_PATH_CLOUD];
+            if (!in_array($apiPath, $allowedPaths, true)) {
+                $apiPath = SMS_API_PATH_CLOUD;
+            }
+
             smsSaveSetting('sms_enabled', $enabled, 'boolean');
             smsSaveSetting('sms_gateway_url', $url);
             smsSaveSetting('sms_gateway_username', $username);
             if ($password !== '') {
                 smsSaveSetting('sms_gateway_password', $password);
             }
-            smsSaveSetting('sms_api_path', $apiPath !== '' ? $apiPath : SMS_API_PATH_LOCAL);
+            smsSaveSetting('sms_api_path', $apiPath !== '' ? $apiPath : SMS_API_PATH_CLOUD);
             smsSaveSetting('sms_country_code', $country);
             smsSaveSetting('sms_timeout_seconds', (string) $timeout, 'integer');
             smsSaveSetting('sms_max_length', (string) $maxLen, 'integer');
@@ -273,11 +278,14 @@ require_once INCLUDES_PATH . '/header.php';
                         <div>
                             <label class="loka-form-label">API path</label>
                             <select name="sms_api_path" class="loka-form-input">
+                                <option value="<?= e(SMS_API_PATH_CLOUD) ?>" <?= $apiPath === SMS_API_PATH_CLOUD ? 'selected' : '' ?>>
+                                    Public cloud sms-gate.app (<?= e(SMS_API_PATH_CLOUD) ?>)
+                                </option>
                                 <option value="<?= e(SMS_API_PATH_LOCAL) ?>" <?= $apiPath === SMS_API_PATH_LOCAL ? 'selected' : '' ?>>
                                     Local phone server (<?= e(SMS_API_PATH_LOCAL) ?>)
                                 </option>
                                 <option value="<?= e(SMS_API_PATH_PRIVATE) ?>" <?= $apiPath === SMS_API_PATH_PRIVATE ? 'selected' : '' ?>>
-                                    Private / Hostinger server (<?= e(SMS_API_PATH_PRIVATE) ?>)
+                                    Self-hosted private server (<?= e(SMS_API_PATH_PRIVATE) ?>)
                                 </option>
                             </select>
                         </div>

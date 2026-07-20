@@ -52,4 +52,7 @@ define('SMS_DEFAULT_ALLOWLIST', [
 
 /** API path presets for All Father UI */
 define('SMS_API_PATH_LOCAL', '/message');
+/** Self-hosted private SMSGate server */
 define('SMS_API_PATH_PRIVATE', '/api/3rdparty/v1/messages');
+/** Public cloud: https://api.sms-gate.app */
+define('SMS_API_PATH_CLOUD', '/3rdparty/v1/messages');

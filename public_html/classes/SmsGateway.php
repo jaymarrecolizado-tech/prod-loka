@@ -27,20 +27,61 @@ class SmsGateway
 
     public static function fromConfig(): ?self
     {
-        $url = smsConfig('sms_gateway_url');
-        $user = smsConfig('sms_gateway_username');
+        $url = trim(smsConfig('sms_gateway_url'));
+        $user = trim(smsConfig('sms_gateway_username'));
         $pass = smsConfig('sms_gateway_password');
         if ($url === '' || $user === '' || $pass === '') {
             return null;
+        }
+
+        $apiPath = trim(smsConfig('sms_api_path', SMS_API_PATH_LOCAL));
+        $url = self::normalizeGatewayBaseUrl($url, $apiPath);
+
+        // Public cloud always uses the cloud messages path.
+        if (stripos($url, 'api.sms-gate.app') !== false) {
+            $apiPath = defined('SMS_API_PATH_CLOUD') ? SMS_API_PATH_CLOUD : '/3rdparty/v1/messages';
+        } elseif ($apiPath === SMS_API_PATH_PRIVATE && stripos($url, 'sms-gate.app') !== false) {
+            $apiPath = defined('SMS_API_PATH_CLOUD') ? SMS_API_PATH_CLOUD : '/3rdparty/v1/messages';
         }
 
         return new self(
             $url,
             $user,
             $pass,
-            smsConfig('sms_api_path', SMS_API_PATH_LOCAL),
+            $apiPath,
             (int) smsConfig('sms_timeout_seconds', '15')
         );
+    }
+
+    /**
+     * Normalize user-entered gateway base (handles app copy "api.sms-gate.app:443").
+     */
+    public static function normalizeGatewayBaseUrl(string $url, string $apiPath = ''): string
+    {
+        $url = trim($url);
+        $url = preg_replace('#/+$#', '', $url) ?? $url;
+
+        // App home screen often shows host:port without scheme.
+        if (!preg_match('#^https?://#i', $url)) {
+            $url = 'https://' . ltrim($url, '/');
+        }
+
+        // http → https for sms-gate (avoids HTTP 308 Permanent Redirect on POST).
+        if (stripos($url, 'sms-gate.app') !== false) {
+            $url = preg_replace('#^http://#i', 'https://', $url) ?? $url;
+            // Strip default HTTPS port if pasted from app (:443).
+            $url = preg_replace('#^(https://[^/:]+):443(?=/|$)#i', '$1', $url) ?? $url;
+        }
+
+        // If user pasted a full messages URL as "gateway URL", peel back to origin.
+        if (preg_match('#^(https://api\.sms-gate\.app)(/3rdparty/v1/messages/?)$#i', $url, $m)) {
+            $url = $m[1];
+        }
+        if (preg_match('#^(https://api\.sms-gate\.app)/api(/3rdparty/v1/messages/?)$#i', $url, $m)) {
+            $url = $m[1];
+        }
+
+        return rtrim($url, '/');
     }
 
     public function endpoint(): string
@@ -72,7 +113,13 @@ class SmsGateway
         $connectTimeout = min(3, $this->timeout);
         $readTimeout = min($this->timeout, 15);
 
-        $ch = curl_init($this->endpoint());
+        // Prefer hitting the final HTTPS URL directly (POST+308 is unreliable).
+        $endpoint = $this->endpoint();
+        if (stripos($endpoint, 'http://api.sms-gate.app') === 0) {
+            $endpoint = 'https://' . substr($endpoint, strlen('http://'));
+        }
+
+        $ch = curl_init($endpoint);
         curl_setopt_array($ch, [
             CURLOPT_POST => true,
             CURLOPT_POSTFIELDS => $payload,
@@ -83,14 +130,16 @@ class SmsGateway
             CURLOPT_USERPWD => $this->username . ':' . $this->password,
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_TIMEOUT => $readTimeout,
-            CURLOPT_CONNECTTIMEOUT => $connectTimeout,
+            CURLOPT_CONNECTTIMEOUT => max(5, $connectTimeout),
             CURLOPT_NOSIGNAL => true,
+            CURLOPT_FOLLOWLOCATION => false,
         ]);
 
         $body = curl_exec($ch);
         $errno = curl_errno($ch);
         $error = curl_error($ch);
         $code = (int) curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $finalUrl = (string) curl_getinfo($ch, CURLINFO_EFFECTIVE_URL);
         curl_close($ch);
 
         if ($errno !== 0) {
@@ -115,11 +164,19 @@ class SmsGateway
         }
 
         $ok = $code >= 200 && $code < 300;
+        $errDetail = '';
+        if (!$ok) {
+            $errDetail = 'HTTP ' . $code;
+            if (is_string($body) && $body !== '') {
+                $errDetail .= ': ' . substr($body, 0, 200);
+            }
+            $errDetail .= ' @ ' . $finalUrl;
+        }
         return [
             'ok' => $ok,
             'message_id' => $messageId,
             'response' => is_string($body) ? substr($body, 0, 4000) : null,
-            'error' => $ok ? null : ('HTTP ' . $code . (is_string($body) ? ': ' . substr($body, 0, 200) : '')),
+            'error' => $ok ? null : $errDetail,
             'http_code' => $code,
         ];
     }
@@ -129,12 +186,15 @@ class SmsGateway
      */
     public function health(): array
     {
-        $url = $this->baseUrl . '/health';
+        // Public cloud has no /health; probe the API host instead.
+        $isCloud = stripos($this->baseUrl, 'sms-gate.app') !== false;
+        $url = $isCloud ? rtrim($this->baseUrl, '/') . '/' : ($this->baseUrl . '/health');
         $ch = curl_init($url);
         curl_setopt_array($ch, [
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_TIMEOUT => min(10, $this->timeout),
             CURLOPT_CONNECTTIMEOUT => 5,
+            CURLOPT_NOBODY => $isCloud,
         ]);
         $body = curl_exec($ch);
         $errno = curl_errno($ch);
@@ -144,6 +204,16 @@ class SmsGateway
 
         if ($errno !== 0) {
             return ['ok' => false, 'error' => $error ?: 'cURL error', 'http_code' => $code, 'body' => null];
+        }
+
+        if ($isCloud) {
+            // Any HTTP response means the cloud host is reachable from this server.
+            return [
+                'ok' => $code > 0,
+                'error' => $code > 0 ? null : 'No HTTP response from cloud host',
+                'http_code' => $code,
+                'body' => is_string($body) ? substr($body, 0, 500) : null,
+            ];
         }
 
         return [
