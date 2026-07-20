@@ -74,10 +74,10 @@ class SmsQueue
                 'created_at' => date(DATETIME_FORMAT),
             ]);
 
-            // Send in this request (parity with Immediate email) — soft-fail keeps row pending for cron
-            if ($id > 0) {
-                $this->processOne($id);
-            }
+            // Queue only — never call the gateway during page requests.
+            // Inline processOne() stacked curl timeouts (≈N × connect timeout) and
+            // blew past max_execution_time on request create when the gateway was down.
+            // Drain via cron, HTTP cron, or All Father → SMS → Process queue.
 
             return $id > 0 ? $id : null;
         } catch (Throwable $e) {

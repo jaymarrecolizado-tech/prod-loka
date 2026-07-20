@@ -88,6 +88,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     ? ['success', 'Gateway health OK (HTTP ' . $h['http_code'] . ').']
                     : ['danger', 'Gateway health failed: ' . ($h['error'] ?: 'unknown')];
             }
+        } elseif ($op === 'delete_log') {
+            $logId = postInt('log_id');
+            $row = $logId
+                ? db()->fetch("SELECT id, phone, event_type, status FROM sms_logs WHERE id = ?", [$logId])
+                : null;
+            if (!$row) {
+                throw new InvalidArgumentException('SMS log not found.');
+            }
+            db()->delete('sms_logs', 'id = ?', [$logId]);
+            auditLog('sms_log_deleted', 'sms_log', $logId, (array) $row, null);
+            $qs = http_build_query(array_filter([
+                'page' => 'security',
+                'action' => 'sms',
+                'status' => postSafe('ret_status', '', 20),
+                'q' => postSafe('ret_q', '', 100),
+                'date_from' => postSafe('ret_date_from', '', 20),
+                'date_to' => postSafe('ret_date_to', '', 20),
+                'per_page' => postSafe('ret_per_page', '', 10),
+                'p' => postSafe('ret_p', '', 10),
+            ], static fn($v) => $v !== null && $v !== ''));
+            redirectWith('/?' . $qs, 'success', "SMS log #{$logId} deleted.");
         }
     } catch (Throwable $e) {
         $flash = ['danger', $e->getMessage()];
@@ -109,14 +130,65 @@ $allowedEvents = $mirrorEmail
     : array_filter(array_map('trim', explode(',', $allowRaw)));
 $stats = $queue->getStats();
 
+$logStatus = getSafe('status', '', 20);
+$logSearch = getSafe('q', '', 100);
+$logDateFrom = getSafe('date_from', '', 20);
+$logDateTo = getSafe('date_to', '', 20);
+$allowedLogStatuses = ['pending', 'processing', 'sent', 'failed'];
+if ($logStatus !== '' && !in_array($logStatus, $allowedLogStatuses, true)) {
+    $logStatus = '';
+}
+
 $logs = [];
+$pag = listPaginationState(0);
+$logBaseParams = [
+    'page' => 'security',
+    'action' => 'sms',
+    'status' => $logStatus,
+    'q' => $logSearch,
+    'date_from' => $logDateFrom,
+    'date_to' => $logDateTo,
+];
 try {
+    $where = ['1=1'];
+    $params = [];
+    if ($logStatus !== '') {
+        $where[] = 's.status = ?';
+        $params[] = $logStatus;
+    }
+    if ($logSearch !== '') {
+        $where[] = '(s.phone LIKE ? OR s.event_type LIKE ? OR s.message LIKE ? OR u.name LIKE ?)';
+        $like = '%' . $logSearch . '%';
+        $params = array_merge($params, [$like, $like, $like, $like]);
+    }
+    if ($logDateFrom !== '') {
+        $where[] = 's.created_at >= ?';
+        $params[] = $logDateFrom . ' 00:00:00';
+    }
+    if ($logDateTo !== '') {
+        $where[] = 's.created_at <= ?';
+        $params[] = $logDateTo . ' 23:59:59';
+    }
+    $whereSql = implode(' AND ', $where);
+
+    $countRow = db()->fetch(
+        "SELECT COUNT(*) as c
+         FROM sms_logs s
+         LEFT JOIN users u ON u.id = s.user_id
+         WHERE {$whereSql}",
+        $params
+    );
+    $pag = listPaginationState((int) ($countRow->c ?? 0));
+    $logBaseParams['per_page'] = $pag['perPage'];
+
     $logs = db()->fetchAll(
         "SELECT s.*, u.name AS user_name
          FROM sms_logs s
          LEFT JOIN users u ON u.id = s.user_id
+         WHERE {$whereSql}
          ORDER BY s.id DESC
-         LIMIT 50"
+         LIMIT ? OFFSET ?",
+        array_merge($params, [$pag['perPage'], $pag['offset']])
     );
 } catch (Throwable $e) {
     $flash = $flash ?: ['danger', 'SMS tables missing. Run migration 023_sms_notifications.php'];
@@ -276,6 +348,8 @@ require_once INCLUDES_PATH . '/header.php';
                     <p class="text-xs text-base-content/50 mt-3 mb-0">
                         Local tip: enable Local Server in the SMS Gateway Android app, use API path “Local phone server”,
                         Gateway URL = <code>http://PHONE_LAN_IP:8080</code>, credentials shown in the app.
+                        Outbound SMS is queued on submit (does not wait on the gateway); use <strong>Process queue now</strong>
+                        or HTTP/CLI cron to send pending messages.
                     </p>
                 </div>
             </div>
@@ -285,8 +359,40 @@ require_once INCLUDES_PATH . '/header.php';
             <div class="loka-card">
                 <div class="loka-card-body">
                     <h5 class="mb-3">Recent SMS logs</h5>
+
+                    <form method="GET" class="flex flex-wrap items-end gap-2 mb-4">
+                        <input type="hidden" name="page" value="security">
+                        <input type="hidden" name="action" value="sms">
+                        <div class="flex flex-col gap-1 min-w-[140px]">
+                            <label class="label py-0"><span class="label-text text-xs font-semibold uppercase text-base-content/70">Status</span></label>
+                            <select name="status" class="select select-bordered select-sm bg-base-100">
+                                <option value="">All</option>
+                                <?php foreach ($allowedLogStatuses as $st): ?>
+                                    <option value="<?= e($st) ?>" <?= $logStatus === $st ? 'selected' : '' ?>><?= e(ucfirst($st)) ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                        <div class="flex flex-col gap-1 flex-1 min-w-[160px]">
+                            <label class="label py-0"><span class="label-text text-xs font-semibold uppercase text-base-content/70">Search</span></label>
+                            <input type="search" name="q" value="<?= e($logSearch) ?>"
+                                   class="input input-bordered input-sm bg-base-100"
+                                   placeholder="Phone, name, event, message…">
+                        </div>
+                        <div class="flex flex-col gap-1">
+                            <label class="label py-0"><span class="label-text text-xs font-semibold uppercase text-base-content/70">From</span></label>
+                            <input type="date" name="date_from" value="<?= e($logDateFrom) ?>" class="input input-bordered input-sm bg-base-100">
+                        </div>
+                        <div class="flex flex-col gap-1">
+                            <label class="label py-0"><span class="label-text text-xs font-semibold uppercase text-base-content/70">To</span></label>
+                            <input type="date" name="date_to" value="<?= e($logDateTo) ?>" class="input input-bordered input-sm bg-base-100">
+                        </div>
+                        <?= perPageFieldHtml($pag['perPage']) ?>
+                        <button type="submit" class="loka-btn-primary loka-btn-sm">Filter</button>
+                        <a href="<?= APP_URL ?>/?page=security&action=sms" class="loka-btn-secondary loka-btn-sm">Reset</a>
+                    </form>
+
                     <div class="overflow-x-auto">
-                        <table class="loka-table w-full text-sm">
+                        <table class="loka-table w-full text-sm sms-logs-table" id="smsLogsTable">
                             <thead>
                                 <tr>
                                     <th>ID</th>
@@ -294,14 +400,15 @@ require_once INCLUDES_PATH . '/header.php';
                                     <th>Event</th>
                                     <th>Status</th>
                                     <th>Time</th>
+                                    <th class="text-center w-16">Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <?php if (empty($logs)): ?>
-                                    <tr><td colspan="5" class="text-center text-base-content/50 py-4">No SMS logs yet.</td></tr>
+                                    <tr><td colspan="6" class="text-center text-base-content/50 py-4">No SMS logs match your filters.</td></tr>
                                 <?php else: ?>
                                     <?php foreach ($logs as $log): ?>
-                                        <tr>
+                                        <tr class="sms-log-row" tabindex="0" data-log-id="<?= (int) $log->id ?>">
                                             <td><?= (int) $log->id ?></td>
                                             <td class="font-mono text-xs">
                                                 <?= e($log->phone) ?>
@@ -316,18 +423,71 @@ require_once INCLUDES_PATH . '/header.php';
                                                     <div class="text-xs text-error"><?= e($log->error_message) ?></div>
                                                 <?php endif; ?>
                                             </td>
-                                            <td><span class="loka-badge"><?= e($log->status) ?></span></td>
+                                            <td>
+                                                <?php
+                                                if ($log->status === 'sent') {
+                                                    $stClass = 'bg-success/20 text-success';
+                                                } elseif ($log->status === 'failed') {
+                                                    $stClass = 'bg-error/20 text-error';
+                                                } elseif ($log->status === 'processing') {
+                                                    $stClass = 'bg-info/20 text-info';
+                                                } else {
+                                                    $stClass = 'bg-warning/20 text-warning';
+                                                }
+                                                ?>
+                                                <span class="loka-badge <?= $stClass ?>"><?= e($log->status) ?></span>
+                                            </td>
                                             <td class="text-xs whitespace-nowrap"><?= e($log->created_at) ?></td>
+                                            <td class="text-center" onclick="event.stopPropagation()">
+                                                <form method="POST" class="inline" onsubmit="return confirm('Delete SMS log #<?= (int) $log->id ?>? This cannot be undone.');">
+                                                    <?= csrfField() ?>
+                                                    <input type="hidden" name="op" value="delete_log">
+                                                    <input type="hidden" name="log_id" value="<?= (int) $log->id ?>">
+                                                    <input type="hidden" name="ret_status" value="<?= e($logStatus) ?>">
+                                                    <input type="hidden" name="ret_q" value="<?= e($logSearch) ?>">
+                                                    <input type="hidden" name="ret_date_from" value="<?= e($logDateFrom) ?>">
+                                                    <input type="hidden" name="ret_date_to" value="<?= e($logDateTo) ?>">
+                                                    <input type="hidden" name="ret_per_page" value="<?= (int) $pag['perPage'] ?>">
+                                                    <input type="hidden" name="ret_p" value="<?= (int) $pag['page'] ?>">
+                                                    <button type="submit" class="loka-btn-icon text-error hover:bg-error/10" title="Delete log">
+                                                        <i class="bi bi-trash"></i>
+                                                    </button>
+                                                </form>
+                                            </td>
                                         </tr>
                                     <?php endforeach; ?>
                                 <?php endif; ?>
                             </tbody>
                         </table>
                     </div>
+                    <?= listPaginationFooter($pag, $logBaseParams) ?>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+<script>
+(function () {
+    const table = document.getElementById('smsLogsTable');
+    if (!table) return;
+    table.querySelectorAll('tr.sms-log-row').forEach(function (row) {
+        row.addEventListener('click', function (e) {
+            if (e.target.closest('button, a, form, input, select, textarea, label')) return;
+            const was = row.classList.contains('is-selected');
+            table.querySelectorAll('tr.sms-log-row.is-selected').forEach(function (r) {
+                r.classList.remove('is-selected');
+            });
+            if (!was) row.classList.add('is-selected');
+        });
+        row.addEventListener('keydown', function (e) {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                row.click();
+            }
+        });
+    });
+})();
+</script>
 
 <?php require_once INCLUDES_PATH . '/footer.php'; ?>

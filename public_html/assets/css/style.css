@@ -1041,3 +1041,22 @@ a.bg-info {
 .loka-nav-sublink.active {
     background: rgba(37, 99, 235, 0.22) !important;
 }
+
+/* SMS logs — click-to-select full row */
+.sms-logs-table tbody tr.sms-log-row {
+    cursor: pointer;
+}
+.sms-logs-table tbody tr.sms-log-row.is-selected td,
+[data-theme="loka-light"] .sms-logs-table tbody tr.sms-log-row.is-selected td {
+    background-color: #dbeafe !important;
+}
+.sms-logs-table tbody tr.sms-log-row.is-selected td:first-child,
+[data-theme="loka-light"] .sms-logs-table tbody tr.sms-log-row.is-selected td:first-child {
+    box-shadow: inset 3px 0 0 #2563eb;
+}
+[data-theme="loka"] .sms-logs-table tbody tr.sms-log-row.is-selected td {
+    background-color: #1e3a5f !important;
+}
+[data-theme="loka"] .sms-logs-table tbody tr.sms-log-row.is-selected td:first-child {
+    box-shadow: inset 3px 0 0 #00d4ff;
+}

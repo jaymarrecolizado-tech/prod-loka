@@ -68,6 +68,10 @@ class SmsGateway
             ];
         }
 
+        // Keep connect/read short so a dead gateway cannot stall the whole PHP request.
+        $connectTimeout = min(3, $this->timeout);
+        $readTimeout = min($this->timeout, 15);
+
         $ch = curl_init($this->endpoint());
         curl_setopt_array($ch, [
             CURLOPT_POST => true,
@@ -78,8 +82,9 @@ class SmsGateway
             ],
             CURLOPT_USERPWD => $this->username . ':' . $this->password,
             CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_TIMEOUT => $this->timeout,
-            CURLOPT_CONNECTTIMEOUT => min(10, $this->timeout),
+            CURLOPT_TIMEOUT => $readTimeout,
+            CURLOPT_CONNECTTIMEOUT => $connectTimeout,
+            CURLOPT_NOSIGNAL => true,
         ]);
 
         $body = curl_exec($ch);
