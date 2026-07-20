@@ -101,7 +101,7 @@ require_once INCLUDES_PATH . '/header.php';
         </main>
     </div>
 
-    <details class="loka-card avail-month-table mt-4">
+    <details class="loka-card avail-month-table mt-4" open>
         <summary class="avail-month-summary">
             <span><i class="bi bi-list-ul me-2"></i>All scheduled trips this month</span>
             <span class="text-sm text-base-content/60"><?= count($monthTrips) ?> trip(s)</span>

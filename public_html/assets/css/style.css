@@ -917,6 +917,17 @@ a.bg-info {
     }
     .avail-sections .avail-section { display: block !important; }
 }
+.avail-section {
+    border: 1px solid #94a3b8;
+    border-radius: 0.65rem;
+    padding: 0.85rem 0.9rem 1rem;
+    background: #f8fafc;
+    min-height: 0;
+}
+[data-theme="loka"] .avail-section {
+    border-color: #64748b;
+    background: #1e293b;
+}
 .avail-section-title {
     font-size: 0.85rem;
     font-weight: 700;
@@ -924,6 +935,11 @@ a.bg-info {
     display: flex;
     align-items: center;
     gap: 0.35rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid #cbd5e1;
+}
+[data-theme="loka"] .avail-section-title {
+    border-bottom-color: #475569;
 }
 .avail-count {
     margin-left: auto;
