@@ -10,6 +10,8 @@ $pageTitle = 'Trip Requests Report';
 $startDate = get('start_date', date('Y-m-01'));
 $endDate = get('end_date', date('Y-m-t'));
 $status = get('status', '');
+$searchQuery = listSearchQuery();
+$perPage = resolvePerPage();
 
 // Build query with filters
 $whereClause = "WHERE r.deleted_at IS NULL AND r.created_at BETWEEN ? AND ?";
@@ -18,6 +20,20 @@ $params = [$startDate, $endDate . ' 23:59:59'];
 if ($status) {
     $whereClause .= " AND r.status = ?";
     $params[] = $status;
+}
+
+if ($searchQuery) {
+    $whereClause .= " AND (
+        CAST(r.id AS CHAR) LIKE ? OR
+        r.destination LIKE ? OR
+        r.purpose LIKE ? OR
+        u.name LIKE ? OR
+        dept.name LIKE ? OR
+        v.plate_number LIKE ? OR
+        dr_user.name LIKE ?
+    )";
+    $searchTerm = '%' . $searchQuery . '%';
+    array_push($params, $searchTerm, $searchTerm, $searchTerm, $searchTerm, $searchTerm, $searchTerm, $searchTerm);
 }
 
 // Get stats
@@ -49,6 +65,18 @@ $sortState = resolveTableSort($allowedSortColumns, 'created_at', 'DESC');
 $sort = $sortState['key'];
 $sortDir = $sortState['dir'];
 
+$fromSql = "FROM requests r
+     JOIN users u ON r.user_id = u.id
+     LEFT JOIN departments dept ON r.department_id = dept.id
+     LEFT JOIN vehicles v ON r.vehicle_id = v.id
+     LEFT JOIN drivers dr ON r.driver_id = dr.id
+     LEFT JOIN users dr_user ON dr.user_id = dr_user.id
+     {$whereClause}";
+
+$countRow = db()->fetch("SELECT COUNT(*) as c {$fromSql}", $params);
+$pag = listPaginationState((int) ($countRow->c ?? 0), null, $perPage);
+$totalCount = $pag['total'];
+
 // Get requests
 $requests = db()->fetchAll(
     "SELECT r.id, r.created_at, r.start_datetime, r.end_datetime, r.purpose, r.destination,
@@ -58,16 +86,10 @@ $requests = db()->fetchAll(
             dr_user.name as driver_name,
             TIMESTAMPDIFF(MINUTE, r.start_datetime, r.end_datetime) as planned_duration,
             TIMESTAMPDIFF(MINUTE, r.actual_dispatch_datetime, r.actual_arrival_datetime) as actual_duration
-     FROM requests r
-     JOIN users u ON r.user_id = u.id
-     LEFT JOIN departments dept ON r.department_id = dept.id
-     LEFT JOIN vehicles v ON r.vehicle_id = v.id
-     LEFT JOIN drivers dr ON r.driver_id = dr.id
-     LEFT JOIN users dr_user ON dr.user_id = dr_user.id
-     $whereClause
+     {$fromSql}
      ORDER BY {$sortState['orderSql']}
-     LIMIT 500",
-    $params
+     LIMIT ? OFFSET ?",
+    array_merge($params, [$pag['perPage'], $pag['offset']])
 );
 
 $baseParams = tableSortQueryParams($sortState, [
@@ -76,6 +98,8 @@ $baseParams = tableSortQueryParams($sortState, [
     'start_date' => $startDate,
     'end_date' => $endDate,
     'status' => $status,
+    'per_page' => $pag['perPage'],
+    'q' => $searchQuery,
 ]);
 
 require_once INCLUDES_PATH . '/header.php';
@@ -131,7 +155,9 @@ require_once INCLUDES_PATH . '/header.php';
                         <option value="revision" <?= $status === 'revision' ? 'selected' : '' ?>>Revision</option>
                     </select>
                 </div>
-                <div class="col-span-12 md:col-span-3">
+                <?= perPageFieldHtml($pag['perPage'], 'loka-form-input') ?>
+                <?= listSearchFieldHtml($searchQuery, 'ID, requester, destination, vehicle, driver...', 'loka-form-input') ?>
+                <div class="col-span-12 md:col-span-3 flex items-end gap-2">
                     <button type="submit" class="loka-btn-primary">
                         <i class="bi bi-search me-1"></i>Filter
                     </button>
@@ -188,7 +214,7 @@ require_once INCLUDES_PATH . '/header.php';
     <!-- Requests Table -->
     <div class="loka-card">
         <div class="px-4 md:px-6 pt-4 md:pt-6">
-            <h5 class="mb-0"><i class="bi bi-list-ul me-2"></i>Trip Requests</h5>
+            <h5 class="mb-0"><i class="bi bi-list-ul me-2"></i>Trip Requests <span class="text-base-content/50 text-sm font-normal">(<?= number_format($totalCount) ?> total)</span></h5>
         </div>
         <div class="loka-card-body p-0">
             <?php if (empty($requests)): ?>
@@ -256,6 +282,7 @@ require_once INCLUDES_PATH . '/header.php';
                     </tbody>
                 </table>
             </div>
+            <?= listPaginationFooter($pag, $baseParams) ?>
             <?php endif; ?>
         </div>
     </div>

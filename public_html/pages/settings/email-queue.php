@@ -80,9 +80,34 @@ $smtpStatus = [
 ];
 
 // ─── Recent queue items ─────────────────────────────────────────────────────
+$searchQuery = listSearchQuery();
+$perPage = resolvePerPage();
+$emailWhere = '1=1';
+$emailParams = [];
+if ($searchQuery) {
+    $emailWhere .= " AND (
+        to_email LIKE ? OR
+        subject LIKE ? OR
+        template LIKE ? OR
+        status LIKE ? OR
+        CAST(id AS CHAR) LIKE ?
+    )";
+    $searchTerm = '%' . $searchQuery . '%';
+    array_push($emailParams, $searchTerm, $searchTerm, $searchTerm, $searchTerm, $searchTerm);
+}
+
+$countRow = db()->fetch("SELECT COUNT(*) as c FROM email_queue WHERE {$emailWhere}", $emailParams);
+$pag = listPaginationState((int) ($countRow->c ?? 0), null, $perPage);
 $recentEmails = db()->fetchAll(
-    "SELECT * FROM email_queue ORDER BY created_at DESC LIMIT 30"
+    "SELECT * FROM email_queue WHERE {$emailWhere} ORDER BY created_at DESC LIMIT ? OFFSET ?",
+    array_merge($emailParams, [$pag['perPage'], $pag['offset']])
 );
+$listParams = [
+    'page' => 'settings',
+    'action' => 'email-queue',
+    'per_page' => $pag['perPage'],
+    'q' => $searchQuery,
+];
 
 $pageTitle = 'Email Queue & Diagnostics';
 require_once INCLUDES_PATH . '/header.php';
@@ -242,11 +267,25 @@ require_once INCLUDES_PATH . '/header.php';
 
     <!-- ── Recent Queue Items ───────────────────────────────────────────── -->
     <div class="loka-card">
-        <div class="px-6 py-4 border-b border-base-200 flex justify-between">
-            <h5 class="mb-0">Recent Queue (Last 30)</h5>
+        <div class="px-6 py-4 border-b border-base-200 flex flex-wrap justify-between items-center gap-3">
+            <h5 class="mb-0">Email Queue <span class="text-base-content/50 text-sm font-normal">(<?= number_format($pag['total']) ?> total)</span></h5>
             <button class="loka-btn-sm loka-btn-secondary" onclick="location.reload()">
                 <i class="bi bi-arrow-clockwise"></i> Refresh
             </button>
+        </div>
+        <div class="px-6 py-4 border-b border-base-200">
+            <form method="GET" class="flex flex-wrap items-end gap-3">
+                <input type="hidden" name="page" value="settings">
+                <input type="hidden" name="action" value="email-queue">
+                <?= perPageFieldHtml($pag['perPage'], 'loka-form-input') ?>
+                <?= listSearchFieldHtml($searchQuery, 'Recipient, subject, template, status...', 'loka-form-input') ?>
+                <div class="flex gap-2">
+                    <button type="submit" class="loka-btn-primary loka-btn-sm">
+                        <i class="bi bi-search me-1"></i>Filter
+                    </button>
+                    <a href="<?= APP_URL ?>/?page=settings&action=email-queue" class="loka-btn-secondary loka-btn-sm">Reset</a>
+                </div>
+            </form>
         </div>
         <div class="p-0">
             <div class="loka-table-responsive">
@@ -293,6 +332,9 @@ require_once INCLUDES_PATH . '/header.php';
                         <?php endif; ?>
                     </tbody>
                 </table>
+            </div>
+            <div class="px-6 pb-4">
+                <?= listPaginationFooter($pag, $listParams) ?>
             </div>
         </div>
     </div>

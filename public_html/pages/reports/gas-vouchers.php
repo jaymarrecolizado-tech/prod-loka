@@ -8,6 +8,8 @@ requireGasVoucherReportAccess();
 
 $pageTitle = 'Gas Voucher Report';
 $f = gasVoucherReportParseFilters();
+$f['search'] = listSearchQuery('q', 'search');
+$perPage = resolvePerPage();
 $options = gasVoucherReportFilterOptions();
 $kpis = gasVoucherReportKpis($f);
 $analytics = gasVoucherReportAnalytics($f);
@@ -26,9 +28,14 @@ $allowedSortColumns = [
 $sortState = resolveTableSort($allowedSortColumns, 'request_date', 'DESC');
 $sort = $sortState['key'];
 $sortDir = $sortState['dir'];
-$rows = gasVoucherReportRows($f, 500, $sortState['orderSql']);
+$pag = listPaginationState((int) ($kpis->total ?? 0), null, $perPage);
+$rows = gasVoucherReportRows($f, $pag['perPage'], $sortState['orderSql'], $pag['offset']);
 
-$baseParams = tableSortQueryParams($sortState, gasVoucherReportQueryParams($f, ['action' => 'gas-vouchers']));
+$baseParams = tableSortQueryParams($sortState, gasVoucherReportQueryParams($f, [
+    'action' => 'gas-vouchers',
+    'per_page' => $pag['perPage'],
+    'q' => $f['search'],
+]));
 $csvUrl = gasVoucherReportUrl(gasVoucherReportQueryParams($f, ['action' => 'export-gas-vouchers-csv']));
 $pdfUrl = gasVoucherReportUrl(gasVoucherReportQueryParams($f, ['action' => 'export-gas-vouchers-pdf']));
 
@@ -137,10 +144,8 @@ require_once INCLUDES_PATH . '/header.php';
                         <?php endforeach; ?>
                     </select>
                 </div>
-                <div class="col-span-6 md:col-span-3">
-                    <label class="loka-form-label">Search</label>
-                    <input type="text" class="loka-form-input" name="search" value="<?= e($f['search']) ?>" placeholder="Voucher, plate, driver…">
-                </div>
+                <?= perPageFieldHtml($pag['perPage'], 'loka-form-input') ?>
+                <?= listSearchFieldHtml($f['search'], 'Voucher, plate, driver…', 'loka-form-input') ?>
                 <div class="col-span-12 md:col-span-6 flex flex-wrap items-center gap-3">
                     <label class="inline-flex items-center gap-2 text-sm">
                         <input type="checkbox" name="include_drafts" value="1" <?= $f['include_drafts'] ? 'checked' : '' ?>>
@@ -233,7 +238,7 @@ require_once INCLUDES_PATH . '/header.php';
     <!-- Table -->
     <div class="loka-card">
         <div class="border-b border-base-200 px-4 py-3 flex justify-between items-center">
-            <h5 class="font-semibold mb-0">Vouchers <span class="text-base-content/50 text-sm font-normal">(showing <?= count($rows) ?>, max 500)</span></h5>
+            <h5 class="font-semibold mb-0">Vouchers <span class="text-base-content/50 text-sm font-normal">(<?= number_format((int) ($kpis->total ?? 0)) ?> total)</span></h5>
         </div>
         <div class="loka-table-responsive">
             <table class="loka-table mb-0">
@@ -275,6 +280,7 @@ require_once INCLUDES_PATH . '/header.php';
                 </tbody>
             </table>
         </div>
+        <?= listPaginationFooter($pag, $baseParams) ?>
     </div>
 </div>
 

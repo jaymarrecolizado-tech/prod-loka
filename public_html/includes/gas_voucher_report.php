@@ -188,11 +188,17 @@ function gasVoucherReportAnalytics(array $f): array
 /**
  * @return list<object>
  */
-function gasVoucherReportRows(array $f, int $limit = 500, string $orderSql = 'gv.request_date DESC, gv.id DESC'): array
-{
+function gasVoucherReportRows(
+    array $f,
+    int $limit = 500,
+    string $orderSql = 'gv.request_date DESC, gv.id DESC',
+    int $offset = 0
+): array {
     [$where, $params] = gasVoucherReportWhere($f);
     $limit = max(1, min($limit, 10000));
+    $offset = max(0, $offset);
     $params[] = $limit;
+    $params[] = $offset;
 
     return db()->fetchAll(
         "SELECT gv.id, gv.voucher_no, gv.request_date, gv.created_at, gv.driver_name, gv.vehicle_plate,
@@ -204,7 +210,7 @@ function gasVoucherReportRows(array $f, int $limit = 500, string $orderSql = 'gv
          LEFT JOIN departments d ON u.department_id = d.id
          WHERE {$where}
          ORDER BY {$orderSql}
-         LIMIT ?",
+         LIMIT ? OFFSET ?",
         $params
     );
 }

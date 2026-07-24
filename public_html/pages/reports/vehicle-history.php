@@ -10,6 +10,8 @@ if (!$driverScoped && !canAccessOpsReports()) {
 
 $pageTitle = 'Vehicle History Report';
 $myDriverId = currentDriverId();
+$searchQuery = listSearchQuery();
+$perPage = resolvePerPage();
 
 $vehicleId = get('vehicle_id');
 $startDate = get('start_date', date('Y-m-01'));
@@ -40,6 +42,16 @@ if ($driverScoped && $myDriverId) {
 // Get vehicle trip history
 $trips = [];
 $vehicleInfo = null;
+$pag = listPaginationState(0, null, $perPage);
+$tripListParams = [
+    'page' => 'reports',
+    'action' => 'vehicle-history',
+    'vehicle_id' => $vehicleId,
+    'start_date' => $startDate,
+    'end_date' => $endDate,
+    'per_page' => $pag['perPage'],
+    'q' => $searchQuery,
+];
 
 if ($vehicleId) {
     // Drivers may only open vehicles they have driven
@@ -64,7 +76,55 @@ if ($vehicleId) {
         [$vehicleId]
     );
 
-    $tripSql = "SELECT r.id, r.start_datetime, r.end_datetime, r.purpose, r.destination,
+    $tripBaseParams = [$vehicleId, $startDate, $endDate . ' 23:59:59'];
+    $statsWhere = "r.vehicle_id = ?
+         AND r.start_datetime BETWEEN ? AND ?
+         AND r.deleted_at IS NULL";
+    if ($driverScoped && $myDriverId) {
+        $statsWhere .= " AND (r.driver_id = ? OR r.requested_driver_id = ?)";
+        $tripBaseParams[] = $myDriverId;
+        $tripBaseParams[] = $myDriverId;
+    }
+
+    $allTripsForStats = db()->fetchAll(
+        "SELECT r.status,
+                TIMESTAMPDIFF(MINUTE, r.start_datetime, r.end_datetime) as planned_duration,
+                TIMESTAMPDIFF(MINUTE, r.actual_dispatch_datetime, r.actual_arrival_datetime) as actual_duration
+         FROM requests r
+         WHERE {$statsWhere}",
+        $tripBaseParams
+    );
+
+    $tableWhere = $statsWhere;
+    $tableParams = $tripBaseParams;
+    if ($searchQuery) {
+        $tableWhere .= " AND (
+            CAST(r.id AS CHAR) LIKE ? OR
+            r.destination LIKE ? OR
+            r.purpose LIKE ? OR
+            u.name LIKE ? OR
+            d.name LIKE ? OR
+            dr_user.name LIKE ?
+        )";
+        $searchTerm = '%' . $searchQuery . '%';
+        array_push($tableParams, $searchTerm, $searchTerm, $searchTerm, $searchTerm, $searchTerm, $searchTerm);
+    }
+
+    $countRow = db()->fetch(
+        "SELECT COUNT(*) as c
+         FROM requests r
+         JOIN users u ON r.user_id = u.id
+         LEFT JOIN departments d ON r.department_id = d.id
+         LEFT JOIN drivers dr ON r.driver_id = dr.id
+         LEFT JOIN users dr_user ON dr.user_id = dr_user.id
+         WHERE {$tableWhere}",
+        $tableParams
+    );
+    $pag = listPaginationState((int) ($countRow->c ?? 0), null, $perPage);
+    $tripListParams['per_page'] = $pag['perPage'];
+
+    $trips = db()->fetchAll(
+        "SELECT r.id, r.start_datetime, r.end_datetime, r.purpose, r.destination,
                 r.status, r.passenger_count, r.actual_dispatch_datetime, r.actual_arrival_datetime,
                 u.name as requester_name, d.name as department_name,
                 dr_user.name as driver_name,
@@ -75,32 +135,31 @@ if ($vehicleId) {
          LEFT JOIN departments d ON r.department_id = d.id
          LEFT JOIN drivers dr ON r.driver_id = dr.id
          LEFT JOIN users dr_user ON dr.user_id = dr_user.id
-         WHERE r.vehicle_id = ?
-         AND r.start_datetime BETWEEN ? AND ?
-         AND r.deleted_at IS NULL";
-    $tripParams = [$vehicleId, $startDate, $endDate . ' 23:59:59'];
-    if ($driverScoped && $myDriverId) {
-        $tripSql .= " AND (r.driver_id = ? OR r.requested_driver_id = ?)";
-        $tripParams[] = $myDriverId;
-        $tripParams[] = $myDriverId;
-    }
-    $tripSql .= " ORDER BY r.start_datetime DESC";
-    $trips = db()->fetchAll($tripSql, $tripParams);
+         WHERE {$tableWhere}
+         ORDER BY r.start_datetime DESC
+         LIMIT ? OFFSET ?",
+        array_merge($tableParams, [$pag['perPage'], $pag['offset']])
+    );
 }
 
-// Stats
+// Stats (full date range, not narrowed by table search)
 $stats = (object)[
-    'total_trips' => count($trips),
+    'total_trips' => count($allTripsForStats ?? []),
     'completed_trips' => 0,
     'total_hours' => 0,
     'total_km' => 0
 ];
 
-if (!empty($trips)) {
-    foreach ($trips as $t) {
-        if ($t->status === 'completed') $stats->completed_trips++;
-        if ($t->actual_duration) $stats->total_hours += $t->actual_duration / 60;
-        elseif ($t->planned_duration) $stats->total_hours += $t->planned_duration / 60;
+if (!empty($allTripsForStats)) {
+    foreach ($allTripsForStats as $t) {
+        if ($t->status === 'completed') {
+            $stats->completed_trips++;
+        }
+        if ($t->actual_duration) {
+            $stats->total_hours += $t->actual_duration / 60;
+        } elseif ($t->planned_duration) {
+            $stats->total_hours += $t->planned_duration / 60;
+        }
     }
 }
 
@@ -144,12 +203,14 @@ require_once INCLUDES_PATH . '/header.php';
                     <label class="loka-form-label">End Date</label>
                     <input type="date" class="loka-form-input" name="end_date" value="<?= e($endDate) ?>">
                 </div>
+                <?= perPageFieldHtml($pag['perPage'], 'loka-form-input') ?>
+                <?= listSearchFieldHtml($searchQuery, 'ID, destination, requester, driver...', 'loka-form-input') ?>
                 <div class="col-span-12 md:col-span-2 flex items-end">
                     <button type="submit" class="loka-btn-primary">
                         <i class="bi bi-search me-1"></i>Generate
                     </button>
                 </div>
-                <?php if ($vehicleId && !empty($trips)): ?>
+                <?php if ($vehicleId && $pag['total'] > 0): ?>
                 <div class="col-span-12 md:col-span-3 flex flex-wrap justify-end items-end gap-2">
                     <a href="<?= APP_URL ?>/?page=reports&action=export-vehicle-csv&vehicle_id=<?= $vehicleId ?>&start_date=<?= $startDate ?>&end_date=<?= $endDate ?>" class="loka-btn-outline-primary">
                         <i class="bi bi-file-earmark-csv me-1"></i>CSV
@@ -220,7 +281,7 @@ require_once INCLUDES_PATH . '/header.php';
     <!-- Trip History Table -->
     <div class="loka-card">
         <div class="px-4 md:px-6 pt-4 md:pt-6">
-            <h5 class="mb-0"><i class="bi bi-clock-history me-2"></i>Trip History</h5>
+            <h5 class="mb-0"><i class="bi bi-clock-history me-2"></i>Trip History <span class="text-base-content/50 text-sm font-normal">(<?= number_format($pag['total']) ?> total)</span></h5>
         </div>
         <div class="loka-card-body">
             <?php if (empty($trips)): ?>
@@ -277,6 +338,7 @@ require_once INCLUDES_PATH . '/header.php';
                     </tbody>
                 </table>
             </div>
+            <?= listPaginationFooter($pag, $tripListParams) ?>
             <?php endif; ?>
         </div>
     </div>
