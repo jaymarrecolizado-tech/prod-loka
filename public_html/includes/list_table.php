@@ -5,6 +5,33 @@
  */
 
 /**
+ * Resolve list search text from q (preferred) or legacy search param.
+ */
+function listSearchQuery(string $primary = 'q', string $legacy = 'search', int $maxLen = 100): string
+{
+    $raw = '';
+    if (function_exists('getSafe')) {
+        $raw = (string) getSafe($primary, '', $maxLen);
+        if (trim($raw) === '' && $legacy !== '') {
+            $raw = (string) getSafe($legacy, '', $maxLen);
+        }
+    } elseif (function_exists('get')) {
+        $raw = (string) get($primary, '');
+        if (trim($raw) === '' && $legacy !== '') {
+            $raw = (string) get($legacy, '');
+        }
+    } else {
+        $raw = (string) ($_GET[$primary] ?? '');
+        if (trim($raw) === '' && $legacy !== '') {
+            $raw = (string) ($_GET[$legacy] ?? '');
+        }
+    }
+
+    $q = trim($raw);
+    return function_exists('mb_substr') ? mb_substr($q, 0, $maxLen) : substr($q, 0, $maxLen);
+}
+
+/**
  * Standard Search field for filter forms (always visible on data tables).
  */
 function listSearchFieldHtml(

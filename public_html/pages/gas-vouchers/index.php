@@ -11,7 +11,7 @@ $pageTitle = 'Gas Vouchers';
 
 // Determine what the user can see
 $statusFilter = getSafe('status', '', 20);
-$searchFilter = getSafe('search', '', 100);
+$searchFilter = listSearchQuery();
 $dateFrom     = getSafe('date_from', '', 20);
 $dateTo       = getSafe('date_to', '', 20);
 
@@ -81,7 +81,7 @@ $vouchers = db()->fetchAll(
 $baseParams = tableSortQueryParams($sortState, [
     'page' => 'gas-vouchers',
     'status' => $statusFilter,
-    'search' => $searchFilter,
+    'q' => $searchFilter,
     'date_from' => $dateFrom,
     'date_to' => $dateTo,
     'per_page' => $pag['perPage'],
@@ -169,12 +169,7 @@ require_once INCLUDES_PATH . '/header.php';
                     </select>
                 </div>
 
-                <div class="w-full sm:w-auto sm:flex-1 sm:max-w-xs">
-                    <label class="label label-text text-xs">Search</label>
-                    <input type="text" name="search" class="input input-bordered input-sm w-full"
-                           placeholder="Voucher no, plate, driver, purpose..."
-                           value="<?= e($searchFilter) ?>">
-                </div>
+                <?= listSearchFieldHtml($searchFilter, 'Voucher no, plate, driver, purpose...') ?>
 
                 <div class="w-auto">
                     <label class="label label-text text-xs">Date From</label>

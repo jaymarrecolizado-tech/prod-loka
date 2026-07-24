@@ -380,12 +380,7 @@ require_once INCLUDES_PATH . '/header.php';
                                 <?php endforeach; ?>
                             </select>
                         </div>
-                        <div class="flex flex-col gap-1 flex-1 min-w-[160px]">
-                            <label class="label py-0"><span class="label-text text-xs font-semibold uppercase text-base-content/70">Search</span></label>
-                            <input type="search" name="q" value="<?= e($logSearch) ?>"
-                                   class="input input-bordered input-sm bg-base-100"
-                                   placeholder="Phone, name, event, message…">
-                        </div>
+                        <?= listSearchFieldHtml($logSearch, 'Phone, name, event, message…') ?>
                         <div class="flex flex-col gap-1">
                             <label class="label py-0"><span class="label-text text-xs font-semibold uppercase text-base-content/70">From</span></label>
                             <input type="date" name="date_from" value="<?= e($logDateFrom) ?>" class="input input-bordered input-sm bg-base-100">

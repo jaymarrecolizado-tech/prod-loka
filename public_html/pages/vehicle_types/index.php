@@ -8,6 +8,16 @@
 requireRole('approver');
 
 $pageTitle = 'Vehicle Types';
+$searchQuery = listSearchQuery();
+
+$whereClause = 'vt.deleted_at IS NULL';
+$params = [];
+if ($searchQuery) {
+    $whereClause .= ' AND (vt.name LIKE ? OR vt.description LIKE ?)';
+    $like = '%' . $searchQuery . '%';
+    $params[] = $like;
+    $params[] = $like;
+}
 
 // Sorting (latest vehicle types first by default)
 $allowedSortColumns = [
@@ -22,17 +32,26 @@ $sortState = resolveTableSort($allowedSortColumns, 'created_at', 'DESC');
 $sort = $sortState['key'];
 $sortDir = $sortState['dir'];
 
-// Get all vehicle types with vehicle count
+$countRow = db()->fetch(
+    "SELECT COUNT(*) as c FROM vehicle_types vt WHERE {$whereClause}",
+    $params
+);
+$pag = listPaginationState((int) ($countRow->c ?? 0));
+
 $vehicleTypes = db()->fetchAll(
     "SELECT vt.*,
             (SELECT COUNT(*) FROM vehicles v WHERE v.vehicle_type_id = vt.id AND v.deleted_at IS NULL) as vehicle_count
      FROM vehicle_types vt
-     WHERE vt.deleted_at IS NULL
-     ORDER BY {$sortState['orderSql']}"
+     WHERE {$whereClause}
+     ORDER BY {$sortState['orderSql']}
+     LIMIT ? OFFSET ?",
+    array_merge($params, [$pag['perPage'], $pag['offset']])
 );
 
 $baseParams = tableSortQueryParams($sortState, [
     'page' => 'vehicle_types',
+    'q' => $searchQuery,
+    'per_page' => $pag['perPage'],
 ]);
 
 require_once INCLUDES_PATH . '/header.php';
@@ -50,6 +69,18 @@ require_once INCLUDES_PATH . '/header.php';
                 <i class="bi bi-plus-lg me-1"></i>Add Vehicle Type
             </a>
         </div>
+    </div>
+
+    <div class="loka-card mb-6">
+        <form method="GET" class="flex flex-wrap items-end gap-3">
+            <input type="hidden" name="page" value="vehicle_types">
+            <?= listSearchFieldHtml($searchQuery, 'Name or description...') ?>
+            <?= perPageFieldHtml($pag['perPage']) ?>
+            <div class="flex gap-2">
+                <button type="submit" class="loka-btn-primary loka-btn-sm">Filter</button>
+                <a href="<?= APP_URL ?>/?page=vehicle_types" class="loka-btn-secondary loka-btn-sm">Clear</a>
+            </div>
+        </form>
     </div>
 
     <!-- Vehicle Types Table -->
@@ -120,6 +151,7 @@ require_once INCLUDES_PATH . '/header.php';
                         </tbody>
                     </table>
                 </div>
+                <?= listPaginationFooter($pag, $baseParams) ?>
             <?php endif; ?>
         </div>
     </div>

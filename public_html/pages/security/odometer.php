@@ -187,9 +187,7 @@ require_once INCLUDES_PATH . '/header.php';
             <form method="GET" class="flex flex-wrap items-end gap-2 mb-4">
                 <input type="hidden" name="page" value="security">
                 <input type="hidden" name="action" value="odometer">
-                <input type="search" name="q" value="<?= e($q) ?>"
-                       class="input input-bordered input-sm w-full sm:w-72"
-                       placeholder="Search plate, make, model…">
+                <?= listSearchFieldHtml($q, 'Plate, make, model…') ?>
                 <?= perPageFieldHtml($pag['perPage']) ?>
                 <button type="submit" class="loka-btn-secondary loka-btn-sm">Search</button>
                 <?php if ($q !== ''): ?>

@@ -7,6 +7,7 @@ requireRole(ROLE_APPROVER);
 
 $pageTitle = 'Drivers';
 $statusFilter = get('status', '');
+$searchQuery = listSearchQuery();
 
 $params = [];
 $whereClause = 'd.deleted_at IS NULL';
@@ -14,6 +15,15 @@ $whereClause = 'd.deleted_at IS NULL';
 if ($statusFilter) {
     $whereClause .= ' AND d.status = ?';
     $params[] = $statusFilter;
+}
+
+if ($searchQuery) {
+    $whereClause .= ' AND (u.name LIKE ? OR d.license_number LIKE ? OR u.phone LIKE ? OR u.email LIKE ?)';
+    $searchPattern = '%' . $searchQuery . '%';
+    $params[] = $searchPattern;
+    $params[] = $searchPattern;
+    $params[] = $searchPattern;
+    $params[] = $searchPattern;
 }
 
 // Sorting (latest drivers first by default)
@@ -53,6 +63,7 @@ $drivers = db()->fetchAll(
 $baseParams = tableSortQueryParams($sortState, [
     'page' => 'drivers',
     'status' => $statusFilter,
+    'q' => $searchQuery,
     'per_page' => $pag['perPage'],
 ]);
 
@@ -77,6 +88,7 @@ require_once INCLUDES_PATH . '/header.php';
     <div class="loka-card mb-6">
         <form method="GET" class="flex flex-wrap items-end gap-3">
             <input type="hidden" name="page" value="drivers">
+            <?= listSearchFieldHtml($searchQuery, 'Name, license, phone...') ?>
             <div class="flex flex-col gap-1.5 min-w-[150px]">
                 <label class="label">
                     <span class="label-text text-xs font-semibold text-base-content/70 uppercase tracking-wide">Status</span>

@@ -9,6 +9,7 @@ $pageTitle = 'Audit Logs';
 
 $userFilter = get('user', '');
 $actionFilter = get('action', '');
+$searchQuery = listSearchQuery();
 $startDate = get('start_date', date('Y-m-01'));
 $endDate = get('end_date', date('Y-m-d'));
 
@@ -23,6 +24,16 @@ if ($userFilter) {
 if ($actionFilter) {
     $whereClause .= ' AND a.action LIKE ?';
     $params[] = '%' . $actionFilter . '%';
+}
+
+if ($searchQuery) {
+    $whereClause .= ' AND (a.action LIKE ? OR a.entity_type LIKE ? OR a.ip_address LIKE ? OR u.name LIKE ? OR u.email LIKE ?)';
+    $like = '%' . $searchQuery . '%';
+    $params[] = $like;
+    $params[] = $like;
+    $params[] = $like;
+    $params[] = $like;
+    $params[] = $like;
 }
 
 // Sorting (latest logs first by default)
@@ -60,6 +71,7 @@ $baseParams = tableSortQueryParams($sortState, [
     'page' => 'audit',
     'user' => $userFilter,
     'action' => $actionFilter,
+    'q' => $searchQuery,
     'start_date' => $startDate,
     'end_date' => $endDate,
     'per_page' => $pag['perPage'],
@@ -83,6 +95,9 @@ require_once INCLUDES_PATH . '/header.php';
         <div class="p-4 md:p-6">
             <form method="GET" class="grid grid-cols-12 gap-3 items-end">
                 <input type="hidden" name="page" value="audit">
+                <div class="col-span-12 md:col-span-3">
+                    <?= listSearchFieldHtml($searchQuery, 'Action, user, entity, IP...', 'loka-form-input') ?>
+                </div>
                 <div class="col-span-6 md:col-span-2">
                     <label class="loka-form-label">User</label>
                     <select name="user" class="loka-form-input">

@@ -6,6 +6,17 @@
 requireRole(ROLE_MOTORPOOL);
 
 $pageTitle = 'Departments';
+$searchQuery = listSearchQuery();
+
+$whereClause = 'd.deleted_at IS NULL';
+$params = [];
+if ($searchQuery) {
+    $whereClause .= ' AND (d.name LIKE ? OR d.description LIKE ? OR u.name LIKE ?)';
+    $like = '%' . $searchQuery . '%';
+    $params[] = $like;
+    $params[] = $like;
+    $params[] = $like;
+}
 
 // Sorting (latest departments first by default)
 $allowedSortColumns = [
@@ -21,17 +32,30 @@ $sortState = resolveTableSort($allowedSortColumns, 'created_at', 'DESC');
 $sort = $sortState['key'];
 $sortDir = $sortState['dir'];
 
+$countRow = db()->fetch(
+    "SELECT COUNT(*) as c
+     FROM departments d
+     LEFT JOIN users u ON d.head_user_id = u.id
+     WHERE {$whereClause}",
+    $params
+);
+$pag = listPaginationState((int) ($countRow->c ?? 0));
+
 $departments = db()->fetchAll(
     "SELECT d.*, u.name as head_name,
             (SELECT COUNT(*) FROM users WHERE department_id = d.id AND deleted_at IS NULL) as user_count
      FROM departments d
      LEFT JOIN users u ON d.head_user_id = u.id
-     WHERE d.deleted_at IS NULL
-     ORDER BY {$sortState['orderSql']}"
+     WHERE {$whereClause}
+     ORDER BY {$sortState['orderSql']}
+     LIMIT ? OFFSET ?",
+    array_merge($params, [$pag['perPage'], $pag['offset']])
 );
 
 $baseParams = tableSortQueryParams($sortState, [
     'page' => 'departments',
+    'q' => $searchQuery,
+    'per_page' => $pag['perPage'],
 ]);
 
 require_once INCLUDES_PATH . '/header.php';
@@ -49,6 +73,18 @@ require_once INCLUDES_PATH . '/header.php';
             Add Department
         </a>
         <?php endif; ?>
+    </div>
+
+    <div class="loka-card mb-6">
+        <form method="GET" class="flex flex-wrap items-end gap-3">
+            <input type="hidden" name="page" value="departments">
+            <?= listSearchFieldHtml($searchQuery, 'Name, description, head...') ?>
+            <?= perPageFieldHtml($pag['perPage']) ?>
+            <div class="flex gap-2">
+                <button type="submit" class="loka-btn-primary loka-btn-sm">Filter</button>
+                <a href="<?= APP_URL ?>/?page=departments" class="loka-btn-secondary loka-btn-sm">Clear</a>
+            </div>
+        </form>
     </div>
 
     <div class="loka-card">
@@ -86,6 +122,7 @@ require_once INCLUDES_PATH . '/header.php';
                     </tbody>
                 </table>
             </div>
+            <?= listPaginationFooter($pag, $baseParams) ?>
             <?php endif; ?>
         </div>
     </div>

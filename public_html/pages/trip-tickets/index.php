@@ -297,13 +297,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $action !== 'list') {
     }
 }
 
-// Get tickets based on role
-$sql = "SELECT tt.*,
-            r.id as request_id, r.destination as trip_destination,
-            d.license_number as driver_license, du.name as driver_name,
-            dg.name as dispatch_guard, ag.name as arrival_guard,
-            u.name as reviewed_by_name
-     FROM trip_tickets tt
+$fromSql = "FROM trip_tickets tt
      JOIN requests r ON tt.request_id = r.id
      LEFT JOIN drivers d ON tt.driver_id = d.id
      LEFT JOIN users du ON d.user_id = du.id
@@ -312,39 +306,38 @@ $sql = "SELECT tt.*,
      LEFT JOIN users u ON tt.reviewed_by = u.id
      WHERE tt.deleted_at IS NULL";
 
-$params = [];
+$roleWhere = '';
+$roleParams = [];
 
 // Role-based filtering
 if (isGuard()) {
-    // Guards see all tickets they created or are involved in
-    $sql .= " AND (tt.created_by = ? OR tt.driver_id = ?)";
-    $params[] = userId();
-    $params[] = userId();
+    $roleWhere = " AND (tt.created_by = ? OR tt.driver_id = ?)";
+    $roleParams[] = userId();
+    $roleParams[] = userId();
 } elseif (isMotorpool()) {
-    // Motorpool sees all tickets for review
-    $sql .= " AND tt.status IN ('submitted', 'reviewed', 'approved')";
-} else {
-    // Other roles (admin) see all
-    $sql .= "";
+    $roleWhere = " AND tt.status IN ('submitted', 'reviewed', 'approved')";
 }
 
-// Filter by status
 $statusFilter = get('status', '');
-if ($statusFilter && in_array($statusFilter, ['draft', 'submitted', 'reviewed', 'approved'])) {
-    $sql .= " AND tt.status = ?";
+$search = listSearchQuery();
+$params = $roleParams;
+$whereSql = $roleWhere;
+
+if ($statusFilter && in_array($statusFilter, ['draft', 'submitted', 'reviewed', 'approved'], true)) {
+    $whereSql .= " AND tt.status = ?";
     $params[] = $statusFilter;
 }
 
-// Search
-$search = get('search', '');
 if ($search) {
-    $sql .= " AND (
+    $whereSql .= " AND (
         r.destination LIKE ? OR
         du.name LIKE ? OR
         r.purpose LIKE ? OR
-        tt.issues_description LIKE ?
+        tt.issues_description LIKE ? OR
+        CAST(r.id AS CHAR) LIKE ?
     )";
     $searchTerm = '%' . $search . '%';
+    $params[] = $searchTerm;
     $params[] = $searchTerm;
     $params[] = $searchTerm;
     $params[] = $searchTerm;
@@ -366,20 +359,39 @@ $sortState = resolveTableSort($allowedSortColumns, 'created_at', 'DESC');
 $sort = $sortState['key'];
 $sortDir = $sortState['dir'];
 
-$sql .= " ORDER BY {$sortState['orderSql']}";
+$countRow = db()->fetch("SELECT COUNT(*) as c {$fromSql}{$whereSql}", $params);
+$pag = listPaginationState((int) ($countRow->c ?? 0));
 
-$tickets = db()->fetchAll($sql, $params);
+$sql = "SELECT tt.*,
+            r.id as request_id, r.destination as trip_destination,
+            d.license_number as driver_license, du.name as driver_name,
+            dg.name as dispatch_guard, ag.name as arrival_guard,
+            u.name as reviewed_by_name
+     {$fromSql}{$whereSql}
+     ORDER BY {$sortState['orderSql']}
+     LIMIT ? OFFSET ?";
+
+$tickets = db()->fetchAll($sql, array_merge($params, [$pag['perPage'], $pag['offset']]));
 
 $baseParams = tableSortQueryParams($sortState, [
     'page' => 'trip-tickets',
     'status' => $statusFilter,
-    'search' => $search,
+    'q' => $search,
+    'per_page' => $pag['perPage'],
 ]);
 
-// Statistics
-$totalTickets = count($tickets);
-$pendingTickets = count(array_filter($tickets, fn($t) => $t->status === 'submitted'));
-$approvedTickets = count(array_filter($tickets, fn($t) => $t->status === 'approved'));
+// Statistics (role-scoped, ignore search/status filters)
+$statsRow = db()->fetch(
+    "SELECT
+        COUNT(*) AS total,
+        SUM(CASE WHEN tt.status = 'submitted' THEN 1 ELSE 0 END) AS pending,
+        SUM(CASE WHEN tt.status = 'approved' THEN 1 ELSE 0 END) AS approved
+     {$fromSql}{$roleWhere}",
+    $roleParams
+);
+$totalTickets = (int) ($statsRow->total ?? 0);
+$pendingTickets = (int) ($statsRow->pending ?? 0);
+$approvedTickets = (int) ($statsRow->approved ?? 0);
 
 require_once INCLUDES_PATH . '/header.php';
 ?>
@@ -464,25 +476,24 @@ require_once INCLUDES_PATH . '/header.php';
     <!-- Filters -->
     <div class="bg-base-100 rounded-lg shadow-sm mb-4">
         <div class="p-5">
-            <form method="GET" class="grid grid-cols-1 md:grid-cols-12 gap-3">
-                <div class="md:col-span-3">
-                    <label class="label"><span class="label-text">Status</span></label>
-                    <select class="select select-bordered w-full" name="status">
+            <form method="GET" class="flex flex-wrap items-end gap-3">
+                <input type="hidden" name="page" value="trip-tickets">
+                <?= listSearchFieldHtml($search, 'Destination, driver, request ID...') ?>
+                <div class="flex flex-col gap-1.5 min-w-[150px]">
+                    <label class="label py-0"><span class="label-text text-xs font-semibold text-base-content/70 uppercase tracking-wide">Status</span></label>
+                    <select class="select select-bordered select-sm bg-base-100" name="status">
                         <option value="">All Status</option>
                         <option value="submitted" <?= $statusFilter === 'submitted' ? 'selected' : '' ?>>Pending Review</option>
                         <option value="reviewed" <?= $statusFilter === 'reviewed' ? 'selected' : '' ?>>Returned for Review</option>
                         <option value="approved" <?= $statusFilter === 'approved' ? 'selected' : '' ?>>Approved</option>
                     </select>
                 </div>
-                <div class="md:col-span-6">
-                    <label class="label"><span class="label-text">Search</span></label>
-                    <input type="text" class="input input-bordered w-full" name="search" value="<?= e($search) ?>" placeholder="Search by destination, driver, request ID...">
-                </div>
-                <div class="md:col-span-3">
-                    <label class="label"><span class="label-text">&nbsp;</span></label>
-                    <button type="submit" class="loka-btn-primary w-full">
+                <?= perPageFieldHtml($pag['perPage']) ?>
+                <div class="flex gap-2">
+                    <button type="submit" class="loka-btn-primary loka-btn-sm">
                         <i class="bi bi-search mr-1"></i>Filter
                     </button>
+                    <a href="?page=trip-tickets" class="loka-btn-secondary loka-btn-sm">Clear</a>
                 </div>
             </form>
         </div>
@@ -491,7 +502,7 @@ require_once INCLUDES_PATH . '/header.php';
     <!-- Trip Tickets Table -->
     <div class="bg-base-100 rounded-lg shadow-sm">
         <div class="border-b border-base-200 p-4 flex justify-between items-center">
-            <h5 class="font-bold mb-0">Trip Tickets (<?= count($tickets) ?>)</h5>
+            <h5 class="font-bold mb-0">Trip Tickets (<?= number_format($pag['total']) ?>)</h5>
                     <button type="button" class="loka-btn-secondary loka-btn-sm" onclick="exportTickets()">
                 <i class="bi bi-file-earmark-excel mr-1"></i>Export
             </button>
@@ -503,8 +514,8 @@ require_once INCLUDES_PATH . '/header.php';
                     <p class="text-base-content/60 mt-3">No trip tickets found.</p>
                 </div>
             <?php else: ?>
-                <div class="overflow-x-auto">
-                    <table class="loka-table table-zebra w-full" id="ticketsTable">
+                <div class="loka-table-responsive">
+                    <table class="loka-table w-full" id="ticketsTable">
                         <thead>
                             <tr>
                                 <?= tableSortTh('id', 'ID', $sort, $sortDir, $baseParams) ?>
@@ -656,6 +667,7 @@ require_once INCLUDES_PATH . '/header.php';
                         </tbody>
                     </table>
                 </div>
+                <?= listPaginationFooter($pag, $baseParams) ?>
             <?php endif; ?>
         </div>
     </div>

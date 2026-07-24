@@ -8,7 +8,7 @@ requireRole(ROLE_MOTORPOOL);
 $pageTitle = 'Users';
 $roleFilter = get('role', '');
 $statusFilter = get('status', '');
-$searchQuery = trim(get('search', ''));
+$searchQuery = listSearchQuery();
 
 $params = [];
 $whereClause = 'deleted_at IS NULL';
@@ -71,7 +71,7 @@ $baseParams = tableSortQueryParams($sortState, [
     'page' => 'users',
     'role' => $roleFilter,
     'status' => $statusFilter,
-    'search' => $searchQuery,
+    'q' => $searchQuery,
     'per_page' => $perPage,
 ]);
 
@@ -94,10 +94,7 @@ require_once INCLUDES_PATH . '/header.php';
     <div class="loka-card mb-6">
         <form method="GET" class="flex flex-wrap items-end gap-3">
             <input type="hidden" name="page" value="users">
-            <div class="min-w-[150px]">
-                <label class="loka-form-label">Search (Name/Email)</label>
-                <input type="text" name="search" class="loka-form-input" placeholder="Search by name or email..." value="<?= e($searchQuery) ?>">
-            </div>
+            <?= listSearchFieldHtml($searchQuery, 'Name or email...') ?>
             <div class="min-w-[150px]">
                 <label class="loka-form-label">Role</label>
                 <select name="role" class="select select-bordered w-full bg-base-100">

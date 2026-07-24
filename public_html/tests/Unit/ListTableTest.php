@@ -30,4 +30,16 @@ class ListTableTest extends PHPUnit\Framework\TestCase
         $this->assertStringNotContainsString('<script>', $html);
         $this->assertStringContainsString('&quot;', $html);
     }
+
+    public function testListSearchQueryPrefersQOverLegacySearch(): void
+    {
+        $_GET = ['q' => 'alpha', 'search' => 'legacy'];
+        $this->assertSame('alpha', listSearchQuery());
+
+        $_GET = ['search' => 'legacy-only'];
+        $this->assertSame('legacy-only', listSearchQuery());
+
+        $_GET = [];
+        $this->assertSame('', listSearchQuery());
+    }
 }
