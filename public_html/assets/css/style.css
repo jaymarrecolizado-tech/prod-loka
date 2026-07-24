@@ -1060,3 +1060,85 @@ a.bg-info {
 [data-theme="loka"] .sms-logs-table tbody tr.sms-log-row.is-selected td:first-child {
     box-shadow: inset 3px 0 0 #00d4ff;
 }
+
+/* ===== SYSTEMWIDE CARD PADDING + DARK BORDERS =====
+   Loaded on every page (not Vite-only) so filter bars never sit flush on edges.
+*/
+:root {
+    --loka-card-pad-y: 1.25rem;
+    --loka-card-pad-x: 1.5rem;
+}
+
+[data-theme="loka"] {
+    --loka-border-soft: rgba(241, 245, 249, 0.22);
+    --loka-border: rgba(241, 245, 249, 0.38);
+    --loka-border-strong: rgba(241, 245, 249, 0.55);
+}
+
+[data-theme="loka-light"] {
+    --loka-border-soft: #cbd5e1;
+    --loka-border: #94a3b8;
+    --loka-border-strong: #64748b;
+}
+
+.loka-card {
+    padding: var(--loka-card-pad-y) var(--loka-card-pad-x) !important;
+    box-sizing: border-box;
+}
+
+/* Edge-to-edge only for flush/table cards */
+.loka-card.loka-card-flush,
+.loka-card.p-0,
+.loka-card:has(> .loka-card-body),
+.loka-card:has(> .loka-table-responsive) {
+    padding: 0 !important;
+}
+
+/* If an inner wrapper already pads, don't double-pad the card */
+.loka-card:has(> .p-4),
+.loka-card:has(> .p-5),
+.loka-card:has(> .p-6) {
+    padding: 0 !important;
+}
+
+/* Filter/forms that live in plain panel shells */
+.bg-base-100.rounded-lg.shadow-sm:has(> form),
+.bg-base-100.rounded-lg.shadow-sm:has(> .flex),
+.bg-base-100.rounded-lg.shadow-sm:has(> .grid) {
+    padding: var(--loka-card-pad-y) var(--loka-card-pad-x) !important;
+    box-sizing: border-box;
+}
+.bg-base-100.rounded-lg.shadow-sm:has(> .p-4),
+.bg-base-100.rounded-lg.shadow-sm:has(> .p-5),
+.bg-base-100.rounded-lg.shadow-sm:has(> .p-6),
+.bg-base-100.rounded-lg.shadow-sm:has(> .loka-card-body) {
+    padding: 0 !important;
+}
+
+/* Dark mode: smoke-white borders on cards + form controls */
+[data-theme="loka"] .loka-card,
+[data-theme="loka"] .loka-stat-card {
+    border-color: var(--loka-border-soft) !important;
+}
+
+[data-theme="loka"] .input,
+[data-theme="loka"] .select,
+[data-theme="loka"] .textarea,
+[data-theme="loka"] .input-bordered,
+[data-theme="loka"] .select-bordered,
+[data-theme="loka"] .loka-form-input,
+[data-theme="loka"] input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]):not([type="file"]),
+[data-theme="loka"] select,
+[data-theme="loka"] textarea {
+    border-color: var(--loka-border) !important;
+}
+
+[data-theme="loka"] .input:hover,
+[data-theme="loka"] .select:hover,
+[data-theme="loka"] .textarea:hover,
+[data-theme="loka"] .loka-form-input:hover,
+[data-theme="loka"] input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]):not([type="file"]):hover,
+[data-theme="loka"] select:hover,
+[data-theme="loka"] textarea:hover {
+    border-color: var(--loka-border-strong) !important;
+}
