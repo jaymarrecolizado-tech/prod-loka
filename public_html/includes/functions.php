@@ -6,6 +6,7 @@
 require_once __DIR__ . '/table_sort.php';
 require_once __DIR__ . '/list_pagination.php';
 require_once __DIR__ . '/list_table.php';
+require_once __DIR__ . '/view_as.php';
 require_once __DIR__ . '/badge_counts.php';
 require_once __DIR__ . '/dashboard_stats.php';
 require_once __DIR__ . '/availability.php';
@@ -210,11 +211,11 @@ function userId(): ?int
 }
 
 /**
- * Get current user role
+ * Get current user role (effective — respects All Father View-as).
  */
 function userRole(): ?string
 {
-    return $_SESSION['user_role'] ?? null;
+    return effectiveUserRole();
 }
 
 /**
@@ -226,23 +227,22 @@ function currentUser(): ?object
     if (isset($_SESSION['user']) && is_object($_SESSION['user'])) {
         return $_SESSION['user'];
     }
-    
+
     // If not in session but user_id exists, fetch from database
     if (isset($_SESSION['user_id'])) {
         $auth = new Auth();
         $user = $auth->getUser($_SESSION['user_id']);
         if ($user) {
-            // Store in session for next time
             $_SESSION['user'] = $user;
             return $user;
         }
     }
-    
+
     return null;
 }
 
 /**
- * Check if user has minimum role level
+ * Check if user has minimum role level (uses effective role).
  */
 function hasRole(string $minRole): bool
 {
@@ -252,11 +252,11 @@ function hasRole(string $minRole): bool
 }
 
 /**
- * Check if user is All Father (god / super-super-admin)
+ * Check if user is All Father (real account — not cleared by View-as).
  */
 function isAllFather(): bool
 {
-    return userRole() === ROLE_ALL_FATHER;
+    return isRealAllFather();
 }
 
 /**
@@ -264,7 +264,7 @@ function isAllFather(): bool
  */
 function canClearRateLimits(): bool
 {
-    return isAllFather();
+    return isRealAllFather();
 }
 
 /**
@@ -275,26 +275,29 @@ function canClearRateLimits(): bool
 function assignableRoles(): array
 {
     $roles = ROLE_LABELS;
-    if (!isAllFather()) {
+    if (!isRealAllFather()) {
         unset($roles[ROLE_ALL_FATHER]);
     }
     return $roles;
 }
 
 /**
- * Check if user is admin (includes All Father)
+ * Check if user is admin (All Father only when not View-as another role).
  */
 function isAdmin(): bool
 {
-    return userRole() === ROLE_ADMIN || isAllFather();
+    if (isViewingAs()) {
+        return userRole() === ROLE_ADMIN;
+    }
+    return userRole() === ROLE_ADMIN || isRealAllFather();
 }
 
 /**
- * Require All Father role or redirect.
+ * Require All Father role or redirect (real role).
  */
 function requireAllFather(): void
 {
-    if (!isAllFather()) {
+    if (!isRealAllFather()) {
         redirectWith('/?page=dashboard', 'danger', 'All Father access required.');
     }
 }
@@ -308,7 +311,7 @@ function isMotorpool(): bool
 }
 
 /**
- * Check if user is guard
+ * Check if user is guard (effective role).
  */
 function isGuard(): bool
 {
@@ -316,7 +319,7 @@ function isGuard(): bool
 }
 
 /**
- * Check if user is a driver (has a driver record)
+ * Check if user is a driver (profile or View-as Driver).
  */
 function isDriver(): bool
 {
@@ -324,12 +327,16 @@ function isDriver(): bool
 }
 
 /**
- * Active driver profile id for the logged-in user, or null.
+ * Active driver profile id for the logged-in user, or View-as test driver.
  */
 function currentDriverId(): ?int
 {
     if (!isLoggedIn()) {
         return null;
+    }
+
+    if (getViewAsRole() === 'driver') {
+        return viewAsTestDriverId();
     }
 
     static $driverId = false; // false = not loaded

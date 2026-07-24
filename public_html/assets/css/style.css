@@ -1142,3 +1142,29 @@ a.bg-info {
 [data-theme="loka"] textarea:hover {
     border-color: var(--loka-border-strong) !important;
 }
+
+/* All Father View-as banner */
+.loka-view-as-banner {
+    background: linear-gradient(90deg, #92400e, #b45309);
+    color: #fffbeb;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+.loka-view-as-banner-inner {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding: 0.65rem 1rem;
+    font-size: 0.875rem;
+}
+.loka-view-as-banner strong {
+    color: #fff;
+}
+[data-theme="loka-light"] .loka-view-as-banner {
+    background: linear-gradient(90deg, #f59e0b, #d97706);
+    color: #451a03;
+}
+[data-theme="loka-light"] .loka-view-as-banner strong {
+    color: #1c1917;
+}

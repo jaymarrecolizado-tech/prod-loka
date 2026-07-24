@@ -156,6 +156,10 @@ switch ($page) {
         redirectWith('/?page=login', 'success', 'You have been logged out.');
         break;
 
+    case 'view-as':
+        require_once PAGES_PATH . '/view-as/set.php';
+        break;
+
     case 'forgot-password':
         require_once PAGES_PATH . '/auth/forgot-password.php';
         break;

@@ -48,6 +48,40 @@
 
         <!-- Right Side -->
         <div class="loka-navbar-actions">
+            <?php if (isRealAllFather()): ?>
+            <!-- View as role (All Father) -->
+            <div class="dropdown dropdown-end">
+                <div tabindex="0" role="button" class="loka-btn-secondary loka-btn-sm gap-1" title="View as role">
+                    <i class="bi bi-person-badge"></i>
+                    <span class="hidden sm:inline"><?= isViewingAs() ? e(viewAsBannerLabel()) : 'View as' ?></span>
+                    <i class="bi bi-chevron-down text-xs"></i>
+                </div>
+                <ul tabindex="0" class="dropdown-content menu bg-base-100 rounded-box z-[1] w-56 p-2 shadow-lg">
+                    <li class="menu-title"><span>View as role</span></li>
+                    <?php
+                    $returnTo = $_SERVER['REQUEST_URI'] ?? '/?page=dashboard';
+                    $returnTo = preg_replace('/^' . preg_quote(parse_url(APP_URL, PHP_URL_PATH) ?: '', '/') . '/', '', $returnTo) ?: $returnTo;
+                    if ($returnTo === '' || $returnTo[0] !== '/') {
+                        $returnTo = '/?page=dashboard';
+                    }
+                    ?>
+                    <li>
+                        <a href="<?= APP_URL ?>/?page=view-as&role=none&redirect=<?= urlencode($returnTo) ?>">
+                            All Father (default)
+                        </a>
+                    </li>
+                    <?php foreach (viewAsRoleOptions() as $roleKey => $roleLabel): ?>
+                    <li>
+                        <a href="<?= APP_URL ?>/?page=view-as&role=<?= e($roleKey) ?>&redirect=<?= urlencode($returnTo) ?>"
+                           class="<?= getViewAsRole() === $roleKey ? 'active' : '' ?>">
+                            <?= e($roleLabel) ?>
+                        </a>
+                    </li>
+                    <?php endforeach; ?>
+                </ul>
+            </div>
+            <?php endif; ?>
+
             <!-- Theme Toggle -->
             <button class="loka-navbar-notification" type="button" id="themeToggle" aria-label="Toggle theme" title="Toggle dark/light mode">
                 <i class="bi bi-moon-stars-fill text-lg" id="themeIconDark"></i>
@@ -103,7 +137,14 @@
                     <li class="menu-title">
                         <span class="text-sm"><?= e(currentUser()->email ?? '') ?></span>
                     </li>
-                    <li class="text-xs px-4 py-1"><?= roleBadge(userRole()) ?></li>
+                    <li class="text-xs px-4 py-1">
+                        <?php if (isViewingAs()): ?>
+                            <span class="loka-badge bg-warning/20 text-warning"><?= e(viewAsBannerLabel()) ?></span>
+                            <span class="text-warning block mt-1">View-as active</span>
+                        <?php else: ?>
+                            <?= roleBadge(realUserRole() ?? '') ?>
+                        <?php endif; ?>
+                    </li>
                     <li class="border-t border-base-200 mt-1 pt-1">
                         <a href="<?= APP_URL ?>/?page=profile"><i class="bi bi-person me-2"></i>Profile</a>
                     </li>
@@ -124,6 +165,28 @@
 
         <!-- Main Content -->
         <main class="main-content" id="main-content">
+            <?php if (isViewingAs()): ?>
+            <div class="loka-view-as-banner" role="status">
+                <div class="loka-view-as-banner-inner">
+                    <span>
+                        <i class="bi bi-eye me-1"></i>
+                        Viewing as <strong><?= e(viewAsBannerLabel()) ?></strong>
+                        — actions run with that role’s permissions
+                    </span>
+                    <?php
+                    $exitTo = $_SERVER['REQUEST_URI'] ?? '/?page=dashboard';
+                    $exitTo = preg_replace('/^' . preg_quote(parse_url(APP_URL, PHP_URL_PATH) ?: '', '/') . '/', '', $exitTo) ?: $exitTo;
+                    if ($exitTo === '' || $exitTo[0] !== '/') {
+                        $exitTo = '/?page=dashboard';
+                    }
+                    ?>
+                    <a class="loka-btn-secondary loka-btn-sm" href="<?= APP_URL ?>/?page=view-as&role=none&redirect=<?= urlencode($exitTo) ?>">
+                        Exit View-as
+                    </a>
+                </div>
+            </div>
+            <?php endif; ?>
+
             <!-- Flash Messages -->
             <?php if ($flash = getFlash()): ?>
             <?php
