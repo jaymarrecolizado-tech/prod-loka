@@ -13,9 +13,7 @@ $pageTitle = 'Maintenance Schedule';
 $view = get('view', 'calendar'); // calendar, list, upcoming
 $vehicleId = getInt('vehicle');
 $month = get('month', date('Y-m'));
-$page = getInt('page', 1);
-$limit = 20;
-$offset = ($page - 1) * $limit;
+$searchQuery = listSearchQuery();
 
 // Get all vehicles for filter
 $vehicles = db()->fetchAll(
@@ -44,7 +42,20 @@ if ($vehicleId) {
     $params[] = $vehicleId;
 }
 
+if ($searchQuery !== '') {
+    $sql .= " AND (
+        mr.title LIKE ? OR
+        mr.description LIKE ? OR
+        v.plate_number LIKE ? OR
+        reporter.name LIKE ? OR
+        CAST(mr.id AS CHAR) LIKE ?
+    )";
+    $like = '%' . $searchQuery . '%';
+    $params = array_merge($params, [$like, $like, $like, $like, $like]);
+}
+
 // Filter by view
+$useListPagination = in_array($view, ['list', 'upcoming', 'overdue'], true);
 switch ($view) {
     case 'upcoming':
         $sql .= " AND mr.status IN (?, ?)
@@ -63,27 +74,66 @@ switch ($view) {
         break;
     case 'list':
     default:
+        if ($view !== 'calendar') {
+            $useListPagination = true;
+        }
         $sql .= " ORDER BY
             FIELD(mr.priority, 'critical', 'high', 'medium', 'low'),
             mr.scheduled_date ASC,
-            mr.created_at DESC
-            LIMIT ? OFFSET ?";
-        $params[] = $limit;
-        $params[] = $offset;
+            mr.created_at DESC";
         break;
+}
+
+$countParams = [];
+$countWhere = 'mr.deleted_at IS NULL';
+if ($vehicleId) {
+    $countWhere .= ' AND mr.vehicle_id = ?';
+    $countParams[] = $vehicleId;
+}
+if ($searchQuery !== '') {
+    $countWhere .= ' AND (mr.title LIKE ? OR mr.description LIKE ? OR v.plate_number LIKE ? OR reporter.name LIKE ? OR CAST(mr.id AS CHAR) LIKE ?)';
+    $like = '%' . $searchQuery . '%';
+    $countParams = array_merge($countParams, [$like, $like, $like, $like, $like]);
+}
+if ($view === 'upcoming') {
+    $countWhere .= ' AND mr.status IN (?, ?) AND mr.scheduled_date >= CURDATE() AND mr.scheduled_date <= DATE_ADD(CURDATE(), INTERVAL 30 DAY)';
+    $countParams[] = MAINTENANCE_STATUS_PENDING;
+    $countParams[] = MAINTENANCE_STATUS_SCHEDULED;
+} elseif ($view === 'overdue') {
+    $countWhere .= ' AND mr.status IN (?, ?) AND mr.scheduled_date < CURDATE()';
+    $countParams[] = MAINTENANCE_STATUS_PENDING;
+    $countParams[] = MAINTENANCE_STATUS_SCHEDULED;
+}
+
+$countRow = db()->fetch(
+    "SELECT COUNT(*) as c
+     FROM maintenance_requests mr
+     JOIN vehicles v ON mr.vehicle_id = v.id
+     JOIN users reporter ON mr.reported_by = reporter.id
+     WHERE {$countWhere}",
+    $countParams
+);
+$pag = listPaginationState((int) ($countRow->c ?? 0));
+$totalCount = $pag['total'];
+$totalPages = $pag['totalPages'];
+$page = $pag['page'];
+
+if ($useListPagination) {
+    $sql .= ' LIMIT ? OFFSET ?';
+    $params[] = $pag['perPage'];
+    $params[] = $pag['offset'];
 }
 
 $maintenanceRequests = db()->fetchAll($sql, $params);
 
-// Get total count for pagination
-$totalCount = db()->fetchColumn(
-    "SELECT COUNT(*) FROM maintenance_requests mr
-     WHERE mr.deleted_at IS NULL" .
-    ($vehicleId ? " AND mr.vehicle_id = ?" : ""),
-    $vehicleId ? [$vehicleId] : []
-);
-
-$totalPages = ceil($totalCount / $limit);
+$baseParams = [
+    'page' => 'maintenance',
+    'action' => 'schedule',
+    'view' => $view,
+    'vehicle' => $vehicleId ?: '',
+    'q' => $searchQuery,
+    'per_page' => $pag['perPage'],
+];
 
 // Get upcoming maintenance alerts (based on mileage and time)
 $upcomingAlerts = [];
@@ -250,11 +300,13 @@ require_once INCLUDES_PATH . '/header.php';
     <!-- Filters -->
     <div class="loka-card mb-4">
         <div class="p-6">
-            <form method="GET" class="grid grid-cols-12 gap-3">
+            <form method="GET" class="flex flex-wrap items-end gap-3">
                 <input type="hidden" name="page" value="maintenance">
                 <input type="hidden" name="action" value="schedule">
 
-                <div class="col-span-12 md:col-span-3">
+                <?= listSearchFieldHtml($searchQuery, 'Title, vehicle, reporter, ID...') ?>
+
+                <div class="flex flex-col gap-1.5 min-w-[160px]">
                     <label class="loka-form-label">View</label>
                     <select name="view" class="loka-form-input" onchange="this.form.submit()">
                         <option value="calendar" <?= $view === 'calendar' ? 'selected' : '' ?>>Calendar View</option>
@@ -264,7 +316,7 @@ require_once INCLUDES_PATH . '/header.php';
                     </select>
                 </div>
 
-                <div class="col-span-12 md:col-span-3">
+                <div class="flex flex-col gap-1.5 min-w-[180px]">
                     <label class="loka-form-label">Vehicle</label>
                     <select name="vehicle" class="loka-form-input" onchange="this.form.submit()">
                         <option value="">All Vehicles</option>
@@ -276,11 +328,13 @@ require_once INCLUDES_PATH . '/header.php';
                     </select>
                 </div>
 
-                <div class="col-span-12 md:col-span-3 flex items-end">
+                <?= perPageFieldHtml($pag['perPage'], 'loka-form-input') ?>
+
+                <div class="flex gap-2">
                     <button type="submit" class="loka-btn-primary">
                         <i class="bi bi-filter me-1"></i>Apply Filters
                     </button>
-                    <a href="<?= APP_URL ?>/?page=maintenance&action=schedule" class="loka-btn-secondary ms-2">
+                    <a href="<?= APP_URL ?>/?page=maintenance&action=schedule" class="loka-btn-secondary">
                         <i class="bi bi-x-circle me-1"></i>Clear
                     </a>
                 </div>
@@ -520,36 +574,7 @@ require_once INCLUDES_PATH . '/header.php';
                     </table>
                 </div>
 
-                <!-- Pagination -->
-                <?php if ($totalPages > 1): ?>
-                <nav class="mt-3">
-                    <ul class="pagination justify-content-center">
-                        <?php if ($page > 1): ?>
-                        <li class="page-item">
-                            <a class="page-link" href="?page=maintenance&action=schedule&view=<?= $view ?>&vehicle=<?= $vehicleId ?>&p=<?= $page - 1 ?>">
-                                <i class="bi bi-chevron-left"></i>
-                            </a>
-                        </li>
-                        <?php endif; ?>
-
-                        <?php for ($i = 1; $i <= $totalPages; $i++): ?>
-                        <li class="page-item <?= $i === $page ? 'active' : '' ?>">
-                            <a class="page-link" href="?page=maintenance&action=schedule&view=<?= $view ?>&vehicle=<?= $vehicleId ?>&p=<?= $i ?>">
-                                <?= $i ?>
-                            </a>
-                        </li>
-                        <?php endfor; ?>
-
-                        <?php if ($page < $totalPages): ?>
-                        <li class="page-item">
-                            <a class="page-link" href="?page=maintenance&action=schedule&view=<?= $view ?>&vehicle=<?= $vehicleId ?>&p=<?= $page + 1 ?>">
-                                <i class="bi bi-chevron-right"></i>
-                            </a>
-                        </li>
-                        <?php endif; ?>
-                    </ul>
-                </nav>
-                <?php endif; ?>
+                <?= listPaginationFooter($pag, $baseParams) ?>
             <?php endif; ?>
         </div>
     </div>

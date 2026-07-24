@@ -81,7 +81,8 @@ function listPaginationUrl(array $params, int $pageNum, string $pageParam = 'p')
 }
 
 /**
- * Compact footer: “Showing X–Y of Z” + page join + optional per-page.
+ * Compact footer: “Showing X–Y of Z” + per-page (10/25/50/100) + page join.
+ * Default page size is always 10 via DEFAULT_PER_PAGE / resolvePerPage().
  */
 function listPaginationFooter(array $state, array $queryParams, string $pageParam = 'p'): string
 {
@@ -95,11 +96,30 @@ function listPaginationFooter(array $state, array $queryParams, string $pagePara
     $from = (int) $state['from'];
     $to = (int) $state['to'];
     $perPage = (int) $state['perPage'];
+    if (!in_array($perPage, PER_PAGE_OPTIONS, true)) {
+        $perPage = DEFAULT_PER_PAGE;
+    }
 
     $queryParams['per_page'] = $perPage;
 
     $html = '<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mt-4 px-1">';
-    $html .= '<p class="text-sm text-base-content/60">Showing ' . $from . '–' . $to . ' of ' . number_format($total) . '</p>';
+    $html .= '<div class="flex flex-wrap items-center gap-3">';
+    $html .= '<p class="text-sm text-base-content/60 mb-0">Showing ' . $from . '–' . $to . ' of ' . number_format($total) . '</p>';
+
+    // Always expose 10/25/50/100 on every paginated list
+    $html .= '<label class="flex items-center gap-2 text-sm text-base-content/60">';
+    $html .= '<span>Per page</span>';
+    $html .= '<select class="select select-bordered select-sm bg-base-100" onchange="window.location.href=this.value">';
+    foreach (PER_PAGE_OPTIONS as $n) {
+        $optParams = $queryParams;
+        $optParams['per_page'] = (int) $n;
+        $optParams[$pageParam] = 1;
+        $href = e(listPaginationUrl($optParams, 1, $pageParam));
+        $sel = ((int) $n === $perPage) ? ' selected' : '';
+        $html .= '<option value="' . $href . '"' . $sel . '>' . (int) $n . '</option>';
+    }
+    $html .= '</select></label>';
+    $html .= '</div>';
 
     if ($totalPages > 1) {
         $html .= '<div class="join">';
