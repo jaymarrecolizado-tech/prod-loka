@@ -3,7 +3,7 @@
  * All Father — SMS notifications settings & logs
  */
 
-requireAllFather();
+requireSystemControl();
 
 $pageTitle = 'SMS Notifications';
 $flash = null;

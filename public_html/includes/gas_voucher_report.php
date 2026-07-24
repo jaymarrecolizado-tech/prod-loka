@@ -7,7 +7,9 @@
 function requireGasVoucherReportAccess(): void
 {
     denyGuardAccess();
-    requireAnyRole([ROLE_APPROVER, ROLE_MOTORPOOL, ROLE_ADMIN, ROLE_CHIEF_ADMIN_FINANCE]);
+    if (!canAccessOpsReports()) {
+        redirectWith('/?page=dashboard', 'danger', 'Administrator or All Father access required.');
+    }
 }
 
 /**

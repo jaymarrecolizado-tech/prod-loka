@@ -295,57 +295,16 @@ switch ($page) {
 
     case 'reports':
         denyGuardAccess();
-        // Gas voucher report is available to CAF (+ ops); other report pages stay approver+
-        if (in_array($action, ['gas-vouchers', 'export-gas-vouchers-csv', 'export-gas-vouchers-pdf'], true)) {
-            if ($action === 'gas-vouchers') {
-                require_once PAGES_PATH . '/reports/gas-vouchers.php';
-            } elseif ($action === 'export-gas-vouchers-csv') {
-                require_once PAGES_PATH . '/reports/export-gas-vouchers-csv.php';
-            } else {
-                require_once PAGES_PATH . '/reports/export-gas-vouchers-pdf.php';
-            }
-            break;
+        if (!canAccessOpsReports()) {
+            redirectWith('/?page=dashboard', 'danger', 'Administrator or All Father access required.');
         }
-
-        // Drivers: own history reports only (no full trip ops reports)
-        $driverReportActions = [
-            'index', 'vehicle-history', 'driver',
-            'export-vehicle-history', 'export-vehicle-csv',
-            'export-driver', 'export-driver-csv',
-        ];
-        if (isDriver() && !canAccessOpsReports()) {
-            if ($action === 'index' || $action === '') {
-                require_once PAGES_PATH . '/reports/index.php';
-            } elseif (in_array($action, $driverReportActions, true)) {
-                if ($action === 'vehicle-history') {
-                    require_once PAGES_PATH . '/reports/vehicle-history.php';
-                } elseif ($action === 'driver') {
-                    require_once PAGES_PATH . '/reports/driver.php';
-                } elseif ($action === 'export-vehicle-history') {
-                    require_once PAGES_PATH . '/reports/export-vehicle-history.php';
-                } elseif ($action === 'export-vehicle-csv') {
-                    require_once PAGES_PATH . '/reports/export-vehicle-csv.php';
-                } elseif ($action === 'export-driver') {
-                    require_once PAGES_PATH . '/reports/export-driver.php';
-                } elseif ($action === 'export-driver-csv') {
-                    require_once PAGES_PATH . '/reports/export-driver-csv.php';
-                } else {
-                    require_once PAGES_PATH . '/reports/index.php';
-                }
-            } else {
-                redirectWith('/?page=reports', 'danger', 'You can only view your own driver and vehicle history reports.');
-            }
-            break;
-        }
-
-        if (isChiefAdminFinance() && !isApprover() && !isMotorpool() && !isAdmin()) {
-            // CAF hub: show reports index (gas card only) without approver gate
-            require_once PAGES_PATH . '/reports/index.php';
-            break;
-        }
-
-        requireRole(ROLE_APPROVER);
-        if ($action === 'vehicle-history') {
+        if ($action === 'gas-vouchers') {
+            require_once PAGES_PATH . '/reports/gas-vouchers.php';
+        } elseif ($action === 'export-gas-vouchers-csv') {
+            require_once PAGES_PATH . '/reports/export-gas-vouchers-csv.php';
+        } elseif ($action === 'export-gas-vouchers-pdf') {
+            require_once PAGES_PATH . '/reports/export-gas-vouchers-pdf.php';
+        } elseif ($action === 'vehicle-history') {
             require_once PAGES_PATH . '/reports/vehicle-history.php';
         } elseif ($action === 'driver') {
             require_once PAGES_PATH . '/reports/driver.php';
@@ -431,7 +390,7 @@ switch ($page) {
         break;
 
     case 'security':
-        requireAllFather();
+        requireSystemControl();
         if ($action === 'summary') {
             require_once PAGES_PATH . '/security/summary.php';
         } elseif ($action === 'sms') {

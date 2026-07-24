@@ -3,10 +3,10 @@
  * LOKA - Export Driver Report to PDF (Complete)
  */
 
-$driverScoped = isDriver() && !canAccessOpsReports();
-if (!$driverScoped && !canAccessOpsReports()) {
-    requireRole(ROLE_APPROVER);
+if (!canAccessOpsReports()) {
+    redirectWith('/?page=dashboard', 'danger', 'Administrator or All Father access required.');
 }
+$driverScoped = false;
 
 require_once BASE_PATH . '/vendor/tecnickcom/tcpdf/tcpdf.php';
 

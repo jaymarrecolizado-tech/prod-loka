@@ -294,7 +294,6 @@ function isAdmin(): bool
 
 /**
  * Require All Father role or redirect (real role, not View-as).
- * System Control is unavailable while View-as is active.
  */
 function requireAllFather(): void
 {
@@ -304,11 +303,29 @@ function requireAllFather(): void
 }
 
 /**
- * System Control / All Father-only tools (hidden while View-as is active).
+ * System Control: Administrator or All Father only.
+ * Hidden for Guard and while All Father is Viewing-as a non-admin role.
  */
 function canAccessSystemControl(): bool
 {
-    return isRealAllFather() && !isViewingAs();
+    if (isGuard()) {
+        return false;
+    }
+    if (isViewingAs()) {
+        return userRole() === ROLE_ADMIN;
+    }
+    return isRealAllFather() || realUserRole() === ROLE_ADMIN;
+}
+
+/**
+ * Require System Control access (Administrator or All Father).
+ */
+function requireSystemControl(): void
+{
+    requireAuth();
+    if (!canAccessSystemControl()) {
+        redirectWith('/?page=dashboard', 'danger', 'Administrator or All Father access required.');
+    }
 }
 
 /**
@@ -361,7 +378,7 @@ function currentDriverId(): ?int
 }
 
 /**
- * Drivers may use gas vouchers (own), my trips, and scoped history reports.
+ * Drivers may use gas vouchers (own) and my trips.
  */
 function canAccessGasVouchers(): bool
 {
@@ -377,27 +394,22 @@ function canAccessGasVouchers(): bool
 }
 
 /**
- * Full ops reports (all vehicles/drivers/trips).
- * Guards never have report access.
+ * Full ops reports — Administrator or All Father only.
  */
 function canAccessOpsReports(): bool
 {
     if (isGuard()) {
         return false;
     }
-    return isApprover() || isMotorpool() || isAdmin();
+    return isAdmin();
 }
 
 /**
- * Driver-scoped reports only (own history + vehicles they drove).
- * Guards never have report access.
+ * Reports menu/pages — Administrator or All Father only.
  */
 function canAccessDriverReports(): bool
 {
-    if (isGuard()) {
-        return false;
-    }
-    return isDriver() || canAccessOpsReports() || isChiefAdminFinance();
+    return canAccessOpsReports();
 }
 
 /**

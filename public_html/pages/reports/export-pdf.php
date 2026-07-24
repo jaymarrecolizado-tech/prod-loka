@@ -3,7 +3,9 @@
  * LOKA - Export Report to PDF (Complete)
  */
 
-requireRole(ROLE_APPROVER);
+if (!canAccessOpsReports()) {
+    redirectWith('/?page=dashboard', 'danger', 'Administrator or All Father access required.');
+}
 
 require_once BASE_PATH . '/vendor/tecnickcom/tcpdf/tcpdf.php';
 

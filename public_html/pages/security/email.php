@@ -3,7 +3,7 @@
  * All Father — Email delivery mode & queue tools
  */
 
-requireAllFather();
+requireSystemControl();
 
 $pageTitle = 'Email Delivery';
 $flash = null;

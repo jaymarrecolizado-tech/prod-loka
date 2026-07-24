@@ -3,10 +3,10 @@
  * LOKA - Driver Report
  */
 
-$driverScoped = isDriver() && !canAccessOpsReports();
-if (!$driverScoped && !canAccessOpsReports()) {
-    requireRole(ROLE_APPROVER);
+if (!canAccessOpsReports()) {
+    redirectWith('/?page=dashboard', 'danger', 'Administrator or All Father access required.');
 }
+$driverScoped = false;
 
 $pageTitle = 'Driver Report';
 $myDriverId = currentDriverId();

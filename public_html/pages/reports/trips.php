@@ -3,7 +3,9 @@
  * LOKA - Trip Requests Report
  */
 
-requireRole(ROLE_APPROVER);
+if (!canAccessOpsReports()) {
+    redirectWith('/?page=dashboard', 'danger', 'Administrator or All Father access required.');
+}
 
 $pageTitle = 'Trip Requests Report';
 

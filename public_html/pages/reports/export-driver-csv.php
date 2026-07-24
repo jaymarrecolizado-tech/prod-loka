@@ -3,10 +3,10 @@
  * LOKA - Export Driver Report to CSV (Complete)
  */
 
-$driverScoped = isDriver() && !canAccessOpsReports();
-if (!$driverScoped && !canAccessOpsReports()) {
-    requireRole(ROLE_APPROVER);
+if (!canAccessOpsReports()) {
+    redirectWith('/?page=dashboard', 'danger', 'Administrator or All Father access required.');
 }
+$driverScoped = false;
 
 $driverId = get('driver_id');
 $startDate = get('start_date', date('Y-m-01'));

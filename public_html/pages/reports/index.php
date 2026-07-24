@@ -1,18 +1,13 @@
 <?php
 /**
- * LOKA - Reports Page
+ * LOKA - Reports Page (Administrator / All Father only)
  */
 
-$canOpsReports = canAccessOpsReports();
-$canGasReport = $canOpsReports || isChiefAdminFinance();
-$canDriverReports = isDriver() && !$canOpsReports;
-if (!$canGasReport && !$canDriverReports) {
-    requireRole(ROLE_APPROVER);
+if (!canAccessOpsReports()) {
+    redirectWith('/?page=dashboard', 'danger', 'Administrator or All Father access required.');
 }
 
 $pageTitle = 'Reports';
-$cafOnly = isChiefAdminFinance() && !$canOpsReports && !$canDriverReports;
-$driverOnly = $canDriverReports;
 
 require_once INCLUDES_PATH . '/header.php';
 ?>
@@ -29,7 +24,6 @@ require_once INCLUDES_PATH . '/header.php';
     </div>
 
     <div class="grid grid-cols-12 gap-4">
-        <?php if ($canGasReport): ?>
         <!-- Gas Voucher Report -->
         <div class="col-span-12 md:col-span-6 lg:col-span-4">
             <a href="<?= APP_URL ?>/?page=reports&action=gas-vouchers" class="no-underline">
@@ -45,9 +39,7 @@ require_once INCLUDES_PATH . '/header.php';
                 </div>
             </a>
         </div>
-        <?php endif; ?>
 
-        <?php if (!$cafOnly): ?>
         <!-- Vehicle History -->
         <div class="col-span-12 md:col-span-6 lg:col-span-4">
             <a href="<?= APP_URL ?>/?page=reports&action=vehicle-history" class="no-underline">
@@ -57,11 +49,7 @@ require_once INCLUDES_PATH . '/header.php';
                             <i class="bi bi-car-front text-primary" style="font-size: 3.5rem;"></i>
                         </div>
                         <h5>Vehicle History</h5>
-                        <p class="text-base-content/60 mb-3">
-                            <?= $driverOnly
-                                ? 'History for vehicles you have driven (your trips only)'
-                                : 'View trip history and utilization for each vehicle with export options' ?>
-                        </p>
+                        <p class="text-base-content/60 mb-3">View trip history and utilization for each vehicle with export options</p>
                         <span class="loka-badge bg-primary">PDF Export</span>
                     </div>
                 </div>
@@ -77,18 +65,13 @@ require_once INCLUDES_PATH . '/header.php';
                             <i class="bi bi-person-badge text-success" style="font-size: 3.5rem;"></i>
                         </div>
                         <h5>Driver Report</h5>
-                        <p class="text-base-content/60 mb-3">
-                            <?= $driverOnly
-                                ? 'Your personal trip history and driving statistics'
-                                : 'View trip history and statistics for each driver with export options' ?>
-                        </p>
+                        <p class="text-base-content/60 mb-3">View trip history and statistics for each driver with export options</p>
                         <span class="loka-badge bg-success">PDF Export</span>
                     </div>
                 </div>
             </a>
         </div>
 
-        <?php if (!$driverOnly): ?>
         <!-- Trip Requests Report -->
         <div class="col-span-12 md:col-span-6 lg:col-span-4">
             <a href="<?= APP_URL ?>/?page=reports&action=trips" class="no-underline">
@@ -104,7 +87,6 @@ require_once INCLUDES_PATH . '/header.php';
                 </div>
             </a>
         </div>
-        <?php endif; ?>
 
         <?php if (isAdmin()): ?>
         <!-- Admin Reports -->
@@ -123,24 +105,7 @@ require_once INCLUDES_PATH . '/header.php';
             </a>
         </div>
         <?php endif; ?>
-        <?php endif; ?>
     </div>
 </div>
-
-<style>
-.report-card {
-    transition: transform 0.2s, box-shadow 0.2s;
-    border: 2px solid transparent;
-}
-.report-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
-    border-color: var(--primary-color);
-}
-.report-card h5 {
-    color: #333;
-    font-weight: 600;
-}
-</style>
 
 <?php require_once INCLUDES_PATH . '/footer.php'; ?>

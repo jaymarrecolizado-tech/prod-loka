@@ -3,7 +3,9 @@
  * LOKA - Export Report to CSV (Complete)
  */
 
-requireRole(ROLE_APPROVER);
+if (!canAccessOpsReports()) {
+    redirectWith('/?page=dashboard', 'danger', 'Administrator or All Father access required.');
+}
 
 $startDate = get('start_date', date('Y-m-01'));
 $endDate = get('end_date', date('Y-m-t'));

@@ -3,7 +3,7 @@
  * All Father — Manage vehicles with broken / unreadable odometers
  */
 
-requireAllFather();
+requireSystemControl();
 
 $pageTitle = 'Broken Odometers';
 $flash = null;

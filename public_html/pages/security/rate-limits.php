@@ -3,7 +3,7 @@
  * All Father — clear rate limits & unlock accounts
  */
 
-requireAllFather();
+requireSystemControl();
 
 $pageTitle = 'Rate Limits & Lockouts';
 $security = Security::getInstance();

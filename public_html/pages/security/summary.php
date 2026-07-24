@@ -3,7 +3,7 @@
  * All Father — rate-limit / lockout summary report
  */
 
-requireAllFather();
+requireSystemControl();
 
 $pageTitle = 'Security Summary';
 
