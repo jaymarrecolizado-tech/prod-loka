@@ -304,17 +304,17 @@ function requireAllFather(): void
 
 /**
  * System Control: Administrator or All Father only.
- * Hidden for Guard and while All Father is Viewing-as a non-admin role.
+ * Hidden for Guard and while View-as is active as a non-admin role.
  */
 function canAccessSystemControl(): bool
 {
-    if (isGuard()) {
+    if (!isLoggedIn() || isGuard()) {
         return false;
     }
     if (isViewingAs()) {
-        return userRole() === ROLE_ADMIN;
+        return getViewAsRole() === ROLE_ADMIN;
     }
-    return isRealAllFather() || realUserRole() === ROLE_ADMIN;
+    return isRealAllFather() || isRealAdministrator();
 }
 
 /**

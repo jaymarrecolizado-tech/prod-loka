@@ -1,19 +1,33 @@
 <?php
 /**
- * All Father "View as" role — session-based effective role for testing.
- * Real identity stays All Father (System Control, audit actor user_id).
+ * "View as" role — session-based effective role for testing.
+ * Available to All Father and Administrator.
+ * Real identity is preserved (System Control, audit actor user_id).
  */
 
 const VIEW_AS_SESSION_KEY = 'view_as_role';
 
 /**
- * Roles All Father may view/act as.
+ * Roles that may use View-as.
+ */
+function canUseViewAs(): bool
+{
+    return isRealAllFather() || isRealAdministrator();
+}
+
+function isRealAdministrator(): bool
+{
+    return realUserRole() === ROLE_ADMIN;
+}
+
+/**
+ * Roles All Father / Administrator may view/act as.
  *
  * @return array<string, string> role => label
  */
 function viewAsRoleOptions(): array
 {
-    return [
+    $options = [
         ROLE_REQUESTER => 'Requester',
         ROLE_GUARD => 'Guard',
         ROLE_APPROVER => 'Approver',
@@ -22,6 +36,28 @@ function viewAsRoleOptions(): array
         ROLE_ADMIN => 'Administrator',
         'driver' => 'Driver',
     ];
+
+    // Do not offer the actor's own real role as a View-as target
+    $real = realUserRole();
+    if ($real !== null && isset($options[$real])) {
+        unset($options[$real]);
+    }
+
+    return $options;
+}
+
+/**
+ * Label for exiting View-as (back to real role).
+ */
+function viewAsDefaultLabel(): string
+{
+    if (isRealAllFather()) {
+        return 'All Father (default)';
+    }
+    if (isRealAdministrator()) {
+        return 'Administrator (default)';
+    }
+    return 'Default role';
 }
 
 function realUserRole(): ?string
@@ -36,20 +72,29 @@ function isRealAllFather(): bool
 
 function isViewingAs(): bool
 {
-    return isRealAllFather() && getViewAsRole() !== null;
+    return canUseViewAs() && getViewAsRole() !== null;
 }
 
 function getViewAsRole(): ?string
 {
-    if (!isRealAllFather()) {
+    if (!canUseViewAs()) {
         return null;
     }
     $role = $_SESSION[VIEW_AS_SESSION_KEY] ?? null;
     if ($role === null || $role === '') {
         return null;
     }
-    $allowed = viewAsRoleOptions();
-    return isset($allowed[$role]) ? (string) $role : null;
+    // Allow reading even if option was filtered for current role (session may retain)
+    $all = [
+        ROLE_REQUESTER => true,
+        ROLE_GUARD => true,
+        ROLE_APPROVER => true,
+        ROLE_MOTORPOOL => true,
+        ROLE_CHIEF_ADMIN_FINANCE => true,
+        ROLE_ADMIN => true,
+        'driver' => true,
+    ];
+    return isset($all[$role]) ? (string) $role : null;
 }
 
 /**
@@ -102,7 +147,7 @@ function viewAsTestDriverId(): ?int
  */
 function setViewAsRole(?string $role): bool
 {
-    if (!isRealAllFather()) {
+    if (!canUseViewAs()) {
         return false;
     }
 
@@ -136,5 +181,14 @@ function viewAsBannerLabel(): ?string
     if ($role === null) {
         return null;
     }
-    return viewAsRoleOptions()[$role] ?? $role;
+    $labels = [
+        ROLE_REQUESTER => 'Requester',
+        ROLE_GUARD => 'Guard',
+        ROLE_APPROVER => 'Approver',
+        ROLE_MOTORPOOL => 'Motorpool Head',
+        ROLE_CHIEF_ADMIN_FINANCE => 'Chief Admin & Finance',
+        ROLE_ADMIN => 'Administrator',
+        'driver' => 'Driver',
+    ];
+    return $labels[$role] ?? $role;
 }

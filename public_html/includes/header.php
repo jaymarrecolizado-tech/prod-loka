@@ -48,8 +48,8 @@
 
         <!-- Right Side -->
         <div class="loka-navbar-actions">
-            <?php if (isRealAllFather()): ?>
-            <!-- View as role (All Father) -->
+            <?php if (canUseViewAs()): ?>
+            <!-- View as role (All Father / Administrator) -->
             <div class="dropdown dropdown-end">
                 <div tabindex="0" role="button" class="loka-btn-secondary loka-btn-sm gap-1" title="View as role">
                     <i class="bi bi-person-badge"></i>
@@ -67,7 +67,7 @@
                     ?>
                     <li>
                         <a href="<?= APP_URL ?>/?page=view-as&role=none&redirect=<?= urlencode($returnTo) ?>">
-                            All Father (default)
+                            <?= e(viewAsDefaultLabel()) ?>
                         </a>
                     </li>
                     <?php foreach (viewAsRoleOptions() as $roleKey => $roleLabel): ?>

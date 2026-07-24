@@ -1,12 +1,12 @@
 <?php
 /**
- * All Father — set / clear View-as role
+ * Set / clear View-as role (All Father or Administrator)
  */
 
 requireAuth();
 
-if (!isRealAllFather()) {
-    redirectWith('/?page=dashboard', 'danger', 'All Father access required.');
+if (!canUseViewAs()) {
+    redirectWith('/?page=dashboard', 'danger', 'Administrator or All Father access required.');
 }
 
 $role = getSafe('role', '', 40);
@@ -21,7 +21,8 @@ if ($redirect[0] !== '/') {
 
 if ($role === '' || $role === 'none') {
     setViewAsRole(null);
-    redirectWith($redirect, 'success', 'View-as cleared. You are All Father again.');
+    $back = isRealAllFather() ? 'All Father' : 'Administrator';
+    redirectWith($redirect, 'success', 'View-as cleared. You are ' . $back . ' again.');
 }
 
 if (!setViewAsRole($role)) {
@@ -31,5 +32,5 @@ if (!setViewAsRole($role)) {
     redirectWith($redirect, 'danger', $msg);
 }
 
-$label = viewAsRoleOptions()[$role] ?? $role;
+$label = viewAsBannerLabel() ?? $role;
 redirectWith($redirect, 'success', 'Now viewing as ' . $label . '.');
