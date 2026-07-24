@@ -15,12 +15,19 @@
 /* Theme color-scheme — makes native selects/date pickers follow dark/light UI */
 [data-theme="loka"] {
   color-scheme: dark;
+  /* Smoke-white borders for dark UI */
+  --loka-border-soft: rgba(241, 245, 249, 0.22);
+  --loka-border: rgba(241, 245, 249, 0.38);
+  --loka-border-strong: rgba(241, 245, 249, 0.55);
 }
 
 [data-theme="loka-light"] {
   color-scheme: light;
   --sidebar-bg: #1e293b;
   --sidebar-text: #cbd5e1;
+  --loka-border-soft: #cbd5e1;
+  --loka-border: #94a3b8;
+  --loka-border-strong: #64748b;
 }
 
 /* ===================================================
@@ -93,20 +100,55 @@ body {
 
 /* ===== CARDS ===== */
 .loka-card {
+  --loka-card-pad-y: 1.25rem;
+  --loka-card-pad-x: 1.5rem;
   background: hsl(var(--b1));
-  border: 1px solid hsl(var(--b3));
+  border: 1px solid var(--loka-border-soft, hsl(var(--b3)));
   border-radius: 1rem;
   box-shadow: 0 2px 8px rgba(0,0,0,.25), 0 1px 2px rgba(0,0,0,.15);
   transition: box-shadow 0.2s;
+  /* Default inner breathing room so forms/controls never sit on the border */
+  padding: var(--loka-card-pad-y) var(--loka-card-pad-x);
 }
 
 .loka-card:hover {
   box-shadow: 0 8px 20px rgba(0,0,0,.35), 0 2px 6px rgba(0,0,0,.2);
 }
 
+/* Opt out when the card already has its own padded shell or edge-to-edge table */
+.loka-card.loka-card-flush,
+.loka-card.p-0,
+.loka-card:has(> .loka-card-body),
+.loka-card:has(> .p-4),
+.loka-card:has(> .p-5),
+.loka-card:has(> .p-6),
+.loka-card:has(> .px-4),
+.loka-card:has(> .px-6),
+.loka-card:has(> .loka-table-responsive) {
+  padding: 0;
+}
+
+/* Keep non-table siblings padded inside table cards (skip if they already set padding) */
+.loka-card:has(> .loka-table-responsive) > :not(.loka-table-responsive):not([class*="p-"]):not([class*="px-"]):not([class*="py-"]) {
+  padding: 1rem var(--loka-card-pad-x);
+}
+
 /* Inner padding wrapper for .loka-card (utility classes like p-0 can override) */
 .loka-card-body {
   padding: 1.25rem 1.5rem;
+}
+
+/* Common non-.loka-card panel shells used by older pages */
+.bg-base-100.rounded-lg.shadow-sm:has(> form),
+.bg-base-100.rounded-lg.shadow-sm:has(> .flex),
+.bg-base-100.rounded-lg.shadow-sm:has(> .grid) {
+  padding: 1.25rem 1.5rem;
+}
+.bg-base-100.rounded-lg.shadow-sm:has(> .p-4),
+.bg-base-100.rounded-lg.shadow-sm:has(> .p-5),
+.bg-base-100.rounded-lg.shadow-sm:has(> .p-6),
+.bg-base-100.rounded-lg.shadow-sm:has(> .loka-card-body) {
+  padding: 0;
 }
 
 .loka-stat-card {
@@ -896,7 +938,7 @@ a.bg-primary.text-primary-content {
   width: 100%;
   min-height: 2.75rem;
   border-radius: 0.75rem;
-  border: 1.5px solid hsl(var(--bc) / 0.32);
+  border: 1.5px solid var(--loka-border, hsl(var(--bc) / 0.32));
   background-color: hsl(var(--b1));
   padding: 0.55rem 0.9rem;
   font-size: 0.875rem;
@@ -918,7 +960,7 @@ select.loka-form-input {
 }
 
 .loka-form-input:hover {
-  border-color: hsl(var(--bc) / 0.5);
+  border-color: var(--loka-border-strong, hsl(var(--bc) / 0.5));
 }
 
 .loka-form-input:focus {
@@ -956,7 +998,7 @@ select,
 textarea {
   background-color: hsl(var(--b1)) !important;
   color: hsl(var(--bc)) !important;
-  border: 1.5px solid hsl(var(--bc) / 0.32) !important;
+  border: 1.5px solid var(--loka-border, hsl(var(--bc) / 0.32)) !important;
   border-radius: 0.75rem !important;
   box-sizing: border-box !important;
   font-size: 0.875rem !important;
@@ -1012,7 +1054,7 @@ select:hover,
 [type="search"]:hover,
 [type="date"]:hover,
 textarea:hover {
-  border-color: hsl(var(--bc) / 0.5) !important;
+  border-color: var(--loka-border-strong, hsl(var(--bc) / 0.5)) !important;
 }
 
 select:focus,
@@ -1099,7 +1141,28 @@ select optgroup,
 .textarea-bordered {
   background-color: hsl(var(--b1)) !important;
   color: hsl(var(--bc)) !important;
-  border: 1.5px solid hsl(var(--bc) / 0.32) !important;
+  border: 1.5px solid var(--loka-border, hsl(var(--bc) / 0.32)) !important;
+}
+
+/* Dark theme: smoke-white borders on cards, tables, joins */
+[data-theme="loka"] .loka-card,
+[data-theme="loka"] .loka-stat-card,
+[data-theme="loka"] .loka-table-responsive {
+  border-color: var(--loka-border-soft);
+}
+
+[data-theme="loka"] .loka-table tbody td {
+  border-bottom-color: var(--loka-border-soft);
+}
+
+[data-theme="loka"] .loka-table .join {
+  border-color: var(--loka-border);
+}
+
+[data-theme="loka"] .loka-table .join > .join-item,
+[data-theme="loka"] .loka-table .join > a,
+[data-theme="loka"] .loka-table .join > button {
+  border-right-color: var(--loka-border-soft) !important;
 }
 
 input:-webkit-autofill,
