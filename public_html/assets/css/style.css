@@ -1119,6 +1119,19 @@ a.bg-info {
     box-sizing: border-box;
 }
 
+/* Shared table pagination footer — breathing room from card border */
+.loka-list-pagination {
+    padding: 1rem 1.5rem 1.25rem !important;
+    box-sizing: border-box;
+    border-top: 1px solid var(--loka-border-soft, #cbd5e1);
+    margin-top: 0 !important;
+}
+
+.loka-card > .loka-list-pagination,
+.loka-card .loka-table-responsive + .loka-list-pagination {
+    padding: 1rem 1.5rem 1.25rem !important;
+}
+
 /* Filter/forms that live in plain panel shells */
 .bg-base-100.rounded-lg.shadow-sm:has(> form),
 .bg-base-100.rounded-lg.shadow-sm:has(> .flex),

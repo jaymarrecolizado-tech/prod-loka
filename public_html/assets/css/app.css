@@ -133,6 +133,19 @@ body {
   padding: 1rem var(--loka-card-pad-x);
 }
 
+/* Shared list pagination footer — inset from card edges app-wide */
+.loka-list-pagination {
+  padding: 1rem var(--loka-card-pad-x, 1.5rem) 1.25rem;
+  box-sizing: border-box;
+  border-top: 1px solid var(--loka-border-soft, hsl(var(--b3) / 0.55));
+  margin-top: 0;
+}
+
+.loka-card > .loka-list-pagination,
+.loka-card .loka-table-responsive + .loka-list-pagination {
+  padding: 1rem var(--loka-card-pad-x, 1.5rem) 1.25rem !important;
+}
+
 /* Section titles / footers inside zero-padded cards */
 .loka-card-header {
   padding: 1rem var(--loka-card-pad-x, 1.5rem);

@@ -102,7 +102,7 @@ function listPaginationFooter(array $state, array $queryParams, string $pagePara
 
     $queryParams['per_page'] = $perPage;
 
-    $html = '<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mt-4 px-1">';
+    $html = '<div class="loka-list-pagination flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">';
     $html .= '<div class="flex flex-wrap items-center gap-3">';
     $html .= '<p class="text-sm text-base-content/60 mb-0">Showing ' . $from . '–' . $to . ' of ' . number_format($total) . '</p>';
 
