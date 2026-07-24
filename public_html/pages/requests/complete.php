@@ -83,14 +83,13 @@ try {
     // =====================================================
     
     $completionMessage = 'Your trip has been marked as completed. Vehicle and driver have been released.';
-    $passengerMessage = 'A trip you were part of has been marked as completed.';
-    $driverMessage = 'A trip you were assigned to drive has been marked as completed. Vehicle and driver have been released.';
+    $partyMessage = 'The trip has been marked as completed. Vehicle and driver have been released.';
     $link = '/?page=requests&action=view&id=' . $requestId;
     
     // Prepare deferred notifications
     $deferredNotifications = [];
     
-    // Requester notification
+    // Requester notification (same event key as guard arrival)
     $deferredNotifications[] = [
         'user_id' => $request->user_id,
         'type' => 'trip_completed',
@@ -104,7 +103,7 @@ try {
         'request_id' => $requestId,
         'type' => 'trip_completed',
         'title' => 'Trip Completed',
-        'message' => $passengerMessage,
+        'message' => $partyMessage,
         'link' => $link
     ];
     
@@ -116,7 +115,7 @@ try {
             'driver_id' => $request->driver_id,
             'type' => 'trip_completed',
             'title' => 'Trip Completed',
-            'message' => $driverMessage,
+            'message' => $partyMessage,
             'link' => $link
         ];
     }

@@ -336,7 +336,8 @@ try {
             
             if ($request->requested_driver_id) {
                 $notificationsToSend[] = [
-                    'user_id' => $request->requested_driver_id,
+                    'driver_id' => $request->requested_driver_id,
+                    'as_driver' => true,
                     'type' => 'driver_status_update',
                     'title' => 'Request Progress Update',
                     'message' => "A trip you were requested to drive has been approved by the assigned approver and is now awaiting final motorpool approval.",
@@ -483,7 +484,8 @@ try {
             
             if ($driverId) {
                 $notificationsToSend[] = [
-                    'user_id' => $driverId,
+                    'driver_id' => $driverId,
+                    'as_driver' => true,
                     'type' => 'driver_assigned',
                     'title' => 'You Have Been Assigned as Driver',
                     'message' => "You have been assigned as the driver for a trip to {$request->destination}.\n\nDeparture: " . formatDateTime($request->start_datetime) . "\nReturn: " . formatDateTime($request->end_datetime) . "\nVehicle: {$vehicleInfo}\nPassengers: {$request->passenger_count}",
@@ -493,7 +495,8 @@ try {
             
             if ($request->requested_driver_id && $request->requested_driver_id != $driverId) {
                 $notificationsToSend[] = [
-                    'user_id' => $request->requested_driver_id,
+                    'driver_id' => $request->requested_driver_id,
+                    'as_driver' => true,
                     'type' => 'driver_not_selected',
                     'title' => 'Request Assignment Update',
                     'message' => "A trip you were requested to drive has been assigned to another driver. The trip to {$request->destination} on " . formatDate($request->start_datetime) . " is now fully approved.",
@@ -633,7 +636,17 @@ try {
 
     foreach ($notificationsToSend as $notif) {
         try {
-            notify($notif['user_id'], $notif['type'], $notif['title'], $notif['message'], $notif['link']);
+            if (!empty($notif['as_driver'])) {
+                notifyDriver(
+                    (int) ($notif['driver_id'] ?? 0),
+                    $notif['type'],
+                    $notif['title'],
+                    $notif['message'],
+                    $notif['link']
+                );
+            } else {
+                notify($notif['user_id'], $notif['type'], $notif['title'], $notif['message'], $notif['link']);
+            }
         } catch (Throwable $e) {
             error_log('Approval notify failed: ' . $e->getMessage());
         }
@@ -686,6 +699,28 @@ try {
             notifyPassengersBatch($requestId, $passengerType, $passengerTitle, $passengerMessage, '/?page=requests&action=view&id=' . $requestId);
         } catch (Throwable $e) {
             error_log('Approval passenger notify failed: ' . $e->getMessage());
+        }
+    }
+
+    // Revision / reject: also notify requested and assigned drivers
+    if ($approvalAction === 'revision' || $approvalAction === 'reject') {
+        $driverIds = array_filter(array_unique([
+            $request->driver_id ? (int) $request->driver_id : null,
+            $request->requested_driver_id ? (int) $request->requested_driver_id : null,
+        ]));
+        $driverType = 'driver_status_update';
+        $driverTitle = $approvalAction === 'revision'
+            ? 'Trip Sent Back for Revision'
+            : 'Trip Request Rejected';
+        $driverMsg = $approvalAction === 'revision'
+            ? "A trip you were linked to ({$request->destination} on " . formatDate($request->start_datetime) . ") was sent back for revision.\nReason: {$comments}"
+            : "A trip you were linked to ({$request->destination} on " . formatDate($request->start_datetime) . ") was rejected.\nReason: {$comments}";
+        foreach ($driverIds as $did) {
+            try {
+                notifyDriver($did, $driverType, $driverTitle, $driverMsg, '/?page=requests&action=view&id=' . $requestId);
+            } catch (Throwable $e) {
+                error_log('Approval driver notify failed: ' . $e->getMessage());
+            }
         }
     }
 

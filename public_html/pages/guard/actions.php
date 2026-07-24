@@ -149,6 +149,14 @@ switch ($action) {
             $requestId
         );
 
+        notifyPassengersBatch(
+            $requestId,
+            'vehicle_dispatched',
+            'Trip Dispatched',
+            "The trip to {$request->destination} (request #{$requestId}) has departed at " . formatDateTime($formattedDispatchTime) . ".",
+            '/?page=requests&action=view&id=' . $requestId
+        );
+
         if ($request->driver_id) {
             notifyDriver(
                 $request->driver_id,
@@ -281,12 +289,16 @@ switch ($action) {
             ]
         );
 
+        $completedMsg = "Your trip for request #{$requestId} to {$request->destination} is completed. Vehicle returned at " . formatDateTime($formattedArrivalTime) . ".";
+        $partyMsg = "The trip to {$request->destination} (request #{$requestId}) has been completed. Vehicle returned at " . formatDateTime($formattedArrivalTime) . ".";
+        $link = '/?page=requests&action=view&id=' . $requestId;
+
         notify(
             $request->user_id,
-            'vehicle_arrived',
-            'Vehicle Returned - Trip Completed',
-            "Your vehicle for request #{$requestId} to {$request->destination} has returned at " . formatDateTime($formattedArrivalTime) . ". Trip completed!",
-            '/?page=requests&action=view&id=' . $requestId,
+            'trip_completed',
+            'Trip Completed',
+            $completedMsg,
+            $link,
             $requestId
         );
 
@@ -294,8 +306,8 @@ switch ($action) {
             $requestId,
             'trip_completed',
             'Trip Completed',
-            "The trip to {$request->destination} has been completed. Vehicle returned at " . formatDateTime($formattedArrivalTime) . ".",
-            '/?page=requests&action=view&id=' . $requestId
+            $partyMsg,
+            $link
         );
 
         if ($request->driver_id) {
@@ -303,8 +315,8 @@ switch ($action) {
                 $request->driver_id,
                 'trip_completed',
                 'Trip Completed',
-                "Trip for request #{$requestId} to {$request->destination} has been completed. Arrival time: " . formatDateTime($formattedArrivalTime),
-                '/?page=requests&action=view&id=' . $requestId
+                $partyMsg,
+                $link
             );
         }
 

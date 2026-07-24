@@ -9,6 +9,7 @@
  */
 define('SMS_DEFAULT_ALLOWLIST', [
     'request_confirmation',
+    'request_resubmitted',
     'request_submitted',
     'request_submitted_motorpool',
     'request_pending_motorpool',

@@ -25,6 +25,9 @@ if (!in_array($voucher->status, ['draft', 'pending_review'])) {
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     requireCsrf();
 
+    $isSelfCancel = ((int) $voucher->requested_by_user_id === (int) userId());
+    $previousStatus = $voucher->status;
+
     db()->update('gas_vouchers', [
         'status'     => 'cancelled',
         'updated_at' => date(DATETIME_FORMAT),
@@ -32,15 +35,49 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     auditLog('cancel', 'gas_voucher', $voucherId);
 
+    $cancelledBy = currentUser()->name ?? 'An administrator';
+    $link = '/?page=gas-vouchers&action=view&id=' . $voucherId;
+
+    // Notify requester when cancelled by someone else (skip email/SMS echo on self-cancel)
+    if (!$isSelfCancel && (int) $voucher->requested_by_user_id > 0) {
+        notify(
+            (int) $voucher->requested_by_user_id,
+            'gas_voucher_cancelled',
+            'Gas Voucher Cancelled',
+            "Your gas voucher {$voucher->voucher_no} has been cancelled by {$cancelledBy}.",
+            $link,
+            $voucherId
+        );
+    } elseif ($isSelfCancel && (int) $voucher->requested_by_user_id > 0) {
+        notify(
+            (int) $voucher->requested_by_user_id,
+            'gas_voucher_cancelled',
+            'Gas Voucher Cancelled',
+            "Your gas voucher {$voucher->voucher_no} has been cancelled.",
+            $link,
+            $voucherId,
+            false
+        );
+    }
+
     // Notify approvers if it was pending
-    if ($voucher->status === 'pending_review') {
+    if ($previousStatus === 'pending_review') {
         $approvers = db()->fetchAll(
-            "SELECT id FROM users WHERE role IN (?, ?, ?, ?) AND deleted_at IS NULL",
+            "SELECT id FROM users WHERE role IN (?, ?, ?, ?) AND deleted_at IS NULL AND status = 'active'",
             [ROLE_APPROVER, ROLE_MOTORPOOL, ROLE_ADMIN, ROLE_CHIEF_ADMIN_FINANCE]
         );
-        $cancelledBy = currentUser()->name;
         foreach ($approvers as $approver) {
-            notify($approver->id, 'gas_voucher_cancelled', 'Gas Voucher Cancelled', "Gas voucher {$voucher->voucher_no} has been cancelled by {$cancelledBy}.", '/?page=gas-vouchers', $voucherId);
+            if ((int) $approver->id === (int) userId()) {
+                continue;
+            }
+            notify(
+                (int) $approver->id,
+                'gas_voucher_cancelled',
+                'Gas Voucher Cancelled',
+                "Gas voucher {$voucher->voucher_no} has been cancelled by {$cancelledBy}.",
+                '/?page=gas-vouchers',
+                $voucherId
+            );
         }
     }
 

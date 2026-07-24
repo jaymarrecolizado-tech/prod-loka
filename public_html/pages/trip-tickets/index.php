@@ -207,14 +207,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $action !== 'list') {
                     ]
                 );
                 
-                // Notify driver
-                notify(
-                    $ticket->driver_id,
+                // Notify driver (trip_tickets.driver_id is drivers.id)
+                notifyDriver(
+                    (int) $ticket->driver_id,
                     'trip_ticket_approved',
                     'Trip Ticket Approved',
                     'Your trip ticket for request #' . $ticket->request_id . ' has been approved and reviewed.',
-                    '/?page=trip-tickets&action=view&id=' . $ticketId,
-                    $ticketId
+                    '/?page=trip-tickets&action=view&id=' . $ticketId
                 );
                 
                 echo json_encode([
@@ -274,14 +273,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $action !== 'list') {
                     ]
                 );
                 
-                // Notify driver
-                notify(
-                    $ticket->driver_id,
+                // Notify driver (trip_tickets.driver_id is drivers.id)
+                notifyDriver(
+                    (int) $ticket->driver_id,
                     'trip_ticket_rejected',
                     'Trip Ticket Returned for Review',
                     'Your trip ticket for request #' . $ticket->request_id . ' has been returned for review. Please address the feedback provided.',
-                    '/?page=trip-tickets&action=view&id=' . $ticketId,
-                    $ticketId
+                    '/?page=trip-tickets&action=view&id=' . $ticketId
                 );
                 
                 echo json_encode([

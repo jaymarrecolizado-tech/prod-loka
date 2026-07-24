@@ -95,6 +95,10 @@ define('MAIL_TEMPLATES', [
         'subject' => 'Your Vehicle Request Has Been Submitted',
         'template' => 'Your vehicle request has been submitted successfully and is now awaiting approval.'
     ],
+    'request_resubmitted' => [
+        'subject' => 'Your Request Has Been Resubmitted',
+        'template' => 'Your vehicle request has been resubmitted after revision and is awaiting approval again.'
+    ],
     'request_approved' => [
         'subject' => 'Your Request Has Been Approved',
         'template' => 'Great news! Your vehicle request has been approved.'

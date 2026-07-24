@@ -699,8 +699,9 @@ function auditLog(string $action, string $entityType, ?int $entityId = null, ?ar
  * @param string $message Notification message
  * @param string|null $link Optional link
  * @param int|null $requestId Optional request ID for Control No. in email subject
+ * @param bool $sendEmailAndSms When false, only the in-app notification is created
  */
-function notify(int $userId, string $type, string $title, string $message, ?string $link = null, ?int $requestId = null): void
+function notify(int $userId, string $type, string $title, string $message, ?string $link = null, ?int $requestId = null, bool $sendEmailAndSms = true): void
 {
     // FIX: Validate notification type against known templates
     $validTypes = array_keys(MAIL_TEMPLATES);
@@ -754,6 +755,11 @@ function notify(int $userId, string $type, string $title, string $message, ?stri
     if ($requestId === null && $link) {
         parse_str(parse_url($link, PHP_URL_QUERY), $query);
         $requestId = isset($query['id']) ? (int) $query['id'] : null;
+    }
+
+    if (!$sendEmailAndSms) {
+        error_log("NOTIFY: User #{$userId} - Notification #{$notifId} in-app only (type: {$type})");
+        return;
     }
 
     // Queue email notification ONLY - never process during request to prevent lag

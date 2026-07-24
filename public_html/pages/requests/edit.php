@@ -205,6 +205,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         'link' => '/?page=approvals&action=view&id=' . $requestId
                     ];
                 }
+
+                // Always confirm resubmit to requester
+                $queueLabel = ($revisionApproval && $revisionApproval->approval_type === 'motorpool')
+                    ? 'motorpool approval'
+                    : 'department approval';
+                $deferredNotifications[] = [
+                    'user_id' => $request->user_id,
+                    'type' => 'request_resubmitted',
+                    'title' => 'Request Resubmitted',
+                    'message' => "Your request for {$destination} on " . date('M j, Y', strtotime($startDatetime)) . " has been resubmitted and is awaiting {$queueLabel} again.",
+                    'link' => '/?page=requests&action=view&id=' . $requestId
+                ];
             }
 
             db()->update('requests', $updateData, 'id = ?', [$requestId]);
@@ -289,20 +301,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
             }
             
-            // Notify requester if request was modified
+            // Notify requester if details changed — skip email/SMS echo on self-edit
+            // (still notify when an admin/ops user edits someone else's request)
             if (
                 $oldData['destination'] !== $destination ||
                 $oldData['start_datetime'] !== $startDatetime ||
                 $oldData['end_datetime'] !== $endDatetime ||
                 $oldData['purpose'] !== $purpose
             ) {
-                $deferredNotifications[] = [
-                    'user_id' => $request->user_id,
-                    'type' => 'request_modified',
-                    'title' => 'Trip Details Updated',
-                    'message' => 'Your vehicle request has been modified. Please review the updated details.',
-                    'link' => '/?page=requests&action=view&id=' . $requestId
-                ];
+                $isSelfEdit = ((int) $request->user_id === (int) userId());
+                if (!$wasRevision) {
+                    // Resubmit already sends request_resubmitted; only notify on normal edits
+                    $deferredNotifications[] = [
+                        'user_id' => $request->user_id,
+                        'type' => 'request_modified',
+                        'title' => 'Trip Details Updated',
+                        'message' => $isSelfEdit
+                            ? 'Your vehicle request details were updated.'
+                            : ('Your vehicle request has been modified by ' . (currentUser()->name ?? 'an administrator') . '. Please review the updated details.'),
+                        'link' => '/?page=requests&action=view&id=' . $requestId,
+                        'send_outbound' => !$isSelfEdit,
+                    ];
+                }
             }
             
             // Prepare driver notification (deferred)
@@ -333,7 +353,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             
             // Send deferred notifications
             foreach ($deferredNotifications as $notif) {
-                notify($notif['user_id'], $notif['type'], $notif['title'], $notif['message'], $notif['link']);
+                $outbound = array_key_exists('send_outbound', $notif) ? (bool) $notif['send_outbound'] : true;
+                notify(
+                    $notif['user_id'],
+                    $notif['type'],
+                    $notif['title'],
+                    $notif['message'],
+                    $notif['link'],
+                    null,
+                    $outbound
+                );
             }
             
             // Send driver notification if needed

@@ -174,19 +174,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && post('confirm_cancel') === '1') {
         db()->commit();
 
         // Send notifications AFTER successful commit (non-blocking)
-        $cancelledBy = ($request->user_id == userId())
+        $isSelfCancel = ((int) $request->user_id === (int) userId());
+        $cancelledBy = $isSelfCancel
             ? 'You'
             : (currentUser()->name ?? 'An administrator');
 
         // Try to send in-app notifications (don't fail if they error)
         try {
-            // Notify requester
+            // Notify requester (skip email/SMS echo on self-cancel)
             @notify(
                 $request->user_id,
                 'request_cancelled',
                 'Request Cancelled',
                 "Your request for {$request->destination} on " . formatDate($request->start_datetime) . " has been cancelled.\n\nCancelled by: {$cancelledBy}\nReason: " . $reason,
-                '/?page=requests&action=view&id=' . $requestId
+                '/?page=requests&action=view&id=' . $requestId,
+                $requestId,
+                !$isSelfCancel
             );
 
             // Notify passengers using batch function
