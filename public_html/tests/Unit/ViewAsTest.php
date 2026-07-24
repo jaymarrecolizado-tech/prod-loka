@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Unit tests for View-as helpers (no DB).
+ * Unit tests for All Father View-as helpers (no DB).
  */
 
 $_SESSION = [];
@@ -28,7 +28,6 @@ class ViewAsTest extends PHPUnit\Framework\TestCase
         $this->assertNull(getViewAsRole());
         $this->assertArrayHasKey(ROLE_GUARD, viewAsRoleOptions());
         $this->assertArrayHasKey('driver', viewAsRoleOptions());
-        $this->assertArrayHasKey(ROLE_ADMIN, viewAsRoleOptions());
     }
 
     public function testSetAndClearViewAsRoleWithoutDriverDb(): void
@@ -44,22 +43,9 @@ class ViewAsTest extends PHPUnit\Framework\TestCase
         $this->assertSame(ROLE_ALL_FATHER, effectiveUserRole());
     }
 
-    public function testAdministratorCanUseViewAs(): void
+    public function testAdministratorCannotUseViewAs(): void
     {
         $_SESSION['user_role'] = ROLE_ADMIN;
-        $this->assertTrue(canUseViewAs());
-        $this->assertTrue(isRealAdministrator());
-        $this->assertArrayNotHasKey(ROLE_ADMIN, viewAsRoleOptions());
-        $this->assertTrue(setViewAsRole(ROLE_GUARD));
-        $this->assertSame(ROLE_GUARD, getViewAsRole());
-        $this->assertTrue(isViewingAs());
-        $this->assertTrue(setViewAsRole(null));
-        $this->assertFalse(isViewingAs());
-    }
-
-    public function testApproverCannotSetViewAs(): void
-    {
-        $_SESSION['user_role'] = ROLE_APPROVER;
         $this->assertFalse(canUseViewAs());
         $this->assertFalse(setViewAsRole(ROLE_GUARD));
         $this->assertNull(getViewAsRole());

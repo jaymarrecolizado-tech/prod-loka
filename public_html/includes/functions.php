@@ -303,28 +303,21 @@ function requireAllFather(): void
 }
 
 /**
- * System Control: Administrator or All Father only.
- * Hidden for Guard and while View-as is active as a non-admin role.
+ * System Control: All Father only (unavailable while View-as is active).
  */
 function canAccessSystemControl(): bool
 {
-    if (!isLoggedIn() || isGuard()) {
-        return false;
-    }
-    if (isViewingAs()) {
-        return getViewAsRole() === ROLE_ADMIN;
-    }
-    return isRealAllFather() || isRealAdministrator();
+    return isRealAllFather() && !isViewingAs();
 }
 
 /**
- * Require System Control access (Administrator or All Father).
+ * Require System Control access (All Father only).
  */
 function requireSystemControl(): void
 {
     requireAuth();
     if (!canAccessSystemControl()) {
-        redirectWith('/?page=dashboard', 'danger', 'Administrator or All Father access required.');
+        redirectWith('/?page=dashboard', 'danger', 'All Father access required.');
     }
 }
 

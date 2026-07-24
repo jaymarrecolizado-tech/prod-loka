@@ -49,7 +49,7 @@
         <!-- Right Side -->
         <div class="loka-navbar-actions">
             <?php if (canUseViewAs()): ?>
-            <!-- View as role (All Father / Administrator) -->
+            <!-- View as role (All Father only) -->
             <div class="dropdown dropdown-end">
                 <div tabindex="0" role="button" class="loka-btn-secondary loka-btn-sm gap-1" title="View as role">
                     <i class="bi bi-person-badge"></i>
