@@ -78,6 +78,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 'priority' => $priority,
                 'title' => $title
             ]);
+
+            $vehicle = db()->fetch("SELECT plate_number FROM vehicles WHERE id = ?", [$vehicleId]);
+            $plate = $vehicle->plate_number ?? ('#' . $vehicleId);
+            notifyRoleUsers(
+                [ROLE_MOTORPOOL, ROLE_ADMIN, ROLE_ALL_FATHER],
+                'maintenance_created',
+                'New Maintenance Request',
+                "Maintenance #{$maintenanceId} ({$title}) was reported for vehicle {$plate}. Priority: {$priority}.",
+                '/?page=maintenance&action=view&id=' . $maintenanceId,
+                userId(),
+                $maintenanceId
+            );
             
             redirectWith('/?page=maintenance&action=view&id=' . $maintenanceId, 'success', 'Maintenance request created successfully.');
             

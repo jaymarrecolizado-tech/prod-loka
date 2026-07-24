@@ -114,6 +114,39 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 auditLog('maintenance_updated', 'maintenance_request', $maintenanceId, ['status' => $maintenance->status], $updateData);
                 
                 db()->commit();
+
+                $reporterId = (int) ($maintenance->reported_by ?? 0);
+                if ($reporterId > 0 && $reporterId !== userId()) {
+                    $statusLabel = MAINTENANCE_STATUSES[$newStatus]['label'] ?? ucfirst(str_replace('_', ' ', $newStatus));
+                    if ($newStatus === MAINTENANCE_STATUS_COMPLETED) {
+                        notify(
+                            $reporterId,
+                            'maintenance_completed',
+                            'Maintenance Completed',
+                            "Maintenance #{$maintenanceId} ({$maintenance->title}) has been marked completed.",
+                            '/?page=maintenance&action=view&id=' . $maintenanceId,
+                            $maintenanceId
+                        );
+                    } elseif ($newStatus === MAINTENANCE_STATUS_CANCELLED) {
+                        notify(
+                            $reporterId,
+                            'maintenance_cancelled',
+                            'Maintenance Cancelled',
+                            "Maintenance #{$maintenanceId} ({$maintenance->title}) has been cancelled.",
+                            '/?page=maintenance&action=view&id=' . $maintenanceId,
+                            $maintenanceId
+                        );
+                    } elseif ($newStatus !== $maintenance->status) {
+                        notify(
+                            $reporterId,
+                            'maintenance_status_updated',
+                            'Maintenance Status Updated',
+                            "Maintenance #{$maintenanceId} ({$maintenance->title}) is now: {$statusLabel}.",
+                            '/?page=maintenance&action=view&id=' . $maintenanceId,
+                            $maintenanceId
+                        );
+                    }
+                }
                 
                 redirectWith('/?page=maintenance&action=view&id=' . $maintenanceId, 'success', 'Maintenance request updated successfully.');
                 

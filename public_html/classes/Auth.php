@@ -511,6 +511,19 @@ class Auth
                 'password_reset',
                 1 // High priority
             );
+
+            // SMS: never include the reset token/link (sms_logs would store it).
+            // Point the user to email instead.
+            if (function_exists('smsNotifyUser')) {
+                smsNotifyUser(
+                    (int) $user->id,
+                    'password_reset',
+                    'Password Reset Request',
+                    'A password reset was requested for your LOKA account. Check your email for the secure reset link (expires in 1 hour). If you did not request this, ignore this message.',
+                    null,
+                    null
+                );
+            }
             
             // Log the event
             $this->security->logSecurityEvent('password_reset_requested', "Email: {$email}", $user->id);

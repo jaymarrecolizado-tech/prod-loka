@@ -264,7 +264,47 @@ define('MAIL_TEMPLATES', [
     'gas_voucher_cancelled' => [
         'subject' => 'Gas Voucher Cancelled',
         'template' => 'A gas voucher request has been cancelled.'
-    ]
+    ],
+
+    // Gas voucher payment
+    'gas_voucher_payment_updated' => [
+        'subject' => 'Gas Voucher Payment Status Updated',
+        'template' => 'The payment status for a gas voucher has been updated.'
+    ],
+
+    // Trip tickets
+    'trip_ticket_approved' => [
+        'subject' => 'Trip Ticket Approved',
+        'template' => 'Your trip ticket has been approved and reviewed.'
+    ],
+    'trip_ticket_rejected' => [
+        'subject' => 'Trip Ticket Rejected',
+        'template' => 'Your trip ticket has been rejected. Please review the notes and resubmit if needed.'
+    ],
+
+    // Driver cancel (dedicated; was falling back to default)
+    'trip_cancelled_driver' => [
+        'subject' => 'Assigned Trip Cancelled',
+        'template' => 'A trip you were assigned to drive has been cancelled.'
+    ],
+
+    // Maintenance
+    'maintenance_created' => [
+        'subject' => 'New Maintenance Request',
+        'template' => 'A new vehicle maintenance request has been created and needs attention.'
+    ],
+    'maintenance_status_updated' => [
+        'subject' => 'Maintenance Request Updated',
+        'template' => 'A maintenance request you reported has a new status.'
+    ],
+    'maintenance_completed' => [
+        'subject' => 'Maintenance Completed',
+        'template' => 'A maintenance request has been marked as completed.'
+    ],
+    'maintenance_cancelled' => [
+        'subject' => 'Maintenance Cancelled',
+        'template' => 'A maintenance request has been cancelled.'
+    ],
 ]);
 
 // Additional mail settings

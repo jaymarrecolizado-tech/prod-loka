@@ -999,6 +999,42 @@ function notifyAllParties(int $requestId, string $type, string $title, string $m
 }
 
 /**
+ * Notify active users with any of the given roles (in-app + email + SMS via notify()).
+ *
+ * @param list<string> $roles
+ */
+function notifyRoleUsers(
+    array $roles,
+    string $type,
+    string $title,
+    string $message,
+    ?string $link = null,
+    ?int $excludeUserId = null,
+    ?int $requestId = null
+): void {
+    $roles = array_values(array_unique(array_filter($roles)));
+    if ($roles === []) {
+        return;
+    }
+
+    $placeholders = implode(',', array_fill(0, count($roles), '?'));
+    $params = $roles;
+    $sql = "SELECT id FROM users
+            WHERE role IN ({$placeholders})
+              AND status = 'active'
+              AND deleted_at IS NULL";
+    if ($excludeUserId !== null && $excludeUserId > 0) {
+        $sql .= ' AND id != ?';
+        $params[] = $excludeUserId;
+    }
+
+    $users = db()->fetchAll($sql, $params);
+    foreach ($users as $user) {
+        notify((int) $user->id, $type, $title, $message, $link, $requestId);
+    }
+}
+
+/**
  * Process email queue asynchronously (non-blocking)
  * NOTE: This function is kept for backward compatibility but does nothing.
  * Emails are processed by the cron job (process_queue.php) to prevent app lag.
