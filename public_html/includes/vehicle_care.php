@@ -4,9 +4,17 @@
  * Additive — does not change repair maintenance_requests behavior.
  */
 
+/**
+ * Care Assignments: Administrator, Motorpool Head, and All Father only.
+ * (Not Approver, CAF, or drivers.)
+ */
 function canManageCareAssignments(): bool
 {
-    return isMotorpool() || isAdmin() || isRealAllFather();
+    if (isRealAllFather()) {
+        return true;
+    }
+    $role = userRole();
+    return $role === ROLE_ADMIN || $role === ROLE_MOTORPOOL;
 }
 
 function canApproveCareSchedules(): bool

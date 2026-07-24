@@ -269,9 +269,9 @@ require_once INCLUDES_PATH . '/header.php';
     <!-- Filters -->
     <div class="loka-card mb-4">
         <div class="p-6">
-            <form method="GET" class="grid grid-cols-12 gap-3">
+            <form method="GET" class="flex flex-wrap items-end gap-3">
                 <input type="hidden" name="page" value="completed-trips">
-                <div class="col-span-12 md:col-span-2">
+                <div class="min-w-[140px]">
                     <label class="loka-form-label">Date Range</label>
                     <select class="loka-form-input" name="all" onchange="this.form.submit()">
                         <option value="1" <?= $showAll === '1' ? 'selected' : '' ?>>All Time</option>
@@ -279,22 +279,22 @@ require_once INCLUDES_PATH . '/header.php';
                     </select>
                 </div>
                 <?php if ($showAll !== '1'): ?>
-                <div class="col-span-12 md:col-span-2">
+                <div class="min-w-[150px]">
                     <label class="loka-form-label">Start Date</label>
                     <input type="date" class="loka-form-input" name="start_date" value="<?= $startDate ?? date('Y-m-01') ?>">
                 </div>
-                <div class="col-span-12 md:col-span-2">
+                <div class="min-w-[150px]">
                     <label class="loka-form-label">End Date</label>
                     <input type="date" class="loka-form-input" name="end_date" value="<?= $endDate ?? date('Y-m-t') ?>">
                 </div>
                 <?php endif; ?>
                 <?= perPageFieldHtml($pag['perPage'], 'loka-form-input') ?>
                 <?= listSearchFieldHtml($searchQuery, 'Vehicle, requester, driver, destination...', 'loka-form-input') ?>
-                <div class="col-span-12 md:col-span-2 flex items-end gap-2">
-                    <button type="submit" class="loka-btn-primary flex-1">
+                <div class="flex items-center gap-2">
+                    <button type="submit" class="loka-btn-primary">
                         <i class="bi bi-search mr-1"></i>Filter
                     </button>
-                    <a href="<?= APP_URL ?>/?page=completed-trips" class="loka-btn-secondary">
+                    <a href="<?= APP_URL ?>/?page=completed-trips" class="loka-btn-secondary" title="Refresh">
                         <i class="bi bi-arrow-clockwise"></i>
                     </a>
                 </div>

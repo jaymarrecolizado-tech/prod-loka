@@ -4,7 +4,7 @@
  */
 
 if (!canManageCareAssignments()) {
-    redirectWith('/?page=maintenance&action=schedule', 'danger', 'Motorpool or Administrator access required.');
+    redirectWith('/?page=maintenance&action=schedule', 'danger', 'Administrator, Motorpool Head, or All Father access required.');
 }
 
 $pageTitle = 'Vehicle Care Assignments';

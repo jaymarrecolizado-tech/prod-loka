@@ -335,6 +335,10 @@ switch ($page) {
                 redirectWith('/?page=dashboard', 'danger', 'Access denied.');
             }
             if ($action === 'care-assign') {
+                // Hard gate: Admin / Motorpool Head / All Father only
+                if (!canManageCareAssignments()) {
+                    redirectWith('/?page=maintenance&action=schedule', 'danger', 'Care Assignments require Administrator, Motorpool Head, or All Father.');
+                }
                 require_once PAGES_PATH . '/maintenance/care-assign.php';
             } elseif ($action === 'care-create') {
                 require_once PAGES_PATH . '/maintenance/care-create.php';

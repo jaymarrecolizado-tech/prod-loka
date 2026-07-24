@@ -133,6 +133,26 @@ body {
   padding: 1rem var(--loka-card-pad-x);
 }
 
+/* Section titles / footers inside zero-padded cards */
+.loka-card-header {
+  padding: 1rem var(--loka-card-pad-x, 1.5rem);
+  border-bottom: 1px solid var(--loka-border-soft, hsl(var(--b3) / 0.6));
+}
+
+.loka-card-title {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+  line-height: 1.4;
+  display: flex;
+  align-items: center;
+}
+
+.loka-card-footer {
+  padding: 1rem var(--loka-card-pad-x, 1.5rem);
+  border-top: 1px solid var(--loka-border-soft, hsl(var(--b3) / 0.6));
+}
+
 /* Inner padding wrapper for .loka-card (utility classes like p-0 can override) */
 .loka-card-body {
   padding: 1.25rem 1.5rem;
