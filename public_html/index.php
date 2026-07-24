@@ -294,6 +294,7 @@ switch ($page) {
         break;
 
     case 'reports':
+        denyGuardAccess();
         // Gas voucher report is available to CAF (+ ops); other report pages stay approver+
         if (in_array($action, ['gas-vouchers', 'export-gas-vouchers-csv', 'export-gas-vouchers-pdf'], true)) {
             if ($action === 'gas-vouchers') {

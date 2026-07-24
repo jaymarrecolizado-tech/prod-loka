@@ -100,7 +100,7 @@
                 </a>
             </li>
 
-            <?php if (isAllFather()): ?>
+            <?php if (canAccessSystemControl()): ?>
             <!-- Broken odometers (All Father) -->
             <li>
                 <a class="loka-nav-link <?= (get('page') === 'security' && get('action') === 'odometer') ? 'active' : '' ?>"
@@ -195,7 +195,7 @@
             </li>
             <?php endif; ?>
 
-            <?php if (isAllFather()):
+            <?php if (canAccessSystemControl()):
                 $secAction = get('action', 'rate-limits');
                 if ($secAction === 'index' || $secAction === '') {
                     $secAction = 'rate-limits';

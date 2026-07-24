@@ -293,13 +293,22 @@ function isAdmin(): bool
 }
 
 /**
- * Require All Father role or redirect (real role).
+ * Require All Father role or redirect (real role, not View-as).
+ * System Control is unavailable while View-as is active.
  */
 function requireAllFather(): void
 {
-    if (!isRealAllFather()) {
+    if (!isRealAllFather() || isViewingAs()) {
         redirectWith('/?page=dashboard', 'danger', 'All Father access required.');
     }
+}
+
+/**
+ * System Control / All Father-only tools (hidden while View-as is active).
+ */
+function canAccessSystemControl(): bool
+{
+    return isRealAllFather() && !isViewingAs();
 }
 
 /**
@@ -369,17 +378,25 @@ function canAccessGasVouchers(): bool
 
 /**
  * Full ops reports (all vehicles/drivers/trips).
+ * Guards never have report access.
  */
 function canAccessOpsReports(): bool
 {
+    if (isGuard()) {
+        return false;
+    }
     return isApprover() || isMotorpool() || isAdmin();
 }
 
 /**
  * Driver-scoped reports only (own history + vehicles they drove).
+ * Guards never have report access.
  */
 function canAccessDriverReports(): bool
 {
+    if (isGuard()) {
+        return false;
+    }
     return isDriver() || canAccessOpsReports() || isChiefAdminFinance();
 }
 
