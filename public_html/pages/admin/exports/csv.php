@@ -101,7 +101,7 @@ switch ($type) {
         $data = db()->fetchAll(
             "SELECT al.id, al.created_at as timestamp, u.name as user, al.action,
                     al.entity_type, al.entity_id, al.ip_address
-             FROM audit_log al
+             FROM audit_logs al
              LEFT JOIN users u ON al.user_id = u.id
              WHERE DATE(al.created_at) BETWEEN ? AND ?
              ORDER BY al.created_at DESC
