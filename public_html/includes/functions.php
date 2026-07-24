@@ -5,6 +5,7 @@
 
 require_once __DIR__ . '/table_sort.php';
 require_once __DIR__ . '/list_pagination.php';
+require_once __DIR__ . '/list_table.php';
 require_once __DIR__ . '/badge_counts.php';
 require_once __DIR__ . '/dashboard_stats.php';
 require_once __DIR__ . '/availability.php';

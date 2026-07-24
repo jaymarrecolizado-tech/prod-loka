@@ -17,6 +17,7 @@ function debounce(fn, ms) {
 function initApp() {
   initSidebar()
   initDataTables()
+  initLokaTableHighlight()
   initDatePickers()
   initToasts()
   initConfirmDialogs()
@@ -129,7 +130,39 @@ function initSidebar() {
 }
 
 /**
+ * Full-row click highlight for all .loka-table bodies (no navigation).
+ * Ignores clicks on links, buttons, inputs, and labels.
+ */
+function initLokaTableHighlight() {
+  document.querySelectorAll('table.loka-table').forEach(table => {
+    if (table._lokaHighlight) return
+    table._lokaHighlight = true
+    const tbody = table.querySelector('tbody')
+    if (!tbody) return
+
+    tbody.querySelectorAll('tr').forEach(tr => {
+      if (tr.querySelector('td[colspan]')) return
+      tr.classList.add('loka-table-row-selectable')
+    })
+
+    tbody.addEventListener('click', event => {
+      const interactive = event.target.closest('a, button, input, select, textarea, label, .join')
+      if (interactive) return
+
+      const tr = event.target.closest('tr')
+      if (!tr || !tbody.contains(tr) || tr.querySelector('td[colspan]')) return
+
+      tbody.querySelectorAll('tr.is-selected').forEach(row => {
+        if (row !== tr) row.classList.remove('is-selected')
+      })
+      tr.classList.toggle('is-selected')
+    })
+  })
+}
+
+/**
  * Initialize Tables — vanilla JS (replaces jQuery DataTables)
+ * Opt-in via .data-table only; server-side lists use PHP helpers instead.
  */
 function initDataTables() {
   document.querySelectorAll('.data-table').forEach(table => {

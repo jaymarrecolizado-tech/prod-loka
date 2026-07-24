@@ -1119,18 +1119,23 @@ select:-webkit-autofill {
 }
 
 /* ===== TABLES ===== */
+/* Fluid type/spacing — one system for all .loka-table instances */
 .loka-table {
+  --loka-table-font: clamp(0.75rem, 0.68rem + 0.35vw, 0.875rem);
+  --loka-table-pad-y: clamp(0.45rem, 0.35rem + 0.4vw, 0.75rem);
+  --loka-table-pad-x: clamp(0.55rem, 0.4rem + 0.5vw, 1rem);
+  --loka-table-head-font: clamp(0.62rem, 0.58rem + 0.2vw, 0.7rem);
   width: 100%;
-  font-size: 0.875rem;
+  font-size: var(--loka-table-font);
   border-collapse: separate;
   border-spacing: 0;
 }
 
 .loka-table thead th {
   background: hsl(var(--b2));
-  padding: 0.75rem 1rem;
+  padding: var(--loka-table-pad-y) var(--loka-table-pad-x);
   text-align: left;
-  font-size: 0.7rem;
+  font-size: var(--loka-table-head-font);
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.06em;
@@ -1161,20 +1166,24 @@ select:-webkit-autofill {
 .loka-table thead th:last-child  { border-radius: 0 0.5rem 0 0; }
 
 .loka-table tbody td {
-  padding: 0.75rem 1rem;
+  padding: var(--loka-table-pad-y) var(--loka-table-pad-x);
   vertical-align: middle;
   border-bottom: 1px solid hsl(var(--b3));
   color: hsl(var(--bc));
-  transition: background-color 0.12s ease;
+  transition: background-color 0.12s ease, box-shadow 0.12s ease;
 }
 
 .loka-table tbody tr:last-child td {
   border-bottom: none;
 }
 
-/* Full-row hover highlight — all loka tables */
+/* Full-row hover + click-to-highlight — all loka tables */
 .loka-table tbody tr {
   cursor: default;
+}
+
+.loka-table tbody tr.loka-table-row-selectable {
+  cursor: pointer;
 }
 
 /* Dark mode needs a solid lift — translucent cyan is nearly invisible on navy */
@@ -1189,6 +1198,14 @@ select:-webkit-autofill {
   box-shadow: inset 3px 0 0 #00d4ff;
 }
 
+[data-theme="loka"] .loka-table tbody tr.is-selected td {
+  background-color: #243f66 !important;
+}
+
+[data-theme="loka"] .loka-table tbody tr.is-selected td:first-child {
+  box-shadow: inset 3px 0 0 #00d4ff;
+}
+
 [data-theme="loka-light"] .loka-table tbody tr:hover td,
 [data-theme="loka-light"] .table tbody tr:hover td,
 [data-theme="loka-light"] table.table-hover tbody tr:hover td {
@@ -1200,12 +1217,28 @@ select:-webkit-autofill {
   box-shadow: inset 3px 0 0 #2563eb;
 }
 
+[data-theme="loka-light"] .loka-table tbody tr.is-selected td {
+  background-color: #bfdbfe !important;
+}
+
+[data-theme="loka-light"] .loka-table tbody tr.is-selected td:first-child {
+  box-shadow: inset 3px 0 0 #2563eb;
+}
+
 /* Fallback when data-theme attribute is missing */
 .loka-table tbody tr:hover td {
   background-color: #1e3a5f;
 }
 
 .loka-table tbody tr:hover td:first-child {
+  box-shadow: inset 3px 0 0 #00d4ff;
+}
+
+.loka-table tbody tr.is-selected td {
+  background-color: #243f66;
+}
+
+.loka-table tbody tr.is-selected td:first-child {
   box-shadow: inset 3px 0 0 #00d4ff;
 }
 
@@ -1330,10 +1363,8 @@ select:-webkit-autofill {
 }
 
 @media (max-width: 768px) {
-  .loka-table { font-size: 0.8rem; }
   .loka-table thead th,
   .loka-table tbody td {
-    padding: 0.5rem 0.75rem;
     white-space: nowrap;
   }
 }
