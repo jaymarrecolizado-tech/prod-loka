@@ -14,17 +14,9 @@ $pageTitle = 'My Trip Tickets';
 
 // Get filter and search parameters
 $statusFilter = get('status', '');
-$search = get('search', '');
+$searchQuery = listSearchQuery();
 
-// Build query for trip tickets
-$sql = "SELECT tt.*,
-            r.id as request_id, r.destination as trip_destination, r.purpose as trip_purpose,
-            r.status as request_status,
-            v.plate_number, v.make, v.model as vehicle_model,
-            dg.name as dispatch_guard,
-            ag.name as arrival_guard,
-            u_rev.name as reviewed_by_name
-     FROM trip_tickets tt
+$fromSql = "FROM trip_tickets tt
      JOIN requests r ON tt.request_id = r.id
      LEFT JOIN vehicles v ON r.vehicle_id = v.id AND v.deleted_at IS NULL
      LEFT JOIN users dg ON tt.dispatch_guard_id = dg.id
@@ -33,21 +25,24 @@ $sql = "SELECT tt.*,
      WHERE tt.deleted_at IS NULL";
 
 $params = [];
+$whereSql = '';
 
-// Apply status filter
-if ($statusFilter && in_array($statusFilter, ['draft', 'submitted', 'reviewed', 'approved'])) {
-    $sql .= " AND tt.status = ?";
+if ($statusFilter && in_array($statusFilter, ['draft', 'submitted', 'reviewed', 'approved'], true)) {
+    $whereSql .= " AND tt.status = ?";
     $params[] = $statusFilter;
 }
 
-// Apply search
-if ($search) {
-    $sql .= " AND (
+if ($searchQuery) {
+    $whereSql .= " AND (
         r.destination LIKE ? OR
         r.purpose LIKE ? OR
-        tt.issues_description LIKE ?
+        tt.issues_description LIKE ? OR
+        v.plate_number LIKE ? OR
+        CAST(r.id AS CHAR) LIKE ?
     )";
-    $searchParam = '%' . $search . '%';
+    $searchParam = '%' . $searchQuery . '%';
+    $params[] = $searchParam;
+    $params[] = $searchParam;
     $params[] = $searchParam;
     $params[] = $searchParam;
     $params[] = $searchParam;
@@ -66,14 +61,28 @@ $sortState = resolveTableSort($allowedSortColumns, 'created_at', 'DESC');
 $sort = $sortState['key'];
 $sortDir = $sortState['dir'];
 
-$sql .= " ORDER BY {$sortState['orderSql']}";
+$countRow = db()->fetch("SELECT COUNT(*) as c {$fromSql}{$whereSql}", $params);
+$pag = listPaginationState((int) ($countRow->c ?? 0));
 
-$tripTickets = db()->fetchAll($sql, $params);
+$tripTickets = db()->fetchAll(
+    "SELECT tt.*,
+            r.id as request_id, r.destination as trip_destination, r.purpose as trip_purpose,
+            r.status as request_status,
+            v.plate_number, v.make, v.model as vehicle_model,
+            dg.name as dispatch_guard,
+            ag.name as arrival_guard,
+            u_rev.name as reviewed_by_name
+     {$fromSql}{$whereSql}
+     ORDER BY {$sortState['orderSql']}
+     LIMIT ? OFFSET ?",
+    array_merge($params, [$pag['perPage'], $pag['offset']])
+);
 
 $baseParams = tableSortQueryParams($sortState, [
     'page' => 'my-trip-tickets',
     'status' => $statusFilter,
-    'search' => $search,
+    'q' => $searchQuery,
+    'per_page' => $pag['perPage'],
 ]);
 
 // Get counts for each status
@@ -164,50 +173,44 @@ require_once INCLUDES_PATH . '/header.php';
 
     <!-- Filters -->
     <div class="loka-card">
-        <div class="p-6">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                    <label class="label">
-                        <span class="label-text font-medium">Status Filter</span>
-                    </label>
-                    <div class="join w-full">
-                        <a href="?page=my-trip-tickets"
-                            class="join-item btn btn-sm <?= $statusFilter === '' ? 'btn-active' : '' ?>">
-                            All (<?= $stats['all'] ?>)
-                        </a>
-                        <a href="?page=my-trip-tickets&status=submitted"
-                            class="join-item btn btn-sm bg-warning text-warning-content <?= $statusFilter === 'submitted' ? 'btn-active' : '' ?>">
-                            Pending (<?= $stats['submitted'] ?>)
-                        </a>
-                        <a href="?page=my-trip-tickets&status=reviewed"
-                            class="join-item btn btn-sm bg-info text-info-content <?= $statusFilter === 'reviewed' ? 'btn-active' : '' ?>">
-                            Reviewed (<?= $stats['reviewed'] ?>)
-                        </a>
-                        <a href="?page=my-trip-tickets&status=approved"
-                            class="join-item btn btn-sm bg-success text-success-content <?= $statusFilter === 'approved' ? 'btn-active' : '' ?>">
-                            Approved (<?= $stats['approved'] ?>)
-                        </a>
-                    </div>
-                </div>
-                <div>
-                    <label class="label">
-                        <span class="label-text font-medium">Search</span>
-                    </label>
-                    <form method="GET" class="flex gap-2">
-                        <input type="hidden" name="page" value="my-trip-tickets">
-                        <input type="text" name="search" class="input input-bordered input-sm flex-1"
-                            placeholder="Search destination or purpose..." value="<?= e($search) ?>">
-                        <button type="submit" class="loka-btn-primary loka-btn-sm">
-                            <i class="bi bi-search"></i>
-                        </button>
-                        <?php if ($search): ?>
-                            <a href="?page=my-trip-tickets" class="loka-btn-secondary loka-btn-sm">
-                                <i class="bi bi-x-lg"></i>
-                            </a>
-                        <?php endif; ?>
-                    </form>
+        <div class="p-6 space-y-4">
+            <div>
+                <label class="label">
+                    <span class="label-text font-medium">Status Filter</span>
+                </label>
+                <div class="join w-full flex-wrap">
+                    <a href="?page=my-trip-tickets"
+                        class="join-item btn btn-sm <?= $statusFilter === '' ? 'btn-active' : '' ?>">
+                        All (<?= $stats['all'] ?>)
+                    </a>
+                    <a href="?page=my-trip-tickets&status=submitted"
+                        class="join-item btn btn-sm bg-warning text-warning-content <?= $statusFilter === 'submitted' ? 'btn-active' : '' ?>">
+                        Pending (<?= $stats['submitted'] ?>)
+                    </a>
+                    <a href="?page=my-trip-tickets&status=reviewed"
+                        class="join-item btn btn-sm bg-info text-info-content <?= $statusFilter === 'reviewed' ? 'btn-active' : '' ?>">
+                        Reviewed (<?= $stats['reviewed'] ?>)
+                    </a>
+                    <a href="?page=my-trip-tickets&status=approved"
+                        class="join-item btn btn-sm bg-success text-success-content <?= $statusFilter === 'approved' ? 'btn-active' : '' ?>">
+                        Approved (<?= $stats['approved'] ?>)
+                    </a>
                 </div>
             </div>
+            <form method="GET" class="flex flex-wrap items-end gap-3">
+                <input type="hidden" name="page" value="my-trip-tickets">
+                <?php if ($statusFilter): ?>
+                    <input type="hidden" name="status" value="<?= e($statusFilter) ?>">
+                <?php endif; ?>
+                <?= listSearchFieldHtml($searchQuery, 'Destination, purpose, plate, request #...') ?>
+                <?= perPageFieldHtml($pag['perPage']) ?>
+                <div class="flex gap-2">
+                    <button type="submit" class="loka-btn-primary loka-btn-sm">
+                        <i class="bi bi-search"></i> Filter
+                    </button>
+                    <a href="?page=my-trip-tickets<?= $statusFilter ? '&status=' . e($statusFilter) : '' ?>" class="loka-btn-secondary loka-btn-sm">Reset</a>
+                </div>
+            </form>
         </div>
     </div>
 
@@ -224,8 +227,8 @@ require_once INCLUDES_PATH . '/header.php';
                     <p class="text-base-content/60 mt-4">
                         <?php if ($statusFilter): ?>
                             No trip tickets found with status "<?= ucfirst($statusFilter) ?>"
-                        <?php elseif ($search): ?>
-                            No trip tickets found matching "<?= e($search) ?>"
+                        <?php elseif ($searchQuery): ?>
+                            No trip tickets found matching "<?= e($searchQuery) ?>"
                         <?php else: ?>
                             You haven't created any trip tickets yet.
                             <br>
@@ -334,6 +337,7 @@ require_once INCLUDES_PATH . '/header.php';
                         </tbody>
                     </table>
                 </div>
+                <?= listPaginationFooter($pag, $baseParams) ?>
             <?php endif; ?>
         </div>
     </div>

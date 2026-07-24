@@ -14,11 +14,8 @@ $pageTitle = 'Completed Trips';
 
 $role = userRole();
 $showAll = get('all', '1'); // Default to show all completed trips
-$search = get('search', '');
-$page = getInt('p', 1); // Use 'p' for pagination, not 'page' (which is for routing)
-$limit = resolvePerPage(); // 10 / 25 / 50 / 100 (default 10)
-$perPage = $limit;
-$offset = ($page - 1) * $limit;
+$searchQuery = listSearchQuery();
+$perPage = resolvePerPage();
 
 // Sorting (latest completed first by default)
 $allowedSortColumns = [
@@ -28,13 +25,12 @@ $allowedSortColumns = [
     'driver_name' => 'driver_user.name',
     'requester_name' => 'u.name',
     'destination' => 'r.destination',
-    'duration' => 'actual_duration',
+    'duration' => 'TIMESTAMPDIFF(MINUTE, r.actual_dispatch_datetime, r.actual_arrival_datetime)',
     'mileage' => 'r.mileage_actual',
 ];
 $sortState = resolveTableSort($allowedSortColumns, 'completed_date', 'DESC');
 $sort = $sortState['key'];
 $sortDir = $sortState['dir'];
-$sortColumn = $sortState['column'];
 
 // Date filter - only apply if not showing all
 $startDate = null;
@@ -51,17 +47,7 @@ $driver = db()->fetch(
 );
 $isDriver = ($driver !== null);
 
-// Build base query with role-based filtering
-$sql = "SELECT r.*,
-            u.name as requester_name, u.phone as requester_phone,
-            d.name as department_name,
-            v.plate_number, v.make, v.model as vehicle_model, v.color,
-            dr.license_number as driver_license,
-            driver_user.name as driver_name, driver_user.phone as driver_phone,
-            dispatch_guard.name as dispatch_guard_name,
-            arrival_guard.name as arrival_guard_name,
-            TIMESTAMPDIFF(MINUTE, r.actual_dispatch_datetime, r.actual_arrival_datetime) as actual_duration
-     FROM requests r
+$fromSql = "FROM requests r
      JOIN users u ON r.user_id = u.id
      JOIN departments d ON r.department_id = d.id
      LEFT JOIN vehicles v ON r.vehicle_id = v.id AND v.deleted_at IS NULL
@@ -74,86 +60,108 @@ $sql = "SELECT r.*,
      AND r.deleted_at IS NULL";
 
 $params = [STATUS_COMPLETED];
+$whereSql = '';
 
 // Role-based filtering
 if ($isDriver) {
-    // Drivers see only their completed trips
-    $sql .= " AND (r.driver_id = ? OR r.requested_driver_id = ?)";
+    $whereSql .= " AND (r.driver_id = ? OR r.requested_driver_id = ?)";
     $params[] = $driver->id;
     $params[] = $driver->id;
 } elseif ($role === ROLE_GUARD) {
-    // Guards see trips they dispatched or received
-    $sql .= " AND (r.dispatch_guard_id = ? OR r.arrival_guard_id = ?)";
+    $whereSql .= " AND (r.dispatch_guard_id = ? OR r.arrival_guard_id = ?)";
     $params[] = userId();
     $params[] = userId();
 } elseif ($role === ROLE_APPROVER) {
-    // Approvers see completed trips from their department
     $userDepartmentId = db()->fetchColumn(
         "SELECT department_id FROM users WHERE id = ?",
         [userId()]
     );
-    $sql .= " AND r.department_id = ?";
+    $whereSql .= " AND r.department_id = ?";
     $params[] = $userDepartmentId;
-} elseif ($role === ROLE_MOTORPOOL || $role === ROLE_ADMIN) {
-    // Motorpool heads and admins see all completed trips
-    // No additional filtering needed
-} else {
-    // Requesters see only their own completed trips
-    $sql .= " AND r.user_id = ?";
+} elseif ($role !== ROLE_MOTORPOOL && $role !== ROLE_ADMIN) {
+    $whereSql .= " AND r.user_id = ?";
     $params[] = userId();
 }
 
-// Apply date range filter (only if specific dates are set)
 if ($startDate && $endDate) {
-    $sql .= " AND DATE(r.actual_arrival_datetime) BETWEEN ? AND ?";
+    $whereSql .= " AND DATE(r.actual_arrival_datetime) BETWEEN ? AND ?";
     $params[] = $startDate;
     $params[] = $endDate . ' 23:59:59';
 }
 
-// Apply search filter
-if ($search) {
-    $sql .= " AND (
+if ($searchQuery) {
+    $whereSql .= " AND (
         v.plate_number LIKE ? OR
         u.name LIKE ? OR
         driver_user.name LIKE ? OR
         r.destination LIKE ? OR
-        r.purpose LIKE ?
+        r.purpose LIKE ? OR
+        CAST(r.id AS CHAR) LIKE ?
     )";
-    $searchTerm = '%' . $search . '%';
-    $params = array_merge($params, array_fill(0, 5, $searchTerm));
+    $searchTerm = '%' . $searchQuery . '%';
+    $params[] = $searchTerm;
+    $params[] = $searchTerm;
+    $params[] = $searchTerm;
+    $params[] = $searchTerm;
+    $params[] = $searchTerm;
+    $params[] = $searchTerm;
 }
 
-// Get total count for pagination
-$countSql = str_replace(
-    "SELECT r.*,\n            u.name as requester_name, u.phone as requester_phone,\n            d.name as department_name,\n            v.plate_number, v.make, v.model as vehicle_model, v.color,\n            dr.license_number as driver_license,\n            driver_user.name as driver_name, driver_user.phone as driver_phone,\n            dispatch_guard.name as dispatch_guard_name,\n            arrival_guard.name as arrival_guard_name,\n            TIMESTAMPDIFF(MINUTE, r.actual_dispatch_datetime, r.actual_arrival_datetime) as actual_duration",
-    "SELECT COUNT(*) as total",
-    $sql
+$countRow = db()->fetch("SELECT COUNT(*) as c {$fromSql}{$whereSql}", $params);
+$pag = listPaginationState((int) ($countRow->c ?? 0), null, $perPage);
+$totalCount = $pag['total'];
+
+$trips = db()->fetchAll(
+    "SELECT r.*,
+            u.name as requester_name, u.phone as requester_phone,
+            d.name as department_name,
+            v.plate_number, v.make, v.model as vehicle_model, v.color,
+            dr.license_number as driver_license,
+            driver_user.name as driver_name, driver_user.phone as driver_phone,
+            dispatch_guard.name as dispatch_guard_name,
+            arrival_guard.name as arrival_guard_name,
+            TIMESTAMPDIFF(MINUTE, r.actual_dispatch_datetime, r.actual_arrival_datetime) as actual_duration
+     {$fromSql}{$whereSql}
+     ORDER BY {$sortState['orderSql']}
+     LIMIT ? OFFSET ?",
+    array_merge($params, [$pag['perPage'], $pag['offset']])
 );
-$countSql = preg_replace('/ORDER BY.*/', '', $countSql);
-$totalCount = db()->fetchColumn($countSql, $params);
-$totalPages = ceil($totalCount / $limit);
 
-// Add ordering and pagination
-$sql .= " ORDER BY {$sortColumn} {$sortDir} LIMIT ? OFFSET ?";
-$params[] = $limit;
-$params[] = $offset;
-
-$trips = db()->fetchAll($sql, $params);
+$baseParams = tableSortQueryParams($sortState, [
+    'page' => 'completed-trips',
+    'all' => $showAll,
+    'per_page' => $pag['perPage'],
+    'q' => $searchQuery,
+]);
+if ($startDate) {
+    $baseParams['start_date'] = $startDate;
+}
+if ($endDate) {
+    $baseParams['end_date'] = $endDate;
+}
 
 // Calculate statistics (without pagination)
-$orderByPattern = '/ ORDER BY [^ ]+ (ASC|DESC)/';
-$statsSql = preg_replace($orderByPattern, '', $sql);
-$statsSql = preg_replace('/LIMIT \? OFFSET \?$/', '', $statsSql);
-$allTripsForStats = db()->fetchAll($statsSql, array_slice($params, 0, -2));
+$statsRows = db()->fetchAll(
+    "SELECT r.mileage_actual,
+            TIMESTAMPDIFF(MINUTE, r.actual_dispatch_datetime, r.actual_arrival_datetime) as actual_duration,
+            r.passenger_count,
+            r.id
+     {$fromSql}{$whereSql}",
+    $params
+);
 
-$totalTrips = count($allTripsForStats);
+$totalTrips = count($statsRows);
 $totalDistance = 0;
 $totalHours = 0;
 $totalPassengers = 0;
 
-foreach ($allTripsForStats as $t) {
-    if ($t->mileage_actual) $totalDistance += $t->mileage_actual;
-    if ($t->actual_duration) $totalHours += $t->actual_duration / 60;
+foreach ($statsRows as $t) {
+    if ($t->mileage_actual) {
+        $totalDistance += $t->mileage_actual;
+    }
+    if ($t->actual_duration) {
+        $totalHours += $t->actual_duration / 60;
+    }
     $totalPassengers += (int) ($t->passenger_count ?? countRequestPassengers((int) $t->id));
 }
 
@@ -280,20 +288,8 @@ require_once INCLUDES_PATH . '/header.php';
                     <input type="date" class="loka-form-input" name="end_date" value="<?= $endDate ?? date('Y-m-t') ?>">
                 </div>
                 <?php endif; ?>
-                <div class="<?= $showAll === '1' ? 'col-span-12 md:col-span-3' : 'col-span-12 md:col-span-2' ?>">
-                    <label class="loka-form-label">Per Page</label>
-                    <select class="loka-form-input" name="per_page" onchange="this.form.submit()">
-                        <option value="10" <?= $limit === 10 ? 'selected' : '' ?>>10</option>
-                        <option value="25" <?= $limit === 25 ? 'selected' : '' ?>>25</option>
-                        <option value="50" <?= $limit === 50 ? 'selected' : '' ?>>50</option>
-                        <option value="100" <?= $limit === 100 ? 'selected' : '' ?>>100</option>
-                    </select>
-                </div>
-                <div class="col-span-12 md:col-span-3">
-                    <label class="loka-form-label">Search</label>
-                    <input type="text" class="loka-form-input" name="search" value="<?= e($search) ?>"
-                           placeholder="Vehicle, requester, driver, destination...">
-                </div>
+                <?= perPageFieldHtml($pag['perPage'], 'loka-form-input') ?>
+                <?= listSearchFieldHtml($searchQuery, 'Vehicle, requester, driver, destination...', 'loka-form-input') ?>
                 <div class="col-span-12 md:col-span-2 flex items-end gap-2">
                     <button type="submit" class="loka-btn-primary flex-1">
                         <i class="bi bi-search mr-1"></i>Filter
@@ -310,37 +306,17 @@ require_once INCLUDES_PATH . '/header.php';
     <div class="loka-card">
         <div class="px-6 py-4 border-b border-base-200 flex justify-between items-center">
             <div>
-                <h5 class="mb-0">Completed Trips (<?= $totalCount ?> total)</h5>
+                <h5 class="mb-0">Completed Trips (<?= number_format($totalCount) ?> total)</h5>
                 <small class="text-base-content/60">
                     <?php if ($showAll === '1'): ?>
-                        Showing all time • Page <?= $page ?> of <?= $totalPages ?>
+                        Showing all time
                     <?php else: ?>
-                        Showing from <?= formatDate($startDate) ?> to <?= formatDate($endDate) ?> • Page <?= $page ?> of <?= $totalPages ?>
+                        Showing from <?= formatDate($startDate) ?> to <?= formatDate($endDate) ?>
                     <?php endif; ?>
                 </small>
             </div>
-            <div class="flex items-center gap-2">
-                <span class="text-base-content/60 text-sm">
-                    <?= ($page - 1) * $limit + 1 ?>-<?= min($page * $limit, $totalCount) ?> of <?= $totalCount ?>
-                </span>
-            </div>
         </div>
         <div class="p-6">
-            <?php
-$baseParams = [
-    'page' => 'completed-trips',
-    'all' => $showAll,
-    'per_page' => $perPage,
-    'search' => $search,
-];
-if ($startDate) {
-    $baseParams['start_date'] = $startDate;
-}
-if ($endDate) {
-    $baseParams['end_date'] = $endDate;
-}
-$baseParams = tableSortQueryParams($sortState, $baseParams);
-?>
             <?php if (empty($trips)): ?>
                 <div class="text-center py-5">
                     <i class="bi bi-calendar-x text-4xl text-base-content/60"></i>
@@ -459,95 +435,7 @@ $baseParams = tableSortQueryParams($sortState, $baseParams);
                     </table>
                 </div>
 
-                <!-- Pagination -->
-                <?php if ($totalPages > 1): ?>
-                <nav class="mt-3 flex flex-col items-center gap-2" aria-label="Trips pagination">
-                    <?php
-                    // Build base query string for pagination
-                    $queryParams = tableSortQueryParams($sortState, [
-                        'page' => 'completed-trips',
-                        'p' => null, // Will be set per link
-                        'per_page' => $limit,
-                        'all' => $showAll,
-                        'start_date' => $startDate,
-                        'end_date' => $endDate,
-                        'search' => $search,
-                    ]);
-
-                    function buildPageUrl($params, $pageNum) {
-                        $params['p'] = $pageNum;
-                        return '?' . http_build_query(array_filter($params));
-                    }
-                    ?>
-
-                    <div class="join">
-                        <!-- First Page & Previous -->
-                        <?php if ($page > 1): ?>
-                        <a class="join-item btn btn-sm" href="<?= buildPageUrl($queryParams, 1) ?>" aria-label="First" title="First page">
-                            <i class="bi bi-chevron-bar-left"></i>
-                        </a>
-                        <a class="join-item btn btn-sm" href="<?= buildPageUrl($queryParams, $page - 1) ?>" aria-label="Previous" title="Previous page">
-                            <i class="bi bi-chevron-left"></i>
-                        </a>
-                        <?php else: ?>
-                        <button class="join-item btn btn-sm btn-disabled" disabled><i class="bi bi-chevron-bar-left"></i></button>
-                        <button class="join-item btn btn-sm btn-disabled" disabled><i class="bi bi-chevron-left"></i></button>
-                        <?php endif; ?>
-
-                        <!-- Page Numbers -->
-                        <?php
-                        // Always show first page
-                        if ($page > 3) {
-                            echo '<a class="join-item btn btn-sm" href="' . buildPageUrl($queryParams, 1) . '">1</a>';
-                            if ($page > 4) {
-                                echo '<button class="join-item btn btn-sm btn-disabled" disabled>...</button>';
-                            }
-                        }
-
-                        // Show range around current page
-                        $startPage = max(1, $page - 1);
-                        $endPage = min($totalPages, $page + 1);
-
-                        for ($i = $startPage; $i <= $endPage; $i++):
-                        ?>
-                        <?php if ($i === $page): ?>
-                            <button class="join-item btn btn-sm btn-primary" disabled><?= $i ?></button>
-                        <?php else: ?>
-                            <a class="join-item btn btn-sm" href="<?= buildPageUrl($queryParams, $i) ?>"><?= $i ?></a>
-                        <?php endif; ?>
-                        <?php endfor; ?>
-
-                        <!-- Always show last page -->
-                        <?php if ($page < $totalPages - 2) {
-                            if ($page < $totalPages - 3) {
-                                echo '<button class="join-item btn btn-sm btn-disabled" disabled>...</button>';
-                            }
-                            echo '<a class="join-item btn btn-sm" href="' . buildPageUrl($queryParams, $totalPages) . '">' . $totalPages . '</a>';
-                        } ?>
-
-                        <!-- Next & Last Page -->
-                        <?php if ($page < $totalPages): ?>
-                        <a class="join-item btn btn-sm" href="<?= buildPageUrl($queryParams, $page + 1) ?>" aria-label="Next" title="Next page">
-                            <i class="bi bi-chevron-right"></i>
-                        </a>
-                        <a class="join-item btn btn-sm" href="<?= buildPageUrl($queryParams, $totalPages) ?>" aria-label="Last" title="Last page">
-                            <i class="bi bi-chevron-bar-right"></i>
-                        </a>
-                        <?php else: ?>
-                        <button class="join-item btn btn-sm btn-disabled" disabled><i class="bi bi-chevron-right"></i></button>
-                        <button class="join-item btn btn-sm btn-disabled" disabled><i class="bi bi-chevron-bar-right"></i></button>
-                        <?php endif; ?>
-                    </div>
-
-                    <!-- Pagination Info -->
-                    <div class="text-center">
-                        <span class="text-base-content/60 text-sm">
-                            Showing <?= ($totalCount > 0 ? ($page - 1) * $limit + 1 : 0) ?>-<?= min($page * $limit, $totalCount) ?> of <?= $totalCount ?> trips
-                            (Page <?= $page ?> of <?= $totalPages ?>)
-                        </span>
-                    </div>
-                </nav>
-                <?php endif; ?>
+                <?= listPaginationFooter($pag, $baseParams) ?>
             <?php endif; ?>
         </div>
     </div>

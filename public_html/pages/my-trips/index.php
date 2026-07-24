@@ -20,17 +20,10 @@ if (!$driver) {
 $pageTitle = 'My Trips';
 
 $filter = get('filter', 'upcoming');
+$searchQuery = listSearchQuery();
 $today = date('Y-m-d');
 
-$sql = "SELECT r.*,
-            u.name as requester_name, u.phone as requester_phone,
-            d.name as department_name,
-            v.plate_number, v.make, v.model as vehicle_model,
-            mph.name as motorpool_head_name,
-            tt.id as trip_ticket_id,
-            tt.status as trip_ticket_status,
-            tt.trip_type as trip_ticket_type
-        FROM requests r
+$fromSql = "FROM requests r
         JOIN users u ON r.user_id = u.id
         JOIN departments d ON r.department_id = d.id
         LEFT JOIN vehicles v ON r.vehicle_id = v.id AND v.deleted_at IS NULL
@@ -40,17 +33,34 @@ $sql = "SELECT r.*,
         AND r.deleted_at IS NULL";
 
 $params = [$driver->id, $driver->id];
+$whereSql = '';
 
 switch ($filter) {
     case 'past':
-        $sql .= " AND r.end_datetime < NOW()";
+        $whereSql .= " AND r.end_datetime < NOW()";
         break;
     case 'all':
         break;
     case 'upcoming':
     default:
-        $sql .= " AND r.end_datetime >= NOW()";
+        $whereSql .= " AND r.end_datetime >= NOW()";
         break;
+}
+
+if ($searchQuery) {
+    $whereSql .= " AND (
+        r.destination LIKE ? OR
+        r.purpose LIKE ? OR
+        u.name LIKE ? OR
+        v.plate_number LIKE ? OR
+        CAST(r.id AS CHAR) LIKE ?
+    )";
+    $searchParam = '%' . $searchQuery . '%';
+    $params[] = $searchParam;
+    $params[] = $searchParam;
+    $params[] = $searchParam;
+    $params[] = $searchParam;
+    $params[] = $searchParam;
 }
 
 // Sorting: upcoming defaults ASC (soonest first); past/all default latest-first DESC
@@ -69,13 +79,29 @@ $sortState = resolveTableSort($allowedSortColumns, 'start_datetime', $defaultSor
 $sort = $sortState['key'];
 $sortDir = $sortState['dir'];
 
-$sql .= " ORDER BY {$sortState['orderSql']}";
+$countRow = db()->fetch("SELECT COUNT(*) as c {$fromSql}{$whereSql}", $params);
+$pag = listPaginationState((int) ($countRow->c ?? 0));
 
-$trips = db()->fetchAll($sql, $params);
+$trips = db()->fetchAll(
+    "SELECT r.*,
+            u.name as requester_name, u.phone as requester_phone,
+            d.name as department_name,
+            v.plate_number, v.make, v.model as vehicle_model,
+            mph.name as motorpool_head_name,
+            tt.id as trip_ticket_id,
+            tt.status as trip_ticket_status,
+            tt.trip_type as trip_ticket_type
+     {$fromSql}{$whereSql}
+     ORDER BY {$sortState['orderSql']}
+     LIMIT ? OFFSET ?",
+    array_merge($params, [$pag['perPage'], $pag['offset']])
+);
 
 $baseParams = tableSortQueryParams($sortState, [
     'page' => 'my-trips',
     'filter' => $filter === 'upcoming' ? '' : $filter,
+    'q' => $searchQuery,
+    'per_page' => $pag['perPage'],
 ]);
 
 $stats = [
@@ -216,6 +242,25 @@ require_once INCLUDES_PATH . '/header.php';
         </div>
     </div>
 
+    <div class="loka-card mb-4">
+        <div class="p-4 md:p-6">
+            <form method="GET" class="flex flex-wrap items-end gap-3">
+                <input type="hidden" name="page" value="my-trips">
+                <?php if ($filter !== 'upcoming'): ?>
+                    <input type="hidden" name="filter" value="<?= e($filter) ?>">
+                <?php endif; ?>
+                <?= listSearchFieldHtml($searchQuery, 'Destination, requester, plate, request #...') ?>
+                <?= perPageFieldHtml($pag['perPage']) ?>
+                <div class="flex gap-2">
+                    <button type="submit" class="loka-btn-primary loka-btn-sm">
+                        <i class="bi bi-search"></i> Filter
+                    </button>
+                    <a href="<?= APP_URL ?>/?page=my-trips<?= $filter !== 'upcoming' ? '&filter=' . e($filter) : '' ?>" class="loka-btn-secondary loka-btn-sm">Reset</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <div class="loka-card">
         <div class="px-6 py-4 border-b border-base-200 bg-base-200">
             <div role="tablist" class="tabs tabs-bordered">
@@ -245,6 +290,8 @@ require_once INCLUDES_PATH . '/header.php';
                             No upcoming trips assigned to you.
                         <?php elseif ($filter === 'past'): ?>
                             No past trips found.
+                        <?php elseif ($searchQuery): ?>
+                            No trips found matching "<?= e($searchQuery) ?>".
                         <?php else: ?>
                             No trips found.
                         <?php endif; ?>
@@ -364,6 +411,7 @@ require_once INCLUDES_PATH . '/header.php';
                         </tbody>
                     </table>
                 </div>
+                <?= listPaginationFooter($pag, $baseParams) ?>
             <?php endif; ?>
         </div>
     </div>

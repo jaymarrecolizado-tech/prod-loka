@@ -11,18 +11,9 @@ $pageTitle = 'Completed Trips';
 
 $startDate = get('start_date', date('Y-m-01'));
 $endDate = get('end_date', date('Y-m-t'));
-$search = get('search', '');
+$searchQuery = listSearchQuery();
 
-$sql = "SELECT r.*,
-            u.name as requester_name, u.phone as requester_phone,
-            d.name as department_name,
-            v.plate_number, v.make, v.model as vehicle_model, v.color,
-            dr.license_number as driver_license,
-            driver_user.name as driver_name, driver_user.phone as driver_phone,
-            dispatch_guard.name as dispatch_guard_name,
-            arrival_guard.name as arrival_guard_name,
-            TIMESTAMPDIFF(MINUTE, r.actual_dispatch_datetime, r.actual_arrival_datetime) as actual_duration
-     FROM requests r
+$fromSql = "FROM requests r
      JOIN users u ON r.user_id = u.id
      JOIN departments d ON r.department_id = d.id
      LEFT JOIN vehicles v ON r.vehicle_id = v.id AND v.deleted_at IS NULL
@@ -33,26 +24,28 @@ $sql = "SELECT r.*,
      WHERE r.status = 'approved'
      AND r.actual_dispatch_datetime IS NOT NULL
      AND r.actual_arrival_datetime IS NOT NULL
-     AND r.deleted_at IS NULL";
+     AND r.deleted_at IS NULL
+     AND DATE(r.actual_arrival_datetime) BETWEEN ? AND ?";
 
-$params = [];
+$params = [$startDate, $endDate . ' 23:59:59'];
+$whereSql = '';
 
-// Apply date range filter
-$sql .= " AND DATE(r.actual_arrival_datetime) BETWEEN ? AND ?";
-$params[] = $startDate;
-$params[] = $endDate . ' 23:59:59';
-
-// Apply search filter
-if ($search) {
-    $sql .= " AND (
+if ($searchQuery) {
+    $whereSql .= " AND (
         v.plate_number LIKE ? OR
         u.name LIKE ? OR
         driver_user.name LIKE ? OR
         r.destination LIKE ? OR
-        r.purpose LIKE ?
+        r.purpose LIKE ? OR
+        CAST(r.id AS CHAR) LIKE ?
     )";
-    $searchTerm = '%' . $search . '%';
-    $params = array_merge($params, array_fill(0, 5, $searchTerm));
+    $searchTerm = '%' . $searchQuery . '%';
+    $params[] = $searchTerm;
+    $params[] = $searchTerm;
+    $params[] = $searchTerm;
+    $params[] = $searchTerm;
+    $params[] = $searchTerm;
+    $params[] = $searchTerm;
 }
 
 // Sorting (latest arrival first by default)
@@ -63,38 +56,56 @@ $allowedSortColumns = [
     'driver_name' => 'driver_user.name',
     'requester_name' => 'u.name',
     'destination' => 'r.destination',
-    'duration' => 'actual_duration',
+    'duration' => 'TIMESTAMPDIFF(MINUTE, r.actual_dispatch_datetime, r.actual_arrival_datetime)',
     'mileage' => 'r.mileage_actual',
 ];
 $sortState = resolveTableSort($allowedSortColumns, 'completed_date', 'DESC');
 $sort = $sortState['key'];
 $sortDir = $sortState['dir'];
 
-$sql .= " ORDER BY {$sortState['orderSql']}";
+$countRow = db()->fetch("SELECT COUNT(*) as c {$fromSql}{$whereSql}", $params);
+$pag = listPaginationState((int) ($countRow->c ?? 0));
 
-$trips = db()->fetchAll($sql, $params);
+$trips = db()->fetchAll(
+    "SELECT r.*,
+            u.name as requester_name, u.phone as requester_phone,
+            d.name as department_name,
+            v.plate_number, v.make, v.model as vehicle_model, v.color,
+            dr.license_number as driver_license,
+            driver_user.name as driver_name, driver_user.phone as driver_phone,
+            dispatch_guard.name as dispatch_guard_name,
+            arrival_guard.name as arrival_guard_name,
+            TIMESTAMPDIFF(MINUTE, r.actual_dispatch_datetime, r.actual_arrival_datetime) as actual_duration
+     {$fromSql}{$whereSql}
+     ORDER BY {$sortState['orderSql']}
+     LIMIT ? OFFSET ?",
+    array_merge($params, [$pag['perPage'], $pag['offset']])
+);
 
 $baseParams = tableSortQueryParams($sortState, [
     'page' => 'guard',
     'action' => 'completed',
     'start_date' => $startDate,
     'end_date' => $endDate,
-    'search' => $search,
+    'q' => $searchQuery,
+    'per_page' => $pag['perPage'],
 ]);
 
-// Calculate statistics
-$totalTrips = count($trips);
-$totalDistance = 0;
-$totalHours = 0;
-$withTravelOrder = 0;
-$withObSlip = 0;
-
-foreach ($trips as $t) {
-    if ($t->mileage_actual) $totalDistance += $t->mileage_actual;
-    if ($t->actual_duration) $totalHours += $t->actual_duration / 60;
-    if ($t->has_travel_order) $withTravelOrder++;
-    if ($t->has_official_business_slip) $withObSlip++;
-}
+// Calculate statistics (date/search scoped, not paginated)
+$statsRow = db()->fetch(
+    "SELECT COUNT(*) as total_trips,
+            COALESCE(SUM(r.mileage_actual), 0) as total_distance,
+            COALESCE(SUM(TIMESTAMPDIFF(MINUTE, r.actual_dispatch_datetime, r.actual_arrival_datetime)), 0) as total_minutes,
+            COALESCE(SUM(r.has_travel_order), 0) as with_travel_order,
+            COALESCE(SUM(r.has_official_business_slip), 0) as with_ob_slip
+     {$fromSql}{$whereSql}",
+    $params
+);
+$totalTrips = (int) ($statsRow->total_trips ?? 0);
+$totalDistance = (int) ($statsRow->total_distance ?? 0);
+$totalHours = ((int) ($statsRow->total_minutes ?? 0)) / 60;
+$withTravelOrder = (int) ($statsRow->with_travel_order ?? 0);
+$withObSlip = (int) ($statsRow->with_ob_slip ?? 0);
 
 require_once INCLUDES_PATH . '/header.php';
 ?>
@@ -195,14 +206,13 @@ require_once INCLUDES_PATH . '/header.php';
                     <label class="loka-form-label">End Date</label>
                     <input type="date" class="loka-form-input" name="end_date" value="<?= $endDate ?>">
                 </div>
-                <div class="min-w-[200px]">
-                    <label class="loka-form-label">Search</label>
-                    <input type="text" class="loka-form-input" name="search" value="<?= e($search) ?>" placeholder="Vehicle, requester, driver, destination...">
-                </div>
-                <div>
+                <?= listSearchFieldHtml($searchQuery, 'Vehicle, requester, driver, destination...', 'loka-form-input') ?>
+                <?= perPageFieldHtml($pag['perPage'], 'loka-form-input') ?>
+                <div class="flex gap-2">
                     <button type="submit" class="loka-btn-primary">
                         <i class="bi bi-search me-1"></i>Filter
                     </button>
+                    <a href="?page=guard&action=completed" class="loka-btn-secondary">Reset</a>
                 </div>
             </form>
         </div>
@@ -211,7 +221,7 @@ require_once INCLUDES_PATH . '/header.php';
     <!-- Completed Trips Table -->
     <div class="loka-card">
         <div class="px-4 md:px-6 pt-4 md:pt-6 flex justify-between items-center">
-            <h5 class="mb-0">Completed Trips (<?= count($trips) ?>)</h5>
+            <h5 class="mb-0">Completed Trips (<?= number_format($totalTrips) ?>)</h5>
             <button type="button" class="bg-success text-success-content hover:bg-success/90 px-4 py-2 text-sm font-medium rounded-xl inline-flex items-center gap-2 transition-colors" onclick="exportCompletedTrips()">
                 <i class="bi bi-file-earmark-excel me-1"></i>Export to CSV
             </button>
@@ -329,6 +339,7 @@ require_once INCLUDES_PATH . '/header.php';
                         </tbody>
                     </table>
                 </div>
+                <?= listPaginationFooter($pag, $baseParams) ?>
             <?php endif; ?>
         </div>
     </div>

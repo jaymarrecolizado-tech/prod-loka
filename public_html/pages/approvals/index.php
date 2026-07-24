@@ -7,11 +7,38 @@ requireRole(ROLE_APPROVER);
 
 $pageTitle = 'Approval Queue';
 $tab = get('tab', 'pending');
+$searchQuery = listSearchQuery();
 $recordsPerPage = resolvePerPage();
 
 // Get current page for pagination
-$pendingPage = max(1, getInt('p_pending', 1));
-$processedPage = max(1, getInt('p_processed', 1));
+$pendingPage = resolveListPage('p_pending');
+$processedPage = resolveListPage('p_processed');
+
+$pendingSearchSql = '';
+$pendingSearchParams = [];
+$processedSearchSql = '';
+$processedSearchParams = [];
+
+if ($searchQuery) {
+    $searchTerm = '%' . $searchQuery . '%';
+    $pendingSearchSql = " AND (
+        CAST(r.id AS CHAR) LIKE ? OR
+        u.name LIKE ? OR
+        d.name LIKE ? OR
+        r.purpose LIKE ? OR
+        r.destination LIKE ? OR
+        v.plate_number LIKE ?
+    )";
+    $pendingSearchParams = array_fill(0, 6, $searchTerm);
+    $processedSearchSql = " AND (
+        CAST(r.id AS CHAR) LIKE ? OR
+        u.name LIKE ? OR
+        d.name LIKE ? OR
+        r.purpose LIKE ? OR
+        r.destination LIKE ?
+    )";
+    $processedSearchParams = array_fill(0, 5, $searchTerm);
+}
 
 // Sorting (latest created / action first by default)
 // Both list queries run every request; only the active tab uses request sort params.
@@ -51,9 +78,14 @@ if (isAdmin()) {
     $pendingRequestsCount = db()->fetchColumn(
         "SELECT COUNT(*)
          FROM requests r
-         WHERE r.status IN ('pending', 'pending_motorpool', 'revision') AND r.deleted_at IS NULL"
+         JOIN users u ON r.user_id = u.id
+         JOIN departments d ON r.department_id = d.id
+         LEFT JOIN vehicles v ON r.vehicle_id = v.id AND v.deleted_at IS NULL
+         WHERE r.status IN ('pending', 'pending_motorpool', 'revision') AND r.deleted_at IS NULL{$pendingSearchSql}",
+        $pendingSearchParams
     );
-    $pendingOffset = ($pendingPage - 1) * $recordsPerPage;
+    $pendingPag = listPaginationState((int) $pendingRequestsCount, $pendingPage, $recordsPerPage);
+    $pendingOffset = $pendingPag['offset'];
     $pendingRequests = db()->fetchAll(
         "SELECT r.*, u.name as requester_name, d.name as department_name,
                 appr.name as assigned_approver_name, mph.name as assigned_motorpool_name,
@@ -66,23 +98,26 @@ if (isAdmin()) {
          LEFT JOIN users appr ON r.approver_id = appr.id
          LEFT JOIN users mph ON r.motorpool_head_id = mph.id
          LEFT JOIN vehicles v ON r.vehicle_id = v.id AND v.deleted_at IS NULL
-         WHERE r.status IN ('pending', 'pending_motorpool', 'revision') AND r.deleted_at IS NULL
+         WHERE r.status IN ('pending', 'pending_motorpool', 'revision') AND r.deleted_at IS NULL{$pendingSearchSql}
          ORDER BY {$pendingOrderSql}, r.viewed_at IS NULL DESC
          LIMIT ? OFFSET ?",
-        [$recordsPerPage, $pendingOffset]
+        array_merge($pendingSearchParams, [$recordsPerPage, $pendingOffset])
     );
     $queueType = 'All';
 } elseif (isMotorpool()) {
-    // Motorpool sees: pending_motorpool + revision requests assigned to them
     $pendingRequestsCount = db()->fetchColumn(
         "SELECT COUNT(*)
          FROM requests r
+         JOIN users u ON r.user_id = u.id
+         JOIN departments d ON r.department_id = d.id
+         LEFT JOIN vehicles v ON r.vehicle_id = v.id AND v.deleted_at IS NULL
          WHERE (r.status = 'pending_motorpool' OR r.status = 'revision')
          AND r.motorpool_head_id = ?
-         AND r.deleted_at IS NULL",
-        [userId()]
+         AND r.deleted_at IS NULL{$pendingSearchSql}",
+        array_merge([userId()], $pendingSearchParams)
     );
-    $pendingOffset = ($pendingPage - 1) * $recordsPerPage;
+    $pendingPag = listPaginationState((int) $pendingRequestsCount, $pendingPage, $recordsPerPage);
+    $pendingOffset = $pendingPag['offset'];
     $pendingRequests = db()->fetchAll(
         "SELECT r.*, u.name as requester_name, d.name as department_name,
                 appr.name as assigned_approver_name,
@@ -95,23 +130,26 @@ if (isAdmin()) {
          LEFT JOIN vehicles v ON r.vehicle_id = v.id AND v.deleted_at IS NULL
          WHERE (r.status = 'pending_motorpool' OR r.status = 'revision')
          AND r.motorpool_head_id = ?
-         AND r.deleted_at IS NULL
+         AND r.deleted_at IS NULL{$pendingSearchSql}
          ORDER BY {$pendingOrderSql}, r.viewed_at IS NULL DESC
          LIMIT ? OFFSET ?",
-        [userId(), $recordsPerPage, $pendingOffset]
+        array_merge([userId()], $pendingSearchParams, [$recordsPerPage, $pendingOffset])
     );
     $queueType = 'Motorpool';
 } else {
-    // Approvers see: pending + revision requests assigned to them
     $pendingRequestsCount = db()->fetchColumn(
         "SELECT COUNT(*)
          FROM requests r
+         JOIN users u ON r.user_id = u.id
+         JOIN departments d ON r.department_id = d.id
+         LEFT JOIN vehicles v ON r.vehicle_id = v.id AND v.deleted_at IS NULL
          WHERE (r.status = 'pending' OR r.status = 'revision')
          AND r.approver_id = ?
-         AND r.deleted_at IS NULL",
-        [userId()]
+         AND r.deleted_at IS NULL{$pendingSearchSql}",
+        array_merge([userId()], $pendingSearchParams)
     );
-    $pendingOffset = ($pendingPage - 1) * $recordsPerPage;
+    $pendingPag = listPaginationState((int) $pendingRequestsCount, $pendingPage, $recordsPerPage);
+    $pendingOffset = $pendingPag['offset'];
     $pendingRequests = db()->fetchAll(
         "SELECT r.*, u.name as requester_name, d.name as department_name,
                 mph.name as assigned_motorpool_name,
@@ -124,10 +162,10 @@ if (isAdmin()) {
          LEFT JOIN vehicles v ON r.vehicle_id = v.id AND v.deleted_at IS NULL
          WHERE (r.status = 'pending' OR r.status = 'revision')
          AND r.approver_id = ?
-         AND r.deleted_at IS NULL
+         AND r.deleted_at IS NULL{$pendingSearchSql}
          ORDER BY {$pendingOrderSql}, r.viewed_at IS NULL DESC
          LIMIT ? OFFSET ?",
-        [userId(), $recordsPerPage, $pendingOffset]
+        array_merge([userId()], $pendingSearchParams, [$recordsPerPage, $pendingOffset])
     );
     $queueType = 'Assigned';
 }
@@ -137,12 +175,16 @@ $processedRequestsCount = db()->fetchColumn(
     "SELECT COUNT(*)
      FROM approvals a
      JOIN requests r ON a.request_id = r.id
-     WHERE a.approver_id = ? AND r.deleted_at IS NULL",
-    [userId()]
+     JOIN users u ON r.user_id = u.id
+     JOIN departments d ON r.department_id = d.id
+     WHERE a.approver_id = ? AND r.deleted_at IS NULL{$processedSearchSql}",
+    array_merge([userId()], $processedSearchParams)
 );
 
+$processedPag = listPaginationState((int) $processedRequestsCount, $processedPage, $recordsPerPage);
+$processedOffset = $processedPag['offset'];
+
 // Get processed requests with pagination
-$processedOffset = ($processedPage - 1) * $recordsPerPage;
 $processedRequests = db()->fetchAll(
     "SELECT r.*, u.name as requester_name, d.name as department_name,
             a.status as my_action, a.approval_type, a.created_at as action_date
@@ -150,19 +192,31 @@ $processedRequests = db()->fetchAll(
      JOIN requests r ON a.request_id = r.id
      JOIN users u ON r.user_id = u.id
      JOIN departments d ON r.department_id = d.id
-     WHERE a.approver_id = ? AND r.deleted_at IS NULL
+     WHERE a.approver_id = ? AND r.deleted_at IS NULL{$processedSearchSql}
      ORDER BY {$processedOrderSql}
      LIMIT ? OFFSET ?",
-    [userId(), $recordsPerPage, $processedOffset]
+    array_merge([userId()], $processedSearchParams, [$recordsPerPage, $processedOffset])
 );
-
-// Calculate pagination
-$pendingTotalPages = ceil($pendingRequestsCount / $recordsPerPage);
-$processedTotalPages = ceil($processedRequestsCount / $recordsPerPage);
 
 $baseParams = tableSortQueryParams($sortState, [
     'page' => 'approvals',
     'tab' => $tab,
+    'q' => $searchQuery,
+    'per_page' => $recordsPerPage,
+]);
+
+$pendingPageParams = tableSortQueryParams($sortState, [
+    'page' => 'approvals',
+    'tab' => 'pending',
+    'q' => $searchQuery,
+    'per_page' => $recordsPerPage,
+]);
+
+$processedPageParams = tableSortQueryParams($sortState, [
+    'page' => 'approvals',
+    'tab' => 'processed',
+    'q' => $searchQuery,
+    'per_page' => $recordsPerPage,
 ]);
 
 require_once INCLUDES_PATH . '/header.php';
@@ -209,6 +263,23 @@ require_once INCLUDES_PATH . '/header.php';
             <span class="loka-badge bg-secondary ms-1"><?= $processedRequestsCount ?></span>
             <?php endif; ?>
         </a>
+    </div>
+
+    <div class="loka-card mb-4">
+        <div class="p-4 md:p-6">
+            <form method="GET" class="flex flex-wrap items-end gap-3">
+                <input type="hidden" name="page" value="approvals">
+                <input type="hidden" name="tab" value="<?= e($tab) ?>">
+                <?= listSearchFieldHtml($searchQuery, 'Request #, requester, purpose, destination...') ?>
+                <?= perPageFieldHtml($recordsPerPage) ?>
+                <div class="flex gap-2">
+                    <button type="submit" class="loka-btn-primary loka-btn-sm">
+                        <i class="bi bi-search"></i> Filter
+                    </button>
+                    <a href="<?= APP_URL ?>/?page=approvals&tab=<?= e($tab) ?>" class="loka-btn-secondary loka-btn-sm">Reset</a>
+                </div>
+            </form>
+        </div>
     </div>
     
     <?php if ($tab === 'pending'): ?>
@@ -310,32 +381,7 @@ require_once INCLUDES_PATH . '/header.php';
                 </table>
             </div>
             
-            <!-- Pagination -->
-            <?php if ($pendingTotalPages > 1): ?>
-            <nav aria-label="Pending approvals pagination" class="mt-4">
-                <?php
-                $pendingPageParams = tableSortQueryParams($sortState, ['page' => 'approvals', 'tab' => 'pending']);
-                $buildPendingUrl = static function (array $params, int $pageNum): string {
-                    $params['p_pending'] = $pageNum;
-                    return APP_URL . '/?' . http_build_query(array_filter($params, static fn($v) => $v !== null && $v !== ''));
-                };
-                ?>
-                <div class="join justify-center mb-0">
-                    <a class="join-item btn btn-sm <?= $pendingPage <= 1 ? 'btn-disabled' : '' ?>" href="<?= e($buildPendingUrl($pendingPageParams, $pendingPage - 1)) ?>">
-                        <i class="bi bi-chevron-left"></i> Previous
-                    </a>
-                    <?php for ($i = 1; $i <= $pendingTotalPages; $i++): ?>
-                    <a class="join-item btn btn-sm <?= $i === $pendingPage ? 'btn-primary' : '' ?>" href="<?= e($buildPendingUrl($pendingPageParams, $i)) ?>"><?= $i ?></a>
-                    <?php endfor; ?>
-                    <a class="join-item btn btn-sm <?= $pendingPage >= $pendingTotalPages ? 'btn-disabled' : '' ?>" href="<?= e($buildPendingUrl($pendingPageParams, $pendingPage + 1)) ?>">
-                        Next <i class="bi bi-chevron-right"></i>
-                    </a>
-                </div>
-            </nav>
-            <div class="text-center text-base-content/60 text-sm mt-2">
-                Showing <?= (($pendingPage - 1) * $recordsPerPage) + 1 ?> to <?= min($pendingPage * $recordsPerPage, $pendingRequestsCount) ?> of <?= $pendingRequestsCount ?> pending requests
-            </div>
-            <?php endif; ?>
+            <?= listPaginationFooter($pendingPag, $pendingPageParams, 'p_pending') ?>
             <?php endif; ?>
         </div>
     </div>
@@ -395,32 +441,7 @@ require_once INCLUDES_PATH . '/header.php';
                 </table>
             </div>
             
-            <!-- Pagination -->
-            <?php if ($processedTotalPages > 1): ?>
-            <nav aria-label="Processed approvals pagination" class="mt-4">
-                <?php
-                $processedPageParams = tableSortQueryParams($sortState, ['page' => 'approvals', 'tab' => 'processed']);
-                $buildProcessedUrl = static function (array $params, int $pageNum): string {
-                    $params['p_processed'] = $pageNum;
-                    return APP_URL . '/?' . http_build_query(array_filter($params, static fn($v) => $v !== null && $v !== ''));
-                };
-                ?>
-                <div class="join justify-center mb-0">
-                    <a class="join-item btn btn-sm <?= $processedPage <= 1 ? 'btn-disabled' : '' ?>" href="<?= e($buildProcessedUrl($processedPageParams, $processedPage - 1)) ?>">
-                        <i class="bi bi-chevron-left"></i> Previous
-                    </a>
-                    <?php for ($i = 1; $i <= $processedTotalPages; $i++): ?>
-                    <a class="join-item btn btn-sm <?= $i === $processedPage ? 'btn-primary' : '' ?>" href="<?= e($buildProcessedUrl($processedPageParams, $i)) ?>"><?= $i ?></a>
-                    <?php endfor; ?>
-                    <a class="join-item btn btn-sm <?= $processedPage >= $processedTotalPages ? 'btn-disabled' : '' ?>" href="<?= e($buildProcessedUrl($processedPageParams, $processedPage + 1)) ?>">
-                        Next <i class="bi bi-chevron-right"></i>
-                    </a>
-                </div>
-            </nav>
-            <div class="text-center text-base-content/60 text-sm mt-2">
-                Showing <?= (($processedPage - 1) * $recordsPerPage) + 1 ?> to <?= min($processedPage * $recordsPerPage, $processedRequestsCount) ?> of <?= $processedRequestsCount ?> processed requests
-            </div>
-            <?php endif; ?>
+            <?= listPaginationFooter($processedPag, $processedPageParams, 'p_processed') ?>
             <?php endif; ?>
         </div>
     </div>

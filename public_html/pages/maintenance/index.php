@@ -11,35 +11,49 @@ $pageTitle = 'Maintenance';
 
 $filter = get('filter', 'all');
 $status = get('status', '');
+$searchQuery = listSearchQuery();
 
-$sql = "SELECT mr.*, 
-            v.plate_number, v.make, v.model,
-            reporter.name as reporter_name,
-            assigned.name as assigned_name
-        FROM maintenance_requests mr
+$fromSql = "FROM maintenance_requests mr
         JOIN vehicles v ON mr.vehicle_id = v.id
         JOIN users reporter ON mr.reported_by = reporter.id
         LEFT JOIN users assigned ON mr.assigned_to = assigned.id
         WHERE mr.deleted_at IS NULL";
 
 $params = [];
+$whereSql = '';
 
-if ($status && in_array($status, [MAINTENANCE_STATUS_PENDING, MAINTENANCE_STATUS_SCHEDULED, MAINTENANCE_STATUS_IN_PROGRESS, MAINTENANCE_STATUS_COMPLETED, MAINTENANCE_STATUS_CANCELLED])) {
-    $sql .= " AND mr.status = ?";
+if ($status && in_array($status, [MAINTENANCE_STATUS_PENDING, MAINTENANCE_STATUS_SCHEDULED, MAINTENANCE_STATUS_IN_PROGRESS, MAINTENANCE_STATUS_COMPLETED, MAINTENANCE_STATUS_CANCELLED], true)) {
+    $whereSql .= " AND mr.status = ?";
     $params[] = $status;
 }
 
 switch ($filter) {
     case 'overdue':
-        $sql .= " AND mr.status IN (?, ?) AND mr.scheduled_date < CURDATE()";
+        $whereSql .= " AND mr.status IN (?, ?) AND mr.scheduled_date < CURDATE()";
         $params[] = MAINTENANCE_STATUS_PENDING;
         $params[] = MAINTENANCE_STATUS_SCHEDULED;
         break;
     case 'upcoming':
-        $sql .= " AND mr.status IN (?, ?) AND mr.scheduled_date >= CURDATE() AND mr.scheduled_date <= DATE_ADD(CURDATE(), INTERVAL 7 DAY)";
+        $whereSql .= " AND mr.status IN (?, ?) AND mr.scheduled_date >= CURDATE() AND mr.scheduled_date <= DATE_ADD(CURDATE(), INTERVAL 7 DAY)";
         $params[] = MAINTENANCE_STATUS_PENDING;
         $params[] = MAINTENANCE_STATUS_SCHEDULED;
         break;
+}
+
+if ($searchQuery) {
+    $whereSql .= " AND (
+        mr.title LIKE ? OR
+        mr.description LIKE ? OR
+        v.plate_number LIKE ? OR
+        reporter.name LIKE ? OR
+        CAST(mr.id AS CHAR) LIKE ?
+    )";
+    $searchParam = '%' . $searchQuery . '%';
+    $params[] = $searchParam;
+    $params[] = $searchParam;
+    $params[] = $searchParam;
+    $params[] = $searchParam;
+    $params[] = $searchParam;
 }
 
 // Sorting (latest created first by default; priority as secondary tie-breaker)
@@ -57,14 +71,26 @@ $sortState = resolveTableSort($allowedSortColumns, 'created_at', 'DESC');
 $sort = $sortState['key'];
 $sortDir = $sortState['dir'];
 
-$sql .= " ORDER BY {$sortState['orderSql']}, FIELD(mr.priority, 'critical', 'high', 'medium', 'low')";
+$countRow = db()->fetch("SELECT COUNT(*) as c {$fromSql}{$whereSql}", $params);
+$pag = listPaginationState((int) ($countRow->c ?? 0));
 
-$maintenanceRequests = db()->fetchAll($sql, $params);
+$maintenanceRequests = db()->fetchAll(
+    "SELECT mr.*,
+            v.plate_number, v.make, v.model,
+            reporter.name as reporter_name,
+            assigned.name as assigned_name
+     {$fromSql}{$whereSql}
+     ORDER BY {$sortState['orderSql']}, FIELD(mr.priority, 'critical', 'high', 'medium', 'low')
+     LIMIT ? OFFSET ?",
+    array_merge($params, [$pag['perPage'], $pag['offset']])
+);
 
 $baseParams = tableSortQueryParams($sortState, [
     'page' => 'maintenance',
     'filter' => $filter === 'all' ? '' : $filter,
     'status' => $status,
+    'q' => $searchQuery,
+    'per_page' => $pag['perPage'],
 ]);
 
 $stats = [
@@ -159,6 +185,28 @@ require_once INCLUDES_PATH . '/header.php';
         </div>
     </div>
 
+    <div class="loka-card mb-4">
+        <div class="p-4 md:p-6">
+            <form method="GET" class="flex flex-wrap items-end gap-3">
+                <input type="hidden" name="page" value="maintenance">
+                <?php if ($filter !== 'all'): ?>
+                    <input type="hidden" name="filter" value="<?= e($filter) ?>">
+                <?php endif; ?>
+                <?php if ($status): ?>
+                    <input type="hidden" name="status" value="<?= e($status) ?>">
+                <?php endif; ?>
+                <?= listSearchFieldHtml($searchQuery, 'Title, vehicle, reporter, ID...') ?>
+                <?= perPageFieldHtml($pag['perPage']) ?>
+                <div class="flex gap-2">
+                    <button type="submit" class="loka-btn-primary loka-btn-sm">
+                        <i class="bi bi-search"></i> Filter
+                    </button>
+                    <a href="<?= APP_URL ?>/?page=maintenance<?= $status ? '&status=' . e($status) : ($filter !== 'all' ? '&filter=' . e($filter) : '') ?>" class="loka-btn-secondary loka-btn-sm">Reset</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <div class="loka-card">
         <div class="px-6 py-4 border-b border-base-200 bg-base-200">
             <div role="tablist" class="tabs tabs-bordered">
@@ -187,7 +235,13 @@ require_once INCLUDES_PATH . '/header.php';
             <?php if (empty($maintenanceRequests)): ?>
                 <div class="text-center py-5">
                     <i class="bi bi-wrench-adjustable fs-1 text-base-content/60"></i>
-                    <p class="text-base-content/60 mt-3">No maintenance requests found.</p>
+                    <p class="text-base-content/60 mt-3">
+                        <?php if ($searchQuery): ?>
+                            No maintenance requests found matching "<?= e($searchQuery) ?>".
+                        <?php else: ?>
+                            No maintenance requests found.
+                        <?php endif; ?>
+                    </p>
                 </div>
             <?php else: ?>
                 <div class="loka-table-responsive">
@@ -278,6 +332,7 @@ require_once INCLUDES_PATH . '/header.php';
                         </tbody>
                     </table>
                 </div>
+                <?= listPaginationFooter($pag, $baseParams) ?>
             <?php endif; ?>
         </div>
     </div>
