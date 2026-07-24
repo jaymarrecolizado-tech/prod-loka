@@ -309,6 +309,28 @@ define('MAIL_TEMPLATES', [
         'subject' => 'Maintenance Cancelled',
         'template' => 'A maintenance request has been cancelled.'
     ],
+
+    // Vehicle care calendar
+    'care_schedule_proposed' => [
+        'subject' => 'Vehicle Care Schedule Proposed',
+        'template' => 'A vehicle care schedule item has been proposed and awaits approval.'
+    ],
+    'care_schedule_scheduled' => [
+        'subject' => 'Vehicle Care Item Scheduled',
+        'template' => 'A vehicle care item has been scheduled.'
+    ],
+    'care_schedule_reminder' => [
+        'subject' => 'Vehicle Care Reminder',
+        'template' => 'A vehicle care item is due soon or overdue.'
+    ],
+    'care_schedule_completed' => [
+        'subject' => 'Vehicle Care Completed',
+        'template' => 'A vehicle care item has been marked completed.'
+    ],
+    'care_schedule_cancelled' => [
+        'subject' => 'Vehicle Care Cancelled',
+        'template' => 'A vehicle care item has been cancelled.'
+    ],
 ]);
 
 // Additional mail settings

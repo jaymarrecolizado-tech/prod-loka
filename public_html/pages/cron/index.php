@@ -3,6 +3,7 @@
  * LOKA - HTTP cron endpoint (no session UI)
  * Usage: /?page=cron&action=email&key=SECRET
  *         /?page=cron&action=sms&key=SECRET
+ *         /?page=cron&action=care&key=SECRET
  */
 
 header('Content-Type: text/plain; charset=utf-8');
@@ -34,6 +35,13 @@ try {
         }
         $r = $queue->process($batch);
         echo date('c') . " SMS ok sent={$r['sent']} failed={$r['failed']} skipped={$r['skipped']}\n";
+        exit;
+    }
+
+    if ($action === 'care') {
+        require_once BASE_PATH . '/cron/process_care_reminders.php';
+        $r = processCareReminders();
+        echo date('c') . " CARE ok sent={$r['sent']} skipped={$r['skipped']}\n";
         exit;
     }
 

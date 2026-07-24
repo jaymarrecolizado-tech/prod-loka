@@ -12,6 +12,7 @@ require_once __DIR__ . '/dashboard_stats.php';
 require_once __DIR__ . '/availability.php';
 require_once __DIR__ . '/image_optimize.php';
 require_once __DIR__ . '/vehicle_observations.php';
+require_once __DIR__ . '/vehicle_care.php';
 
 /**
  * Get database instance

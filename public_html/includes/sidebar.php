@@ -129,21 +129,36 @@
             </li>
             <?php endif; ?>
 
-            <!-- Maintenance -->
+            <!-- Maintenance (repair tickets — Approver+) -->
+            <?php if (isApprover()): ?>
             <li>
-                <a class="loka-nav-link <?= activeMenu('maintenance') ?>" href="<?= APP_URL ?>/?page=maintenance">
+                <a class="loka-nav-link <?= activeMenu('maintenance') && get('action') !== 'schedule' && get('action') !== 'care-assign' && get('action') !== 'care-create' && get('action') !== 'care-edit' ? 'active' : '' ?>"
+                   href="<?= APP_URL ?>/?page=maintenance">
                     <i class="bi bi-wrench w-5 text-center flex-shrink-0"></i>
                     <span>Maintenance</span>
                     <?= sidebarBadgeHtml(badgeCountPendingMaintenance()) ?>
                 </a>
             </li>
-            <!-- Maintenance Schedule -->
+            <?php endif; ?>
+            <?php endif; ?>
+
+            <?php if (canAccessMaintenanceSchedule()): ?>
+            <!-- Maintenance Schedule (Care + Repair calendar) -->
             <li>
-                <a class="loka-nav-link <?= activeMenu('maintenance', 'schedule') ?>" href="<?= APP_URL ?>/?page=maintenance&action=schedule">
+                <a class="loka-nav-link <?= activeMenu('maintenance', 'schedule') || in_array(get('action'), ['care-create', 'care-edit'], true) ? 'active' : '' ?>"
+                   href="<?= APP_URL ?>/?page=maintenance&action=schedule">
                     <i class="bi bi-calendar-check w-5 text-center flex-shrink-0"></i>
                     <span>Maint. Schedule</span>
                 </a>
             </li>
+            <?php if (canManageCareAssignments()): ?>
+            <li>
+                <a class="loka-nav-link <?= activeMenu('maintenance', 'care-assign') ?>" href="<?= APP_URL ?>/?page=maintenance&action=care-assign">
+                    <i class="bi bi-person-check w-5 text-center flex-shrink-0"></i>
+                    <span>Care Assignments</span>
+                </a>
+            </li>
+            <?php endif; ?>
             <?php endif; ?>
 
             <?php if (canAccessDriverReports()): ?>

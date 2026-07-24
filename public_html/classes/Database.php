@@ -39,6 +39,8 @@ class Database
         'vehicle_observation_photos',
         'user_badge_acks',
         'sms_logs',
+        'vehicle_care_assignments',
+        'vehicle_care_schedules',
     ];
 
     private function __construct()

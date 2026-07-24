@@ -328,6 +328,23 @@ switch ($page) {
         break;
 
     case 'maintenance':
+        $careActions = ['schedule', 'care-assign', 'care-create', 'care-edit'];
+        if (in_array($action, $careActions, true)) {
+            requireAuth();
+            if (!canAccessMaintenanceSchedule()) {
+                redirectWith('/?page=dashboard', 'danger', 'Access denied.');
+            }
+            if ($action === 'care-assign') {
+                require_once PAGES_PATH . '/maintenance/care-assign.php';
+            } elseif ($action === 'care-create') {
+                require_once PAGES_PATH . '/maintenance/care-create.php';
+            } elseif ($action === 'care-edit') {
+                require_once PAGES_PATH . '/maintenance/care-edit.php';
+            } else {
+                require_once PAGES_PATH . '/maintenance/schedule.php';
+            }
+            break;
+        }
         requireRole(ROLE_APPROVER);
         if ($action === 'create') {
             require_once PAGES_PATH . '/maintenance/create.php';
@@ -337,8 +354,6 @@ switch ($page) {
             require_once PAGES_PATH . '/maintenance/edit.php';
         } elseif ($action === 'delete') {
             require_once PAGES_PATH . '/maintenance/delete.php';
-        } elseif ($action === 'schedule') {
-            require_once PAGES_PATH . '/maintenance/schedule.php';
         } else {
             require_once PAGES_PATH . '/maintenance/index.php';
         }

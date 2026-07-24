@@ -3,27 +3,55 @@
  * LOKA - Maintenance Schedule Page
  *
  * View and manage scheduled maintenance with calendar view
- * Includes recurring maintenance reminders based on mileage and dates
+ * Includes repair requests + vehicle care schedule (additive)
  */
 
-requireRole(ROLE_APPROVER);
+if (!canAccessMaintenanceSchedule()) {
+    redirectWith('/?page=dashboard', 'danger', 'Access denied.');
+}
 
 $pageTitle = 'Maintenance Schedule';
 
 $view = get('view', 'calendar'); // calendar, list, upcoming
 $vehicleId = getInt('vehicle');
 $month = get('month', date('Y-m'));
+if (!preg_match('/^\d{4}-\d{2}$/', $month)) {
+    $month = date('Y-m');
+}
 $searchQuery = listSearchQuery();
 
-// Get all vehicles for filter
-$vehicles = db()->fetchAll(
-    "SELECT id, plate_number, make, model, mileage
-     FROM vehicles
-     WHERE deleted_at IS NULL
-     ORDER BY plate_number"
-);
+// Get vehicles for filter (scoped for care drivers)
+if (isAdmin() || isMotorpool() || isApprover() || isChiefAdminFinance() || isRealAllFather()) {
+    $vehicles = db()->fetchAll(
+        "SELECT id, plate_number, make, model, mileage
+         FROM vehicles
+         WHERE deleted_at IS NULL
+         ORDER BY plate_number"
+    );
+} else {
+    $ids = careVehicleIdsForDriver();
+    if ($ids === []) {
+        $vehicles = [];
+    } else {
+        $ph = implode(',', array_fill(0, count($ids), '?'));
+        $vehicles = db()->fetchAll(
+            "SELECT id, plate_number, make, model, mileage
+             FROM vehicles WHERE deleted_at IS NULL AND id IN ({$ph})
+             ORDER BY plate_number",
+            $ids
+        );
+    }
+}
 
-// Build query
+// Build query (repair tickets — Approver+ only; drivers see care calendar only)
+$showRepairList = isApprover();
+$maintenanceRequests = [];
+$totalCount = 0;
+$totalPages = 1;
+$page = 1;
+$pag = listPaginationState(0);
+
+if ($showRepairList) {
 $sql = "SELECT mr.*,
                v.plate_number, v.make, v.model, v.mileage as current_mileage,
                reporter.name as reporter_name,
@@ -125,6 +153,9 @@ if ($useListPagination) {
 }
 
 $maintenanceRequests = db()->fetchAll($sql, $params);
+} else {
+    $useListPagination = false;
+}
 
 $baseParams = [
     'page' => 'maintenance',
@@ -135,76 +166,74 @@ $baseParams = [
     'per_page' => $pag['perPage'],
 ];
 
-// Get upcoming maintenance alerts (based on mileage and time)
+// Repair mileage/time alerts — Approver+ only (unchanged for existing users)
 $upcomingAlerts = [];
+if ($showRepairList) {
+    foreach ($vehicles as $vehicle) {
+        foreach (RECURRING_MAINTENANCE_TYPES as $type => $typeInfo) {
+            $lastMaintenance = db()->fetch(
+                "SELECT mr.*
+                 FROM maintenance_requests mr
+                 WHERE mr.vehicle_id = ?
+                 AND mr.type = ?
+                 AND mr.status = ?
+                 AND mr.deleted_at IS NULL
+                 ORDER BY mr.completed_at DESC
+                 LIMIT 1",
+                [$vehicle->id, $type, MAINTENANCE_STATUS_COMPLETED]
+            );
 
-foreach ($vehicles as $vehicle) {
-    // Get last completed maintenance for each type
-    foreach (RECURRING_MAINTENANCE_TYPES as $type => $typeInfo) {
-        $lastMaintenance = db()->fetch(
-            "SELECT mr.*
-             FROM maintenance_requests mr
-             WHERE mr.vehicle_id = ?
-             AND mr.type = ?
-             AND mr.status = ?
-             AND mr.deleted_at IS NULL
-             ORDER BY mr.completed_at DESC
-             LIMIT 1",
-            [$vehicle->id, $type, MAINTENANCE_STATUS_COMPLETED]
-        );
+            if ($lastMaintenance && $lastMaintenance->completed_at) {
+                $daysSinceCompleted = (time() - strtotime($lastMaintenance->completed_at)) / 86400;
+                $kmSinceCompleted = $vehicle->mileage - ($lastMaintenance->mileage_at_completion ?? 0);
 
-        if ($lastMaintenance && $lastMaintenance->completed_at) {
-            // Calculate due dates
-            $daysSinceCompleted = (time() - strtotime($lastMaintenance->completed_at)) / 86400;
-            $kmSinceCompleted = $vehicle->mileage - ($lastMaintenance->mileage_at_completion ?? 0);
+                $dueByDays = $typeInfo['interval_days'] ? $typeInfo['interval_days'] - $daysSinceCompleted : null;
+                $dueByKm = $typeInfo['interval_km'] ? $typeInfo['interval_km'] - $kmSinceCompleted : null;
 
-            $dueByDays = $typeInfo['interval_days'] ? $typeInfo['interval_days'] - $daysSinceCompleted : null;
-            $dueByKm = $typeInfo['interval_km'] ? $typeInfo['interval_km'] - $kmSinceCompleted : null;
+                $isDueSoon = false;
+                $isOverdue = false;
+                $dueReason = [];
 
-            $isDueSoon = false;
-            $isOverdue = false;
-            $dueReason = [];
-
-            if ($dueByDays !== null) {
-                if ($dueByDays < 0) {
-                    $isOverdue = true;
-                    $dueReason[] = abs($daysSinceCompleted) . ' days overdue';
-                } elseif ($dueByDays <= 30) {
-                    $isDueSoon = true;
-                    $dueReason[] = 'Due in ' . $dueByDays . ' days';
+                if ($dueByDays !== null) {
+                    if ($dueByDays < 0) {
+                        $isOverdue = true;
+                        $dueReason[] = abs($daysSinceCompleted) . ' days overdue';
+                    } elseif ($dueByDays <= 30) {
+                        $isDueSoon = true;
+                        $dueReason[] = 'Due in ' . $dueByDays . ' days';
+                    }
                 }
-            }
 
-            if ($dueByKm !== null) {
-                if ($dueByKm < 0) {
-                    $isOverdue = true;
-                    $dueReason[] = abs($kmSinceCompleted) . ' km overdue';
-                } elseif ($dueByKm <= 1000) {
-                    $isDueSoon = true;
-                    $dueReason[] = 'Due in ' . $dueByKm . ' km';
+                if ($dueByKm !== null) {
+                    if ($dueByKm < 0) {
+                        $isOverdue = true;
+                        $dueReason[] = abs($kmSinceCompleted) . ' km overdue';
+                    } elseif ($dueByKm <= 1000) {
+                        $isDueSoon = true;
+                        $dueReason[] = 'Due in ' . $dueByKm . ' km';
+                    }
                 }
-            }
 
-            if ($isDueSoon || $isOverdue) {
-                $upcomingAlerts[] = [
-                    'vehicle' => $vehicle,
-                    'type' => $type,
-                    'type_info' => $typeInfo,
-                    'last_maintenance' => $lastMaintenance,
-                    'is_overdue' => $isOverdue,
-                    'due_reason' => implode(', ', $dueReason)
-                ];
+                if ($isDueSoon || $isOverdue) {
+                    $upcomingAlerts[] = [
+                        'vehicle' => $vehicle,
+                        'type' => $type,
+                        'type_info' => $typeInfo,
+                        'last_maintenance' => $lastMaintenance,
+                        'is_overdue' => $isOverdue,
+                        'due_reason' => implode(', ', $dueReason)
+                    ];
+                }
             }
         }
     }
-}
 
-// Sort alerts: overdue first, then by priority
-usort($upcomingAlerts, function($a, $b) {
-    if ($a['is_overdue'] && !$b['is_overdue']) return -1;
-    if (!$a['is_overdue'] && $b['is_overdue']) return 1;
-    return 0;
-});
+    usort($upcomingAlerts, function ($a, $b) {
+        if ($a['is_overdue'] && !$b['is_overdue']) return -1;
+        if (!$a['is_overdue'] && $b['is_overdue']) return 1;
+        return 0;
+    });
+}
 
 require_once INCLUDES_PATH . '/header.php';
 ?>
@@ -215,10 +244,22 @@ require_once INCLUDES_PATH . '/header.php';
             <h4 class="mb-1"><i class="bi bi-calendar-check me-2"></i>Maintenance Schedule</h4>
             <p class="text-base-content/60 mb-0">Plan and track vehicle maintenance</p>
         </div>
-        <div class="flex gap-2">
-            <a href="<?= APP_URL ?>/?page=maintenance&action=create" class="loka-btn-primary">
-                <i class="bi bi-plus-lg me-1"></i>New Request
+        <div class="flex gap-2 flex-wrap">
+            <?php if (canProposeCareSchedule()): ?>
+            <a href="<?= APP_URL ?>/?page=maintenance&action=care-create" class="loka-btn-primary">
+                <i class="bi bi-plus-lg me-1"></i>New Care Item
             </a>
+            <?php endif; ?>
+            <?php if (canManageCareAssignments()): ?>
+            <a href="<?= APP_URL ?>/?page=maintenance&action=care-assign" class="loka-btn-secondary">
+                <i class="bi bi-person-check me-1"></i>Assignments
+            </a>
+            <?php endif; ?>
+            <?php if (isApprover()): ?>
+            <a href="<?= APP_URL ?>/?page=maintenance&action=create" class="loka-btn-secondary">
+                <i class="bi bi-wrench me-1"></i>New Repair Request
+            </a>
+            <?php endif; ?>
         </div>
     </div>
 
@@ -345,11 +386,21 @@ require_once INCLUDES_PATH . '/header.php';
     <!-- Calendar View -->
     <?php if ($view === 'calendar'): ?>
     <div class="loka-card">
-        <div class="px-6 py-4 border-b border-base-200 bg-base-200">
+        <div class="px-6 py-4 border-b border-base-200 bg-base-200 flex flex-wrap justify-between items-center gap-2">
             <h6 class="mb-0">
                 <i class="bi bi-calendar3 me-2"></i>
                 <?= date('F Y', strtotime($month . '-01')) ?>
             </h6>
+            <div class="flex gap-2">
+                <?php
+                $prevMonth = date('Y-m', strtotime($month . '-01 -1 month'));
+                $nextMonth = date('Y-m', strtotime($month . '-01 +1 month'));
+                $calBase = APP_URL . '/?page=maintenance&action=schedule&view=calendar&month=';
+                ?>
+                <a class="loka-btn-secondary loka-btn-sm" href="<?= $calBase . e($prevMonth) . ($vehicleId ? '&vehicle=' . (int) $vehicleId : '') ?>">Prev</a>
+                <a class="loka-btn-secondary loka-btn-sm" href="<?= $calBase . date('Y-m') . ($vehicleId ? '&vehicle=' . (int) $vehicleId : '') ?>">Today</a>
+                <a class="loka-btn-secondary loka-btn-sm" href="<?= $calBase . e($nextMonth) . ($vehicleId ? '&vehicle=' . (int) $vehicleId : '') ?>">Next</a>
+            </div>
         </div>
         <div class="p-6">
             <?php
@@ -364,23 +415,40 @@ require_once INCLUDES_PATH . '/header.php';
             $monthEnd = date('Y-m-t', $timestamp);
 
             $calendarEvents = [];
-            $monthMaintenance = db()->fetchAll(
-                "SELECT mr.*, v.plate_number
-                 FROM maintenance_requests mr
-                 JOIN vehicles v ON mr.vehicle_id = v.id
-                 WHERE mr.scheduled_date BETWEEN ? AND ?
-                 AND mr.deleted_at IS NULL" .
-                ($vehicleId ? " AND mr.vehicle_id = ?" : "") .
-                " ORDER BY mr.scheduled_date ASC",
-                $vehicleId ? [$monthStart, $monthEnd, $vehicleId] : [$monthStart, $monthEnd]
-            );
+            // Repair tickets on calendar: Approver+ only (same gate as repair list)
+            if ($showRepairList) {
+                $monthMaintenance = db()->fetchAll(
+                    "SELECT mr.*, v.plate_number
+                     FROM maintenance_requests mr
+                     JOIN vehicles v ON mr.vehicle_id = v.id
+                     WHERE mr.scheduled_date BETWEEN ? AND ?
+                     AND mr.deleted_at IS NULL" .
+                    ($vehicleId ? " AND mr.vehicle_id = ?" : "") .
+                    " ORDER BY mr.scheduled_date ASC",
+                    $vehicleId ? [$monthStart, $monthEnd, $vehicleId] : [$monthStart, $monthEnd]
+                );
 
-            foreach ($monthMaintenance as $m) {
-                $day = date('j', strtotime($m->scheduled_date));
-                if (!isset($calendarEvents[$day])) {
-                    $calendarEvents[$day] = [];
+                foreach ($monthMaintenance as $m) {
+                    $day = date('j', strtotime($m->scheduled_date));
+                    if (!isset($calendarEvents[$day])) {
+                        $calendarEvents[$day] = [];
+                    }
+                    $m->_source = 'repair';
+                    $calendarEvents[$day][] = $m;
                 }
-                $calendarEvents[$day][] = $m;
+            }
+
+            // Additive: vehicle care items on the same calendar
+            try {
+                foreach (careCalendarEvents($monthStart, $monthEnd, $vehicleId ?: null) as $care) {
+                    $day = date('j', strtotime($care->due_date));
+                    if (!isset($calendarEvents[$day])) {
+                        $calendarEvents[$day] = [];
+                    }
+                    $calendarEvents[$day][] = $care;
+                }
+            } catch (Throwable $e) {
+                error_log('care calendar merge: ' . $e->getMessage());
             }
             ?>
             <div class="loka-table-responsive">
@@ -430,6 +498,7 @@ require_once INCLUDES_PATH . '/header.php';
                                             <div class="mt-1">
                                                 <?php foreach ($calendarEvents[$cellDay] as $event): ?>
                                                     <?php
+                                                    $isCare = (($event->_source ?? '') === 'care');
                                                     $statusColors = [
                                                         'pending' => 'warning',
                                                         'scheduled' => 'info',
@@ -438,11 +507,15 @@ require_once INCLUDES_PATH . '/header.php';
                                                         'cancelled' => 'secondary'
                                                     ];
                                                     $color = $statusColors[$event->status] ?? 'secondary';
+                                                    $href = $isCare
+                                                        ? APP_URL . '/?page=maintenance&action=care-edit&id=' . (int) $event->id
+                                                        : APP_URL . '/?page=maintenance&action=view&id=' . (int) $event->id;
                                                     ?>
-                                                    <a href="<?= APP_URL ?>/?page=maintenance&action=view&id=<?= $event->id ?>"
-                                                       class="block mb-1 p-1 rounded bg-<?= $color ?> bg-opacity-10 no-underline">
+                                                    <a href="<?= $href ?>"
+                                                       class="block mb-1 p-1 rounded bg-<?= $color ?> bg-opacity-10 no-underline"
+                                                       title="<?= $isCare ? 'Care' : 'Repair' ?>">
                                                         <small>
-                                                            <strong>#<?= $event->id ?></strong>
+                                                            <strong><?= $isCare ? 'Care' : '#' . (int) $event->id ?></strong>
                                                             <?= e($event->plate_number) ?>
                                                             <br>
                                                             <?= truncate(e($event->title), 20) ?>
