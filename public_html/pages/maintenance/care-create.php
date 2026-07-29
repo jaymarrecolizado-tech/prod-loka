@@ -173,7 +173,7 @@ require_once INCLUDES_PATH . '/header.php';
                     <textarea name="notes" class="loka-form-input" rows="3" maxlength="2000"><?= e(post('notes', '')) ?></textarea>
                 </div>
                 <?php if (canApproveCareSchedules()): ?>
-                <div class="grid grid-cols-2 gap-3">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
                         <label class="loka-form-label">Interval days (optional)</label>
                         <input type="number" name="interval_days" class="loka-form-input" min="1" value="<?= e(post('interval_days', '')) ?>">

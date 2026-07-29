@@ -152,59 +152,56 @@ require_once INCLUDES_PATH . '/header.php';
 
     <!-- Filters -->
     <div class="loka-card mb-6">
-        <div class="loka-card-body">
-            <form method="GET" class="flex flex-wrap items-end gap-3">
-                <input type="hidden" name="page" value="gas-vouchers">
+        <form method="GET" class="loka-filter-form">
+            <input type="hidden" name="page" value="gas-vouchers">
 
-                <div class="w-full sm:w-auto">
-                    <label class="label label-text text-xs">Status</label>
-                    <select name="status" class="select select-bordered select-sm w-full sm:w-40">
-                        <option value="">All</option>
-                        <option value="draft" <?= $statusFilter === 'draft' ? 'selected' : '' ?>>Draft</option>
-                        <option value="pending_review" <?= $statusFilter === 'pending_review' ? 'selected' : '' ?>>Pending Review</option>
-                        <option value="pending_approval" <?= $statusFilter === 'pending_approval' ? 'selected' : '' ?>>Pending Approval</option>
-                        <option value="approved" <?= $statusFilter === 'approved' ? 'selected' : '' ?>>Approved</option>
-                        <option value="rejected" <?= $statusFilter === 'rejected' ? 'selected' : '' ?>>Rejected</option>
-                        <option value="cancelled" <?= $statusFilter === 'cancelled' ? 'selected' : '' ?>>Cancelled</option>
-                    </select>
-                </div>
+            <div class="flex flex-col gap-1.5 min-w-[140px]">
+                <label class="label py-0"><span class="label-text text-xs font-semibold text-base-content/70 uppercase tracking-wide">Status</span></label>
+                <select name="status" class="select select-bordered select-sm bg-base-100">
+                    <option value="">All</option>
+                    <option value="draft" <?= $statusFilter === 'draft' ? 'selected' : '' ?>>Draft</option>
+                    <option value="pending_review" <?= $statusFilter === 'pending_review' ? 'selected' : '' ?>>Pending Review</option>
+                    <option value="pending_approval" <?= $statusFilter === 'pending_approval' ? 'selected' : '' ?>>Pending Approval</option>
+                    <option value="approved" <?= $statusFilter === 'approved' ? 'selected' : '' ?>>Approved</option>
+                    <option value="rejected" <?= $statusFilter === 'rejected' ? 'selected' : '' ?>>Rejected</option>
+                    <option value="cancelled" <?= $statusFilter === 'cancelled' ? 'selected' : '' ?>>Cancelled</option>
+                </select>
+            </div>
 
-                <?= listSearchFieldHtml($searchFilter, 'Voucher no, plate, driver, purpose...') ?>
+            <?= listSearchFieldHtml($searchFilter, 'Voucher no, plate, driver, purpose...') ?>
 
-                <div class="w-auto">
-                    <label class="label label-text text-xs">Date From</label>
-                    <input type="date" name="date_from" class="input input-bordered input-sm w-40" value="<?= e($dateFrom) ?>">
-                </div>
-                <div class="w-auto">
-                    <label class="label label-text text-xs">Date To</label>
-                    <input type="date" name="date_to" class="input input-bordered input-sm w-40" value="<?= e($dateTo) ?>">
-                </div>
+            <div class="flex flex-col gap-1.5 min-w-[140px]">
+                <label class="label py-0"><span class="label-text text-xs font-semibold text-base-content/70 uppercase tracking-wide">Date From</span></label>
+                <input type="date" name="date_from" class="input input-bordered input-sm bg-base-100" value="<?= e($dateFrom) ?>">
+            </div>
+            <div class="flex flex-col gap-1.5 min-w-[140px]">
+                <label class="label py-0"><span class="label-text text-xs font-semibold text-base-content/70 uppercase tracking-wide">Date To</span></label>
+                <input type="date" name="date_to" class="input input-bordered input-sm bg-base-100" value="<?= e($dateTo) ?>">
+            </div>
 
-                <?= perPageFieldHtml($pag['perPage']) ?>
+            <?= perPageFieldHtml($pag['perPage']) ?>
 
-                <div class="flex gap-2">
-                    <button type="submit" class="loka-btn loka-btn-primary loka-btn-sm">
-                        <i class="bi bi-search me-1"></i>Filter
-                    </button>
-                    <a href="<?= APP_URL ?>/?page=gas-vouchers" class="loka-btn loka-btn-secondary loka-btn-sm">Reset</a>
-                </div>
-            </form>
-        </div>
+            <div class="flex gap-2">
+                <button type="submit" class="loka-btn-primary loka-btn-sm">
+                    <i class="bi bi-search me-1"></i>Filter
+                </button>
+                <a href="<?= APP_URL ?>/?page=gas-vouchers" class="loka-btn-secondary loka-btn-sm">Reset</a>
+            </div>
+        </form>
     </div>
 
     <!-- Vouchers Table -->
     <div class="loka-card">
-        <div class="loka-card-body">
-            <?php if (empty($vouchers)): ?>
-            <div class="empty-state">
+        <?php if (empty($vouchers)): ?>
+            <div class="loka-empty empty-state">
                 <i class="bi bi-fuel-pump text-5xl text-base-content/20"></i>
                 <h3 class="mt-3 text-lg font-semibold">No gas vouchers found</h3>
                 <p class="text-sm text-base-content/50">Create your first gas voucher request to get started.</p>
-                <a href="<?= APP_URL ?>/?page=gas-vouchers&action=create" class="loka-btn loka-btn-primary mt-2">
+                <a href="<?= APP_URL ?>/?page=gas-vouchers&action=create" class="loka-btn-primary mt-2">
                     <i class="bi bi-plus-lg me-1"></i>New Gas Voucher
                 </a>
             </div>
-            <?php else: ?>
+        <?php else: ?>
             <div class="loka-table-responsive">
                 <table class="loka-table">
                     <thead>
@@ -286,8 +283,7 @@ require_once INCLUDES_PATH . '/header.php';
                 </table>
             </div>
             <?= listPaginationFooter($pag, $baseParams) ?>
-            <?php endif; ?>
-        </div>
+        <?php endif; ?>
     </div>
 </div>
 

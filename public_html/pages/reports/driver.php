@@ -166,53 +166,49 @@ require_once INCLUDES_PATH . '/header.php';
 
     <!-- Filters -->
     <div class="loka-card mb-4">
-        <div class="loka-card-body">
-            <form method="GET" class="grid grid-cols-12 gap-3 items-end">
-                <input type="hidden" name="page" value="reports">
-                <input type="hidden" name="action" value="driver">
-                <div class="col-span-12 md:col-span-3">
-                    <label class="loka-form-label">Driver</label>
-                    <?php if ($driverScoped): ?>
-                        <input type="hidden" name="driver_id" value="<?= (int) $myDriverId ?>">
-                        <input type="text" class="loka-form-input" value="<?= e($drivers[0]->name ?? 'You') ?>" readonly>
-                    <?php else: ?>
-                    <select class="loka-form-input" name="driver_id" required>
-                        <option value="">Select Driver...</option>
-                        <?php foreach ($drivers as $d): ?>
-                        <option value="<?= $d->id ?>" <?= $driverId == $d->id ? 'selected' : '' ?>>
-                            <?= e($d->name) ?> - <?= e($d->license_number ?: 'No License') ?>
-                        </option>
-                        <?php endforeach; ?>
-                    </select>
-                    <?php endif; ?>
-                </div>
-                <div class="col-span-6 md:col-span-2">
-                    <label class="loka-form-label">Start Date</label>
-                    <input type="date" class="loka-form-input" name="start_date" value="<?= e($startDate) ?>">
-                </div>
-                <div class="col-span-6 md:col-span-2">
-                    <label class="loka-form-label">End Date</label>
-                    <input type="date" class="loka-form-input" name="end_date" value="<?= e($endDate) ?>">
-                </div>
-                <?= perPageFieldHtml($pag['perPage'], 'loka-form-input') ?>
-                <?= listSearchFieldHtml($searchQuery, 'ID, destination, requester, vehicle...', 'loka-form-input') ?>
-                <div class="col-span-12 md:col-span-2 flex items-end">
-                    <button type="submit" class="loka-btn-primary">
-                        <i class="bi bi-search me-1"></i>Generate
-                    </button>
-                </div>
-                <?php if ($driverId && $pag['total'] > 0): ?>
-                <div class="col-span-12 md:col-span-3 flex flex-wrap justify-end items-end gap-2">
-                    <a href="<?= APP_URL ?>/?page=reports&action=export-driver-csv&driver_id=<?= $driverId ?>&start_date=<?= $startDate ?>&end_date=<?= $endDate ?>" class="loka-btn-outline-primary">
-                        <i class="bi bi-file-earmark-csv me-1"></i>CSV
-                    </a>
-                    <a href="<?= APP_URL ?>/?page=reports&action=export-driver&driver_id=<?= $driverId ?>&start_date=<?= $startDate ?>&end_date=<?= $endDate ?>" class="loka-btn-outline-error">
-                        <i class="bi bi-file-earmark-pdf me-1"></i>PDF
-                    </a>
-                </div>
+        <form method="GET" class="loka-filter-form">
+            <input type="hidden" name="page" value="reports">
+            <input type="hidden" name="action" value="driver">
+            <div class="min-w-[200px]">
+                <label class="loka-form-label">Driver</label>
+                <?php if ($driverScoped): ?>
+                    <input type="hidden" name="driver_id" value="<?= (int) $myDriverId ?>">
+                    <input type="text" class="loka-form-input" value="<?= e($drivers[0]->name ?? 'You') ?>" readonly>
+                <?php else: ?>
+                <select class="loka-form-input" name="driver_id" required>
+                    <option value="">Select Driver...</option>
+                    <?php foreach ($drivers as $d): ?>
+                    <option value="<?= $d->id ?>" <?= $driverId == $d->id ? 'selected' : '' ?>>
+                        <?= e($d->name) ?> - <?= e($d->license_number ?: 'No License') ?>
+                    </option>
+                    <?php endforeach; ?>
+                </select>
                 <?php endif; ?>
-            </form>
-        </div>
+            </div>
+            <div class="min-w-[140px]">
+                <label class="loka-form-label">Start Date</label>
+                <input type="date" class="loka-form-input" name="start_date" value="<?= e($startDate) ?>">
+            </div>
+            <div class="min-w-[140px]">
+                <label class="loka-form-label">End Date</label>
+                <input type="date" class="loka-form-input" name="end_date" value="<?= e($endDate) ?>">
+            </div>
+            <?= perPageFieldHtml($pag['perPage'], 'loka-form-input') ?>
+            <?= listSearchFieldHtml($searchQuery, 'ID, destination, requester, vehicle...', 'loka-form-input') ?>
+            <div class="flex flex-wrap gap-2">
+                <button type="submit" class="loka-btn-primary">
+                    <i class="bi bi-search me-1"></i>Generate
+                </button>
+                <?php if ($driverId && $pag['total'] > 0): ?>
+                <a href="<?= APP_URL ?>/?page=reports&action=export-driver-csv&driver_id=<?= $driverId ?>&start_date=<?= $startDate ?>&end_date=<?= $endDate ?>" class="loka-btn-outline-primary">
+                    <i class="bi bi-file-earmark-csv me-1"></i>CSV
+                </a>
+                <a href="<?= APP_URL ?>/?page=reports&action=export-driver&driver_id=<?= $driverId ?>&start_date=<?= $startDate ?>&end_date=<?= $endDate ?>" class="loka-btn-outline-error">
+                    <i class="bi bi-file-earmark-pdf me-1"></i>PDF
+                </a>
+                <?php endif; ?>
+            </div>
+        </form>
     </div>
 
     <?php if ($driverInfo): ?>

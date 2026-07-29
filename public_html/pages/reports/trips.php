@@ -133,40 +133,38 @@ require_once INCLUDES_PATH . '/header.php';
 
     <!-- Filters -->
     <div class="loka-card mb-4">
-        <div class="loka-card-body">
-            <form method="GET" class="grid grid-cols-12 gap-3 items-end">
-                <input type="hidden" name="page" value="reports">
-                <input type="hidden" name="action" value="trips">
-                <div class="col-span-12 md:col-span-3">
-                    <label class="loka-form-label">Start Date</label>
-                    <input type="date" class="loka-form-input" name="start_date" value="<?= e($startDate) ?>">
-                </div>
-                <div class="col-span-12 md:col-span-3">
-                    <label class="loka-form-label">End Date</label>
-                    <input type="date" class="loka-form-input" name="end_date" value="<?= e($endDate) ?>">
-                </div>
-                <div class="col-span-12 md:col-span-3">
-                    <label class="loka-form-label">Status</label>
-                    <select class="loka-form-input" name="status">
-                        <option value="">All Statuses</option>
-                        <option value="pending" <?= $status === 'pending' ? 'selected' : '' ?>>Pending</option>
-                        <option value="pending_motorpool" <?= $status === 'pending_motorpool' ? 'selected' : '' ?>>Pending Motorpool</option>
-                        <option value="approved" <?= $status === 'approved' ? 'selected' : '' ?>>Approved</option>
-                        <option value="completed" <?= $status === 'completed' ? 'selected' : '' ?>>Completed</option>
-                        <option value="rejected" <?= $status === 'rejected' ? 'selected' : '' ?>>Rejected</option>
-                        <option value="revision" <?= $status === 'revision' ? 'selected' : '' ?>>Revision</option>
-                    </select>
-                </div>
-                <?= perPageFieldHtml($pag['perPage'], 'loka-form-input') ?>
-                <?= listSearchFieldHtml($searchQuery, 'ID, requester, destination, vehicle, driver...', 'loka-form-input') ?>
-                <div class="col-span-12 md:col-span-3 flex items-end gap-2">
-                    <button type="submit" class="loka-btn-primary">
-                        <i class="bi bi-search me-1"></i>Filter
-                    </button>
-                    <a href="<?= APP_URL ?>/?page=reports&action=trips" class="loka-btn-secondary">Reset</a>
-                </div>
-            </form>
-        </div>
+        <form method="GET" class="loka-filter-form">
+            <input type="hidden" name="page" value="reports">
+            <input type="hidden" name="action" value="trips">
+            <div class="min-w-[150px]">
+                <label class="loka-form-label">Start Date</label>
+                <input type="date" class="loka-form-input" name="start_date" value="<?= e($startDate) ?>">
+            </div>
+            <div class="min-w-[150px]">
+                <label class="loka-form-label">End Date</label>
+                <input type="date" class="loka-form-input" name="end_date" value="<?= e($endDate) ?>">
+            </div>
+            <div class="min-w-[160px]">
+                <label class="loka-form-label">Status</label>
+                <select class="loka-form-input" name="status">
+                    <option value="">All Statuses</option>
+                    <option value="pending" <?= $status === 'pending' ? 'selected' : '' ?>>Pending</option>
+                    <option value="pending_motorpool" <?= $status === 'pending_motorpool' ? 'selected' : '' ?>>Pending Motorpool</option>
+                    <option value="approved" <?= $status === 'approved' ? 'selected' : '' ?>>Approved</option>
+                    <option value="completed" <?= $status === 'completed' ? 'selected' : '' ?>>Completed</option>
+                    <option value="rejected" <?= $status === 'rejected' ? 'selected' : '' ?>>Rejected</option>
+                    <option value="revision" <?= $status === 'revision' ? 'selected' : '' ?>>Revision</option>
+                </select>
+            </div>
+            <?= perPageFieldHtml($pag['perPage'], 'loka-form-input') ?>
+            <?= listSearchFieldHtml($searchQuery, 'ID, requester, destination, vehicle, driver...', 'loka-form-input') ?>
+            <div class="flex gap-2">
+                <button type="submit" class="loka-btn-primary">
+                    <i class="bi bi-search me-1"></i>Filter
+                </button>
+                <a href="<?= APP_URL ?>/?page=reports&action=trips" class="loka-btn-secondary">Reset</a>
+            </div>
+        </form>
     </div>
 
     <!-- Stats Cards -->
@@ -215,16 +213,15 @@ require_once INCLUDES_PATH . '/header.php';
 
     <!-- Requests Table -->
     <div class="loka-card">
-        <div class="px-4 md:px-6 pt-4 md:pt-6">
-            <h5 class="mb-0"><i class="bi bi-list-ul me-2"></i>Trip Requests <span class="text-base-content/50 text-sm font-normal">(<?= number_format($totalCount) ?> total)</span></h5>
+        <div class="loka-card-header">
+            <h5 class="loka-card-title mb-0"><i class="bi bi-list-ul me-2"></i>Trip Requests <span class="text-base-content/50 text-sm font-normal">(<?= number_format($totalCount) ?> total)</span></h5>
         </div>
-        <div class="loka-card-body p-0">
-            <?php if (empty($requests)): ?>
-            <div class="text-center py-5 text-base-content/60">
-                <i class="bi bi-clipboard-x fs-1"></i>
+        <?php if (empty($requests)): ?>
+            <div class="loka-empty text-base-content/60">
+                <i class="bi bi-clipboard-x text-4xl"></i>
                 <p class="mt-2">No trip requests found for the selected period.</p>
             </div>
-            <?php else: ?>
+        <?php else: ?>
             <div class="loka-table-responsive">
                 <table class="loka-table table-hover mb-0">
                     <thead>
@@ -285,8 +282,7 @@ require_once INCLUDES_PATH . '/header.php';
                 </table>
             </div>
             <?= listPaginationFooter($pag, $baseParams) ?>
-            <?php endif; ?>
-        </div>
+        <?php endif; ?>
     </div>
 </div>
 

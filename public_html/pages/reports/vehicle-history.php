@@ -180,48 +180,44 @@ require_once INCLUDES_PATH . '/header.php';
 
     <!-- Filters -->
     <div class="loka-card mb-4">
-        <div class="loka-card-body">
-            <form method="GET" class="grid grid-cols-12 gap-3 items-end">
-                <input type="hidden" name="page" value="reports">
-                <input type="hidden" name="action" value="vehicle-history">
-                <div class="col-span-12 md:col-span-3">
-                    <label class="loka-form-label">Vehicle</label>
-                    <select class="loka-form-input" name="vehicle_id" required>
-                        <option value="">Select Vehicle...</option>
-                        <?php foreach ($vehicles as $v): ?>
-                        <option value="<?= $v->id ?>" <?= $vehicleId == $v->id ? 'selected' : '' ?>>
-                            <?= e($v->plate_number) ?> - <?= e($v->make . ' ' . $v->model) ?>
-                        </option>
-                        <?php endforeach; ?>
-                    </select>
-                </div>
-                <div class="col-span-6 md:col-span-2">
-                    <label class="loka-form-label">Start Date</label>
-                    <input type="date" class="loka-form-input" name="start_date" value="<?= e($startDate) ?>">
-                </div>
-                <div class="col-span-6 md:col-span-2">
-                    <label class="loka-form-label">End Date</label>
-                    <input type="date" class="loka-form-input" name="end_date" value="<?= e($endDate) ?>">
-                </div>
-                <?= perPageFieldHtml($pag['perPage'], 'loka-form-input') ?>
-                <?= listSearchFieldHtml($searchQuery, 'ID, destination, requester, driver...', 'loka-form-input') ?>
-                <div class="col-span-12 md:col-span-2 flex items-end">
-                    <button type="submit" class="loka-btn-primary">
-                        <i class="bi bi-search me-1"></i>Generate
-                    </button>
-                </div>
+        <form method="GET" class="loka-filter-form">
+            <input type="hidden" name="page" value="reports">
+            <input type="hidden" name="action" value="vehicle-history">
+            <div class="min-w-[220px]">
+                <label class="loka-form-label">Vehicle</label>
+                <select class="loka-form-input" name="vehicle_id" required>
+                    <option value="">Select Vehicle...</option>
+                    <?php foreach ($vehicles as $v): ?>
+                    <option value="<?= $v->id ?>" <?= $vehicleId == $v->id ? 'selected' : '' ?>>
+                        <?= e($v->plate_number) ?> - <?= e($v->make . ' ' . $v->model) ?>
+                    </option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+            <div class="min-w-[140px]">
+                <label class="loka-form-label">Start Date</label>
+                <input type="date" class="loka-form-input" name="start_date" value="<?= e($startDate) ?>">
+            </div>
+            <div class="min-w-[140px]">
+                <label class="loka-form-label">End Date</label>
+                <input type="date" class="loka-form-input" name="end_date" value="<?= e($endDate) ?>">
+            </div>
+            <?= perPageFieldHtml($pag['perPage'], 'loka-form-input') ?>
+            <?= listSearchFieldHtml($searchQuery, 'ID, destination, requester, driver...', 'loka-form-input') ?>
+            <div class="flex flex-wrap gap-2">
+                <button type="submit" class="loka-btn-primary">
+                    <i class="bi bi-search me-1"></i>Generate
+                </button>
                 <?php if ($vehicleId && $pag['total'] > 0): ?>
-                <div class="col-span-12 md:col-span-3 flex flex-wrap justify-end items-end gap-2">
-                    <a href="<?= APP_URL ?>/?page=reports&action=export-vehicle-csv&vehicle_id=<?= $vehicleId ?>&start_date=<?= $startDate ?>&end_date=<?= $endDate ?>" class="loka-btn-outline-primary">
-                        <i class="bi bi-file-earmark-csv me-1"></i>CSV
-                    </a>
-                    <a href="<?= APP_URL ?>/?page=reports&action=export-vehicle-history&vehicle_id=<?= $vehicleId ?>&start_date=<?= $startDate ?>&end_date=<?= $endDate ?>" class="loka-btn-outline-error">
-                        <i class="bi bi-file-earmark-pdf me-1"></i>PDF
-                    </a>
-                </div>
+                <a href="<?= APP_URL ?>/?page=reports&action=export-vehicle-csv&vehicle_id=<?= $vehicleId ?>&start_date=<?= $startDate ?>&end_date=<?= $endDate ?>" class="loka-btn-outline-primary">
+                    <i class="bi bi-file-earmark-csv me-1"></i>CSV
+                </a>
+                <a href="<?= APP_URL ?>/?page=reports&action=export-vehicle-history&vehicle_id=<?= $vehicleId ?>&start_date=<?= $startDate ?>&end_date=<?= $endDate ?>" class="loka-btn-outline-error">
+                    <i class="bi bi-file-earmark-pdf me-1"></i>PDF
+                </a>
                 <?php endif; ?>
-            </form>
-        </div>
+            </div>
+        </form>
     </div>
 
     <?php if ($vehicleInfo): ?>

@@ -71,91 +71,89 @@ require_once INCLUDES_PATH . '/header.php';
 
     <!-- Filters -->
     <div class="loka-card mb-4">
-        <div class="loka-card-body">
-            <form method="GET" class="grid grid-cols-12 gap-3 items-end">
-                <input type="hidden" name="page" value="reports">
-                <input type="hidden" name="action" value="gas-vouchers">
-                <div class="col-span-6 md:col-span-2">
-                    <label class="loka-form-label">Start Date</label>
-                    <input type="date" class="loka-form-input" name="start_date" value="<?= e($f['start_date']) ?>">
-                </div>
-                <div class="col-span-6 md:col-span-2">
-                    <label class="loka-form-label">End Date</label>
-                    <input type="date" class="loka-form-input" name="end_date" value="<?= e($f['end_date']) ?>">
-                </div>
-                <div class="col-span-6 md:col-span-2">
-                    <label class="loka-form-label">Date Field</label>
-                    <select class="loka-form-input" name="date_field">
-                        <option value="request_date" <?= $f['date_field'] === 'request_date' ? 'selected' : '' ?>>Request date</option>
-                        <option value="created_at" <?= $f['date_field'] === 'created_at' ? 'selected' : '' ?>>Created</option>
-                        <option value="approved_at" <?= $f['date_field'] === 'approved_at' ? 'selected' : '' ?>>Approved</option>
-                    </select>
-                </div>
-                <div class="col-span-6 md:col-span-2">
-                    <label class="loka-form-label">Status</label>
-                    <select class="loka-form-input" name="status">
-                        <option value="">All statuses</option>
-                        <?php foreach (GAS_VOUCHER_STATUSES as $key => $meta): ?>
-                        <option value="<?= e($key) ?>" <?= $f['status'] === $key ? 'selected' : '' ?>><?= e($meta['label']) ?></option>
-                        <?php endforeach; ?>
-                    </select>
-                </div>
-                <div class="col-span-6 md:col-span-2">
-                    <label class="loka-form-label">Payment</label>
-                    <select class="loka-form-input" name="payment_status">
-                        <option value="">All payment</option>
-                        <?php foreach (['unpaid', 'paid', 'processed', 'cancelled'] as $ps): ?>
-                        <option value="<?= $ps ?>" <?= $f['payment_status'] === $ps ? 'selected' : '' ?>><?= e(ucfirst($ps)) ?></option>
-                        <?php endforeach; ?>
-                    </select>
-                </div>
-                <div class="col-span-6 md:col-span-2">
-                    <label class="loka-form-label">Fuel Type</label>
-                    <select class="loka-form-input" name="fuel_type">
-                        <option value="">All fuel</option>
-                        <option value="Gasoline" <?= $f['fuel_type'] === 'Gasoline' ? 'selected' : '' ?>>Gasoline</option>
-                        <option value="Diesel" <?= $f['fuel_type'] === 'Diesel' ? 'selected' : '' ?>>Diesel</option>
-                    </select>
-                </div>
-                <div class="col-span-6 md:col-span-3">
-                    <label class="loka-form-label">Fund Source</label>
-                    <select class="loka-form-input" name="fund_source">
-                        <option value="">All funds</option>
-                        <?php foreach ($options['funds'] as $fund): ?>
-                        <option value="<?= e($fund) ?>" <?= $f['fund_source'] === $fund ? 'selected' : '' ?>><?= e($fund) ?></option>
-                        <?php endforeach; ?>
-                    </select>
-                </div>
-                <div class="col-span-6 md:col-span-3">
-                    <label class="loka-form-label">Gas Station</label>
-                    <select class="loka-form-input" name="gas_station">
-                        <option value="">All stations</option>
-                        <?php foreach ($options['stations'] as $st): ?>
-                        <option value="<?= e($st) ?>" <?= $f['gas_station'] === $st ? 'selected' : '' ?>><?= e($st) ?></option>
-                        <?php endforeach; ?>
-                    </select>
-                </div>
-                <div class="col-span-6 md:col-span-3">
-                    <label class="loka-form-label">Department</label>
-                    <select class="loka-form-input" name="department_id">
-                        <option value="">All departments</option>
-                        <?php foreach ($options['departments'] as $dept): ?>
-                        <option value="<?= (int) $dept->id ?>" <?= (int) $f['department_id'] === (int) $dept->id ? 'selected' : '' ?>><?= e($dept->name) ?></option>
-                        <?php endforeach; ?>
-                    </select>
-                </div>
-                <?= perPageFieldHtml($pag['perPage'], 'loka-form-input') ?>
-                <?= listSearchFieldHtml($f['search'], 'Voucher, plate, driver…', 'loka-form-input') ?>
-                <div class="col-span-12 md:col-span-6 flex flex-wrap items-center gap-3">
-                    <label class="inline-flex items-center gap-2 text-sm">
-                        <input type="checkbox" name="include_drafts" value="1" <?= $f['include_drafts'] ? 'checked' : '' ?>>
-                        Include drafts
-                    </label>
-                    <button type="submit" class="loka-btn-primary"><i class="bi bi-search me-1"></i>Filter</button>
-                    <a href="<?= APP_URL ?>/?page=reports&action=gas-vouchers" class="loka-btn-secondary">Reset</a>
-                </div>
-            </form>
-        </div>
+        <form method="GET" class="loka-filter-form">
+            <input type="hidden" name="page" value="reports">
+            <input type="hidden" name="action" value="gas-vouchers">
+            <div class="min-w-[140px]">
+                <label class="loka-form-label">Start Date</label>
+                <input type="date" class="loka-form-input" name="start_date" value="<?= e($f['start_date']) ?>">
+            </div>
+            <div class="min-w-[140px]">
+                <label class="loka-form-label">End Date</label>
+                <input type="date" class="loka-form-input" name="end_date" value="<?= e($f['end_date']) ?>">
+            </div>
+            <div class="min-w-[140px]">
+                <label class="loka-form-label">Date Field</label>
+                <select class="loka-form-input" name="date_field">
+                    <option value="request_date" <?= $f['date_field'] === 'request_date' ? 'selected' : '' ?>>Request date</option>
+                    <option value="created_at" <?= $f['date_field'] === 'created_at' ? 'selected' : '' ?>>Created</option>
+                    <option value="approved_at" <?= $f['date_field'] === 'approved_at' ? 'selected' : '' ?>>Approved</option>
+                </select>
+            </div>
+            <div class="min-w-[140px]">
+                <label class="loka-form-label">Status</label>
+                <select class="loka-form-input" name="status">
+                    <option value="">All statuses</option>
+                    <?php foreach (GAS_VOUCHER_STATUSES as $key => $meta): ?>
+                    <option value="<?= e($key) ?>" <?= $f['status'] === $key ? 'selected' : '' ?>><?= e($meta['label']) ?></option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+            <div class="min-w-[140px]">
+                <label class="loka-form-label">Payment</label>
+                <select class="loka-form-input" name="payment_status">
+                    <option value="">All payment</option>
+                    <?php foreach (['unpaid', 'paid', 'processed', 'cancelled'] as $ps): ?>
+                    <option value="<?= $ps ?>" <?= $f['payment_status'] === $ps ? 'selected' : '' ?>><?= e(ucfirst($ps)) ?></option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+            <div class="min-w-[140px]">
+                <label class="loka-form-label">Fuel Type</label>
+                <select class="loka-form-input" name="fuel_type">
+                    <option value="">All fuel</option>
+                    <option value="Gasoline" <?= $f['fuel_type'] === 'Gasoline' ? 'selected' : '' ?>>Gasoline</option>
+                    <option value="Diesel" <?= $f['fuel_type'] === 'Diesel' ? 'selected' : '' ?>>Diesel</option>
+                </select>
+            </div>
+            <div class="min-w-[160px]">
+                <label class="loka-form-label">Fund Source</label>
+                <select class="loka-form-input" name="fund_source">
+                    <option value="">All funds</option>
+                    <?php foreach ($options['funds'] as $fund): ?>
+                    <option value="<?= e($fund) ?>" <?= $f['fund_source'] === $fund ? 'selected' : '' ?>><?= e($fund) ?></option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+            <div class="min-w-[160px]">
+                <label class="loka-form-label">Gas Station</label>
+                <select class="loka-form-input" name="gas_station">
+                    <option value="">All stations</option>
+                    <?php foreach ($options['stations'] as $st): ?>
+                    <option value="<?= e($st) ?>" <?= $f['gas_station'] === $st ? 'selected' : '' ?>><?= e($st) ?></option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+            <div class="min-w-[160px]">
+                <label class="loka-form-label">Department</label>
+                <select class="loka-form-input" name="department_id">
+                    <option value="">All departments</option>
+                    <?php foreach ($options['departments'] as $dept): ?>
+                    <option value="<?= (int) $dept->id ?>" <?= (int) $f['department_id'] === (int) $dept->id ? 'selected' : '' ?>><?= e($dept->name) ?></option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+            <?= perPageFieldHtml($pag['perPage'], 'loka-form-input') ?>
+            <?= listSearchFieldHtml($f['search'], 'Voucher, plate, driver…', 'loka-form-input') ?>
+            <div class="flex flex-wrap items-center gap-3">
+                <label class="inline-flex items-center gap-2 text-sm">
+                    <input type="checkbox" name="include_drafts" value="1" <?= $f['include_drafts'] ? 'checked' : '' ?>>
+                    Include drafts
+                </label>
+                <button type="submit" class="loka-btn-primary"><i class="bi bi-search me-1"></i>Filter</button>
+                <a href="<?= APP_URL ?>/?page=reports&action=gas-vouchers" class="loka-btn-secondary">Reset</a>
+            </div>
+        </form>
     </div>
 
     <!-- KPIs -->
@@ -237,8 +235,8 @@ require_once INCLUDES_PATH . '/header.php';
 
     <!-- Table -->
     <div class="loka-card">
-        <div class="border-b border-base-200 px-4 py-3 flex justify-between items-center">
-            <h5 class="font-semibold mb-0">Vouchers <span class="text-base-content/50 text-sm font-normal">(<?= number_format((int) ($kpis->total ?? 0)) ?> total)</span></h5>
+        <div class="loka-card-header flex justify-between items-center">
+            <h5 class="loka-card-title font-semibold mb-0">Vouchers <span class="text-base-content/50 text-sm font-normal">(<?= number_format((int) ($kpis->total ?? 0)) ?> total)</span></h5>
         </div>
         <div class="loka-table-responsive">
             <table class="loka-table mb-0">

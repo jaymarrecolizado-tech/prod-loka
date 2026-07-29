@@ -341,7 +341,7 @@ require_once INCLUDES_PATH . '/header.php';
     <!-- Filters -->
     <div class="loka-card mb-4">
         <div class="p-6">
-            <form method="GET" class="flex flex-wrap items-end gap-3">
+            <form method="GET" class="loka-filter-form">
                 <input type="hidden" name="page" value="maintenance">
                 <input type="hidden" name="action" value="schedule">
 
@@ -386,8 +386,8 @@ require_once INCLUDES_PATH . '/header.php';
     <!-- Calendar View -->
     <?php if ($view === 'calendar'): ?>
     <div class="loka-card">
-        <div class="px-6 py-4 border-b border-base-200 bg-base-200 flex flex-wrap justify-between items-center gap-2">
-            <h6 class="mb-0">
+        <div class="loka-card-header bg-base-200 flex flex-wrap justify-between items-center gap-2">
+            <h6 class="loka-card-title mb-0">
                 <i class="bi bi-calendar3 me-2"></i>
                 <?= date('F Y', strtotime($month . '-01')) ?>
             </h6>

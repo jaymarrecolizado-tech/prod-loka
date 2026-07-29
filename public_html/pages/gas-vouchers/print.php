@@ -35,6 +35,13 @@ if ($voucher->requested_by_user_id != userId() && !isAdmin() && !isApprover() &&
     redirectWith('/?page=gas-vouchers', 'danger', 'Access denied.');
 }
 
+// dual = 2 copies on one A4 (default); single = 1 copy per A4 page (fallback)
+$printLayout = strtolower((string) get('layout', 'dual'));
+if (!in_array($printLayout, ['dual', 'single'], true)) {
+    $printLayout = 'dual';
+}
+$copyCount = 2;
+
 // QR Verification — gas stations scan this to confirm authenticity
 $verifyUrl = gasVoucherVerifyUrl($voucher);
 $siteLooksLocal = (bool) preg_match('#://(localhost|127\.0\.0\.1)([:/]|$)#i', $verifyUrl);
@@ -256,23 +263,79 @@ if ($qrHtml === '') {
             font-style: italic;
         }
 
+        .purpose-cell {
+            max-height: 3.2em;
+            overflow: hidden;
+        }
+
+        .article-row td {
+            font-weight: bold;
+        }
+
+        .cut-line-separator {
+            text-align: center;
+            padding: 4px 0;
+            margin: 2mm 0;
+            border-top: 1px dashed #999;
+            border-bottom: 1px dashed #999;
+            font-size: 8pt;
+            color: #666;
+            letter-spacing: 1px;
+        }
+
+        .sheet {
+            width: 210mm;
+            margin: 0 auto;
+        }
+
         @media print {
-            @page { size: 8.5in 13in; margin: 5mm; }
-            body { background: #fff; margin: 0; padding: 0; }
-            .page { padding: 0 !important; min-height: auto !important; margin: 0 auto !important; width: 100% !important; }
+            @page { size: A4 portrait; margin: 6mm; }
+            body { background: #fff; margin: 0; padding: 0; font-size: 9pt; }
+            .sheet { width: 100% !important; margin: 0 !important; }
+            .page {
+                padding: 0 !important;
+                min-height: 0 !important;
+                margin: 0 !important;
+                width: 100% !important;
+                page-break-inside: avoid;
+                break-inside: avoid;
+            }
             .no-print { display: none !important; }
-            .grid-header { margin-bottom: 5px !important; }
-            .header-logo { width: 80px !important; }
-            .header-title { margin: 5px 0 15px !important; font-size: 15pt !important; }
-            .gas-station-title { font-size: 14pt !important; margin-bottom: 5px !important; margin-left: 5px !important; }
-            .voucher-grid td, .voucher-grid th { padding: 3px 5px !important; font-size: 9.5pt !important; }
-            .auth-row { padding: 4px !important; font-size: 10pt !important; }
-            .signatures-grid td { padding: 4px !important; }
-            .sig-label { margin-bottom: 25px !important; }
-            .distribution { margin-top: 5px !important; font-size: 8pt !important; }
-            .qr-block .qr-img { width: 128px !important; height: 128px !important; }
-            .qr-block .qr-svg-pad svg { width: 96px !important; height: 96px !important; }
+            .grid-header { margin-bottom: 2px !important; }
+            .header-logo { width: 48px !important; }
+            .header-text .republic { font-size: 8pt !important; }
+            .header-text .dept { font-size: 9pt !important; margin: 1px 0 !important; }
+            .header-text .office { font-size: 7.5pt !important; }
+            .header-title { margin: 2px 0 4px !important; font-size: 12pt !important; letter-spacing: 3px !important; }
+            .gas-station-title { font-size: 11pt !important; margin-bottom: 3px !important; margin-left: 2px !important; }
+            .voucher-grid { font-size: 8.5pt !important; }
+            .voucher-grid td, .voucher-grid th { padding: 2px 4px !important; font-size: 8.5pt !important; }
+            .auth-row { padding: 3px 6px !important; font-size: 8.5pt !important; }
+            .articles-header th { padding: 2px !important; }
+            .article-row td { padding: 3px 4px !important; font-size: 9pt !important; }
+            .signatures-grid td { padding: 3px !important; }
+            .sig-label { margin-bottom: 14px !important; font-size: 7.5pt !important; }
+            .sig-name { font-size: 9pt !important; }
+            .sig-title { font-size: 7.5pt !important; }
+            .distribution { margin-top: 3px !important; font-size: 7pt !important; }
+            .purpose-cell {
+                max-height: 2.4em !important;
+                overflow: hidden !important;
+                font-size: 8pt !important;
+                line-height: 1.2 !important;
+            }
+            .qr-block { padding: 2px 4px 4px !important; }
+            .qr-block .qr-img { width: 72px !important; height: 72px !important; }
+            .qr-block .qr-svg-pad { padding: 6px !important; }
+            .qr-block .qr-svg-pad svg { width: 64px !important; height: 64px !important; }
+            .qr-block .qr-label { font-size: 7pt !important; }
+            .qr-block .qr-sub { font-size: 6.5pt !important; }
             .qr-container { margin-top: 0 !important; }
+            .cut-line-separator { padding: 2px 0 !important; margin: 1.5mm 0 !important; font-size: 7pt !important; page-break-inside: avoid; }
+            .footer-row { display: flex; justify-content: space-between; align-items: flex-end; gap: 8px; margin-top: 3px !important; }
+            body.layout-single .page { page-break-after: always; break-after: page; }
+            body.layout-single .page:last-of-type { page-break-after: auto; break-after: auto; }
+            body.layout-single .cut-line-separator { display: none !important; }
         }
 
         .qr-block {
@@ -319,39 +382,31 @@ if ($qrHtml === '') {
         }
     </style>
 </head>
-<body>
+<body class="layout-<?= e($printLayout) ?>">
 
 <!-- Print Controls -->
 <div class="no-print" style="text-align:center;padding:12px;background:#f8f9fa;border-bottom:1px solid #ddd;margin-bottom:15px;font-family:sans-serif;">
     <button onclick="window.print()" style="background:#0d6efd;color:#fff;border:none;padding:8px 24px;border-radius:4px;cursor:pointer;font-size:14px;font-weight:bold;">
-        🖨️ Print Voucher
+        Print Voucher (A4)
     </button>
+    <a href="<?= APP_URL ?>/?page=gas-vouchers&amp;action=print&amp;id=<?= (int) $voucherId ?>&amp;layout=dual" style="margin-left:12px;<?= $printLayout === 'dual' ? 'font-weight:bold;' : '' ?>">2-up (1 page)</a>
+    <a href="<?= APP_URL ?>/?page=gas-vouchers&amp;action=print&amp;id=<?= (int) $voucherId ?>&amp;layout=single" style="margin-left:8px;<?= $printLayout === 'single' ? 'font-weight:bold;' : '' ?>">1 copy / page</a>
     <a href="javascript:history.back()" style="margin-left:15px;color:#666;text-decoration:none;">← Back to App</a>
     <div style="margin-top:10px;padding:8px 12px;background:#e7f1ff;border:1px solid #9ec5fe;border-radius:6px;display:inline-block;max-width:720px;font-size:13px;color:#084298;text-align:left;">
         <strong>Phone scan tip:</strong> Join the same Wi‑Fi as this PC, then scan again.<br>
         Verify link: <code style="word-break:break-all;"><?= e($verifyUrl) ?></code>
         <?php if ($siteLooksLocal): ?>
-        <br><span style="color:#664d03;">⚠ Still using localhost — phones cannot open this. Set <code>SITE_URL</code> in <code>.env</code> to your LAN IP or public domain.</span>
+        <br><span style="color:#664d03;">Still using localhost — phones cannot open this. Set <code>SITE_URL</code> in <code>.env</code> to your LAN IP or public domain.</span>
         <?php endif; ?>
     </div>
 </div>
 
-<?php for ($copy = 1; $copy <= 2; $copy++): ?>
+<div class="sheet">
+<?php for ($copy = 1; $copy <= $copyCount; $copy++): ?>
+<?php if ($copy === 2 && $printLayout === 'dual'): ?>
+    <div class="cut-line-separator">CUT HERE</div>
+<?php endif; ?>
 <div class="page">
-
-    <?php if ($copy == 2): ?>
-    <!-- Cut Line Separator (between copy 1 and copy 2) -->
-    <div class="cut-line-separator" style="
-        text-align: center;
-        padding: 6px 0;
-        margin-bottom: 4px;
-        border-top: 1px dashed #999;
-        border-bottom: 1px dashed #999;
-        font-size: 9.5pt;
-        color: #666;
-        letter-spacing: 2px;
-    ">✂&nbsp;&nbsp;- - - - - - - - - - CUT HERE - - - - - - - - - - &nbsp;✂</div>
-    <?php endif; ?>
 
     <!-- Formal Header -->
     <div class="grid-header">
@@ -402,18 +457,18 @@ if ($qrHtml === '') {
         $printQty = $isFullTank ? '—' : e($voucher->quantity);
         $printUnit = $isFullTank ? 'FULL TANK' : e($voucher->unit);
         ?>
-        <tr>
-            <td class="center" style="font-weight:bold; font-size:12pt; padding:12px;"><?= $printQty ?></td>
-            <td class="center" style="font-weight:bold; font-size:12pt; padding:12px;"><?= $printUnit ?></td>
-            <td colspan="2" style="font-weight:bold; font-size:11pt; padding:12px; vertical-align:middle; color:#000;">
+        <tr class="article-row">
+            <td class="center"><?= $printQty ?></td>
+            <td class="center"><?= $printUnit ?></td>
+            <td colspan="2" style="vertical-align:middle; color:#000;">
                 <?= e($voucher->fuel_type) ?>
             </td>
         </tr>
         <?php if ($voucher->other_items || $voucher->other_qty || $voucher->other_unit): ?>
-        <tr>
-            <td class="center" style="font-weight:bold; font-size:12pt; padding:12px;"><?= e($voucher->other_qty) ?></td>
-            <td class="center" style="font-weight:bold; font-size:12pt; padding:12px;"><?= e($voucher->other_unit) ?></td>
-            <td colspan="2" style="font-weight:bold; font-size:11pt; padding:12px; vertical-align:middle; color:#000;">
+        <tr class="article-row">
+            <td class="center"><?= e($voucher->other_qty) ?></td>
+            <td class="center"><?= e($voucher->other_unit) ?></td>
+            <td colspan="2" style="vertical-align:middle; color:#000;">
                 <?= e($voucher->other_items) ?>
             </td>
         </tr>
@@ -422,7 +477,7 @@ if ($qrHtml === '') {
         <!-- Purpose & Charging -->
         <tr>
             <td class="label-cell">Purpose:</td>
-            <td colspan="3" class="value-cell" style="font-weight:normal;"><?= e($voucher->purpose) ?></td>
+            <td colspan="3" class="value-cell purpose-cell" style="font-weight:normal;"><?= e($voucher->purpose) ?></td>
         </tr>
         <tr>
             <td class="label-cell">Chargeable against:</td>
@@ -452,7 +507,7 @@ if ($qrHtml === '') {
     </table>
 
     
-    <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-top: 10px;">
+    <div class="footer-row" style="display: flex; justify-content: space-between; align-items: flex-end; margin-top: 10px;">
         <div class="distribution" style="margin-top: 0;">
             
         <strong>Distribution:</strong> Prepare three (3) copies.<br>
@@ -472,6 +527,7 @@ if ($qrHtml === '') {
 
 </div>
 <?php endfor; ?>
+</div>
 
 </body>
 </html>

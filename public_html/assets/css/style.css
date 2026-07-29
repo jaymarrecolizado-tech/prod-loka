@@ -1132,6 +1132,25 @@ a.bg-info {
     padding: 1rem 1.5rem 1.25rem !important;
 }
 
+/* Canonical filter row */
+.loka-filter-form {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 0.75rem;
+}
+
+.loka-empty,
+.loka-card .empty-state {
+    padding: 2.5rem 1.5rem;
+    text-align: center;
+}
+
+.loka-card:has(> .loka-table-responsive) > .loka-card-header {
+    padding-left: 1.5rem !important;
+    padding-right: 1.5rem !important;
+}
+
 /* Filter/forms that live in plain panel shells */
 .bg-base-100.rounded-lg.shadow-sm:has(> form),
 .bg-base-100.rounded-lg.shadow-sm:has(> .flex),

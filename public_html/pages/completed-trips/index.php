@@ -269,7 +269,7 @@ require_once INCLUDES_PATH . '/header.php';
     <!-- Filters -->
     <div class="loka-card mb-4">
         <div class="p-6">
-            <form method="GET" class="flex flex-wrap items-end gap-3">
+            <form method="GET" class="loka-filter-form">
                 <input type="hidden" name="page" value="completed-trips">
                 <div class="min-w-[140px]">
                     <label class="loka-form-label">Date Range</label>
@@ -304,9 +304,9 @@ require_once INCLUDES_PATH . '/header.php';
 
     <!-- Completed Trips Table -->
     <div class="loka-card">
-        <div class="px-6 py-4 border-b border-base-200 flex justify-between items-center">
+        <div class="loka-card-header flex justify-between items-center">
             <div>
-                <h5 class="mb-0">Completed Trips (<?= number_format($totalCount) ?> total)</h5>
+                <h5 class="loka-card-title mb-0">Completed Trips (<?= number_format($totalCount) ?> total)</h5>
                 <small class="text-base-content/60">
                     <?php if ($showAll === '1'): ?>
                         Showing all time
@@ -316,34 +316,33 @@ require_once INCLUDES_PATH . '/header.php';
                 </small>
             </div>
         </div>
-        <div class="p-6">
-            <?php if (empty($trips)): ?>
-                <div class="text-center py-5">
-                    <i class="bi bi-calendar-x text-4xl text-base-content/60"></i>
-                    <p class="text-base-content/60 mt-3">No completed trips found for the selected criteria.</p>
-                </div>
-            <?php else: ?>
-                <div class="loka-table-responsive">
-                    <table class="loka-table" id="completedTripsTable">
-                        <thead>
-                            <tr>
-                                <?= tableSortTh('id', 'ID', $sort, $sortDir, $baseParams) ?>
-                                <?= tableSortTh('completed_date', 'Completed Date', $sort, $sortDir, $baseParams) ?>
-                                <?= tableSortTh('plate_number', 'Vehicle', $sort, $sortDir, $baseParams) ?>
-                                <?= tableSortTh('driver_name', 'Driver', $sort, $sortDir, $baseParams) ?>
-                                <?= tableSortTh('requester_name', 'Requester', $sort, $sortDir, $baseParams) ?>
-                                <?= tableSortTh('destination', 'Destination', $sort, $sortDir, $baseParams) ?>
-                                <?= tableSortTh('duration', 'Duration', $sort, $sortDir, $baseParams) ?>
-                                <?= tableSortTh('mileage', 'Mileage', $sort, $sortDir, $baseParams) ?>
-                                <th>Passengers</th>
-                                <?php if (in_array($role, [ROLE_MOTORPOOL, ROLE_ADMIN])): ?>
-                                <th>Dispatch</th>
-                                <th>Arrival</th>
-                                <?php endif; ?>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
+        <?php if (empty($trips)): ?>
+            <div class="loka-empty">
+                <i class="bi bi-calendar-x text-4xl text-base-content/60"></i>
+                <p class="text-base-content/60 mt-3">No completed trips found for the selected criteria.</p>
+            </div>
+        <?php else: ?>
+            <div class="loka-table-responsive">
+                <table class="loka-table" id="completedTripsTable">
+                    <thead>
+                        <tr>
+                            <?= tableSortTh('id', 'ID', $sort, $sortDir, $baseParams) ?>
+                            <?= tableSortTh('completed_date', 'Completed Date', $sort, $sortDir, $baseParams) ?>
+                            <?= tableSortTh('plate_number', 'Vehicle', $sort, $sortDir, $baseParams) ?>
+                            <?= tableSortTh('driver_name', 'Driver', $sort, $sortDir, $baseParams) ?>
+                            <?= tableSortTh('requester_name', 'Requester', $sort, $sortDir, $baseParams) ?>
+                            <?= tableSortTh('destination', 'Destination', $sort, $sortDir, $baseParams) ?>
+                            <?= tableSortTh('duration', 'Duration', $sort, $sortDir, $baseParams) ?>
+                            <?= tableSortTh('mileage', 'Mileage', $sort, $sortDir, $baseParams) ?>
+                            <th>Passengers</th>
+                            <?php if (in_array($role, [ROLE_MOTORPOOL, ROLE_ADMIN])): ?>
+                            <th>Dispatch</th>
+                            <th>Arrival</th>
+                            <?php endif; ?>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
                             <?php foreach ($trips as $trip): ?>
                             <?php
                             $passengerCount = (int) ($trip->passenger_count ?? countRequestPassengers((int) $trip->id));
@@ -437,7 +436,6 @@ require_once INCLUDES_PATH . '/header.php';
 
                 <?= listPaginationFooter($pag, $baseParams) ?>
             <?php endif; ?>
-        </div>
     </div>
 </div>
 
