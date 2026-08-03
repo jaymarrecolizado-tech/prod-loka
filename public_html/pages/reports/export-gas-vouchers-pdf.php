@@ -39,6 +39,18 @@ $pdf->SetMargins(12, 18, 12);
 $pdf->SetAutoPageBreak(true, 14);
 $pdf->AddPage();
 
+$filterLines = [
+    'Period: ' . $f['start_date'] . ' to ' . $f['end_date'],
+    'Date field: ' . $f['date_field'],
+];
+if ($f['status'] !== '') {
+    $filterLines[] = 'Status: ' . $f['status'];
+}
+if ($f['search'] !== '') {
+    $filterLines[] = 'Search: ' . $f['search'];
+}
+reportPdfWriteMeta($pdf, $title, $filterLines, count($rows), 500);
+
 $pdf->SetFont('helvetica', 'B', 10);
 $pdf->Cell(0, 7, 'Summary KPIs', 0, 1);
 $pdf->SetFont('helvetica', '', 8);
@@ -81,7 +93,7 @@ $pdf->Ln();
 
 $pdf->SetFillColor(248, 248, 248);
 $pdf->SetTextColor(0, 0, 0);
-$pdf->SetFont('helvetica', '', 6);
+$pdf->SetFont('helvetica', '', 7);
 $fill = false;
 
 $short = static function (?string $text, int $max): string {

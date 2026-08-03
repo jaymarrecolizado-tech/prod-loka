@@ -8,7 +8,7 @@ requireGasVoucherReportAccess();
 
 $pageTitle = 'Gas Voucher Report';
 $f = gasVoucherReportParseFilters();
-$f['search'] = listSearchQuery('q', 'search');
+$preset = (string) ($f['preset'] ?? '');
 $perPage = resolvePerPage();
 $options = gasVoucherReportFilterOptions();
 $kpis = gasVoucherReportKpis($f);
@@ -35,6 +35,7 @@ $baseParams = tableSortQueryParams($sortState, gasVoucherReportQueryParams($f, [
     'action' => 'gas-vouchers',
     'per_page' => $pag['perPage'],
     'q' => $f['search'],
+    'preset' => $preset,
 ]));
 $csvUrl = gasVoucherReportUrl(gasVoucherReportQueryParams($f, ['action' => 'export-gas-vouchers-csv']));
 $pdfUrl = gasVoucherReportUrl(gasVoucherReportQueryParams($f, ['action' => 'export-gas-vouchers-pdf']));
@@ -74,6 +75,7 @@ require_once INCLUDES_PATH . '/header.php';
         <form method="GET" class="loka-filter-form">
             <input type="hidden" name="page" value="reports">
             <input type="hidden" name="action" value="gas-vouchers">
+            <?= reportPresetFieldHtml($preset) ?>
             <div class="min-w-[140px]">
                 <label class="loka-form-label">Start Date</label>
                 <input type="date" class="loka-form-input" name="start_date" value="<?= e($f['start_date']) ?>">
@@ -155,6 +157,12 @@ require_once INCLUDES_PATH . '/header.php';
             </div>
         </form>
     </div>
+
+    <?php if ((int) ($kpis->total ?? 0) > 500): ?>
+    <div class="loka-alert loka-alert-warning mb-4">
+        Large result set (<?= number_format((int) $kpis->total) ?> rows). PDF export is capped at 500 rows; CSV at 10,000. Narrow filters if you need a complete export.
+    </div>
+    <?php endif; ?>
 
     <!-- KPIs -->
     <div class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-7 gap-3 mb-4">

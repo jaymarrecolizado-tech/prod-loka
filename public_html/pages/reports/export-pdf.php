@@ -12,6 +12,7 @@ require_once BASE_PATH . '/vendor/tecnickcom/tcpdf/tcpdf.php';
 $startDate = get('start_date', date('Y-m-01'));
 $endDate = get('end_date', date('Y-m-t'));
 $status = get('status', '');
+$searchQuery = listSearchQuery();
 $maxRows = 500;
 
 $whereClause = "WHERE r.deleted_at IS NULL AND r.created_at BETWEEN ? AND ?";
@@ -22,14 +23,18 @@ if ($status) {
     $params[] = $status;
 }
 
-$params[] = $maxRows;
+[$searchSql, $searchParams] = tripsReportSearchClause($searchQuery);
+$whereClause .= $searchSql;
+$params = array_merge($params, $searchParams);
+
+$queryParams = array_merge($params, [$maxRows]);
 
 $requests = db()->fetchAll(
     "SELECT r.id, r.created_at, r.start_datetime, r.end_datetime, r.purpose, r.destination,
             r.passenger_count, r.status, r.notes,
             u.name as requester, dept.name as department,
             v.plate_number, v.make as vehicle_make, v.model as vehicle_model,
-            dr_u.name as driver,
+            dr_user.name as driver,
             r.actual_dispatch_datetime, r.actual_arrival_datetime, r.guard_notes,
             TIMESTAMPDIFF(MINUTE, r.start_datetime, r.end_datetime) as planned_duration,
             TIMESTAMPDIFF(MINUTE, r.actual_dispatch_datetime, r.actual_arrival_datetime) as actual_duration,
@@ -39,25 +44,35 @@ $requests = db()->fetchAll(
      LEFT JOIN departments dept ON r.department_id = dept.id
      LEFT JOIN vehicles v ON r.vehicle_id = v.id AND v.deleted_at IS NULL
      LEFT JOIN drivers d ON r.driver_id = d.id AND d.deleted_at IS NULL
-     LEFT JOIN users dr_u ON d.user_id = dr_u.id
+     LEFT JOIN users dr_user ON d.user_id = dr_user.id
      LEFT JOIN users dispatch_g ON r.dispatch_guard_id = dispatch_g.id
      LEFT JOIN users arrival_g ON r.arrival_guard_id = arrival_g.id
      $whereClause
      ORDER BY r.created_at DESC
      LIMIT ?",
-    $params
+    $queryParams
 );
 
-auditLog('data_export', 'requests', null, null, ['format' => 'pdf', 'rows' => count($requests)]);
+$rowCount = count($requests);
+
+auditLog('data_export', 'requests', null, null, ['format' => 'pdf', 'rows' => $rowCount]);
+
+$filterLines = ["Date range: {$startDate} to {$endDate}"];
+if ($status !== '') {
+    $filterLines[] = 'Status: ' . ucfirst(str_replace('_', ' ', $status));
+}
+if ($searchQuery !== '') {
+    $filterLines[] = 'Search: ' . $searchQuery;
+}
 
 $filename = 'fleet_report_' . $startDate . '_to_' . $endDate;
-$title = 'Fleet Report - ' . $startDate . ' to ' . $endDate;
+$title = 'Fleet Report - Trip Requests';
 
 $pdf = new TCPDF('L', PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
 $pdf->SetCreator('LOKA Fleet Management');
 $pdf->SetAuthor(currentUser()->name);
 $pdf->SetTitle($title);
-$pdf->SetHeaderData('', 0, 'DICT - Fleet Management Report', 
+$pdf->SetHeaderData('', 0, 'DICT - Fleet Management Report',
     'Period: ' . $startDate . ' to ' . $endDate . ' | Generated: ' . date('Y-m-d H:i:s'));
 $pdf->setHeaderFont([PDF_FONT_NAME_MAIN, '', 10]);
 $pdf->setFooterFont([PDF_FONT_NAME_DATA, '', 8]);
@@ -65,17 +80,24 @@ $pdf->SetMargins(15, 15, 15);
 $pdf->SetAutoPageBreak(TRUE, 15);
 $pdf->AddPage();
 
+reportPdfWriteMeta($pdf, $title, $filterLines, $rowCount, $maxRows);
+
 // Summary Stats
 $pdf->SetFont('helvetica', 'B', 10);
 $pdf->Cell(0, 8, 'Summary', 0, 1);
 $pdf->SetFont('helvetica', '', 8);
 
-$stats = ['total' => count($requests), 'approved' => 0, 'completed' => 0, 'rejected' => 0, 'pending' => 0];
+$stats = ['total' => $rowCount, 'approved' => 0, 'completed' => 0, 'rejected' => 0, 'pending' => 0];
 foreach ($requests as $r) {
-    if ($r->status === 'approved') $stats['approved']++;
-    elseif ($r->status === 'completed') $stats['completed']++;
-    elseif ($r->status === 'rejected') $stats['rejected']++;
-    elseif (in_array($r->status, ['pending', 'pending_motorpool'])) $stats['pending']++;
+    if ($r->status === 'approved') {
+        $stats['approved']++;
+    } elseif ($r->status === 'completed') {
+        $stats['completed']++;
+    } elseif ($r->status === 'rejected') {
+        $stats['rejected']++;
+    } elseif (in_array($r->status, ['pending', 'pending_motorpool'])) {
+        $stats['pending']++;
+    }
 }
 
 $pdf->Cell(35, 5, 'Total: ' . $stats['total'], 0, 0);
@@ -99,16 +121,16 @@ $pdf->Ln();
 
 $pdf->SetFillColor(248, 248, 248);
 $pdf->SetTextColor(0, 0, 0);
-$pdf->SetFont('helvetica', '', 6);
+$pdf->SetFont('helvetica', '', 7);
 
 $fill = false;
 foreach ($requests as $row) {
-    $duration = $row->actual_duration 
+    $duration = $row->actual_duration
         ? floor($row->actual_duration / 60) . 'h ' . ($row->actual_duration % 60) . 'm'
         : ($row->planned_duration ? floor($row->planned_duration / 60) . 'h ' . ($row->planned_duration % 60) . 'm' : '-');
-    
+
     $scheduled = date('m/d H:i', strtotime($row->start_datetime)) . '-' . date('H:i', strtotime($row->end_datetime));
-    
+
     $rowData = [
         $row->id,
         date('m/d/y', strtotime($row->created_at)),
@@ -123,7 +145,7 @@ foreach ($requests as $row) {
         $row->actual_dispatch_datetime ? date('m/d H:i', strtotime($row->actual_dispatch_datetime)) : '-',
         $row->actual_arrival_datetime ? date('m/d H:i', strtotime($row->actual_arrival_datetime)) : '-'
     ];
-    
+
     foreach ($rowData as $i => $val) {
         $pdf->Cell($colWidths[$i], 5, $val, 1, 0, 'L', $fill);
     }
@@ -133,7 +155,7 @@ foreach ($requests as $row) {
 
 $pdf->Ln(3);
 $pdf->SetFont('helvetica', 'I', 7);
-$pdf->Cell(0, 4, 'Total Records: ' . count($requests) . ' | Generated by LOKA Fleet Management System', 0, 1, 'C');
+$pdf->Cell(0, 4, 'Total Records: ' . $rowCount . ' | Generated by LOKA Fleet Management System', 0, 1, 'C');
 
 $pdf->Output($filename . '.pdf', 'D');
 exit;

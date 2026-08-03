@@ -6,28 +6,14 @@
 if (!canAccessOpsReports()) {
     redirectWith('/?page=dashboard', 'danger', 'Administrator or All Father access required.');
 }
-$driverScoped = false;
 
 $vehicleId = get('vehicle_id');
-$startDate = get('start_date', date('Y-m-01'));
-$endDate = get('end_date', date('Y-m-t'));
-$myDriverId = currentDriverId();
+$range = reportResolveDateRange();
+$startDate = $range['start'];
+$endDate = $range['end'];
 
 if (!$vehicleId) {
     redirectWith('/?page=reports&action=vehicle-history', 'danger', 'Please select a vehicle.');
-}
-
-if ($driverScoped && $myDriverId) {
-    $allowed = db()->fetch(
-        "SELECT r.id FROM requests r
-         WHERE r.vehicle_id = ? AND r.deleted_at IS NULL
-           AND (r.driver_id = ? OR r.requested_driver_id = ?)
-         LIMIT 1",
-        [$vehicleId, $myDriverId, $myDriverId]
-    );
-    if (!$allowed) {
-        redirectWith('/?page=reports&action=vehicle-history', 'danger', 'You can only export vehicles you have driven.');
-    }
 }
 
 $vehicleInfo = db()->fetch(
@@ -60,12 +46,10 @@ $trips = db()->fetchAll(
      LEFT JOIN users arrival_g ON r.arrival_guard_id = arrival_g.id
      WHERE r.vehicle_id = ? 
      AND r.start_datetime BETWEEN ? AND ?
-     AND r.deleted_at IS NULL"
-        . ($driverScoped && $myDriverId ? " AND (r.driver_id = ? OR r.requested_driver_id = ?)" : "")
-        . " ORDER BY r.start_datetime DESC",
-    $driverScoped && $myDriverId
-        ? [$vehicleId, $startDate, $endDate . ' 23:59:59', $myDriverId, $myDriverId]
-        : [$vehicleId, $startDate, $endDate . ' 23:59:59']
+     AND r.deleted_at IS NULL
+     ORDER BY r.start_datetime DESC
+     LIMIT 10000",
+    [$vehicleId, $startDate, $endDate . ' 23:59:59']
 );
 
 header('Content-Type: text/csv; charset=utf-8');
@@ -73,12 +57,18 @@ header('Content-Disposition: attachment; filename="vehicle_history_' . $vehicleI
 
 $output = fopen('php://output', 'w');
 
+$rowCount = count($trips);
+reportCsvWriteMeta($output, 'Vehicle History Report', [
+    'Vehicle: ' . $vehicleInfo->plate_number . ' - ' . $vehicleInfo->make . ' ' . $vehicleInfo->model,
+    'Period: ' . $startDate . ' to ' . $endDate,
+], $rowCount, 10000);
+
 // Vehicle info header
-fputcsv($output, ['VEHICLE HISTORY REPORT']);
+fputcsv($output, ['VEHICLE DETAILS']);
 fputcsv($output, ['Vehicle', $vehicleInfo->plate_number . ' - ' . $vehicleInfo->make . ' ' . $vehicleInfo->model]);
 fputcsv($output, ['Type', $vehicleInfo->type_name ?: '-']);
 fputcsv($output, ['Status', ucfirst($vehicleInfo->status)]);
-fputcsv($output, ['Mileage', number_format($vehicleInfo->mileage ?? 0) . ' km']);
+fputcsv($output, ['Odometer', number_format($vehicleInfo->mileage ?? 0) . ' km']);
 fputcsv($output, ['Period', $startDate . ' to ' . $endDate]);
 fputcsv($output, []);
 fputcsv($output, ['TRIP DETAILS']);

@@ -22,9 +22,16 @@ function gasVoucherReportParseFilters(): array
         $dateField = 'request_date';
     }
 
+    $range = reportResolveDateRange();
+    $search = listSearchQuery('q', 'search');
+    if ($search === '') {
+        $search = getSafe('search', '', 100);
+    }
+
     return [
-        'start_date' => getSafe('start_date', date('Y-m-01'), 20),
-        'end_date' => getSafe('end_date', date('Y-m-t'), 20),
+        'start_date' => $range['start'],
+        'end_date' => $range['end'],
+        'preset' => $range['preset'],
         'date_field' => $dateField,
         'status' => getSafe('status', '', 30),
         'include_drafts' => get('include_drafts') === '1',
@@ -34,7 +41,7 @@ function gasVoucherReportParseFilters(): array
         'fuel_type' => getSafe('fuel_type', '', 30),
         'department_id' => (int) get('department_id', 0),
         'user_id' => (int) get('user_id', 0),
-        'search' => getSafe('search', '', 100),
+        'search' => $search,
     ];
 }
 

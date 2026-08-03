@@ -50,7 +50,7 @@ require_once INCLUDES_PATH . '/header.php';
                         </div>
                         <h5>Vehicle History</h5>
                         <p class="text-base-content/60 mb-3">View trip history and utilization for each vehicle with export options</p>
-                        <span class="loka-badge bg-primary">PDF Export</span>
+                        <span class="loka-badge bg-primary">CSV & PDF</span>
                     </div>
                 </div>
             </a>
@@ -66,7 +66,7 @@ require_once INCLUDES_PATH . '/header.php';
                         </div>
                         <h5>Driver Report</h5>
                         <p class="text-base-content/60 mb-3">View trip history and statistics for each driver with export options</p>
-                        <span class="loka-badge bg-success">PDF Export</span>
+                        <span class="loka-badge bg-success">CSV & PDF</span>
                     </div>
                 </div>
             </a>

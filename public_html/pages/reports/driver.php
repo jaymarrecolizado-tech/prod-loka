@@ -6,36 +6,24 @@
 if (!canAccessOpsReports()) {
     redirectWith('/?page=dashboard', 'danger', 'Administrator or All Father access required.');
 }
-$driverScoped = false;
 
 $pageTitle = 'Driver Report';
-$myDriverId = currentDriverId();
 $searchQuery = listSearchQuery();
 $perPage = resolvePerPage();
 
 $driverId = get('driver_id');
-$startDate = get('start_date', date('Y-m-01'));
-$endDate = get('end_date', date('Y-m-t'));
+$range = reportResolveDateRange();
+$startDate = $range['start'];
+$endDate = $range['end'];
+$preset = $range['preset'];
 
-// Drivers only see themselves; ops see all
-if ($driverScoped && $myDriverId) {
-    $driverId = (string) $myDriverId;
-    $drivers = db()->fetchAll(
-        "SELECT d.id, u.name, u.phone, d.license_number, d.status
-         FROM drivers d
-         JOIN users u ON d.user_id = u.id
-         WHERE d.id = ? AND d.deleted_at IS NULL AND u.deleted_at IS NULL",
-        [$myDriverId]
-    );
-} else {
-    $drivers = db()->fetchAll(
-        "SELECT d.id, u.name, u.phone, d.license_number, d.status
-         FROM drivers d
-         JOIN users u ON d.user_id = u.id
-         WHERE d.deleted_at IS NULL AND u.deleted_at IS NULL
-         ORDER BY u.name"
-    );
-}
+$drivers = db()->fetchAll(
+    "SELECT d.id, u.name, u.phone, d.license_number, d.status
+     FROM drivers d
+     JOIN users u ON d.user_id = u.id
+     WHERE d.deleted_at IS NULL AND u.deleted_at IS NULL
+     ORDER BY u.name"
+);
 
 // Get driver trip history
 $trips = [];
@@ -47,6 +35,7 @@ $tripListParams = [
     'driver_id' => $driverId,
     'start_date' => $startDate,
     'end_date' => $endDate,
+    'preset' => $preset,
     'per_page' => $pag['perPage'],
     'q' => $searchQuery,
 ];
@@ -169,12 +158,9 @@ require_once INCLUDES_PATH . '/header.php';
         <form method="GET" class="loka-filter-form">
             <input type="hidden" name="page" value="reports">
             <input type="hidden" name="action" value="driver">
+            <?= reportPresetFieldHtml($preset) ?>
             <div class="min-w-[200px]">
                 <label class="loka-form-label">Driver</label>
-                <?php if ($driverScoped): ?>
-                    <input type="hidden" name="driver_id" value="<?= (int) $myDriverId ?>">
-                    <input type="text" class="loka-form-input" value="<?= e($drivers[0]->name ?? 'You') ?>" readonly>
-                <?php else: ?>
                 <select class="loka-form-input" name="driver_id" required>
                     <option value="">Select Driver...</option>
                     <?php foreach ($drivers as $d): ?>
@@ -183,7 +169,6 @@ require_once INCLUDES_PATH . '/header.php';
                     </option>
                     <?php endforeach; ?>
                 </select>
-                <?php endif; ?>
             </div>
             <div class="min-w-[140px]">
                 <label class="loka-form-label">Start Date</label>
@@ -200,16 +185,22 @@ require_once INCLUDES_PATH . '/header.php';
                     <i class="bi bi-search me-1"></i>Generate
                 </button>
                 <?php if ($driverId && $pag['total'] > 0): ?>
-                <a href="<?= APP_URL ?>/?page=reports&action=export-driver-csv&driver_id=<?= $driverId ?>&start_date=<?= $startDate ?>&end_date=<?= $endDate ?>" class="loka-btn-outline-primary">
+                <a href="<?= APP_URL ?>/?page=reports&action=export-driver-csv&driver_id=<?= $driverId ?>&start_date=<?= $startDate ?>&end_date=<?= $endDate ?>&preset=<?= e($preset) ?>" class="loka-btn-outline-primary">
                     <i class="bi bi-file-earmark-csv me-1"></i>CSV
                 </a>
-                <a href="<?= APP_URL ?>/?page=reports&action=export-driver&driver_id=<?= $driverId ?>&start_date=<?= $startDate ?>&end_date=<?= $endDate ?>" class="loka-btn-outline-error">
+                <a href="<?= APP_URL ?>/?page=reports&action=export-driver&driver_id=<?= $driverId ?>&start_date=<?= $startDate ?>&end_date=<?= $endDate ?>&preset=<?= e($preset) ?>" class="loka-btn-outline-error">
                     <i class="bi bi-file-earmark-pdf me-1"></i>PDF
                 </a>
                 <?php endif; ?>
             </div>
         </form>
     </div>
+
+    <?php if ($driverId && $pag['total'] > 500): ?>
+    <div class="loka-alert loka-alert-warning mb-4">
+        Large result set (<?= number_format($pag['total']) ?> rows). PDF export is capped at 500 rows; CSV at 10,000. Narrow filters if you need a complete export.
+    </div>
+    <?php endif; ?>
 
     <?php if ($driverInfo): ?>
     <!-- Driver Info -->

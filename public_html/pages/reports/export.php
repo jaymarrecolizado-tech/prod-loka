@@ -10,6 +10,7 @@ if (!canAccessOpsReports()) {
 $startDate = get('start_date', date('Y-m-01'));
 $endDate = get('end_date', date('Y-m-t'));
 $status = get('status', '');
+$searchQuery = listSearchQuery();
 
 $maxRows = 10000;
 $limit = min((int) get('limit', $maxRows), $maxRows);
@@ -22,7 +23,11 @@ if ($status) {
     $params[] = $status;
 }
 
-$params[] = $limit;
+[$searchSql, $searchParams] = tripsReportSearchClause($searchQuery);
+$whereClause .= $searchSql;
+$params = array_merge($params, $searchParams);
+
+$queryParams = array_merge($params, [$limit]);
 
 $requests = db()->fetchAll(
     "SELECT r.id, r.created_at, r.start_datetime, r.end_datetime, r.purpose, r.destination,
@@ -31,7 +36,7 @@ $requests = db()->fetchAll(
             dept.name as department,
             v.plate_number, v.make as vehicle_make, v.model as vehicle_model, v.year as vehicle_year,
             v.color as vehicle_color, vt.name as vehicle_type,
-            dr_u.name as driver, d.license_number as driver_license,
+            dr_user.name as driver, d.license_number as driver_license,
             r.actual_dispatch_datetime, r.actual_arrival_datetime, r.guard_notes,
             TIMESTAMPDIFF(MINUTE, r.start_datetime, r.end_datetime) as planned_duration_minutes,
             TIMESTAMPDIFF(MINUTE, r.actual_dispatch_datetime, r.actual_arrival_datetime) as actual_duration_minutes,
@@ -43,7 +48,7 @@ $requests = db()->fetchAll(
      LEFT JOIN vehicles v ON r.vehicle_id = v.id AND v.deleted_at IS NULL
      LEFT JOIN vehicle_types vt ON v.vehicle_type_id = vt.id
      LEFT JOIN drivers d ON r.driver_id = d.id AND d.deleted_at IS NULL
-     LEFT JOIN users dr_u ON d.user_id = dr_u.id
+     LEFT JOIN users dr_user ON d.user_id = dr_user.id
      LEFT JOIN users dispatch_g ON r.dispatch_guard_id = dispatch_g.id
      LEFT JOIN users arrival_g ON r.arrival_guard_id = arrival_g.id
      LEFT JOIN users approver ON r.approver_id = approver.id
@@ -51,13 +56,25 @@ $requests = db()->fetchAll(
      $whereClause
      ORDER BY r.created_at DESC
      LIMIT ?",
-    $params
+    $queryParams
 );
+
+$rowCount = count($requests);
+
+$filterLines = ["Date range: {$startDate} to {$endDate}"];
+if ($status !== '') {
+    $filterLines[] = 'Status: ' . ucfirst(str_replace('_', ' ', $status));
+}
+if ($searchQuery !== '') {
+    $filterLines[] = 'Search: ' . $searchQuery;
+}
 
 header('Content-Type: text/csv; charset=utf-8');
 header('Content-Disposition: attachment; filename="fleet_report_' . $startDate . '_to_' . $endDate . '.csv"');
 
 $output = fopen('php://output', 'w');
+
+reportCsvWriteMeta($output, 'Fleet Report - Trip Requests', $filterLines, $rowCount, $maxRows);
 
 fputcsv($output, [
     'Request ID',
@@ -97,7 +114,7 @@ foreach ($requests as $row) {
     $plannedMins = $row->planned_duration_minutes ? $row->planned_duration_minutes % 60 : 0;
     $actualHrs = $row->actual_duration_minutes ? floor($row->actual_duration_minutes / 60) : 0;
     $actualMins = $row->actual_duration_minutes ? $row->actual_duration_minutes % 60 : 0;
-    
+
     fputcsv($output, [
         $row->id,
         $row->created_at,

@@ -6,17 +6,13 @@
 if (!canAccessOpsReports()) {
     redirectWith('/?page=dashboard', 'danger', 'Administrator or All Father access required.');
 }
-$driverScoped = false;
 
 require_once BASE_PATH . '/vendor/tecnickcom/tcpdf/tcpdf.php';
 
 $driverId = get('driver_id');
-$startDate = get('start_date', date('Y-m-01'));
-$endDate = get('end_date', date('Y-m-t'));
-
-if ($driverScoped) {
-    $driverId = (string) currentDriverId();
-}
+$range = reportResolveDateRange();
+$startDate = $range['start'];
+$endDate = $range['end'];
 
 if (!$driverId) {
     redirectWith('/?page=reports&action=driver', 'danger', 'Please select a driver.');
@@ -54,7 +50,8 @@ $trips = db()->fetchAll(
      WHERE (r.driver_id = ? OR r.requested_driver_id = ?)
      AND r.start_datetime BETWEEN ? AND ?
      AND r.deleted_at IS NULL
-     ORDER BY r.start_datetime DESC",
+     ORDER BY r.start_datetime DESC
+     LIMIT 500",
     [$driverId, $driverId, $startDate, $endDate . ' 23:59:59']
 );
 
@@ -72,6 +69,11 @@ $pdf->setFooterFont([PDF_FONT_NAME_DATA, '', 8]);
 $pdf->SetMargins(15, 15, 15);
 $pdf->SetAutoPageBreak(TRUE, 15);
 $pdf->AddPage();
+
+reportPdfWriteMeta($pdf, $title, [
+    'Driver: ' . $driverInfo->name,
+    'Period: ' . $startDate . ' to ' . $endDate,
+], count($trips), 500);
 
 // Driver Information Section
 $pdf->SetFont('helvetica', 'B', 12);

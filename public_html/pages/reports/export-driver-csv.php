@@ -6,15 +6,11 @@
 if (!canAccessOpsReports()) {
     redirectWith('/?page=dashboard', 'danger', 'Administrator or All Father access required.');
 }
-$driverScoped = false;
 
 $driverId = get('driver_id');
-$startDate = get('start_date', date('Y-m-01'));
-$endDate = get('end_date', date('Y-m-t'));
-
-if ($driverScoped) {
-    $driverId = (string) currentDriverId();
-}
+$range = reportResolveDateRange();
+$startDate = $range['start'];
+$endDate = $range['end'];
 
 if (!$driverId) {
     redirectWith('/?page=reports&action=driver', 'danger', 'Please select a driver.');
@@ -52,7 +48,8 @@ $trips = db()->fetchAll(
      WHERE (r.driver_id = ? OR r.requested_driver_id = ?)
      AND r.start_datetime BETWEEN ? AND ?
      AND r.deleted_at IS NULL
-     ORDER BY r.start_datetime DESC",
+     ORDER BY r.start_datetime DESC
+     LIMIT 10000",
     [$driverId, $driverId, $startDate, $endDate . ' 23:59:59']
 );
 
@@ -61,8 +58,14 @@ header('Content-Disposition: attachment; filename="driver_report_' . preg_replac
 
 $output = fopen('php://output', 'w');
 
+$rowCount = count($trips);
+reportCsvWriteMeta($output, 'Driver Report', [
+    'Driver: ' . $driverInfo->name,
+    'Period: ' . $startDate . ' to ' . $endDate,
+], $rowCount, 10000);
+
 // Driver info header
-fputcsv($output, ['DRIVER REPORT']);
+fputcsv($output, ['DRIVER DETAILS']);
 fputcsv($output, ['Driver Name', $driverInfo->name]);
 fputcsv($output, ['Phone', $driverInfo->phone ?: '-']);
 fputcsv($output, ['Email', $driverInfo->email ?: '-']);

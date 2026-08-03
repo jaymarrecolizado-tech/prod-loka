@@ -9,13 +9,14 @@ if (!canAccessOpsReports()) {
 
 $pageTitle = 'Trip Requests Report';
 
-$startDate = get('start_date', date('Y-m-01'));
-$endDate = get('end_date', date('Y-m-t'));
+$range = reportResolveDateRange();
+$startDate = $range['start'];
+$endDate = $range['end'];
+$preset = $range['preset'];
 $status = get('status', '');
 $searchQuery = listSearchQuery();
 $perPage = resolvePerPage();
 
-// Build query with filters
 $whereClause = "WHERE r.deleted_at IS NULL AND r.created_at BETWEEN ? AND ?";
 $params = [$startDate, $endDate . ' 23:59:59'];
 
@@ -24,21 +25,13 @@ if ($status) {
     $params[] = $status;
 }
 
-if ($searchQuery) {
-    $whereClause .= " AND (
-        CAST(r.id AS CHAR) LIKE ? OR
-        r.destination LIKE ? OR
-        r.purpose LIKE ? OR
-        u.name LIKE ? OR
-        dept.name LIKE ? OR
-        v.plate_number LIKE ? OR
-        dr_user.name LIKE ?
-    )";
-    $searchTerm = '%' . $searchQuery . '%';
-    array_push($params, $searchTerm, $searchTerm, $searchTerm, $searchTerm, $searchTerm, $searchTerm, $searchTerm);
-}
+[$searchSql, $searchParams] = tripsReportSearchClause($searchQuery);
+$whereClause .= $searchSql;
+$params = array_merge($params, $searchParams);
 
-// Get stats
+$fromSql = tripsReportFromSql() . "\n     {$whereClause}";
+
+// Stats use same joins as list (search-safe)
 $stats = db()->fetch(
     "SELECT
         COUNT(*) as total,
@@ -46,12 +39,10 @@ $stats = db()->fetch(
         SUM(CASE WHEN r.status = 'completed' THEN 1 ELSE 0 END) as completed,
         SUM(CASE WHEN r.status = 'rejected' THEN 1 ELSE 0 END) as rejected,
         SUM(CASE WHEN r.status IN ('pending', 'pending_motorpool') THEN 1 ELSE 0 END) as pending
-     FROM requests r
-     $whereClause",
+     {$fromSql}",
     $params
 );
 
-// Sorting (latest created first by default)
 $allowedSortColumns = [
     'id' => 'r.id',
     'created_at' => 'r.created_at',
@@ -67,19 +58,10 @@ $sortState = resolveTableSort($allowedSortColumns, 'created_at', 'DESC');
 $sort = $sortState['key'];
 $sortDir = $sortState['dir'];
 
-$fromSql = "FROM requests r
-     JOIN users u ON r.user_id = u.id
-     LEFT JOIN departments dept ON r.department_id = dept.id
-     LEFT JOIN vehicles v ON r.vehicle_id = v.id
-     LEFT JOIN drivers dr ON r.driver_id = dr.id
-     LEFT JOIN users dr_user ON dr.user_id = dr_user.id
-     {$whereClause}";
-
 $countRow = db()->fetch("SELECT COUNT(*) as c {$fromSql}", $params);
 $pag = listPaginationState((int) ($countRow->c ?? 0), null, $perPage);
 $totalCount = $pag['total'];
 
-// Get requests
 $requests = db()->fetchAll(
     "SELECT r.id, r.created_at, r.start_datetime, r.end_datetime, r.purpose, r.destination,
             r.status, r.passenger_count, r.actual_dispatch_datetime, r.actual_arrival_datetime,
@@ -99,10 +81,19 @@ $baseParams = tableSortQueryParams($sortState, [
     'action' => 'trips',
     'start_date' => $startDate,
     'end_date' => $endDate,
+    'preset' => $preset,
     'status' => $status,
     'per_page' => $pag['perPage'],
     'q' => $searchQuery,
 ]);
+
+$exportQs = http_build_query(array_filter([
+    'page' => 'reports',
+    'start_date' => $startDate,
+    'end_date' => $endDate,
+    'status' => $status !== '' ? $status : null,
+    'q' => $searchQuery !== '' ? $searchQuery : null,
+], static fn($v) => $v !== null && $v !== ''));
 
 require_once INCLUDES_PATH . '/header.php';
 ?>
@@ -120,22 +111,29 @@ require_once INCLUDES_PATH . '/header.php';
             </nav>
         </div>
         <div class="flex flex-wrap items-center gap-2">
-            <a href="<?= APP_URL ?>/?page=reports&action=export&start_date=<?= $startDate ?>&end_date=<?= $endDate ?><?= $status ? '&status=' . $status : '' ?>"
+            <a href="<?= APP_URL ?>/?<?= e($exportQs) ?>&action=export"
                class="loka-btn-outline-primary">
                 <i class="bi bi-file-earmark-csv me-1"></i>Export CSV
             </a>
-            <a href="<?= APP_URL ?>/?page=reports&action=export-pdf&start_date=<?= $startDate ?>&end_date=<?= $endDate ?>"
+            <a href="<?= APP_URL ?>/?<?= e($exportQs) ?>&action=export-pdf"
                class="loka-btn-outline-error">
                 <i class="bi bi-file-earmark-pdf me-1"></i>Export PDF
             </a>
         </div>
     </div>
 
+    <?php if ($totalCount >= 500): ?>
+    <div class="loka-alert loka-alert-warning mb-3">
+        Large result set (<?= number_format($totalCount) ?> rows). PDF export is capped at 500 rows; CSV at 10,000. Narrow filters if you need a complete export.
+    </div>
+    <?php endif; ?>
+
     <!-- Filters -->
     <div class="loka-card mb-4">
         <form method="GET" class="loka-filter-form">
             <input type="hidden" name="page" value="reports">
             <input type="hidden" name="action" value="trips">
+            <?= reportPresetFieldHtml($preset) ?>
             <div class="min-w-[150px]">
                 <label class="loka-form-label">Start Date</label>
                 <input type="date" class="loka-form-input" name="start_date" value="<?= e($startDate) ?>">

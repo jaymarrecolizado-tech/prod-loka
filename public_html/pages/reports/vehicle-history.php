@@ -6,38 +6,24 @@
 if (!canAccessOpsReports()) {
     redirectWith('/?page=dashboard', 'danger', 'Administrator or All Father access required.');
 }
-$driverScoped = false;
 
 $pageTitle = 'Vehicle History Report';
-$myDriverId = currentDriverId();
 $searchQuery = listSearchQuery();
 $perPage = resolvePerPage();
 
 $vehicleId = get('vehicle_id');
-$startDate = get('start_date', date('Y-m-01'));
-$endDate = get('end_date', date('Y-m-t'));
+$range = reportResolveDateRange();
+$startDate = $range['start'];
+$endDate = $range['end'];
+$preset = $range['preset'];
 
-// Vehicles for dropdown (drivers: only vehicles they have driven)
-if ($driverScoped && $myDriverId) {
-    $vehicles = db()->fetchAll(
-        "SELECT DISTINCT v.id, v.plate_number, v.make, v.model, vt.name as type_name
-         FROM vehicles v
-         LEFT JOIN vehicle_types vt ON v.vehicle_type_id = vt.id
-         JOIN requests r ON r.vehicle_id = v.id AND r.deleted_at IS NULL
-         WHERE v.deleted_at IS NULL
-           AND (r.driver_id = ? OR r.requested_driver_id = ?)
-         ORDER BY v.plate_number",
-        [$myDriverId, $myDriverId]
-    );
-} else {
-    $vehicles = db()->fetchAll(
-        "SELECT v.id, v.plate_number, v.make, v.model, vt.name as type_name
-         FROM vehicles v
-         LEFT JOIN vehicle_types vt ON v.vehicle_type_id = vt.id
-         WHERE v.deleted_at IS NULL
-         ORDER BY v.plate_number"
-    );
-}
+$vehicles = db()->fetchAll(
+    "SELECT v.id, v.plate_number, v.make, v.model, vt.name as type_name
+     FROM vehicles v
+     LEFT JOIN vehicle_types vt ON v.vehicle_type_id = vt.id
+     WHERE v.deleted_at IS NULL
+     ORDER BY v.plate_number"
+);
 
 // Get vehicle trip history
 $trips = [];
@@ -49,25 +35,12 @@ $tripListParams = [
     'vehicle_id' => $vehicleId,
     'start_date' => $startDate,
     'end_date' => $endDate,
+    'preset' => $preset,
     'per_page' => $pag['perPage'],
     'q' => $searchQuery,
 ];
 
 if ($vehicleId) {
-    // Drivers may only open vehicles they have driven
-    if ($driverScoped && $myDriverId) {
-        $allowed = false;
-        foreach ($vehicles as $v) {
-            if ((int) $v->id === (int) $vehicleId) {
-                $allowed = true;
-                break;
-            }
-        }
-        if (!$allowed) {
-            redirectWith('/?page=reports&action=vehicle-history', 'danger', 'You can only view vehicles you have driven.');
-        }
-    }
-
     $vehicleInfo = db()->fetch(
         "SELECT v.*, vt.name as type_name, vt.passenger_capacity
          FROM vehicles v
@@ -80,11 +53,6 @@ if ($vehicleId) {
     $statsWhere = "r.vehicle_id = ?
          AND r.start_datetime BETWEEN ? AND ?
          AND r.deleted_at IS NULL";
-    if ($driverScoped && $myDriverId) {
-        $statsWhere .= " AND (r.driver_id = ? OR r.requested_driver_id = ?)";
-        $tripBaseParams[] = $myDriverId;
-        $tripBaseParams[] = $myDriverId;
-    }
 
     $allTripsForStats = db()->fetchAll(
         "SELECT r.status,
@@ -183,6 +151,7 @@ require_once INCLUDES_PATH . '/header.php';
         <form method="GET" class="loka-filter-form">
             <input type="hidden" name="page" value="reports">
             <input type="hidden" name="action" value="vehicle-history">
+            <?= reportPresetFieldHtml($preset) ?>
             <div class="min-w-[220px]">
                 <label class="loka-form-label">Vehicle</label>
                 <select class="loka-form-input" name="vehicle_id" required>
@@ -209,16 +178,22 @@ require_once INCLUDES_PATH . '/header.php';
                     <i class="bi bi-search me-1"></i>Generate
                 </button>
                 <?php if ($vehicleId && $pag['total'] > 0): ?>
-                <a href="<?= APP_URL ?>/?page=reports&action=export-vehicle-csv&vehicle_id=<?= $vehicleId ?>&start_date=<?= $startDate ?>&end_date=<?= $endDate ?>" class="loka-btn-outline-primary">
+                <a href="<?= APP_URL ?>/?page=reports&action=export-vehicle-csv&vehicle_id=<?= $vehicleId ?>&start_date=<?= $startDate ?>&end_date=<?= $endDate ?>&preset=<?= e($preset) ?>" class="loka-btn-outline-primary">
                     <i class="bi bi-file-earmark-csv me-1"></i>CSV
                 </a>
-                <a href="<?= APP_URL ?>/?page=reports&action=export-vehicle-history&vehicle_id=<?= $vehicleId ?>&start_date=<?= $startDate ?>&end_date=<?= $endDate ?>" class="loka-btn-outline-error">
+                <a href="<?= APP_URL ?>/?page=reports&action=export-vehicle-history&vehicle_id=<?= $vehicleId ?>&start_date=<?= $startDate ?>&end_date=<?= $endDate ?>&preset=<?= e($preset) ?>" class="loka-btn-outline-error">
                     <i class="bi bi-file-earmark-pdf me-1"></i>PDF
                 </a>
                 <?php endif; ?>
             </div>
         </form>
     </div>
+
+    <?php if ($vehicleId && $pag['total'] > 500): ?>
+    <div class="loka-alert loka-alert-warning mb-4">
+        Large result set (<?= number_format($pag['total']) ?> rows). PDF export is capped at 500 rows; CSV at 10,000. Narrow filters if you need a complete export.
+    </div>
+    <?php endif; ?>
 
     <?php if ($vehicleInfo): ?>
     <!-- Vehicle Info -->
@@ -266,7 +241,7 @@ require_once INCLUDES_PATH . '/header.php';
                     <div class="loka-card bg-warning bg-opacity-10 h-full">
                         <div class="loka-card-body text-center">
                             <h3 class="text-warning mb-0"><?= number_format($vehicleInfo->mileage ?? 0) ?></h3>
-                            <small class="text-base-content/60">Current Mileage (km)</small>
+                            <small class="text-base-content/60">Odometer (km)</small>
                         </div>
                     </div>
                 </div>

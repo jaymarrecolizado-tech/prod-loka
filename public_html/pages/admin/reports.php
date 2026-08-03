@@ -43,21 +43,6 @@ $availableReports = [
         'description' => 'System audit logs and activity history',
         'icon' => 'bi-journal-text',
     ],
-    'driver_history' => [
-        'title' => 'Driver Trip History',
-        'description' => 'Driver performance and trip statistics',
-        'icon' => 'bi-person-badge',
-    ],
-    'vehicle_history' => [
-        'title' => 'Vehicle Trip History',
-        'description' => 'Vehicle utilization and usage statistics',
-        'icon' => 'bi-car-front-fill',
-    ],
-    'department_usage' => [
-        'title' => 'Department Usage',
-        'description' => 'Department request frequency and utilization',
-        'icon' => 'bi-building-fill',
-    ],
 ];
 
 if (!isset($availableReports[$type])) {
@@ -95,6 +80,10 @@ require_once INCLUDES_PATH . '/header.php';
                             </div>
                         </a>
                     <?php endforeach; ?>
+                </div>
+                <div class="border-t border-base-200 p-3 text-sm text-base-content/60">
+                    Trip, driver, and vehicle history reports are available under
+                    <a href="<?= APP_URL ?>/?page=reports" class="link link-primary">Ops Reports</a>.
                 </div>
             </div>
 

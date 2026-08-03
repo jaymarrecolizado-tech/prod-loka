@@ -20,6 +20,19 @@ header('Content-Type: text/csv; charset=utf-8');
 header('Content-Disposition: attachment; filename="' . $filename . '"');
 
 $out = fopen('php://output', 'w');
+$rowCount = count($rows);
+$filterLines = [
+    'Period: ' . $f['start_date'] . ' to ' . $f['end_date'],
+    'Date field: ' . $f['date_field'],
+];
+if ($f['status'] !== '') {
+    $filterLines[] = 'Status: ' . $f['status'];
+}
+if ($f['search'] !== '') {
+    $filterLines[] = 'Search: ' . $f['search'];
+}
+reportCsvWriteMeta($out, 'Gas Voucher Report', $filterLines, $rowCount, 10000);
+
 fputcsv($out, [
     'Voucher No',
     'Request Date',
